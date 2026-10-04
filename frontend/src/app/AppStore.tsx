@@ -86,7 +86,30 @@ type AppStoreValue = AppSnapshot & {
 const AppStoreContext = createContext<AppStoreValue | null>(null)
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
-  const [initial] = useState(() => localStorageRepository.load(fallbackSnapshot))
+  const [initial] = useState(() => {
+    const stored = localStorageRepository.load(fallbackSnapshot)
+    return {
+      ...stored,
+      middlemanInfo: {
+        ...initialMiddlemanInfo,
+        ...stored.middlemanInfo,
+        fees: stored.middlemanInfo?.fees?.length
+          ? stored.middlemanInfo.fees
+          : initialMiddlemanInfo.fees,
+      },
+      contactInfo: {
+        ...initialContactInfo,
+        ...stored.contactInfo,
+        intro: stored.contactInfo?.intro || initialContactInfo.intro,
+        supportHours: stored.contactInfo?.supportHours || initialContactInfo.supportHours,
+        commitmentTitle: stored.contactInfo?.commitmentTitle || initialContactInfo.commitmentTitle,
+        commitment: stored.contactInfo?.commitment || initialContactInfo.commitment,
+        channels: stored.contactInfo?.channels?.length
+          ? stored.contactInfo.channels
+          : initialContactInfo.channels,
+      },
+    }
+  })
   const [products, setProducts] = useState(initial.products)
   const [productStatuses, setProductStatuses] = useState(initial.productStatuses)
   const [topupTemplates, setTopupTemplates] = useState(initial.topupTemplates)
