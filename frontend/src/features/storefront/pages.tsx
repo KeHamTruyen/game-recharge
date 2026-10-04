@@ -226,6 +226,7 @@ export function ServiceDetailPage({
                     <span>{service.iconText}</span>
                   )}
                   {pkg.note && <span className="package-note">{pkg.note}</span>}
+                  <span className="package-image-price">{formatPrice(pkg.price)}</span>
                 </div>
                 <div className="package-card-body">
                   <h3>{pkg.name}</h3>
@@ -264,13 +265,11 @@ export function ServiceDetailPage({
 export function TopupInformationPage({
   pkg,
   service,
-  packages,
   cart,
   productStatuses,
   template,
   quantity,
   onQuantityChange,
-  onPackageChange,
   onQuantityChangeForPackage,
   onRemoveFromCart,
   onBack,
@@ -278,13 +277,10 @@ export function TopupInformationPage({
 }: {
   pkg: ServicePackage
   service: Service
-  packages: ServicePackage[]
   cart: CartItem[]
-  productStatuses: ProductStatus[]
   template?: TopupTemplate
   quantity: number
   onQuantityChange: (quantity: number) => void
-  onPackageChange: (pkg: ServicePackage) => void
   onQuantityChangeForPackage: (id: string | number, quantity: number) => void
   onRemoveFromCart: (id: string | number) => void
   onBack: () => void
@@ -336,46 +332,9 @@ export function TopupInformationPage({
                 "Sản phẩm này không yêu cầu thông tin bổ sung."}
             </p>
           </div>
-          <div className="topup-package-picker">
-            <div className="topup-section-heading">
-              <span className="section-kicker">BƯỚC 1</span>
-              <strong>Chọn gói nạp</strong>
-              <small>Chọn đúng gói bạn muốn nhận vào tài khoản.</small>
-            </div>
-            <div className="topup-package-options">
-              {packages
-                .slice()
-                .sort((a, b) => a.sortOrder - b.sortOrder)
-                .map((option) => {
-                  const status =
-                    productStatuses.find((item) => item.id === option.statusId) ||
-                    productStatuses[0]
-                  const canBuy = status?.purchasable ?? false
-                  const selected = String(option.id) === String(pkg.id)
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      className={`topup-package-option${selected ? " is-selected" : ""}`}
-                      disabled={!canBuy}
-                      onClick={() => onPackageChange(option)}
-                    >
-                      <span className="topup-package-radio" aria-hidden="true">
-                        {selected && <span />}
-                      </span>
-                      <span className="topup-package-copy">
-                        <strong>{option.name}</strong>
-                        <small>{option.description}</small>
-                      </span>
-                      <b>{formatPrice(option.price)}</b>
-                    </button>
-                  )
-                })}
-            </div>
-          </div>
           <div className="cart-items">
             <div className="topup-section-heading">
-              <span className="section-kicker">GIỎ HÀNG</span>
+              <span className="section-kicker">GÓI ĐÃ CHỌN</span>
               <strong>{cart.length} gói đã chọn</strong>
             </div>
             {cart.map((item) => (
@@ -398,7 +357,7 @@ export function TopupInformationPage({
           )}
           <form className="dynamic-topup-form" onSubmit={submit}>
             <div className="topup-form-step">
-              <span className="section-kicker">BƯỚC 2</span>
+              <span className="section-kicker">BƯỚC 1</span>
               <strong>Nhập thông tin nhận sản phẩm</strong>
             </div>
             {template?.fields.map((field) => (

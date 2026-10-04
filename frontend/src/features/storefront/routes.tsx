@@ -95,20 +95,11 @@ export function TopupInformationRoute() {
       pkg={pkg}
       service={service}
       cart={store.cart}
-      packages={store.servicePackages.filter((item) => item.serviceId === service.id)}
-      productStatuses={store.productStatuses}
       template={store.topupTemplates.find(
         (item) => item.id === pkg.templateId,
       )}
       quantity={store.selectedQuantity}
       onQuantityChange={store.setSelectedQuantity}
-      onPackageChange={(nextPackage) => {
-        store.setSelectedPackage(nextPackage)
-        store.setCart((current) => current.some((item) => item.pkg.id === nextPackage.id)
-          ? current
-          : [...current, { pkg: nextPackage, quantity: 1 }])
-        store.setSelectedQuantity(store.cart.find((item) => item.pkg.id === nextPackage.id)?.quantity || 1)
-      }}
       onQuantityChangeForPackage={(id, quantity) => {
         const nextQuantity = Math.max(0, Math.min(10, quantity))
         store.setCart((current) => nextQuantity === 0
