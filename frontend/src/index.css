@@ -122,9 +122,9 @@ h1, h2, h3, p { margin-top: 0; }
 .package-card-art { position: relative; height: 154px; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 50% 50%, var(--glow), transparent 60%), linear-gradient(145deg, #121a2a, #0d1220); }
 .package-card-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(7, 10, 18, .58)); pointer-events: none; }
 .package-card-art img { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
-.package-card-art > span:not(.package-note) { position: relative; z-index: 1; color: #e8f9ff; font-size: 22px; font-weight: 800; letter-spacing: -1px; }
+.package-card-art > span:not(.package-note):not(.package-image-price) { position: relative; z-index: 1; color: #e8f9ff; font-size: 22px; font-weight: 800; letter-spacing: -1px; }
 .package-note { position: absolute; z-index: 2; top: 10px; right: 10px; padding: 5px 8px; border-radius: 5px; background: color-mix(in srgb, var(--accent) 72%, #10151f); color: #eefcff; font-size: 8px; font-weight: 700; }
-.package-image-price { position: absolute; z-index: 2; right: 10px; bottom: 10px; padding: 6px 9px; border: 1px solid rgba(255,255,255,.12); border-radius: 7px; color: #fff; background: rgba(7, 12, 23, .88); font-size: 11px; font-weight: 800; }
+.package-image-price { position: absolute; z-index: 2; left: 50%; bottom: 5px; transform: translateX(-50%); color: #fff; font-size: 10px; font-weight: 800; white-space: nowrap; }
 .package-discount { padding: 4px 8px; border-radius: 5px; color: #ffd166; background: rgba(255, 209, 102, .1); font-size: 8px; font-weight: 700; }
 .package-card-body { flex: 1; padding: 15px; }
 .package-card-body h3 { margin: 0 0 7px; font-size: 14px; letter-spacing: -.3px; }
