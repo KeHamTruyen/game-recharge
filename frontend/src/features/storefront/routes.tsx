@@ -22,13 +22,12 @@ export function StorefrontRoute() {
       services={store.services}
       search={search}
       onSearch={setSearch}
-      servicePackages={store.servicePackages}
-      productStatuses={store.productStatuses}
       onSelectService={(service: Service) => {
         store.setSelectedService(service)
         store.setSelectedPackage(null)
         store.setSelectedQuantity(1)
         store.setCheckoutInfo({})
+        store.setCart([])
         navigate(`/nap-game/${service.id}`)
       }}
     />
@@ -58,11 +57,24 @@ export function ServiceDetailRoute() {
       packages={packages}
       productStatuses={store.productStatuses}
       onBack={() => navigate("/nap-game")}
-      onSelectPackage={(pkg: ServicePackage) => {
-        store.setSelectedPackage(pkg)
-        store.setSelectedQuantity(1)
-        store.setCheckoutInfo({})
-        navigate("/nap-game/thong-tin")
+      onAddToCart={(pkg: ServicePackage) => {
+        store.setCart((current) => {
+          const existing = current.find((item) => item.pkg.id === pkg.id)
+          return existing
+            ? current.map((item) => item.pkg.id === pkg.id ? { ...item, quantity: Math.min(10, item.quantity + 1) } : item)
+            : [...current, { pkg, quantity: 1 }]
+        })
+        store.setSelectedService(service)
+        store.setNotice(`${pkg.name} đã được thêm vào giỏ hàng.`)
+      }}
+      cartCount={store.cart.reduce((total, item) => total + item.quantity, 0)}
+      onOpenCart={() => {
+        const first = store.cart[0]
+        if (first) {
+          store.setSelectedPackage(first.pkg)
+          store.setSelectedQuantity(first.quantity)
+          navigate("/nap-game/thong-tin")
+        }
       }}
     />
   )
@@ -74,14 +86,15 @@ export function TopupInformationRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
 
-  const pkg = store.selectedPackage
+  const pkg = store.selectedPackage || store.cart[0]?.pkg
   const service = store.selectedService
-  if (!pkg || !service) return <Navigate to="/nap-game" replace />
+  if (!pkg || !service || store.cart.length === 0) return <Navigate to="/nap-game" replace />
 
   return (
     <TopupInformationPage
       pkg={pkg}
       service={service}
+      cart={store.cart}
       packages={store.servicePackages.filter((item) => item.serviceId === service.id)}
       productStatuses={store.productStatuses}
       template={store.topupTemplates.find(
@@ -91,8 +104,19 @@ export function TopupInformationRoute() {
       onQuantityChange={store.setSelectedQuantity}
       onPackageChange={(nextPackage) => {
         store.setSelectedPackage(nextPackage)
-        store.setSelectedQuantity(1)
+        store.setCart((current) => current.some((item) => item.pkg.id === nextPackage.id)
+          ? current
+          : [...current, { pkg: nextPackage, quantity: 1 }])
+        store.setSelectedQuantity(store.cart.find((item) => item.pkg.id === nextPackage.id)?.quantity || 1)
       }}
+      onQuantityChangeForPackage={(id, quantity) => {
+        const nextQuantity = Math.max(0, Math.min(10, quantity))
+        store.setCart((current) => nextQuantity === 0
+          ? current.filter((item) => item.pkg.id !== id)
+          : current.map((item) => item.pkg.id === id ? { ...item, quantity: nextQuantity } : item))
+        if (String(store.selectedPackage?.id) === String(id)) store.setSelectedQuantity(nextQuantity)
+      }}
+      onRemoveFromCart={(id) => store.setCart((current) => current.filter((item) => item.pkg.id !== id))}
       onBack={() => navigate(`/nap-game/${service.id}`)}
       onContinue={(values) => {
         store.setCheckoutInfo(values)
@@ -108,9 +132,9 @@ export function CheckoutRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
 
-  const pkg = store.selectedPackage
+  const pkg = store.selectedPackage || store.cart[0]?.pkg
   const service = store.selectedService
-  if (!pkg || !service) return <Navigate to="/nap-game" replace />
+  if (!pkg || !service || store.cart.length === 0) return <Navigate to="/nap-game" replace />
 
   const template = store.topupTemplates.find(
     (item) => item.id === pkg.templateId,
@@ -122,18 +146,16 @@ export function CheckoutRoute() {
       service={service}
       template={template}
       quantity={store.selectedQuantity}
+      cart={store.cart}
       topupInfo={store.checkoutInfo}
       onBack={() => navigate("/nap-game/thong-tin")}
       onNotice={store.setNotice}
       onConfirm={async () => {
         try {
-          const transaction = await api.orders.create(
-            pkg.id,
-            store.selectedQuantity,
-            store.checkoutInfo,
-            store.user?.email,
-          )
-          store.setTransactions((current) => [transaction, ...current])
+          const transactions = await Promise.all(store.cart.map((item) =>
+            api.orders.create(item.pkg.id, item.quantity, store.checkoutInfo, store.user?.email),
+          ))
+          store.setTransactions((current) => [...transactions, ...current])
           store.setNotice("Đơn hàng đã được ghi nhận và chuyển sang trạng thái chờ thanh toán.")
           return true
         } catch (error) {

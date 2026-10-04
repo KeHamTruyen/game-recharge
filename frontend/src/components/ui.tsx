@@ -285,25 +285,11 @@ export function ProductCard({
 
 export function ServiceCard({
   service,
-  packageCount,
-  minPrice,
-  productStatuses,
-  servicePackages,
   onClick,
 }: {
   service: Service
-  packageCount: number
-  minPrice: number
-  productStatuses: ProductStatus[]
-  servicePackages: ServicePackage[]
   onClick: () => void
 }) {
-  const pkgs = servicePackages.filter((p) => p.serviceId === service.id)
-  const hasAvailable = pkgs.some((p) => {
-    const status = productStatuses.find((s) => s.id === p.statusId)
-    return status?.purchasable ?? false
-  })
-
   return (
     <article className="service-card" onClick={onClick} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && onClick()}>
       <div className={`service-art tone-${service.tone}`}>
@@ -316,24 +302,7 @@ export function ServiceCard({
           </div>
         )}
       </div>
-      <div className="service-info">
-        <h3>{service.name}</h3>
-        <p className="service-desc">{service.description}</p>
-        <div className="service-meta">
-          <span className="service-pkg-count">
-            <Icon name="bag" size={12} />
-            {packageCount} gói
-          </span>
-          {hasAvailable && minPrice > 0 && (
-            <span className="service-min-price">
-              Từ {formatPrice(minPrice)}
-            </span>
-          )}
-        </div>
-        <button className="service-cta" aria-label={`Xem dịch vụ ${service.name}`}>
-          Xem các gói <Icon name="chevron" size={16} />
-        </button>
-      </div>
+      <h3 className="service-name">{service.name}</h3>
     </article>
   )
 }

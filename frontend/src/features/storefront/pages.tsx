@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react"
-import type { Product, ProductStatus, Service, ServicePackage, TopupTemplate } from "@/domain/models"
+import type { CartItem, Product, ProductStatus, Service, ServicePackage, TopupTemplate } from "@/domain/models"
 import {
   Icon,
   Pagination,
@@ -15,15 +15,11 @@ export function TopupPage({
   search,
   onSearch,
   onSelectService,
-  servicePackages,
-  productStatuses,
 }: {
   services: Service[]
   search: string
   onSearch: (value: string) => void
   onSelectService: (service: Service) => void
-  servicePackages: ServicePackage[]
-  productStatuses: ProductStatus[]
 }) {
   const filtered = services
     .filter((s) => s.isActive)
@@ -111,23 +107,10 @@ export function TopupPage({
         {filtered.length > 0 ? (
           <div className="service-grid">
             {filtered.map((service) => {
-              const pkgCount = servicePackages.filter(
-                (p) => p.serviceId === service.id && p.statusId !== "sold-out",
-              ).length
-              const minPrice = servicePackages
-                .filter((p) => p.serviceId === service.id)
-                .reduce(
-                  (min, p) => (p.price < min ? p.price : min),
-                  Number.MAX_SAFE_INTEGER,
-                )
               return (
                 <ServiceCard
                   key={service.id}
                   service={service}
-                  packageCount={pkgCount}
-                  minPrice={minPrice === Number.MAX_SAFE_INTEGER ? 0 : minPrice}
-                  productStatuses={productStatuses}
-                  servicePackages={servicePackages}
                   onClick={() => onSelectService(service)}
                 />
               )
@@ -153,13 +136,17 @@ export function ServiceDetailPage({
   packages,
   productStatuses,
   onBack,
-  onSelectPackage,
+  onAddToCart,
+  cartCount,
+  onOpenCart,
 }: {
   service: Service
   packages: ServicePackage[]
   productStatuses: ProductStatus[]
   onBack: () => void
-  onSelectPackage: (pkg: ServicePackage) => void
+  onAddToCart: (pkg: ServicePackage) => void
+  cartCount: number
+  onOpenCart: () => void
 }) {
   const [filter, setFilter] = useState("Tất cả")
   const tags = ["Tất cả", ...Array.from(new Set(packages.flatMap((p) => p.tags)))]
@@ -199,6 +186,9 @@ export function ServiceDetailPage({
             </button>
           ))}
         </div>
+        <button className="secondary-button cart-button" onClick={onOpenCart}>
+          <Icon name="bag" size={15} /> Giỏ hàng ({cartCount})
+        </button>
       </div>
 
       {filtered.length > 0 ? (
@@ -231,7 +221,7 @@ export function ServiceDetailPage({
                   </div>
                   <button
                     className="primary-button package-buy-btn"
-                    onClick={() => onSelectPackage(pkg)}
+                    onClick={() => onAddToCart(pkg)}
                     disabled={!canBuy}
                   >
                     {canBuy ? (
@@ -262,22 +252,28 @@ export function TopupInformationPage({
   pkg,
   service,
   packages,
+  cart,
   productStatuses,
   template,
   quantity,
   onQuantityChange,
   onPackageChange,
+  onQuantityChangeForPackage,
+  onRemoveFromCart,
   onBack,
   onContinue,
 }: {
   pkg: ServicePackage
   service: Service
   packages: ServicePackage[]
+  cart: CartItem[]
   productStatuses: ProductStatus[]
   template?: TopupTemplate
   quantity: number
   onQuantityChange: (quantity: number) => void
   onPackageChange: (pkg: ServicePackage) => void
+  onQuantityChangeForPackage: (id: string | number, quantity: number) => void
+  onRemoveFromCart: (id: string | number) => void
   onBack: () => void
   onContinue: (values: Record<string, string>) => void
 }) {
@@ -363,6 +359,23 @@ export function TopupInformationPage({
                   )
                 })}
             </div>
+          </div>
+          <div className="cart-items">
+            <div className="topup-section-heading">
+              <span className="section-kicker">GIỎ HÀNG</span>
+              <strong>{cart.length} gói đã chọn</strong>
+            </div>
+            {cart.map((item) => (
+              <div className="cart-item" key={item.pkg.id}>
+                <span><strong>{item.pkg.name}</strong><small>{formatPrice(item.pkg.price)} / gói</small></span>
+                <div>
+                  <button type="button" onClick={() => onQuantityChangeForPackage(item.pkg.id, item.quantity - 1)}>−</button>
+                  <b>{item.quantity}</b>
+                  <button type="button" onClick={() => onQuantityChangeForPackage(item.pkg.id, item.quantity + 1)}>+</button>
+                  <button type="button" className="cart-remove" onClick={() => onRemoveFromCart(item.pkg.id)}>×</button>
+                </div>
+              </div>
+            ))}
           </div>
           {template?.warning && (
             <div className="topup-warning">
@@ -523,6 +536,7 @@ export function TopupInformationPage({
 export function CheckoutPage({
   pkg,
   service,
+  cart,
   template,
   quantity,
   topupInfo,
@@ -532,6 +546,7 @@ export function CheckoutPage({
 }: {
   pkg: ServicePackage
   service: Service
+  cart: CartItem[]
   template?: TopupTemplate
   quantity: number
   topupInfo: Record<string, string>
@@ -540,7 +555,7 @@ export function CheckoutPage({
   onConfirm: () => boolean | void | Promise<boolean | void>
 }) {
   const orderCode = `NEXA${String(pkg.id).padStart(4, "0")}-${Date.now().toString(36).toUpperCase().slice(-4)}`
-  const totalAmount = pkg.price * quantity
+  const totalAmount = cart.reduce((total, item) => total + item.pkg.price * item.quantity, 0)
   const [orderConfirmed, setOrderConfirmed] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const copy = (value: string, label: string) => {
@@ -643,7 +658,8 @@ export function CheckoutPage({
         <aside className="order-summary">
           <span className="section-kicker">ĐƠN HÀNG CỦA BẠN</span>
           <h2>Chi tiết đơn hàng</h2>
-          <div className="checkout-product">
+          <div className="checkout-product-list">
+          {cart.map((item) => <div className="checkout-product" key={item.pkg.id}>
             <div className={`checkout-product-art tone-${service.tone}`}>
               {service.image ? (
                 <img
@@ -657,19 +673,14 @@ export function CheckoutPage({
             </div>
             <span>
               <small>{service.name}</small>
-              <strong>{pkg.name}</strong>
+              <strong>{item.pkg.name} × {item.quantity}</strong>
               <em>{pkg.tags.join(" · ")}</em>
             </span>
+          </div>)}
           </div>
           <div className="summary-lines">
-            <div>
-              <span>Đơn giá</span>
-              <strong>{formatPrice(pkg.price)}</strong>
-            </div>
-            <div>
-              <span>Số lượng</span>
-              <strong>× {quantity}</strong>
-            </div>
+            <div><span>Số loại gói</span><strong>{cart.length}</strong></div>
+            <div><span>Tổng số gói</span><strong>× {cart.reduce((total, item) => total + item.quantity, 0)}</strong></div>
             <div>
               <span>Phí thanh toán</span>
               <strong>0đ</strong>

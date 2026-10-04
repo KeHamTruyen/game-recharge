@@ -58,6 +58,11 @@ export type ServicePackage = {
   sortOrder: number
 }
 
+export type CartItem = {
+  pkg: ServicePackage
+  quantity: number
+}
+
 /** Legacy - vẫn dùng trong admin để tương thích */
 export type Product = {
   id: string | number

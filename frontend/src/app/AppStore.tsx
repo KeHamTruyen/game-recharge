@@ -10,6 +10,7 @@ import {
 } from "react"
 import type {
   ContactInfo,
+  CartItem,
   ManagedUser,
   MiddlemanInfo,
   Product,
@@ -56,6 +57,7 @@ type AppStoreValue = AppSnapshot & {
   selectedPackage: ServicePackage | null
   selectedService: Service | null
   selectedQuantity: number
+  cart: CartItem[]
   checkoutInfo: Record<string, string>
   notice: string
   apiReady: boolean
@@ -74,6 +76,7 @@ type AppStoreValue = AppSnapshot & {
   setSelectedPackage: Setter<ServicePackage | null>
   setSelectedService: Setter<Service | null>
   setSelectedQuantity: Setter<number>
+  setCart: Setter<CartItem[]>
   setCheckoutInfo: Setter<Record<string, string>>
   setNotice: Setter<string>
   login(email: string, password?: string, name?: string): Promise<User>
@@ -100,6 +103,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [selectedPackage, setSelectedPackage] = useState<ServicePackage | null>(null)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [selectedQuantity, setSelectedQuantity] = useState(1)
+  const [cart, setCart] = useState<CartItem[]>([])
   const [checkoutInfo, setCheckoutInfo] = useState<Record<string, string>>({})
   const [notice, setNotice] = useState("")
   const [apiReady, setApiReady] = useState(false)
@@ -181,11 +185,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AppStoreValue>(() => ({
     products, productStatuses, topupTemplates, categories, games,
     middlemanInfo, contactInfo, users, transactions, services, servicePackages,
-    user, selectedProduct, selectedPackage, selectedService, selectedQuantity,
+    user, selectedProduct, selectedPackage, selectedService, selectedQuantity, cart,
     checkoutInfo, notice, apiReady, setProducts, setProductStatuses,
     setTopupTemplates, setCategories, setGames, setMiddlemanInfo, setContactInfo,
     setUsers, setTransactions, setServices, setServicePackages, setSelectedProduct,
-    setSelectedPackage, setSelectedService, setSelectedQuantity, setCheckoutInfo,
+    setSelectedPackage, setSelectedService, setSelectedQuantity, setCart, setCheckoutInfo,
     setNotice,
     async login(email, password, name) {
       const nextUser = password
@@ -207,7 +211,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   }), [
     products, productStatuses, topupTemplates, categories, games, middlemanInfo,
     contactInfo, users, transactions, services, servicePackages, user,
-    selectedProduct, selectedPackage, selectedService, selectedQuantity,
+    selectedProduct, selectedPackage, selectedService, selectedQuantity, cart,
     checkoutInfo, notice, apiReady,
   ])
 
