@@ -82,11 +82,17 @@ export function TopupInformationRoute() {
     <TopupInformationPage
       pkg={pkg}
       service={service}
+      packages={store.servicePackages.filter((item) => item.serviceId === service.id)}
+      productStatuses={store.productStatuses}
       template={store.topupTemplates.find(
         (item) => item.id === pkg.templateId,
       )}
       quantity={store.selectedQuantity}
       onQuantityChange={store.setSelectedQuantity}
+      onPackageChange={(nextPackage) => {
+        store.setSelectedPackage(nextPackage)
+        store.setSelectedQuantity(1)
+      }}
       onBack={() => navigate(`/nap-game/${service.id}`)}
       onContinue={(values) => {
         store.setCheckoutInfo(values)
