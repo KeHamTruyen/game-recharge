@@ -127,6 +127,16 @@ export function PublicLayout() {
               <span>{item.label}</span>
             </NavLink>
           ))}
+          <button
+            type="button"
+            className={store.user ? "account-nav-button signed-in" : "account-nav-button"}
+            onClick={() =>
+              store.user ? navigate("/tai-khoan") : setLoginOpen(true)
+            }
+          >
+            <Icon name="user" size={19} />
+            <span>{store.user ? "Tài khoản" : "Đăng nhập"}</span>
+          </button>
         </nav>
       </header>
       <main>
