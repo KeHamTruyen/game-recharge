@@ -48,5 +48,6 @@ object storage first, then save the returned URL in `Product.image`.
 
 ## Authorization
 
-The temporary email-based admin rule is UI-only. The backend must derive roles
-from the authenticated session and enforce authorization on every admin route.
+Administrative access is derived only from the authenticated user's database
+role/session. Email text is never used to grant permissions, and the backend
+enforces authorization on every admin route.

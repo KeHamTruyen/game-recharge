@@ -21,7 +21,7 @@ export function PublicLayout() {
   const handleLogin = async (email: string, password: string, name?: string) => {
     const user = await store.login(email, password, name)
     setLoginOpen(false)
-    navigate(user.role === "admin" ? "/admin" : "/tai-khoan")
+    navigate(user.role === "admin" || user.role === "staff" ? "/admin" : "/tai-khoan")
   }
   const handleSupport = () => {
     if (!isSupportOnline) {
