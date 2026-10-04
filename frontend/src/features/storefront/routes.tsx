@@ -135,8 +135,10 @@ export function CheckoutRoute() {
           )
           store.setTransactions((current) => [transaction, ...current])
           store.setNotice("Đơn hàng đã được ghi nhận và chuyển sang trạng thái chờ thanh toán.")
+          return true
         } catch (error) {
           store.setNotice(error instanceof Error ? error.message : "Không thể tạo đơn hàng.")
+          return false
         }
       }}
     />

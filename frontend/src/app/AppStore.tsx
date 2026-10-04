@@ -91,8 +91,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [games, setGames] = useState(initial.games)
   const [middlemanInfo, setMiddlemanInfo] = useState(initial.middlemanInfo)
   const [contactInfo, setContactInfo] = useState(initial.contactInfo)
-  const [users, setUsers] = useState(initial.users)
-  const [transactions, setTransactions] = useState(initial.transactions)
+  const [users, setUsers] = useState(initial.users || initialUsers)
+  const [transactions, setTransactions] = useState(initial.transactions || initialTransactions)
   const [services, setServices] = useState<Service[]>(initialServices)
   const [servicePackages, setServicePackages] = useState<ServicePackage[]>(initialServicePackages)
   const [user, setUser] = useState<User | null>(null)
@@ -125,7 +125,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorageRepository.save({
       products, productStatuses, topupTemplates, categories, games,
-      middlemanInfo, contactInfo, users, transactions,
+      middlemanInfo, contactInfo,
     })
   }, [products, productStatuses, topupTemplates, categories, games, middlemanInfo, contactInfo, users, transactions])
 
@@ -136,6 +136,22 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         if (cancelled) return
         setServices(catalog.services)
         setServicePackages(catalog.packages)
+        setProducts(catalog.packages.map((pkg) => {
+          const service = catalog.services.find((item) => item.id === pkg.serviceId)
+          return {
+            id: pkg.id,
+            name: pkg.name,
+            game: service?.name || service?.game || "Game",
+            tags: pkg.tags,
+            price: pkg.price,
+            oldPrice: pkg.oldPrice,
+            note: pkg.note,
+            art: (service?.iconText || service?.name || "GAME").slice(0, 3).toUpperCase(),
+            tone: service?.tone || "cyan",
+            statusId: pkg.statusId,
+            templateId: pkg.templateId,
+          }
+        }))
         setTopupTemplates(catalog.templates)
         setProductStatuses(catalog.statuses)
         const [remoteMiddleman, remoteContact] = await Promise.all([

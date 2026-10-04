@@ -89,8 +89,26 @@ router.post(
         });
         templateName = tpl?.name ?? '';
 
-        // Build human-readable labels from template fields
-        // tpl.fields is Json: FieldDef[]
+        const fields = Array.isArray(tpl?.fields) ? tpl.fields as Array<Record<string, unknown>> : [];
+        const allowedKeys = new Set(fields.map((field) => String(field.key || "")));
+        for (const field of fields) {
+          const key = String(field.key || "");
+          const value = body.topupInfo[key];
+          if (field.required && (value === undefined || String(value).trim() === "")) {
+            throw new AppError(`Field ${String(field.label || key)} is required`, 400);
+          }
+          if (value !== undefined && field.type === "email" && !z.string().email().safeParse(String(value)).success) {
+            throw new AppError(`Field ${String(field.label || key)} must be a valid email`, 400);
+          }
+          if (value !== undefined && field.type === "select" && Array.isArray(field.options) && !field.options.map(String).includes(String(value))) {
+            throw new AppError(`Invalid option for ${String(field.label || key)}`, 400);
+          }
+        }
+        for (const key of Object.keys(body.topupInfo)) {
+          if (allowedKeys.size > 0 && !allowedKeys.has(key)) {
+            throw new AppError(`Unknown top-up field: ${key}`, 400);
+          }
+        }
       }
 
       // Build topupLabels (human-readable field names → values)
@@ -148,14 +166,6 @@ router.post(
           package: { select: { id: true, name: true, price: true } },
         },
       });
-
-      // Update user totalSpent if authenticated
-      if (req.user?.userId) {
-        await prisma.user.update({
-          where: { id: req.user.userId },
-          data: { totalSpent: { increment: amount } },
-        });
-      }
 
       res.status(201).json({ success: true, data: transaction });
     } catch (err) {

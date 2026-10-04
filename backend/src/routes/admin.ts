@@ -464,9 +464,26 @@ router.patch(
         })
         .parse(req.body);
 
-      const transaction = await prisma.transaction.update({
-        where: { id },
-        data: { status },
+      const transaction = await prisma.$transaction(async (tx) => {
+        const previous = await tx.transaction.findUnique({
+          where: { id },
+          select: { status: true, userId: true, amount: true, quantity: true },
+        });
+        if (!previous) throw new NotFoundError('Transaction');
+        const completedBefore = previous.status === 'COMPLETED';
+        const completedAfter = status === 'COMPLETED';
+        if (previous.userId && completedBefore !== completedAfter) {
+          const delta = completedAfter
+            ? new Prisma.Decimal(previous.amount)
+            : new Prisma.Decimal(previous.amount).neg();
+          await tx.user.update({
+            where: { id: previous.userId },
+            data: { totalSpent: { increment: delta } },
+          });
+        }
+        return tx.transaction.update({
+          where: { id },
+          data: { status },
         select: {
           id: true,
           code: true,
@@ -476,7 +493,13 @@ router.patch(
           packageName: true,
           gameName: true,
           amount: true,
+          quantity: true,
+          topupInfo: true,
+          topupLabels: true,
+          templateName: true,
+          createdAt: true,
         },
+        });
       });
 
       res.json({ success: true, data: transaction });

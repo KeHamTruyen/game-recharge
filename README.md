@@ -46,6 +46,8 @@ npm run start:backend
 ```
 
 Set `NODE_ENV=production`, use HTTPS, set `CORS_ORIGIN` to the exact frontend
-origin(s), and never commit `.env` files. Email delivery, bank QR/payment
-reconciliation, and connecting the storefront state to the API are intentionally
-outside this setup.
+origin(s), and never commit `.env` files. Email delivery and bank QR/payment reconciliation are intentionally outside this
+setup. The storefront catalog, authentication, orders, templates, users, and
+admin transaction controls are connected to the API and PostgreSQL database.
+Admin package/template/status changes require an authenticated ADMIN account;
+staff accounts are limited to operational admin access.

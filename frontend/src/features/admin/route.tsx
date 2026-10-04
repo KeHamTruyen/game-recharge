@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router"
 import { useAppStore } from "@/app/AppStore"
 import { AdminHeader, AdminLogin, AdminPage } from "@/features/admin"
+import { api } from "@/services/api"
 
 export function AdminRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
 
-  if (store.user?.role !== "admin") {
+  if (store.user?.role !== "admin" && store.user?.role !== "staff") {
     return (
       <div className="app-shell admin-shell">
         <AdminLogin
@@ -33,32 +34,54 @@ export function AdminRoute() {
       />
       <AdminPage
         products={store.products}
+        services={store.services}
         categories={store.categories}
         games={store.games}
         productStatuses={store.productStatuses}
         topupTemplates={store.topupTemplates}
-        onAddProduct={(product) =>
-          store.setProducts((current) => [
-            { ...product, id: Date.now() },
-            ...current,
-          ])
-        }
-        onDeleteProduct={(id) =>
-          store.setProducts((current) =>
-            current.filter((item) => item.id !== id),
-          )
-        }
-        onUpdateProduct={(id, updates) =>
-          store.setProducts((current) =>
-            current.map((item) =>
-              item.id === id ? { ...item, ...updates } : item,
-            ),
-          )
-        }
-        onAddProductStatus={(status) =>
-          store.setProductStatuses((current) => [...current, status])
-        }
-        onDeleteProductStatus={(id) => {
+        onAddProduct={async (product) => {
+          const service = store.services.find((item) => item.name === product.game || item.game === product.game)
+          if (!service) throw new Error("Không tìm thấy dịch vụ tương ứng.")
+          const created = await api.admin.createPackage({
+            serviceId: String(service.id),
+            name: product.name,
+            description: "",
+            price: product.price,
+            oldPrice: product.oldPrice || null,
+            note: product.note,
+            tags: product.tags,
+            statusId: product.statusId,
+            templateId: product.templateId,
+            sortOrder: 0,
+            isActive: true,
+          })
+          store.setServicePackages((current) => [created, ...current])
+          store.setProducts((current) => [{ ...product, id: created.id }, ...current])
+        }}
+        onDeleteProduct={async (id) => {
+          await api.admin.deletePackage(id)
+          store.setServicePackages((current) => current.filter((item) => item.id !== id))
+          store.setProducts((current) => current.filter((item) => item.id !== id))
+        }}
+        onUpdateProduct={async (id, updates) => {
+          const updated = await api.admin.updatePackage(id, {
+            name: updates.name,
+            price: updates.price,
+            oldPrice: updates.oldPrice || null,
+            note: updates.note,
+            tags: updates.tags,
+            statusId: updates.statusId,
+            templateId: updates.templateId,
+          })
+          store.setServicePackages((current) => current.map((item) => item.id === id ? updated : item))
+          store.setProducts((current) => current.map((item) => item.id === id ? { ...item, ...updates } : item))
+        }}
+        onAddProductStatus={async (status) => {
+          const created = await api.admin.createStatus(status)
+          store.setProductStatuses((current) => [...current, created])
+        }}
+        onDeleteProductStatus={async (id) => {
+          await api.admin.deleteStatus(id)
           store.setProductStatuses((current) =>
             current.filter((item) => item.id !== id),
           )
@@ -68,15 +91,18 @@ export function AdminRoute() {
             ),
           )
         }}
-        onAddTopupTemplate={(template) =>
-          store.setTopupTemplates((current) => [...current, template])
-        }
-        onUpdateTopupTemplate={(id, template) =>
+        onAddTopupTemplate={async (template) => {
+          const created = await api.admin.createTemplate(template)
+          store.setTopupTemplates((current) => [...current, created])
+        }}
+        onUpdateTopupTemplate={async (id, template) => {
+          const updated = await api.admin.updateTemplate(id, template)
           store.setTopupTemplates((current) =>
-            current.map((item) => (item.id === id ? template : item)),
+            current.map((item) => (item.id === id ? updated : item)),
           )
-        }
-        onDeleteTopupTemplate={(id) => {
+        }}
+        onDeleteTopupTemplate={async (id) => {
+          await api.admin.deleteTemplate(id)
           const fallback =
             store.topupTemplates.find((item) => item.id !== id)?.id || ""
           store.setTopupTemplates((current) =>
@@ -107,9 +133,15 @@ export function AdminRoute() {
           store.setGames((current) => current.filter((item) => item !== name))
         }
         middlemanInfo={store.middlemanInfo}
-        onUpdateMiddleman={store.setMiddlemanInfo}
+        onUpdateMiddleman={async (info) => {
+          await api.admin.updateSetting("middlemanInfo", info as unknown as Record<string, unknown>)
+          store.setMiddlemanInfo(info)
+        }}
         contactInfo={store.contactInfo}
-        onUpdateContact={store.setContactInfo}
+        onUpdateContact={async (info) => {
+          await api.admin.updateSetting("contactInfo", info as unknown as Record<string, unknown>)
+          store.setContactInfo(info)
+        }}
         users={store.users}
         transactions={store.transactions}
         onUpdateUser={async (id, updates) => {

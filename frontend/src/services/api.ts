@@ -193,6 +193,66 @@ export const api = {
     },
   },
   admin: {
+    async services() {
+      const result = await client.request<ApiEnvelope<ApiService[]>>("/admin/services?limit=100")
+      return result.data
+    },
+    async packages(serviceId?: string | number) {
+      const query = serviceId ? `&serviceId=${encodeURIComponent(String(serviceId))}` : ""
+      const result = await client.request<ApiEnvelope<{ items: ApiPackage[] }>>(`/admin/packages?limit=100${query}`)
+      return result.data.items.map(mapPackage)
+    },
+    async createPackage(payload: Omit<ServicePackage, "id">) {
+      const result = await client.request<ApiEnvelope<ApiPackage>>("/admin/packages", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      })
+      return mapPackage(result.data)
+    },
+    async updatePackage(id: string | number, payload: Partial<Omit<ServicePackage, "id" | "serviceId">>) {
+      const result = await client.request<ApiEnvelope<ApiPackage>>(`/admin/packages/${String(id)}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      })
+      return mapPackage(result.data)
+    },
+    async deletePackage(id: string | number) {
+      await client.request(`/admin/packages/${String(id)}`, { method: "DELETE" })
+    },
+    async createStatus(status: ProductStatus) {
+      const result = await client.request<ApiEnvelope<ProductStatus>>("/admin/product-statuses", {
+        method: "POST",
+        body: JSON.stringify({ ...status, iconName: status.icon }),
+      })
+      return { ...result.data, icon: "check" as const }
+    },
+    async deleteStatus(id: string) {
+      await client.request(`/admin/product-statuses/${encodeURIComponent(id)}`, { method: "DELETE" })
+    },
+    async createTemplate(template: TopupTemplate) {
+      const result = await client.request<ApiEnvelope<Record<string, unknown>>>("/admin/topup-templates", {
+        method: "POST",
+        body: JSON.stringify(template),
+      })
+      return mapTemplate(result.data)
+    },
+    async updateTemplate(id: string, template: TopupTemplate) {
+      const result = await client.request<ApiEnvelope<Record<string, unknown>>>(`/admin/topup-templates/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: JSON.stringify(template),
+      })
+      return mapTemplate(result.data)
+    },
+    async deleteTemplate(id: string) {
+      await client.request(`/admin/topup-templates/${encodeURIComponent(id)}`, { method: "DELETE" })
+    },
+    async updateSetting<T extends Record<string, unknown>>(key: string, value: T) {
+      const result = await client.request<ApiEnvelope<{ value: T }>>(`/admin/settings/${encodeURIComponent(key)}`, {
+        method: "PUT",
+        body: JSON.stringify(value),
+      })
+      return result.data.value
+    },
     async users() {
       const result = await client.request<ApiEnvelope<{ items: Array<{
         id: string

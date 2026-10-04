@@ -537,11 +537,12 @@ export function CheckoutPage({
   topupInfo: Record<string, string>
   onBack: () => void
   onNotice: (message: string) => void
-  onConfirm: () => void | Promise<void>
+  onConfirm: () => boolean | void | Promise<boolean | void>
 }) {
   const orderCode = `NEXA${String(pkg.id).padStart(4, "0")}-${Date.now().toString(36).toUpperCase().slice(-4)}`
   const totalAmount = pkg.price * quantity
   const [orderConfirmed, setOrderConfirmed] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const copy = (value: string, label: string) => {
     navigator.clipboard?.writeText(value)
     onNotice(`Đã sao chép ${label}.`)
@@ -684,13 +685,15 @@ export function CheckoutPage({
           </div>
           <button
             className="primary-button confirm-payment"
-            disabled={orderConfirmed}
-            onClick={() => {
-              onConfirm()
-              setOrderConfirmed(true)
+            disabled={orderConfirmed || isSubmitting}
+            onClick={async () => {
+              setIsSubmitting(true)
+              const success = await onConfirm()
+              setIsSubmitting(false)
+              if (success !== false) setOrderConfirmed(true)
             }}
           >
-            {orderConfirmed ? "Đã ghi nhận thanh toán" : "Tôi đã chuyển khoản"}{" "}
+            {orderConfirmed ? "Đã ghi nhận thanh toán" : isSubmitting ? "Đang ghi nhận..." : "Tôi đã chuyển khoản"}{" "}
             <Icon name="check" size={17} />
           </button>
         </aside>

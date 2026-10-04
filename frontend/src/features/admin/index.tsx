@@ -8,6 +8,7 @@ import type {
   MiddlemanInfo,
   Product,
   ProductStatus,
+  Service,
   TopupField,
   TopupFieldType,
   TopupTemplate,
@@ -59,6 +60,7 @@ export function AdminHeader({
 
 export function AdminPage({
   products,
+  services,
   categories,
   games,
   productStatuses,
@@ -85,13 +87,14 @@ export function AdminPage({
   onUpdateTransaction,
 }: {
   products: Product[]
+  services: Service[]
   categories: string[]
   games: string[]
   productStatuses: ProductStatus[]
   topupTemplates: TopupTemplate[]
-  onAddProduct: (product: Omit<Product, "id">) => void
-  onDeleteProduct: (id: number) => void
-  onUpdateProduct: (id: number, updates: Partial<Product>) => void
+  onAddProduct: (product: Omit<Product, "id">) => void | Promise<void>
+  onDeleteProduct: (id: string | number) => void | Promise<void>
+  onUpdateProduct: (id: string | number, updates: Partial<Product>) => void | Promise<void>
   onAddProductStatus: (status: ProductStatus) => void
   onDeleteProductStatus: (id: string) => void
   onAddTopupTemplate: (template: TopupTemplate) => void
@@ -798,6 +801,7 @@ export function TopupTemplateManager({
 }: {
   templates: TopupTemplate[]
   products: Product[]
+  services: Service[]
   games: string[]
   onAdd: (template: TopupTemplate) => void
   onUpdate: (id: string, template: TopupTemplate) => void

@@ -16,8 +16,8 @@ export type AppSnapshot = {
   games: string[]
   middlemanInfo: MiddlemanInfo
   contactInfo: ContactInfo
-  users: ManagedUser[]
-  transactions: Transaction[]
+  users?: ManagedUser[]
+  transactions?: Transaction[]
 }
 
 const STORAGE_KEY = "nexa-app-snapshot-v1"
