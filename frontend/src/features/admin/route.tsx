@@ -81,13 +81,22 @@ export function AdminRoute() {
           store.setProductStatuses((current) => [...current, created])
         }}
         onDeleteProductStatus={async (id) => {
+          const fallback = store.productStatuses.find((item) => item.id !== id)?.id || "available"
           await api.admin.deleteStatus(id)
           store.setProductStatuses((current) =>
             current.filter((item) => item.id !== id),
           )
+          await Promise.all(
+            store.servicePackages
+              .filter((item) => item.statusId === id)
+              .map((item) => api.admin.updatePackage(item.id, { statusId: fallback })),
+          )
+          store.setServicePackages((current) =>
+            current.map((item) => item.statusId === id ? { ...item, statusId: fallback } : item),
+          )
           store.setProducts((current) =>
             current.map((item) =>
-              item.statusId === id ? { ...item, statusId: "available" } : item,
+              item.statusId === id ? { ...item, statusId: fallback } : item,
             ),
           )
         }}
