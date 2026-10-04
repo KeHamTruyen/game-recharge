@@ -27,6 +27,13 @@ export const router = createBrowserRouter([
             }),
           },
           {
+            path: "nap-game/:serviceId",
+            lazy: async () => ({
+              Component: (await import("@/features/storefront/routes"))
+                .ServiceDetailRoute,
+            }),
+          },
+          {
             path: "nap-game/thong-tin",
             lazy: async () => ({
               Component: (await import("@/features/storefront/routes"))

@@ -14,6 +14,8 @@ import type {
   MiddlemanInfo,
   Product,
   ProductStatus,
+  Service,
+  ServicePackage,
   TopupTemplate,
   Transaction,
   User,
@@ -23,6 +25,8 @@ import {
   initialMiddlemanInfo,
   initialProducts,
   initialProductStatuses,
+  initialServicePackages,
+  initialServices,
   initialTopupTemplates,
   initialTransactions,
   initialUsers,
@@ -54,8 +58,12 @@ const fallbackSnapshot: AppSnapshot = {
 type Setter<T> = Dispatch<SetStateAction<T>>
 
 type AppStoreValue = AppSnapshot & {
+  services: Service[]
+  servicePackages: ServicePackage[]
   user: User | null
   selectedProduct: Product | null
+  selectedPackage: ServicePackage | null
+  selectedService: Service | null
   selectedQuantity: number
   checkoutInfo: Record<string, string>
   notice: string
@@ -68,7 +76,11 @@ type AppStoreValue = AppSnapshot & {
   setContactInfo: Setter<ContactInfo>
   setUsers: Setter<ManagedUser[]>
   setTransactions: Setter<Transaction[]>
+  setServices: Setter<Service[]>
+  setServicePackages: Setter<ServicePackage[]>
   setSelectedProduct: Setter<Product | null>
+  setSelectedPackage: Setter<ServicePackage | null>
+  setSelectedService: Setter<Service | null>
   setSelectedQuantity: Setter<number>
   setCheckoutInfo: Setter<Record<string, string>>
   setNotice: Setter<string>
@@ -93,8 +105,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [contactInfo, setContactInfo] = useState(initial.contactInfo)
   const [users, setUsers] = useState(initial.users)
   const [transactions, setTransactions] = useState(initial.transactions)
+  const [services, setServices] = useState<Service[]>(initialServices)
+  const [servicePackages, setServicePackages] = useState<ServicePackage[]>(initialServicePackages)
   const [user, setUser] = useState<User | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [selectedPackage, setSelectedPackage] = useState<ServicePackage | null>(null)
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [selectedQuantity, setSelectedQuantity] = useState(1)
   const [checkoutInfo, setCheckoutInfo] = useState<Record<string, string>>({})
   const [notice, setNotice] = useState("")
@@ -134,8 +150,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       contactInfo,
       users,
       transactions,
+      services,
+      servicePackages,
       user,
       selectedProduct,
+      selectedPackage,
+      selectedService,
       selectedQuantity,
       checkoutInfo,
       notice,
@@ -148,7 +168,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       setContactInfo,
       setUsers,
       setTransactions,
+      setServices,
+      setServicePackages,
       setSelectedProduct,
+      setSelectedPackage,
+      setSelectedService,
       setSelectedQuantity,
       setCheckoutInfo,
       setNotice,
@@ -192,8 +216,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       contactInfo,
       users,
       transactions,
+      services,
+      servicePackages,
       user,
       selectedProduct,
+      selectedPackage,
+      selectedService,
       selectedQuantity,
       checkoutInfo,
       notice,

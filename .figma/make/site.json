@@ -1,0 +1,10 @@
+{
+  "description": "This web application allows users to easily recharge game accounts, manage personal information, and access support, while providing admins with tools to add and edit game services.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

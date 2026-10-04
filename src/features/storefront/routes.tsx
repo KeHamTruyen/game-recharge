@@ -1,49 +1,60 @@
-import { useMemo, useState } from "react"
-import { Navigate, useNavigate, useSearchParams } from "react-router"
+import { useState } from "react"
+import { Navigate, useNavigate } from "react-router"
 import { useAppStore } from "@/app/AppStore"
 import {
   CheckoutPage,
+  ServiceDetailPage,
   TopupInformationPage,
   TopupPage,
 } from "@/features/storefront/pages"
+import type { Service, ServicePackage } from "@/domain/models"
+
+// ─── Trang chủ: Danh sách dịch vụ ───────────────────────────────────────────
 
 export function StorefrontRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [category, setCategory] = useState("Tất cả")
   const [search, setSearch] = useState("")
-  const selectedGame = searchParams.get("game") || ""
-  const products = useMemo(
-    () =>
-      store.products.filter((product) => {
-        const matchesCategory =
-          category === "Tất cả" || product.tags.includes(category)
-        const matchesGame = !selectedGame || product.game === selectedGame
-        const query = search.trim().toLowerCase()
-        return (
-          matchesCategory &&
-          matchesGame &&
-          (!query ||
-            `${product.name} ${product.game}`.toLowerCase().includes(query))
-        )
-      }),
-    [store.products, category, search, selectedGame],
-  )
 
   return (
     <TopupPage
-      products={products}
-      categories={store.categories}
-      category={category}
+      services={store.services}
       search={search}
-      onCategory={setCategory}
       onSearch={setSearch}
+      servicePackages={store.servicePackages}
       productStatuses={store.productStatuses}
-      selectedGame={selectedGame}
-      onClearGame={() => setSearchParams({})}
-      onBuy={(product) => {
-        store.setSelectedProduct(product)
+      onSelectService={(service: Service) => {
+        store.setSelectedService(service)
+        store.setSelectedPackage(null)
+        store.setSelectedQuantity(1)
+        store.setCheckoutInfo({})
+        navigate(`/nap-game/${service.id}`)
+      }}
+    />
+  )
+}
+
+// ─── Trang chi tiết dịch vụ ─────────────────────────────────────────────────
+
+export function ServiceDetailRoute() {
+  const store = useAppStore()
+  const navigate = useNavigate()
+
+  const service = store.selectedService
+  if (!service) return <Navigate to="/nap-game" replace />
+
+  const packages = store.servicePackages.filter(
+    (p) => p.serviceId === service.id,
+  )
+
+  return (
+    <ServiceDetailPage
+      service={service}
+      packages={packages}
+      productStatuses={store.productStatuses}
+      onBack={() => navigate("/nap-game")}
+      onSelectPackage={(pkg: ServicePackage) => {
+        store.setSelectedPackage(pkg)
         store.setSelectedQuantity(1)
         store.setCheckoutInfo({})
         navigate("/nap-game/thong-tin")
@@ -52,19 +63,26 @@ export function StorefrontRoute() {
   )
 }
 
+// ─── Trang nhập thông tin nạp ────────────────────────────────────────────────
+
 export function TopupInformationRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
-  if (!store.selectedProduct) return <Navigate to="/nap-game" replace />
+
+  const pkg = store.selectedPackage
+  const service = store.selectedService
+  if (!pkg || !service) return <Navigate to="/nap-game" replace />
+
   return (
     <TopupInformationPage
-      product={store.selectedProduct}
+      pkg={pkg}
+      service={service}
       template={store.topupTemplates.find(
-        (item) => item.id === store.selectedProduct?.templateId,
+        (item) => item.id === pkg.templateId,
       )}
       quantity={store.selectedQuantity}
       onQuantityChange={store.setSelectedQuantity}
-      onBack={() => navigate("/nap-game")}
+      onBack={() => navigate(`/nap-game/${service.id}`)}
       onContinue={(values) => {
         store.setCheckoutInfo(values)
         navigate("/thanh-toan")
@@ -73,17 +91,24 @@ export function TopupInformationRoute() {
   )
 }
 
+// ─── Trang thanh toán ────────────────────────────────────────────────────────
+
 export function CheckoutRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
-  const product = store.selectedProduct
-  if (!product) return <Navigate to="/nap-game" replace />
+
+  const pkg = store.selectedPackage
+  const service = store.selectedService
+  if (!pkg || !service) return <Navigate to="/nap-game" replace />
+
   const template = store.topupTemplates.find(
-    (item) => item.id === product.templateId,
+    (item) => item.id === pkg.templateId,
   )
+
   return (
     <CheckoutPage
-      product={product}
+      pkg={pkg}
+      service={service}
       template={template}
       quantity={store.selectedQuantity}
       topupInfo={store.checkoutInfo}
@@ -100,9 +125,9 @@ export function CheckoutRoute() {
             id,
             code: `NEXA${String(id).slice(-6)}`,
             email,
-            product: product.name,
-            game: product.game,
-            amount: product.price * store.selectedQuantity,
+            product: pkg.name,
+            game: service.name,
+            amount: pkg.price * store.selectedQuantity,
             quantity: store.selectedQuantity,
             status: "Đang xử lý",
             date: new Date().toLocaleString("vi-VN"),

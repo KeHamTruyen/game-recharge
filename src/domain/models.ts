@@ -29,6 +29,36 @@ export type ManagedUser = {
   totalSpent: number
 }
 
+/** Dịch vụ (game): mỗi dịch vụ nhóm nhiều gói nạp */
+export type Service = {
+  id: number
+  name: string
+  description: string
+  iconText: string
+  tone: string
+  image?: string
+  imagePosition?: string
+  packageCount?: number
+  isActive: boolean
+  sortOrder: number
+}
+
+/** Gói nạp cụ thể trong một dịch vụ */
+export type ServicePackage = {
+  id: number
+  serviceId: number
+  name: string
+  description: string
+  price: number
+  oldPrice: number
+  note: string
+  tags: string[]
+  statusId: string
+  templateId: string
+  sortOrder: number
+}
+
+/** Legacy - vẫn dùng trong admin để tương thích */
 export type Product = {
   id: number
   name: string

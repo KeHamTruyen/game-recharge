@@ -1,5 +1,5 @@
 import { PointerEvent as ReactPointerEvent, useRef } from "react"
-import type { IconName, Product, ProductStatus } from "@/domain/models"
+import type { IconName, Product, ProductStatus, Service, ServicePackage } from "@/domain/models"
 import { initialProductStatuses } from "@/data/mock-data"
 
 export function Icon({ name, size = 20 }: { name: IconName size?: number }) {
@@ -278,6 +278,61 @@ export function ProductCard({
             <Icon name="chevron" size={19} />
           </button>
         </div>
+      </div>
+    </article>
+  )
+}
+
+export function ServiceCard({
+  service,
+  packageCount,
+  minPrice,
+  productStatuses,
+  servicePackages,
+  onClick,
+}: {
+  service: Service
+  packageCount: number
+  minPrice: number
+  productStatuses: ProductStatus[]
+  servicePackages: ServicePackage[]
+  onClick: () => void
+}) {
+  const pkgs = servicePackages.filter((p) => p.serviceId === service.id)
+  const hasAvailable = pkgs.some((p) => {
+    const status = productStatuses.find((s) => s.id === p.statusId)
+    return status?.purchasable ?? false
+  })
+
+  return (
+    <article className="service-card" onClick={onClick} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && onClick()}>
+      <div className={`service-art tone-${service.tone}`}>
+        {service.image ? (
+          <img className="product-image" src={service.image} alt={service.name} style={{ objectPosition: service.imagePosition || "50% 50%" }} />
+        ) : (
+          <div className="art-symbol">
+            <span>{service.iconText}</span>
+            <i />
+          </div>
+        )}
+      </div>
+      <div className="service-info">
+        <h3>{service.name}</h3>
+        <p className="service-desc">{service.description}</p>
+        <div className="service-meta">
+          <span className="service-pkg-count">
+            <Icon name="bag" size={12} />
+            {packageCount} gói
+          </span>
+          {hasAvailable && minPrice > 0 && (
+            <span className="service-min-price">
+              Từ {formatPrice(minPrice)}
+            </span>
+          )}
+        </div>
+        <button className="service-cta" aria-label={`Xem dịch vụ ${service.name}`}>
+          Xem các gói <Icon name="chevron" size={16} />
+        </button>
       </div>
     </article>
   )

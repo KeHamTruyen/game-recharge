@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String
+  passwordHash String
+  role         Role          @default(CUSTOMER)
+  status       UserStatus    @default(ACTIVE)
+  totalSpent   Decimal       @default(0) @db.Decimal(12, 2)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
+
+model Service {
+  id          String           @id @default(cuid())
+  name        String
+  game        String
+  description String           @default("")
+  iconText    String           @default("")
+  tone        String           @default("blue")
+  sortOrder   Int              @default(0)
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  packages    ServicePackage[]
+  transactions Transaction[]
+
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("services")
+}
+
+model ServicePackage {
+  id          String        @id @default(cuid())
+  serviceId   String
+  service     Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  name        String
+  description String        @default("")
+  price       Decimal       @db.Decimal(12, 2)
+  oldPrice    Decimal?      @db.Decimal(12, 2)
+  note        String        @default("")
+  tags        String[]
+  statusId    String        @default("available")
+  templateId  String        @default("")
+  sortOrder   Int           @default(0)
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  transactions Transaction[]
+
+  @@index([serviceId])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("service_packages")
+}
+
+model ProductStatus {
+  id          String  @id
+  name        String
+  iconName    String  @default("circle")
+  color       String  @default("gray")
+  purchasable Boolean @default(true)
+
+  @@map("product_statuses")
+}
+
+model TopupTemplate {
+  id          String @id
+  name        String
+  game        String
+  description String @default("")
+  warning     String @default("")
+  fields      Json
+
+  @@map("topup_templates")
+}
+
+model Transaction {
+  id           String            @id @default(cuid())
+  code         String            @unique
+  userId       String?
+  user         User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail    String
+  serviceId    String?
+  service      Service?          @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  packageId    String?
+  package      ServicePackage?   @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  packageName  String
+  gameName     String
+  amount       Decimal           @db.Decimal(12, 2)
+  quantity     Int               @default(1)
+  status       TransactionStatus @default(PENDING)
+  topupInfo    Json              @default("{}")
+  topupLabels  Json              @default("{}")
+  templateName String            @default("")
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([userEmail])
+  @@index([status])
+  @@index([code])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model Setting {
+  id        String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
