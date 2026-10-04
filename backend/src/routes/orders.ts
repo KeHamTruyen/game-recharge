@@ -23,12 +23,19 @@ function generateOrderCode(): string {
 
 // ─── Validation Schemas ───────────────────────────────────────────────────────
 
+const topupInfoSchema = z
+  .record(
+    z.string().min(1).max(50),
+    z.union([z.string().max(500), z.number(), z.boolean()])
+  )
+  .refine((value) => Object.keys(value).length <= 20, {
+    message: 'A maximum of 20 top-up fields is allowed',
+  });
+
 const createOrderSchema = z.object({
   packageId: z.string().min(1, 'Package ID is required'),
   quantity: z.coerce.number().int().min(1).max(100).default(1),
-  topupInfo: z
-    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
-    .default({}),
+  topupInfo: topupInfoSchema.default({}),
   userEmail: z
     .string()
     .email('Valid email is required for guest orders')

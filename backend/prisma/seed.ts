@@ -6,6 +6,14 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminEmail || !adminPassword || adminPassword.length < 12) {
+    throw new Error(
+      'ADMIN_EMAIL and ADMIN_PASSWORD (at least 12 characters) are required to seed the admin account'
+    );
+  }
+
   // ─── Product Statuses ─────────────────────────────────────────────────────
   const statuses = [
     { id: 'available', name: 'Available', iconName: 'check-circle', color: 'green', purchasable: true },
@@ -117,19 +125,19 @@ async function main() {
   console.log('✅ Topup templates seeded');
 
   // ─── Admin User ───────────────────────────────────────────────────────────
-  const adminPassword = await bcrypt.hash('Admin@2025!', 12);
+  const adminPasswordHash = await bcrypt.hash(adminPassword, 12);
   await prisma.user.upsert({
-    where: { email: 'admin@nexatopup.vn' },
-    update: {},
+    where: { email: adminEmail },
+    update: { role: 'ADMIN', status: 'ACTIVE' },
     create: {
-      email: 'admin@nexatopup.vn',
+      email: adminEmail,
       name: 'NEXA Admin',
-      passwordHash: adminPassword,
+      passwordHash: adminPasswordHash,
       role: 'ADMIN',
       status: 'ACTIVE',
     },
   });
-  console.log('✅ Admin user seeded (admin@nexatopup.vn / Admin@2025!)');
+  console.log(`✅ Admin user seeded (${adminEmail})`);
 
   // ─── Services & Packages ──────────────────────────────────────────────────
 

@@ -1,11 +1,11 @@
 export type IconName = "bag" | "bridge" | "chat" | "check" | "chevron" | "clock" | "close" | "edit" | "game" | "grid" | "headset" | "home" | "mail" | "plus" | "search" | "shield" | "spark" | "trash" | "user"
 
-export type User = { email: string role: "customer" | "admin" }
+export type User = { id?: string; email: string; name?: string; role: "customer" | "staff" | "admin" }
 
 export type TransactionStatus = "Chờ thanh toán" | "Đang xử lý" | "Hoàn thành" | "Thất bại" | "Đã hoàn tiền"
 
 export type Transaction = {
-  id: number
+  id: string | number
   code: string
   email: string
   product: string
@@ -20,7 +20,7 @@ export type Transaction = {
 }
 
 export type ManagedUser = {
-  id: number
+  id: string | number
   name: string
   email: string
   role: "customer" | "staff" | "admin"
@@ -31,7 +31,7 @@ export type ManagedUser = {
 
 /** Dịch vụ (game): mỗi dịch vụ nhóm nhiều gói nạp */
 export type Service = {
-  id: number
+  id: string | number
   name: string
   description: string
   iconText: string
@@ -45,8 +45,8 @@ export type Service = {
 
 /** Gói nạp cụ thể trong một dịch vụ */
 export type ServicePackage = {
-  id: number
-  serviceId: number
+  id: string | number
+  serviceId: string | number
   name: string
   description: string
   price: number
@@ -60,7 +60,7 @@ export type ServicePackage = {
 
 /** Legacy - vẫn dùng trong admin để tương thích */
 export type Product = {
-  id: number
+  id: string | number
   name: string
   game: string
   tags: string[]
@@ -127,7 +127,7 @@ export type MiddlemanInfo = {
 export type ContactPlatform = "zalo" | "youtube" | "discord" | "facebook" | "telegram" | "email" | "custom"
 
 export type ContactChannel = {
-  id: number
+  id: string | number
   platform: ContactPlatform
   label: string
   name: string

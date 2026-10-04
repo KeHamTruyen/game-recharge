@@ -805,7 +805,7 @@ h1, h2, h3, p { margin-top: 0; }
   .page-width, .header-inner { width: min(100% - 24px, 1680px); }
   .header-inner { height: 64px; }
   .login-button { width: 39px; padding: 0 !important; justify-content: center; font-size: 0 !important; }
-  .mobile-nav { position: fixed; z-index: 39; inset: auto 0 0; height: 67px; padding: 7px 10px; border-top: 1px solid #20283a; display: grid; grid-template-columns: repeat(3, 1fr); background: rgba(9, 13, 22, .96); backdrop-filter: blur(15px); }
+  .mobile-nav { position: fixed; z-index: 39; inset: auto 0 0; min-height: 67px; height: calc(67px + env(safe-area-inset-bottom)); padding: 7px 10px calc(7px + env(safe-area-inset-bottom)); border-top: 1px solid #20283a; display: grid; grid-template-columns: repeat(3, 1fr); background: rgba(9, 13, 22, .96); backdrop-filter: blur(15px); }
   .mobile-nav a { border: 0; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #687387; background: transparent; font-size: 8px; text-decoration: none; }
   .mobile-nav a.active { color: #3bdbf8; background: rgba(47, 218, 255, .07); }
   .hero { min-height: auto; padding-block: 53px 25px; }
@@ -904,7 +904,25 @@ h1, h2, h3, p { margin-top: 0; }
   .admin-login-card { padding: 30px 23px; }
   .chat-fab { right: 15px; bottom: 80px; }
   .chat-panel { right: 12px; bottom: 142px; width: calc(100% - 24px); }
-  .toast { bottom: 80px; }
+  .toast { bottom: calc(80px + env(safe-area-inset-bottom)); width: calc(100% - 24px); }
   .modal-backdrop { padding: 12px; }
   .login-modal { padding: 30px 23px; }
+}
+
+@media (max-width: 420px) {
+  .page-width, .header-inner { width: calc(100% - 20px); }
+  .hero h1 { font-size: clamp(35px, 11vw, 42px); }
+  .hero-stats { gap: 12px; }
+  .hero-stats strong { font-size: 14px; }
+  .hero-stats span { font-size: 9px; }
+  .hero-visual { transform: scale(.7); margin: -30px 0; }
+  .service-grid, .package-grid { gap: 8px; }
+  .service-art { height: 140px; }
+  .package-card-footer { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .package-card-footer .primary-button { width: 100%; }
+  .mobile-nav a { font-size: 7px; }
+  .login-modal { padding: 27px 18px; }
+  .admin-summary { gap: 6px; }
+  .admin-summary > div { padding: 11px 7px; }
+  .admin-summary strong { font-size: 17px; }
 }

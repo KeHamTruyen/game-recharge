@@ -467,7 +467,7 @@ export function CheckoutPage({
   topupInfo: Record<string, string>
   onBack: () => void
   onNotice: (message: string) => void
-  onConfirm: () => void
+  onConfirm: () => void | Promise<void>
 }) {
   const orderCode = `NEXA${String(pkg.id).padStart(4, "0")}-${Date.now().toString(36).toUpperCase().slice(-4)}`
   const totalAmount = pkg.price * quantity

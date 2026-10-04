@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Navigate, useNavigate } from "react-router"
+import { Navigate, useNavigate, useParams } from "react-router"
 import { useAppStore } from "@/app/AppStore"
 import {
   CheckoutPage,
@@ -8,6 +8,7 @@ import {
   TopupPage,
 } from "@/features/storefront/pages"
 import type { Service, ServicePackage } from "@/domain/models"
+import { api } from "@/services/api"
 
 // ─── Trang chủ: Danh sách dịch vụ ───────────────────────────────────────────
 
@@ -39,9 +40,13 @@ export function StorefrontRoute() {
 export function ServiceDetailRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
+  const { serviceId } = useParams()
 
-  const service = store.selectedService
-  if (!service) return <Navigate to="/nap-game" replace />
+  const service = store.selectedService || store.services.find((item) => String(item.id) === serviceId)
+  if (!service) {
+    if (!store.apiReady) return <div className="page-width empty-state">Đang tải dịch vụ...</div>
+    return <Navigate to="/nap-game" replace />
+  }
 
   const packages = store.servicePackages.filter(
     (p) => p.serviceId === service.id,
@@ -114,34 +119,19 @@ export function CheckoutRoute() {
       topupInfo={store.checkoutInfo}
       onBack={() => navigate("/nap-game/thong-tin")}
       onNotice={store.setNotice}
-      onConfirm={() => {
-        const id = Date.now()
-        const email =
-          store.user?.email ||
-          store.checkoutInfo.contactEmail ||
-          "guest@nexa.local"
-        store.setTransactions((current) => [
-          {
-            id,
-            code: `NEXA${String(id).slice(-6)}`,
-            email,
-            product: pkg.name,
-            game: service.name,
-            amount: pkg.price * store.selectedQuantity,
-            quantity: store.selectedQuantity,
-            status: "Đang xử lý",
-            date: new Date().toLocaleString("vi-VN"),
-            topupInfo: store.checkoutInfo,
-            topupLabels: Object.fromEntries(
-              (template?.fields || []).map((field) => [field.key, field.label]),
-            ),
-            templateName: template?.name,
-          },
-          ...current,
-        ])
-        store.setNotice(
-          "Đơn hàng đã được ghi nhận và chuyển sang trạng thái đang xử lý.",
-        )
+      onConfirm={async () => {
+        try {
+          const transaction = await api.orders.create(
+            pkg.id,
+            store.selectedQuantity,
+            store.checkoutInfo,
+            store.user?.email,
+          )
+          store.setTransactions((current) => [transaction, ...current])
+          store.setNotice("Đơn hàng đã được ghi nhận và chuyển sang trạng thái chờ thanh toán.")
+        } catch (error) {
+          store.setNotice(error instanceof Error ? error.message : "Không thể tạo đơn hàng.")
+        }
       }}
     />
   )

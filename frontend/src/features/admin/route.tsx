@@ -10,12 +10,12 @@ export function AdminRoute() {
     return (
       <div className="app-shell admin-shell">
         <AdminLogin
-          onLogin={(email) => {
-            const user = store.login(email)
-            if (user.role !== "admin")
-              store.setNotice(
-                "Email quản trị cần chứa chữ “admin” trong bản prototype.",
-              )
+          onLogin={async (email, password) => {
+            const user = await store.login(email, password)
+            if (user.role !== "admin" && user.role !== "staff") {
+              await store.logout()
+              store.setNotice("Tài khoản không có quyền quản trị.")
+            }
           }}
           onStore={() => navigate("/nap-game")}
         />
@@ -112,20 +112,16 @@ export function AdminRoute() {
         onUpdateContact={store.setContactInfo}
         users={store.users}
         transactions={store.transactions}
-        onUpdateUser={(id, updates) =>
-          store.setUsers((current) =>
-            current.map((item) =>
-              item.id === id ? { ...item, ...updates } : item,
-            ),
-          )
-        }
-        onUpdateTransaction={(id, status) =>
-          store.setTransactions((current) =>
-            current.map((item) =>
-              item.id === id ? { ...item, status } : item,
-            ),
-          )
-        }
+        onUpdateUser={async (id, updates) => {
+          const { api } = await import("@/services/api")
+          const updated = await api.admin.updateUser(id, updates)
+          store.setUsers((current) => current.map((item) => item.id === id ? updated : item))
+        }}
+        onUpdateTransaction={async (id, status) => {
+          const { api } = await import("@/services/api")
+          const updated = await api.admin.updateTransaction(id, status)
+          store.setTransactions((current) => current.map((item) => item.id === id ? updated : item))
+        }}
       />
     </div>
   )

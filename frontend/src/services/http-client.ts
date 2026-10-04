@@ -14,10 +14,11 @@ export class HttpClient {
     private readonly getAccessToken: () => string | null = () => null,
   ) {}
 
-  async request<T,>(path: string, init: RequestInit = {}): Promise<T> {
+  async request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const token = this.getAccessToken()
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...init,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -31,7 +32,8 @@ export class HttpClient {
         : await response.json().catch(() => undefined)
     if (!response.ok) {
       throw new ApiError(
-        (body as { message?: string } | undefined)?.message ||
+        (body as { error?: string; message?: string } | undefined)?.error ||
+          (body as { message?: string } | undefined)?.message ||
           "Yêu cầu không thành công.",
         response.status,
         body,

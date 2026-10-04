@@ -6,7 +6,7 @@ export function LoginModal({
   onLogin,
 }: {
   onClose: () => void
-  onLogin: (email: string) => void
+  onLogin: (email: string, password: string, name?: string) => Promise<void>
 }) {
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login")
   const [displayName, setDisplayName] = useState("")
@@ -15,7 +15,7 @@ export function LoginModal({
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [resetSent, setResetSent] = useState(false)
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (mode === "forgot") {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -28,10 +28,14 @@ export function LoginModal({
       return setError("Vui lòng nhập tên hiển thị.")
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return setError("Vui lòng nhập đúng định dạng email.")
-    if (password.length < 6) return setError("Mật khẩu cần có ít nhất 6 ký tự.")
+    if (password.length < 8) return setError("Mật khẩu cần có ít nhất 8 ký tự.")
     if (mode === "register" && password !== confirmPassword)
       return setError("Mật khẩu xác nhận chưa khớp.")
-    onLogin(email)
+    try {
+      await onLogin(email, password, mode === "register" ? displayName : undefined)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Đăng nhập không thành công.")
+    }
   }
   const changeMode = (nextMode: "login" | "register" | "forgot") => {
     setMode(nextMode)
@@ -133,7 +137,7 @@ export function LoginModal({
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Tối thiểu 6 ký tự"
+                    placeholder="Tối thiểu 8 ký tự"
                   />
                 </div>
               </label>

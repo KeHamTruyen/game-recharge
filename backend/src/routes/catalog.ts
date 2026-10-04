@@ -5,6 +5,7 @@ import { NotFoundError } from '../middleware/errorHandler.js';
 import { getPagination, buildPaginatedResult, getPaginationSkipTake } from '../utils/pagination.js';
 
 const router = Router();
+const publicSettings = ['middlemanInfo', 'contactInfo', 'siteConfig'] as const;
 
 // ─── Shared Selects ───────────────────────────────────────────────────────────
 
@@ -131,6 +132,47 @@ router.get(
       ]);
 
       res.json({ success: true, data: buildPaginatedResult(packages, total, page, limit) });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  '/product-statuses',
+  async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const statuses = await prisma.productStatus.findMany({ orderBy: { id: 'asc' } });
+      res.json({ success: true, data: statuses });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  '/topup-templates',
+  async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const templates = await prisma.topupTemplate.findMany({ orderBy: { id: 'asc' } });
+      res.json({ success: true, data: templates });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  '/settings/:key',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const key = req.params.id || req.params.key;
+      if (!publicSettings.includes(key as (typeof publicSettings)[number])) {
+        throw new NotFoundError('Setting');
+      }
+      const setting = await prisma.setting.findUnique({ where: { id: key } });
+      if (!setting) throw new NotFoundError('Setting');
+      res.json({ success: true, data: setting });
     } catch (err) {
       next(err);
     }

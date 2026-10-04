@@ -30,15 +30,15 @@ export interface CatalogService {
     limit?: number
   }): Promise<{ items: Product[] total: number }>
   createProduct(product: Omit<Product, "id">): Promise<Product>
-  updateProduct(id: number, updates: Partial<Product>): Promise<Product>
-  deleteProduct(id: number): Promise<void>
+  updateProduct(id: string | number, updates: Partial<Product>): Promise<Product>
+  deleteProduct(id: string | number): Promise<void>
   listStatuses(): Promise<ProductStatus[]>
   listTopupTemplates(): Promise<TopupTemplate[]>
 }
 
 export interface OrderService {
   createOrder(input: {
-    productId: number
+    productId: string | number
     quantity: number
     topupInfo: Record<string, string>
   }): Promise<Transaction>
@@ -52,7 +52,7 @@ export interface OrderService {
     page?: number
     limit?: number
   }): Promise<{ items: Transaction[] total: number }>
-  updateOrderStatus(id: number, status: TransactionStatus): Promise<Transaction>
+  updateOrderStatus(id: string | number, status: TransactionStatus): Promise<Transaction>
 }
 
 export interface AdminService {
@@ -60,7 +60,7 @@ export interface AdminService {
     items: ManagedUser[]
     total: number
   }>
-  updateUser(id: number, updates: Partial<ManagedUser>): Promise<ManagedUser>
+  updateUser(id: string | number, updates: Partial<ManagedUser>): Promise<ManagedUser>
   getMiddlemanContent(): Promise<MiddlemanInfo>
   updateMiddlemanContent(info: MiddlemanInfo): Promise<MiddlemanInfo>
   getContactContent(): Promise<ContactInfo>

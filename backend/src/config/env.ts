@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { z } from 'zod';
 
 const envSchema = z.object({
@@ -22,8 +23,7 @@ const envSchema = z.object({
   // Cookie signing secret
   COOKIE_SECRET: z
     .string()
-    .min(16, 'COOKIE_SECRET must be at least 16 characters long')
-    .optional(),
+    .min(32, 'COOKIE_SECRET must be at least 32 characters long'),
 });
 
 function validateEnv() {
@@ -33,6 +33,19 @@ function validateEnv() {
     console.error('❌ Invalid environment variables:');
     const formatted = parsed.error.format();
     console.error(JSON.stringify(formatted, null, 2));
+    process.exit(1);
+  }
+
+  if (
+    parsed.data.NODE_ENV === 'production' &&
+    (parsed.data.JWT_SECRET.length < 64 ||
+      parsed.data.CORS_ORIGIN.split(',').some((origin) =>
+        origin.trim().startsWith('http://localhost')
+      ))
+  ) {
+    console.error(
+      '❌ Production requires a JWT_SECRET of at least 64 characters and non-localhost CORS_ORIGIN values'
+    );
     process.exit(1);
   }
 

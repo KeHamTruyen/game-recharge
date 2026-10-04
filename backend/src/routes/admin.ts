@@ -319,7 +319,9 @@ router.post(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const data = topupTemplateSchema.parse(req.body);
-      const tpl = await prisma.topupTemplate.create({ data });
+      const tpl = await prisma.topupTemplate.create({
+        data: { ...data, fields: data.fields as Prisma.InputJsonValue },
+      });
       res.status(201).json({ success: true, data: tpl });
     } catch (err) {
       next(err);
@@ -334,7 +336,16 @@ router.put(
     try {
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
       const data = topupTemplateSchema.partial().omit({ id: true }).parse(req.body);
-      const tpl = await prisma.topupTemplate.update({ where: { id }, data });
+      const { fields, ...metadata } = data;
+      const tpl = await prisma.topupTemplate.update({
+        where: { id },
+        data: {
+          ...metadata,
+          ...(fields !== undefined
+            ? { fields: fields as Prisma.InputJsonValue }
+            : {}),
+        },
+      });
       res.json({ success: true, data: tpl });
     } catch (err) {
       next(err);
@@ -631,7 +642,7 @@ router.put(
         throw new NotFoundError('Setting');
       }
 
-      const value = z.record(z.string(), z.unknown()).parse(req.body);
+      const value = z.record(z.string(), z.unknown()).parse(req.body) as Prisma.InputJsonObject;
 
       const setting = await prisma.setting.upsert({
         where: { id: key },
