@@ -163,6 +163,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       .then(async ([session, catalog]) => {
         if (cancelled) return
         setServices(catalog.services)
+        setGames(catalog.services.map((service) => service.name))
         setServicePackages(catalog.packages)
         setProducts(catalog.packages.map((pkg) => {
           const service = catalog.services.find((item) => item.id === pkg.serviceId)
