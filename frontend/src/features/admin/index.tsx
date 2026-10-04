@@ -117,6 +117,13 @@ export function AdminPage({
     useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount">(
       "products",
     )
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const selectTab = (
+    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount",
+  ) => {
+    setTab(nextTab)
+    setSidebarOpen(false)
+  }
   const [name, setName] = useState("")
   const [game, setGame] = useState(games[0] || "")
   const [price, setPrice] = useState("")
@@ -269,6 +276,16 @@ export function AdminPage({
           <Icon name="shield" size={16} /> Quản trị viên
         </span>
       </div>
+      <button
+        className="admin-sidebar-toggle"
+        type="button"
+        aria-expanded={sidebarOpen}
+        aria-controls="admin-navigation"
+        onClick={() => setSidebarOpen((open) => !open)}
+      >
+        <Icon name={sidebarOpen ? "close" : "grid"} size={17} />
+        {sidebarOpen ? "Đóng danh mục" : "Mở danh mục"}
+      </button>
       <div className="admin-summary">
         <div>
           <small>Sản phẩm</small>
@@ -287,64 +304,73 @@ export function AdminPage({
         </div>
       </div>
       <div className="admin-workspace">
-        <aside>
+        <div
+          className={`admin-sidebar-backdrop ${sidebarOpen ? "visible" : ""}`}
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+        <aside
+          id="admin-navigation"
+          className={sidebarOpen ? "open" : ""}
+          aria-label="Danh mục quản trị"
+        >
           <button
             className={tab === "products" ? "active" : ""}
-            onClick={() => setTab("products")}
+            onClick={() => selectTab("products")}
           >
             <Icon name="bag" size={18} /> Sản phẩm
           </button>
           <button
             className={tab === "templates" ? "active" : ""}
-            onClick={() => setTab("templates")}
+            onClick={() => selectTab("templates")}
           >
             <Icon name="grid" size={18} /> Mẫu thông tin nạp
           </button>
           <button
             className={tab === "statuses" ? "active" : ""}
-            onClick={() => setTab("statuses")}
+            onClick={() => selectTab("statuses")}
           >
             <Icon name="check" size={18} /> Trạng thái sản phẩm
           </button>
           <button
             className={tab === "transactions" ? "active" : ""}
-            onClick={() => setTab("transactions")}
+            onClick={() => selectTab("transactions")}
           >
             <Icon name="clock" size={18} /> Giao dịch
           </button>
           <button
             className={tab === "users" ? "active" : ""}
-            onClick={() => setTab("users")}
+            onClick={() => selectTab("users")}
           >
             <Icon name="user" size={18} /> Người dùng
           </button>
           <button
             className={tab === "categories" ? "active" : ""}
-            onClick={() => setTab("categories")}
+            onClick={() => selectTab("categories")}
           >
             <Icon name="grid" size={18} /> Danh mục & tag
           </button>
           <button
             className={tab === "games" ? "active" : ""}
-            onClick={() => setTab("games")}
+            onClick={() => selectTab("games")}
           >
             <Icon name="game" size={18} /> Danh sách game
           </button>
           <button
             className={tab === "middleman" ? "active" : ""}
-            onClick={() => setTab("middleman")}
+            onClick={() => selectTab("middleman")}
           >
             <Icon name="bridge" size={18} /> Trang trung gian
           </button>
           <button
             className={tab === "contacts" ? "active" : ""}
-            onClick={() => setTab("contacts")}
+            onClick={() => selectTab("contacts")}
           >
             <Icon name="headset" size={18} /> Trang liên hệ
           </button>
           <button
             className={tab === "adminAccount" ? "active" : ""}
-            onClick={() => setTab("adminAccount")}
+            onClick={() => selectTab("adminAccount")}
           >
             <Icon name="shield" size={18} /> Tài khoản admin
           </button>
@@ -1533,8 +1559,7 @@ export function AdminUsers({
           <span>Người dùng</span>
           <span>Ngày tham gia</span>
           <span>Tổng chi tiêu</span>
-          <span>Vai trò</span>
-          <span>Trạng thái</span>
+            <span>Trạng thái</span>
         </div>
         {visible.map((item) => (
           <div className="admin-table-row" key={item.id}>
@@ -1547,18 +1572,6 @@ export function AdminUsers({
             </span>
             <span>{item.joined}</span>
             <strong>{formatPrice(item.totalSpent)}</strong>
-            <select
-              value={item.role}
-              onChange={(event) =>
-                onUpdate(item.id, {
-                  role: event.target.value as ManagedUser["role"],
-                })
-              }
-            >
-              <option value="customer">Khách hàng</option>
-              <option value="staff">Nhân viên</option>
-              <option value="admin">Admin</option>
-            </select>
             <button
               className={`user-status ${item.status}`}
               onClick={() =>
