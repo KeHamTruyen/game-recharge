@@ -114,6 +114,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       intro: String(remoteMiddleman.description || current.intro),
       contactDescription: String(remoteMiddleman.supportEmail || current.contactDescription),
       supportHours: current.supportHours,
+      fees: Array.isArray(remoteMiddleman.fees) ? remoteMiddleman.fees as typeof current.fees : current.fees,
     }))
     setContactInfo((current) => ({
       ...current,

@@ -52,7 +52,7 @@ export function MiddlemanPage({ info }: { info: MiddlemanInfo }) {
               <span>Giá trị trao đổi</span>
               <span>Phí trung gian</span>
             </div>
-            {info.fees.map((row, index) => (
+            {(info.fees || []).map((row, index) => (
               <div className="fee-row" key={`${row.range}-${index}`}>
                 <span>{row.range}</span>
                 <strong>{row.fee}</strong>
@@ -139,7 +139,7 @@ export function ContactPage({ info }: { info: ContactInfo }) {
         </span>
       </div>
       <div className="social-contact-grid">
-        {info.channels.map((channel) => (
+        {(info.channels || []).map((channel) => (
           <a
             className={`social-contact-card channel-${channel.color}`}
             key={channel.id}
