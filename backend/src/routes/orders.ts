@@ -97,11 +97,30 @@ router.post(
           if (field.required && (value === undefined || String(value).trim() === "")) {
             throw new AppError(`Field ${String(field.label || key)} is required`, 400);
           }
+          if (value !== undefined && field.pattern) {
+            let matches = false;
+            try {
+              matches = new RegExp(String(field.pattern)).test(String(value));
+            } catch {
+              throw new AppError(`Invalid validation pattern for ${String(field.label || key)}`, 500);
+            }
+            if (!matches) {
+              throw new AppError(`Invalid value for ${String(field.label || key)}`, 400);
+            }
+          }
           if (value !== undefined && field.type === "email" && !z.string().email().safeParse(String(value)).success) {
             throw new AppError(`Field ${String(field.label || key)} must be a valid email`, 400);
           }
-          if (value !== undefined && field.type === "select" && Array.isArray(field.options) && !field.options.map(String).includes(String(value))) {
-            throw new AppError(`Invalid option for ${String(field.label || key)}`, 400);
+          if (value !== undefined && field.type === "select" && Array.isArray(field.options)) {
+            const options = field.options.map((option) => {
+              if (option && typeof option === "object" && "value" in option) {
+                return String(option.value);
+              }
+              return String(option);
+            });
+            if (!options.includes(String(value))) {
+              throw new AppError(`Invalid option for ${String(field.label || key)}`, 400);
+            }
           }
         }
         for (const key of Object.keys(body.topupInfo)) {
