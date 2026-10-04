@@ -943,6 +943,10 @@ h1, h2, h3, p { margin-top: 0; }
   .status-default { font-size: 0; }
   .status-default::after { content: "—"; font-size: 9px; }
   .admin-table { overflow: hidden; }
+  .transaction-filters { display: grid; grid-template-columns: 1fr; gap: 8px; padding: 14px 0 12px; }
+  .transaction-filters .admin-search,
+  .transaction-filters > select { width: 100%; height: 40px; }
+  .transaction-filters > select { padding-inline: 12px; }
   .admin-table-head { display: none; }
   .admin-table-row { min-height: 0; padding: 13px; gap: 11px 12px; }
   .user-table .admin-table-row { grid-template-columns: 1fr 1fr; }
@@ -952,7 +956,7 @@ h1, h2, h3, p { margin-top: 0; }
   .user-table .admin-table-row > span:nth-child(2)::before { content: "Ngày tham gia"; }
   .user-table .admin-table-row > strong::before { content: "Tổng chi tiêu"; }
   .user-table .admin-table-row > .user-status { grid-column: 1 / -1; width: 100%; height: 29px; margin-top: 1px; }
-  .transaction-table .admin-table-row { grid-template-columns: 1fr 1fr; padding: 14px; gap: 12px; }
+  .transaction-table .admin-table-row { grid-template-columns: 1fr 1fr; padding: 16px; gap: 13px 12px; }
   .transaction-table .admin-table-row > span:nth-child(1),
   .transaction-table .admin-table-row > span:nth-child(2),
   .transaction-table .admin-table-row > span:nth-child(3) { grid-column: 1 / -1; }
@@ -970,8 +974,14 @@ h1, h2, h3, p { margin-top: 0; }
   .transaction-table .admin-table-row > span:nth-child(3)::before { content: "Sản phẩm"; }
   .transaction-table .admin-table-row > strong::before { content: "Số tiền"; }
   .transaction-table .transaction-status::before { content: "Trạng thái"; }
-  .transaction-table .transaction-status { width: 100%; height: 32px; }
-  .transaction-table .view-order-info { width: 100%; height: 32px; }
+  .transaction-table .admin-table-row > span:nth-child(1) strong,
+  .transaction-table .admin-table-row > span:nth-child(2),
+  .transaction-table .admin-table-row > span:nth-child(3) strong,
+  .transaction-table .admin-table-row > strong { font-size: 9px; }
+  .transaction-table .admin-table-row > span:nth-child(1) small,
+  .transaction-table .admin-table-row > span:nth-child(3) small { font-size: 7px; }
+  .transaction-table .transaction-status { width: 100%; height: 36px; }
+  .transaction-table .view-order-info { grid-column: 1 / -1; width: 100%; height: 36px; }
   .template-card button:nth-last-child(2) { justify-self: end; }
   .template-card button:nth-last-child(2) svg { flex: none; }
   .admin-account-form, .admin-account-form.security { grid-template-columns: 1fr; }

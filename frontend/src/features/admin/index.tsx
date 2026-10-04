@@ -1379,7 +1379,7 @@ export function AdminTransactions({
         </div>
         <span>{transactions.length} giao dịch</span>
       </div>
-      <div className="data-filters">
+      <div className="data-filters transaction-filters">
         <label className="admin-search">
           <Icon name="search" size={17} />
           <input
