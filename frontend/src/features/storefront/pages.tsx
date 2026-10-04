@@ -199,9 +199,33 @@ export function ServiceDetailPage({
               productStatuses[0]
             const canBuy = status?.purchasable ?? false
             return (
-              <article key={pkg.id} className={`package-card${!canBuy ? " package-card--unavailable" : ""}`}>
-                <div className="package-card-header">
-                  <span className="package-note">{pkg.note}</span>
+              <article
+                key={pkg.id}
+                className={`package-card${!canBuy ? " package-card--unavailable" : ""}`}
+                role="button"
+                tabIndex={canBuy ? 0 : -1}
+                aria-label={`${pkg.name}${canBuy ? ", thêm vào giỏ hàng" : ", không khả dụng"}`}
+                onClick={() => canBuy && onAddToCart(pkg)}
+                onKeyDown={(event) => {
+                  if (canBuy && (event.key === "Enter" || event.key === " ")) {
+                    event.preventDefault()
+                    onAddToCart(pkg)
+                  }
+                }}
+              >
+                <div className={`package-card-art tone-${service.tone}`}>
+                  {service.image ? (
+                    <img
+                      src={service.image}
+                      alt=""
+                      style={{
+                        objectPosition: service.imagePosition || "50% 50%",
+                      }}
+                    />
+                  ) : (
+                    <span>{service.iconText}</span>
+                  )}
+                  {pkg.note && <span className="package-note">{pkg.note}</span>}
                 </div>
                 <div className="package-card-body">
                   <h3>{pkg.name}</h3>
@@ -219,17 +243,6 @@ export function ServiceDetailPage({
                     </span>
                     <span>{status?.name || "Có sẵn"}</span>
                   </div>
-                  <button
-                    className="primary-button package-buy-btn"
-                    onClick={() => onAddToCart(pkg)}
-                    disabled={!canBuy}
-                  >
-                    {canBuy ? (
-                      <>Chọn gói <Icon name="chevron" size={16} /></>
-                    ) : (
-                      <>{status?.name || "Không khả dụng"}</>
-                    )}
-                  </button>
                 </div>
               </article>
             )
