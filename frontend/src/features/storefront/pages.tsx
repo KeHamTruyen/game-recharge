@@ -208,16 +208,10 @@ export function ServiceDetailPage({
               productStatuses.find((s) => s.id === pkg.statusId) ||
               productStatuses[0]
             const canBuy = status?.purchasable ?? false
-            const hasDiscount = pkg.oldPrice > pkg.price
             return (
               <article key={pkg.id} className={`package-card${!canBuy ? " package-card--unavailable" : ""}`}>
                 <div className="package-card-header">
                   <span className="package-note">{pkg.note}</span>
-                  {hasDiscount && (
-                    <span className="package-discount">
-                      -{Math.round(((pkg.oldPrice - pkg.price) / pkg.oldPrice) * 100)}%
-                    </span>
-                  )}
                 </div>
                 <div className="package-card-body">
                   <h3>{pkg.name}</h3>
@@ -234,12 +228,6 @@ export function ServiceDetailPage({
                       <Icon name={status?.icon || "check"} size={10} />
                     </span>
                     <span>{status?.name || "Có sẵn"}</span>
-                  </div>
-                  <div className="package-pricing">
-                    {hasDiscount && (
-                      <s className="package-old-price">{formatPrice(pkg.oldPrice)}</s>
-                    )}
-                    <strong className="package-price">{formatPrice(pkg.price)}</strong>
                   </div>
                   <button
                     className="primary-button package-buy-btn"
