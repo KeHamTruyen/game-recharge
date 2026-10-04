@@ -113,11 +113,16 @@ h1, h2, h3, p { margin-top: 0; }
 .service-detail-header > div { flex: 1; }
 .service-detail-header h1 { margin: 8px 0 9px; font-size: 32px; letter-spacing: -1.2px; }
 .service-detail-header > div > p { margin: 0; color: #748095; font-size: 11px; line-height: 1.7; }
-.service-detail-toolbar { margin-bottom: 24px; }
+.service-detail-toolbar { margin-bottom: 24px; position: sticky; top: 76px; z-index: 8; padding: 10px 0; background: rgba(7, 11, 20, .9); backdrop-filter: blur(12px); }
+.cart-button { min-height: 42px; gap: 8px; white-space: nowrap; }
+.cart-button b { min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; display: inline-grid; place-items: center; color: #08111d; background: #4de3ff; font-size: 9px; }
+.cart-button small { color: #8defff; font-size: 9px; font-weight: 700; }
+.cart-button.has-items { border-color: rgba(77, 227, 255, .65); color: #e8fbff; background: linear-gradient(135deg, rgba(44, 205, 235, .2), rgba(48, 87, 211, .2)); box-shadow: 0 0 0 3px rgba(77, 227, 255, .08), 0 8px 24px rgba(0, 0, 0, .25); }
 
 .package-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 40px; }
 .package-card { border: 1px solid #20283a; border-radius: 14px; background: #0d121e; display: flex; flex-direction: column; transition: border-color .2s, box-shadow .2s, transform .2s; overflow: hidden; cursor: pointer; }
-.package-card:hover, .package-card:focus-visible { border-color: rgba(51, 217, 255, .38); box-shadow: 0 14px 36px rgba(0,0,0,.28); transform: translateY(-3px); outline: none; }
+.package-card:hover, .package-card:focus-visible, .package-card--selected { border-color: rgba(51, 217, 255, .75); box-shadow: 0 0 0 2px rgba(51, 217, 255, .16), 0 14px 36px rgba(0,0,0,.28); transform: translateY(-3px); outline: none; }
+.package-card--selected .package-card-art::before { content: "ĐÃ CHỌN"; position: absolute; z-index: 3; left: 10px; bottom: 10px; padding: 5px 8px; border-radius: 5px; color: #07121a; background: #4de3ff; font-size: 8px; font-weight: 800; }
 .package-card--unavailable { opacity: .6; pointer-events: none; }
 .package-card-art { position: relative; height: 154px; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 50% 50%, var(--glow), transparent 60%), linear-gradient(145deg, #121a2a, #0d1220); }
 .package-card-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(7, 10, 18, .58)); pointer-events: none; }

@@ -61,13 +61,16 @@ export function ServiceDetailRoute() {
         store.setCart((current) => {
           const existing = current.find((item) => item.pkg.id === pkg.id)
           return existing
-            ? current.map((item) => item.pkg.id === pkg.id ? { ...item, quantity: Math.min(10, item.quantity + 1) } : item)
+            ? current.filter((item) => item.pkg.id !== pkg.id)
             : [...current, { pkg, quantity: 1 }]
         })
         store.setSelectedService(service)
-        store.setNotice(`${pkg.name} đã được thêm vào giỏ hàng.`)
+        const isSelected = store.cart.some((item) => item.pkg.id === pkg.id)
+        store.setNotice(isSelected ? `${pkg.name} đã được bỏ khỏi giỏ hàng.` : `${pkg.name} đã được chọn.`)
       }}
       cartCount={store.cart.reduce((total, item) => total + item.quantity, 0)}
+      cartTotal={store.cart.reduce((total, item) => total + item.pkg.price * item.quantity, 0)}
+      selectedPackageIds={new Set(store.cart.map((item) => String(item.pkg.id)))}
       onOpenCart={() => {
         const first = store.cart[0]
         if (first) {

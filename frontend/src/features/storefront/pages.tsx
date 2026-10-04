@@ -138,6 +138,8 @@ export function ServiceDetailPage({
   onBack,
   onAddToCart,
   cartCount,
+  cartTotal,
+  selectedPackageIds,
   onOpenCart,
 }: {
   service: Service
@@ -146,6 +148,8 @@ export function ServiceDetailPage({
   onBack: () => void
   onAddToCart: (pkg: ServicePackage) => void
   cartCount: number
+  cartTotal: number
+  selectedPackageIds: Set<string>
   onOpenCart: () => void
 }) {
   const [filter, setFilter] = useState("Tất cả")
@@ -186,8 +190,11 @@ export function ServiceDetailPage({
             </button>
           ))}
         </div>
-        <button className="secondary-button cart-button" onClick={onOpenCart}>
-          <Icon name="bag" size={15} /> Giỏ hàng ({cartCount})
+        <button className={`secondary-button cart-button${cartCount > 0 ? " has-items" : ""}`} onClick={onOpenCart}>
+          <Icon name="bag" size={15} />
+          <span>Giỏ hàng</span>
+          <b>{cartCount}</b>
+          {cartCount > 0 && <small>{formatPrice(cartTotal)}</small>}
         </button>
       </div>
 
@@ -201,10 +208,11 @@ export function ServiceDetailPage({
             return (
               <article
                 key={pkg.id}
-                className={`package-card${!canBuy ? " package-card--unavailable" : ""}`}
+                className={`package-card${selectedPackageIds.has(String(pkg.id)) ? " package-card--selected" : ""}${!canBuy ? " package-card--unavailable" : ""}`}
                 role="button"
                 tabIndex={canBuy ? 0 : -1}
-                aria-label={`${pkg.name}${canBuy ? ", thêm vào giỏ hàng" : ", không khả dụng"}`}
+                aria-pressed={selectedPackageIds.has(String(pkg.id))}
+                aria-label={`${pkg.name}${canBuy ? (selectedPackageIds.has(String(pkg.id)) ? ", đã chọn, bấm để bỏ chọn" : ", bấm để chọn") : ", không khả dụng"}`}
                 onClick={() => canBuy && onAddToCart(pkg)}
                 onKeyDown={(event) => {
                   if (canBuy && (event.key === "Enter" || event.key === " ")) {
