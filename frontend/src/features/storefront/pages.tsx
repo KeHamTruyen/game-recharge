@@ -418,50 +418,6 @@ export function TopupInformationPage({
             </button>
           </form>
         </div>
-        <aside className="topup-product-summary">
-          <span className="section-kicker">GÓI ĐÃ CHỌN</span>
-          <div className={`topup-summary-art tone-${service.tone}`}>
-            {service.image ? (
-              <img
-                src={service.image}
-                alt=""
-                style={{ objectPosition: service.imagePosition || "50% 50%" }}
-              />
-            ) : (
-              <span>{service.iconText}</span>
-            )}
-          </div>
-          <small>{service.name}</small>
-          <h2>{pkg.name}</h2>
-          <strong>{formatPrice(pkg.price * quantity)}</strong>
-          <div className="topup-quantity">
-            <span>
-              <small>Số lượng gói</small>
-              <em>Cùng nạp vào thông tin đã nhập</em>
-            </span>
-            <div>
-              <button
-                type="button"
-                disabled={quantity <= 1}
-                onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-              >
-                −
-              </button>
-              <strong>{quantity}</strong>
-              <button
-                type="button"
-                disabled={quantity >= 10}
-                onClick={() => onQuantityChange(Math.min(10, quantity + 1))}
-              >
-                +
-              </button>
-            </div>
-          </div>
-          <div>
-            <Icon name="shield" size={16} />
-            <span>Thông tin chỉ được dùng để xử lý đơn hàng.</span>
-          </div>
-        </aside>
       </div>
       {showConfirmation && (
         <div

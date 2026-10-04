@@ -247,7 +247,7 @@ h1, h2, h3, p { margin-top: 0; }
 .confirm-payment { width: 100%; margin-top: 13px; }
 .confirm-payment:disabled { opacity: .55; cursor: not-allowed; }
 .topup-info-page { min-height: calc(100vh - 76px); padding-block: 45px 95px; }
-.topup-info-layout { display: grid; grid-template-columns: minmax(0, 1fr) 315px; gap: 18px; align-items: start; }
+.topup-info-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
 .topup-form-panel, .topup-product-summary { border: 1px solid #202a3c; border-radius: 16px; background: #0d131f; }
 .topup-form-panel { padding: 29px; }
 .topup-info-heading h1 { margin: 18px 0 9px; font-size: 29px; letter-spacing: -1px; }
