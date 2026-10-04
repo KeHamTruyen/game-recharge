@@ -621,7 +621,7 @@ h1, h2, h3, p { margin-top: 0; }
 .template-card small { color: #3bdaf7; font-size: 7px; text-transform: uppercase; }
 .template-card strong { font-size: 10px; }
 .template-card em { color: #616d81; font-size: 7px; font-style: normal; }
-.template-card button { height: 32px; padding: 0 10px; border: 1px solid #293449; border-radius: 8px; display: flex; align-items: center; gap: 6px; color: #8490a3; background: #101725; font-size: 8px; cursor: pointer; }
+.template-card button { height: 32px; padding: 0 10px; border: 1px solid #293449; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; color: #8490a3; background: #101725; font-size: 8px; line-height: 0; cursor: pointer; }
 .template-card button:last-child { width: 32px; padding: 0; justify-content: center; color: #ed7587; }
 .template-card button:disabled { opacity: .25; cursor: not-allowed; }
 .template-modal { width: min(100%, 1050px); }
@@ -942,9 +942,27 @@ h1, h2, h3, p { margin-top: 0; }
   .status-permission { display: none; }
   .status-default { font-size: 0; }
   .status-default::after { content: "—"; font-size: 9px; }
-  .admin-table { overflow-x: auto; }
-  .transaction-table .admin-table-head, .transaction-table .admin-table-row { min-width: 760px; }
-  .user-table .admin-table-head, .user-table .admin-table-row { min-width: 600px; }
+  .admin-table { overflow: hidden; }
+  .admin-table-head { display: none; }
+  .admin-table-row { min-height: 0; padding: 12px; gap: 9px 12px; }
+  .user-table .admin-table-row { grid-template-columns: 1fr auto; }
+  .user-table .admin-table-row > .admin-user-cell { grid-column: 1 / -1; }
+  .user-table .admin-table-row > span:nth-child(2)::before { content: "Ngày tham gia"; display: block; margin-bottom: 3px; color: #59657a; font-size: 6px; text-transform: uppercase; }
+  .user-table .admin-table-row > strong::before { content: "Tổng chi tiêu"; display: block; margin-bottom: 3px; color: #59657a; font-size: 6px; font-weight: 700; text-transform: uppercase; }
+  .user-table .admin-table-row > .user-status { align-self: end; }
+  .transaction-table .admin-table-row { grid-template-columns: 1fr 1fr; }
+  .transaction-table .admin-table-row > span:nth-child(1),
+  .transaction-table .admin-table-row > span:nth-child(2),
+  .transaction-table .admin-table-row > span:nth-child(3) { grid-column: 1 / -1; }
+  .transaction-table .admin-table-row > span:nth-child(1)::before { content: "Mã giao dịch"; display: block; margin-bottom: 3px; color: #59657a; font-size: 6px; text-transform: uppercase; }
+  .transaction-table .admin-table-row > span:nth-child(2)::before { content: "Khách hàng"; display: block; margin-bottom: 3px; color: #59657a; font-size: 6px; text-transform: uppercase; }
+  .transaction-table .admin-table-row > span:nth-child(3)::before { content: "Sản phẩm"; display: block; margin-bottom: 3px; color: #59657a; font-size: 6px; text-transform: uppercase; }
+  .transaction-table .admin-table-row > strong::before { content: "Số tiền"; display: block; margin-bottom: 3px; color: #59657a; font-size: 6px; font-weight: 700; text-transform: uppercase; }
+  .transaction-table .transaction-status::before { content: "Trạng thái"; display: block; margin-bottom: 3px; color: #59657a; font-size: 6px; text-transform: uppercase; }
+  .transaction-table .transaction-status { width: 100%; height: 31px; }
+  .transaction-table .view-order-info { width: 100%; }
+  .template-card button:nth-last-child(2) { justify-self: end; }
+  .template-card button:nth-last-child(2) svg { flex: none; }
   .admin-account-form, .admin-account-form.security { grid-template-columns: 1fr; }
   .admin-account-form h3 { grid-column: auto; }
   .admin-header-inner { width: min(100% - 24px, 1680px); }
