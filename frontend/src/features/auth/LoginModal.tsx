@@ -28,7 +28,7 @@ export function LoginModal({
       return setError("Vui lòng nhập tên hiển thị.")
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return setError("Vui lòng nhập đúng định dạng email.")
-    if (password.length < 8) return setError("Mật khẩu cần có ít nhất 8 ký tự.")
+    if (password.length < 6) return setError("Mật khẩu cần có ít nhất 6 ký tự.")
     if (mode === "register" && password !== confirmPassword)
       return setError("Mật khẩu xác nhận chưa khớp.")
     try {
@@ -137,7 +137,7 @@ export function LoginModal({
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Tối thiểu 8 ký tự"
+                    placeholder="Tối thiểu 6 ký tự"
                   />
                 </div>
               </label>

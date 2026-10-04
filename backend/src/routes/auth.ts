@@ -27,7 +27,7 @@ const registerSchema = z.object({
     .trim(),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
+    .min(6, 'Password must be at least 6 characters')
     .max(72, 'Password must not exceed 72 characters')
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
