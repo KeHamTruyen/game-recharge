@@ -283,12 +283,12 @@ export function TopupInformationPage({
 }) {
   const [values, setValues] = useState<Record<string, string>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [confirmed, setConfirmed] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
 
   useEffect(() => {
     setValues({})
     setErrors({})
-    setConfirmed(false)
+    setShowConfirmation(false)
   }, [template?.id])
 
   const submit = (event: FormEvent) => {
@@ -306,10 +306,8 @@ export function TopupInformationPage({
       )
         nextErrors[field.key] = "Email chưa đúng định dạng."
     })
-    if (!confirmed)
-      nextErrors.confirmed = "Bạn cần xác nhận đã kiểm tra thông tin."
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length === 0) onContinue(values)
+    if (Object.keys(nextErrors).length === 0) setShowConfirmation(true)
   }
 
   return (
@@ -422,21 +420,8 @@ export function TopupInformationPage({
                 {errors[field.key] && <em>{errors[field.key]}</em>}
               </label>
             ))}
-            <label className="confirm-topup-info">
-              <input
-                type="checkbox"
-                checked={confirmed}
-                onChange={(event) => setConfirmed(event.target.checked)}
-              />
-              <span>
-                Tôi đã kiểm tra và xác nhận thông tin phía trên là chính xác.
-              </span>
-            </label>
-            {errors.confirmed && (
-              <span className="form-error">{errors.confirmed}</span>
-            )}
             <button className="primary-button" type="submit">
-              Tiếp tục thanh toán <Icon name="chevron" size={17} />
+              Kiểm tra và tiếp tục <Icon name="chevron" size={17} />
             </button>
           </form>
         </div>
@@ -485,6 +470,50 @@ export function TopupInformationPage({
           </div>
         </aside>
       </div>
+      {showConfirmation && (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setShowConfirmation(false)
+          }}
+        >
+          <div className="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="confirmation-title">
+            <span className="confirmation-icon">
+              <Icon name="shield" size={21} />
+            </span>
+            <span className="section-kicker">XÁC NHẬN THÔNG TIN</span>
+            <h2 id="confirmation-title">Thông tin đã chính xác?</h2>
+            <p>
+              Vui lòng kiểm tra lại thông tin tài khoản và gói nạp trước khi
+              chuyển sang bước thanh toán.
+            </p>
+            <div className="confirmation-summary">
+              <span>{pkg.name}</span>
+              <strong>{formatPrice(pkg.price * quantity)}</strong>
+            </div>
+            <div className="confirmation-actions">
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => setShowConfirmation(false)}
+              >
+                Quay lại chỉnh sửa
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => {
+                  setShowConfirmation(false)
+                  onContinue(values)
+                }}
+              >
+                Tiếp tục thanh toán <Icon name="chevron" size={17} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
