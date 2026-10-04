@@ -124,14 +124,30 @@ export function AdminRoute() {
             current.filter((item) => item === "Tất cả" || item !== name),
           )
         }
-        onAddGame={(name) =>
-          store.setGames((current) =>
-            current.includes(name) ? current : [...current, name],
-          )
-        }
-        onDeleteGame={(name) =>
+        onAddGame={async (name) => {
+          if (store.services.some((item) => item.name === name || item.game === name)) return
+          const service = await api.admin.createService({
+            name,
+            game: name,
+            description: "",
+            iconText: name.slice(0, 3).toUpperCase(),
+            tone: "cyan",
+            sortOrder: store.services.length,
+            isActive: true,
+          })
+          store.setServices((current) => [...current, service])
+          store.setGames((current) => [...current, name])
+        }}
+        onDeleteGame={async (name) => {
+          const service = store.services.find((item) => item.name === name || item.game === name)
+          if (service) {
+            await api.admin.deleteService(service.id)
+            store.setServices((current) => current.filter((item) => item.id !== service.id))
+            store.setServicePackages((current) => current.filter((item) => item.serviceId !== service.id))
+            store.setProducts((current) => current.filter((item) => item.game !== name))
+          }
           store.setGames((current) => current.filter((item) => item !== name))
-        }
+        }}
         middlemanInfo={store.middlemanInfo}
         onUpdateMiddleman={async (info) => {
           await api.admin.updateSetting("middlemanInfo", info as unknown as Record<string, unknown>)

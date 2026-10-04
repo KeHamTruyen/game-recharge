@@ -197,6 +197,16 @@ export const api = {
       const result = await client.request<ApiEnvelope<ApiService[]>>("/admin/services?limit=100")
       return result.data
     },
+    async createService(payload: Omit<Service, "id"> & { game: string }) {
+      const result = await client.request<ApiEnvelope<ApiService>>("/admin/services", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      })
+      return result.data
+    },
+    async deleteService(id: string | number) {
+      await client.request(`/admin/services/${String(id)}`, { method: "DELETE" })
+    },
     async packages(serviceId?: string | number) {
       const query = serviceId ? `&serviceId=${encodeURIComponent(String(serviceId))}` : ""
       const result = await client.request<ApiEnvelope<{ items: ApiPackage[] }>>(`/admin/packages?limit=100${query}`)
