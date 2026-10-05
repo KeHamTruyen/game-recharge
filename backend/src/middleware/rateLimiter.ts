@@ -56,3 +56,21 @@ export const orderLimiter = rateLimit({
   },
   skip: () => env.NODE_ENV === 'test',
 });
+
+export const paymentStatusLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many payment status requests.' },
+  skip: () => env.NODE_ENV === 'test',
+});
+
+export const paymentWebhookLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many webhook requests.' },
+  skip: () => env.NODE_ENV === 'test',
+});

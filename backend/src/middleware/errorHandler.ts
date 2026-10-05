@@ -101,18 +101,27 @@ export function errorHandler(
   // Unknown/unexpected errors
   if (!isProd) {
     // In development, expose the error details
-    console.error('Unhandled error:', err);
+    console.error(JSON.stringify({
+      event: 'unhandled_error',
+      requestId: _req.requestId,
+      error: err instanceof Error ? err.message : 'unknown_error',
+    }));
     res.status(500).json({
       success: false,
       error: err instanceof Error ? err.message : 'Internal server error',
-      stack: err instanceof Error ? err.stack : undefined,
+      requestId: _req.requestId,
     });
   } else {
     // In production, never expose internals
-    console.error('Unhandled error:', err);
+    console.error(JSON.stringify({
+      event: 'unhandled_error',
+      requestId: _req.requestId,
+      error: err instanceof Error ? err.message : 'unknown_error',
+    }));
     res.status(500).json({
       success: false,
       error: 'An unexpected error occurred. Please try again later.',
+      requestId: _req.requestId,
     });
   }
 }

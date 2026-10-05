@@ -9,6 +9,7 @@ import {
 } from "@/features/storefront/pages"
 import type { Service, ServicePackage } from "@/domain/models"
 import { api } from "@/services/api"
+import type { PaymentDetails } from "@/services/api"
 
 // ─── Trang chủ: Danh sách dịch vụ ───────────────────────────────────────────
 
@@ -133,6 +134,31 @@ export function CheckoutRoute() {
   const template = store.topupTemplates.find(
     (item) => item.id === pkg.templateId,
   )
+  const [payment, setPayment] = useState<PaymentDetails | null>(null)
+  const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "PAID">("PENDING")
+  const [checkoutKey] = useState(() => crypto.randomUUID())
+
+  useEffect(() => {
+    if (!payment) return
+    let cancelled = false
+    const checkStatus = async () => {
+      try {
+        const result = await api.payments.status(payment.orderCode)
+        if (!cancelled && result.paymentStatus === "PAID") {
+          setPaymentStatus("PAID")
+          store.setNotice("Đã nhận thanh toán. Đơn hàng đang được xử lý.")
+        }
+      } catch {
+        // The payment page remains usable while a temporary status request fails.
+      }
+    }
+    void checkStatus()
+    const timer = window.setInterval(() => void checkStatus(), 5000)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [payment, store])
 
   return (
     <CheckoutPage
@@ -142,16 +168,25 @@ export function CheckoutRoute() {
       quantity={store.selectedQuantity}
       cart={store.cart}
       topupInfo={store.checkoutInfo}
+      payment={payment}
+      paymentStatus={paymentStatus}
       onBack={() => navigate("/nap-game/thong-tin")}
       onNotice={store.setNotice}
       onConfirm={async () => {
         try {
-          const transactions = await Promise.all(store.cart.map((item) =>
-            api.orders.create(item.pkg.id, item.quantity, store.checkoutInfo, store.user?.email),
-          ))
-          store.setTransactions((current) => [...transactions, ...current])
-          store.setNotice("Đơn hàng đã được ghi nhận và chuyển sang trạng thái chờ thanh toán.")
-          return true
+        const result = await api.orders.checkout(
+          store.cart.map((item) => ({
+            packageId: item.pkg.id,
+            quantity: item.quantity,
+          })),
+          store.checkoutInfo,
+          store.user?.email,
+          checkoutKey,
+        )
+        setPayment(result.payment)
+        store.setTransactions((current) => [...result.transactions, ...current])
+        store.setNotice("Đơn hàng đã được ghi nhận và chuyển sang trạng thái chờ thanh toán.")
+        return result.payment
         } catch (error) {
           store.setNotice(error instanceof Error ? error.message : "Không thể tạo đơn hàng.")
           return false

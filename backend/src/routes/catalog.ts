@@ -20,6 +20,8 @@ const packageSelect = {
   tags: true,
   statusId: true,
   templateId: true,
+  image: true,
+  imagePosition: true,
   sortOrder: true,
   isActive: true,
   createdAt: true,
@@ -42,6 +44,8 @@ router.get(
           description: true,
           iconText: true,
           tone: true,
+          image: true,
+          imagePosition: true,
           sortOrder: true,
           isActive: true,
           createdAt: true,
@@ -82,6 +86,8 @@ router.get(
           description: true,
           iconText: true,
           tone: true,
+          image: true,
+          imagePosition: true,
           sortOrder: true,
           isActive: true,
           createdAt: true,
@@ -149,6 +155,15 @@ router.get(
     }
   }
 );
+
+router.get('/tags', async (_req, res, next) => {
+  try {
+    const tags = await prisma.catalogTag.findMany({ orderBy: { name: 'asc' } });
+    res.json({ success: true, data: tags });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get(
   '/topup-templates',

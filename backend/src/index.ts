@@ -7,7 +7,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-import { authLimiter, apiLimiter, adminLimiter, orderLimiter } from './middleware/rateLimiter.js';
+import { authLimiter, apiLimiter, adminLimiter, orderLimiter, paymentStatusLimiter, paymentWebhookLimiter } from './middleware/rateLimiter.js';
+import { requestContext } from './middleware/requestContext.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { prisma } from './lib/prisma.js';
 
@@ -15,6 +16,7 @@ import authRouter from './routes/auth.js';
 import catalogRouter from './routes/catalog.js';
 import ordersRouter from './routes/orders.js';
 import adminRouter from './routes/admin.js';
+import paymentsRouter from './routes/payments.js';
 
 // ─── App Setup ────────────────────────────────────────────────────────────────
 
@@ -82,6 +84,7 @@ app.use(cookieParser(env.COOKIE_SECRET));
 // ─── Trust Proxy ─────────────────────────────────────────────────────────────
 // Required for rate-limiting behind nginx/load balancer
 app.set('trust proxy', 1);
+app.use(requestContext);
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 
@@ -110,6 +113,9 @@ app.use('/api/orders', orderLimiter, ordersRouter);
 
 // Admin — generous limit for back-office operations
 app.use('/api/admin', adminLimiter, adminRouter);
+app.use('/api/payments/status', paymentStatusLimiter);
+app.use('/api/payments/webhook', paymentWebhookLimiter);
+app.use('/api/payments', paymentsRouter);
 
 // ─── Not Found + Error Handler ────────────────────────────────────────────────
 
@@ -130,11 +136,34 @@ async function startServer(): Promise<void> {
       console.log(`   CORS allowed: ${allowedOrigins.join(', ')}`);
     });
 
+    const staleOrderCheck = setInterval(() => {
+      void prisma.transaction.count({
+        where: {
+          status: { in: ['PENDING', 'PROCESSING'] },
+          updatedAt: { lt: new Date(Date.now() - 15 * 60 * 1000) },
+        },
+      }).then((count) => {
+        if (count > 0) {
+          console.warn(JSON.stringify({
+            event: 'stale_orders_detected',
+            count,
+            thresholdMinutes: 15,
+          }));
+        }
+      }).catch((error: unknown) => {
+        console.error(JSON.stringify({
+          event: 'stale_order_check_failure',
+          error: error instanceof Error ? error.message : 'unknown_error',
+        }));
+      });
+    }, 5 * 60 * 1000);
+
     // ─── Graceful Shutdown ─────────────────────────────────────────────────
     const shutdown = async (signal: string): Promise<void> => {
       console.log(`\n⚠️  Received ${signal}. Shutting down gracefully...`);
 
       server.close(async () => {
+        clearInterval(staleOrderCheck);
         console.log('🔌 HTTP server closed');
         await prisma.$disconnect();
         console.log('🔌 Database disconnected');

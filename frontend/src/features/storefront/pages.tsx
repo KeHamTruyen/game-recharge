@@ -7,6 +7,7 @@ import {
   TrustStrip,
   formatPrice,
 } from "@/components/ui"
+import type { PaymentDetails } from "@/services/api"
 
 // ─── Trang chủ: Danh sách dịch vụ ───────────────────────────────────────────
 
@@ -476,6 +477,8 @@ export function CheckoutPage({
   template,
   quantity,
   topupInfo,
+  payment,
+  paymentStatus,
   onBack,
   onNotice,
   onConfirm,
@@ -486,9 +489,11 @@ export function CheckoutPage({
   template?: TopupTemplate
   quantity: number
   topupInfo: Record<string, string>
+  payment: PaymentDetails | null
+  paymentStatus: "PENDING" | "PAID"
   onBack: () => void
   onNotice: (message: string) => void
-  onConfirm: () => boolean | void | Promise<boolean | void>
+  onConfirm: () => boolean | PaymentDetails | void | Promise<boolean | PaymentDetails | void>
 }) {
   const orderCode = `NEXA${String(pkg.id).padStart(4, "0")}-${Date.now().toString(36).toUpperCase().slice(-4)}`
   const totalAmount = cart.reduce((total, item) => total + item.pkg.price * item.quantity, 0)
@@ -522,23 +527,29 @@ export function CheckoutPage({
               <h2>Chuyển khoản ngân hàng</h2>
             </div>
             <span className="payment-status">
-              <span /> Chờ thanh toán
+              <span /> {paymentStatus === "PAID" ? "Đã thanh toán" : "Chờ thanh toán"}
             </span>
           </div>
           <div className="bank-payment">
             <div className="qr-placeholder">
-              <div className="qr-pattern" />
-              <span>QR ngân hàng</span>
-              <small>Sẽ cập nhật sau</small>
+              {payment?.qrCode ? (
+                <img src={payment.qrCode} alt="QR thanh toán SePay" />
+              ) : (
+                <>
+                  <div className="qr-pattern" />
+                  <span>QR thanh toán SePay</span>
+                  <small>Bấm xác nhận để tạo mã thanh toán</small>
+                </>
+              )}
             </div>
             <div className="bank-details">
               <div>
                 <small>Ngân hàng</small>
-                <strong>Chưa cập nhật</strong>
+                <strong>Quét QR VietQR qua SePay</strong>
               </div>
               <div>
                 <small>Số tài khoản</small>
-                <strong>Chưa cập nhật</strong>
+                <strong>Quét mã QR bên trái</strong>
               </div>
               <div>
                 <small>Chủ tài khoản</small>
@@ -556,7 +567,7 @@ export function CheckoutPage({
               <div className="copy-field highlight">
                 <span>
                   <small>Nội dung chuyển khoản</small>
-                  <strong>{orderCode}</strong>
+                  <strong>{payment?.orderCode || orderCode}</strong>
                 </span>
                 <button
                   onClick={() => copy(orderCode, "nội dung chuyển khoản")}
@@ -635,9 +646,9 @@ export function CheckoutPage({
             disabled={orderConfirmed || isSubmitting}
             onClick={async () => {
               setIsSubmitting(true)
-              const success = await onConfirm()
+              const result = await onConfirm()
               setIsSubmitting(false)
-              if (success !== false) setOrderConfirmed(true)
+              if (result !== false) setOrderConfirmed(true)
             }}
           >
             {orderConfirmed ? "Đã ghi nhận thanh toán" : isSubmitting ? "Đang ghi nhận..." : "Tôi đã chuyển khoản"}{" "}

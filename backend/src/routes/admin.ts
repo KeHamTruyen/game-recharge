@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { NotFoundError } from '../middleware/errorHandler.js';
+import { auditAdminRequest } from '../middleware/requestContext.js';
 import {
   getPagination,
   buildPaginatedResult,
@@ -12,8 +13,8 @@ import {
 
 const router = Router();
 
-// All admin routes require authentication + ADMIN or STAFF role
-router.use(requireAuth, requireRole('ADMIN', 'STAFF'));
+// All admin routes require an authenticated administrator.
+router.use(requireAuth, requireRole('ADMIN'), auditAdminRequest);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SERVICES CRUD
@@ -25,6 +26,8 @@ const serviceSchema = z.object({
   description: z.string().max(500).trim().default(''),
   iconText: z.string().max(10).trim().default(''),
   tone: z.string().max(30).trim().default('blue'),
+  image: z.string().url().nullable().optional(),
+  imagePosition: z.string().regex(/^\d{1,3}%\s+\d{1,3}%$/).nullable().optional(),
   sortOrder: z.coerce.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
 });
@@ -115,6 +118,8 @@ const packageSchema = z.object({
   tags: z.array(z.string().max(30)).default([]),
   statusId: z.string().min(1).default('available'),
   templateId: z.string().default(''),
+  image: z.string().url().nullable().optional(),
+  imagePosition: z.string().regex(/^\d{1,3}%\s+\d{1,3}%$/).nullable().optional(),
   sortOrder: z.coerce.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
 });
@@ -202,6 +207,35 @@ router.delete(
     }
   }
 );
+
+router.get('/tags', async (_req, res, next) => {
+  try {
+    const tags = await prisma.catalogTag.findMany({ orderBy: { name: 'asc' } });
+    res.json({ success: true, data: tags });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/tags', requireRole('ADMIN'), async (req, res, next) => {
+  try {
+    const data = z.object({ name: z.string().min(1).max(30).trim() }).parse(req.body);
+    const tag = await prisma.catalogTag.create({ data });
+    res.status(201).json({ success: true, data: tag });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/tags/:id', requireRole('ADMIN'), async (req, res, next) => {
+  try {
+    const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
+    await prisma.catalogTag.delete({ where: { id } });
+    res.json({ success: true, data: { message: 'Tag deleted' } });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // PRODUCT STATUSES CRUD
@@ -523,7 +557,7 @@ router.get(
 
       const querySchema = z.object({
         search: z.string().max(100).optional(),
-        role: z.enum(['CUSTOMER', 'STAFF', 'ADMIN']).optional(),
+        role: z.enum(['CUSTOMER', 'ADMIN']).optional(),
         status: z.enum(['ACTIVE', 'BLOCKED']).optional(),
       });
 
@@ -588,7 +622,7 @@ router.patch(
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
 
       const updateSchema = z.object({
-        role: z.enum(['CUSTOMER', 'STAFF', 'ADMIN']).optional(),
+        role: z.enum(['CUSTOMER', 'ADMIN']).optional(),
         status: z.enum(['ACTIVE', 'BLOCKED']).optional(),
         name: z.string().min(2).max(60).trim().optional(),
       });
@@ -628,6 +662,47 @@ router.patch(
 const ALLOWED_SETTINGS = ['middlemanInfo', 'contactInfo', 'siteConfig'] as const;
 type AllowedSetting = (typeof ALLOWED_SETTINGS)[number];
 
+const contactChannelSchema = z.object({
+  id: z.union([z.string(), z.number()]),
+  platform: z.enum(['zalo', 'youtube', 'discord', 'facebook', 'telegram', 'email', 'custom']),
+  label: z.string().max(100),
+  name: z.string().max(120),
+  description: z.string().max(500),
+  url: z.string().max(500),
+  image: z.string().max(500),
+  color: z.string().max(30),
+});
+const contactInfoSchema = z.object({
+  intro: z.string().max(2000),
+  supportHours: z.string().max(100),
+  commitmentTitle: z.string().max(200),
+  commitment: z.string().max(2000),
+  channels: z.array(contactChannelSchema).max(20),
+});
+const middlemanInfoSchema = z.object({
+  intro: z.string().max(2000),
+  supportHours: z.string().max(100),
+  contactTitle: z.string().max(200),
+  contactDescription: z.string().max(1000),
+  zaloName: z.string().max(120),
+  zaloPhone: z.string().max(50),
+  zaloUrl: z.string().max(500),
+  fees: z.array(z.object({ range: z.string().max(100), fee: z.string().max(100) })).max(20),
+  feeNote: z.string().max(1000),
+  accepted: z.string().max(2000),
+  rejected: z.string().max(2000),
+  warning: z.string().max(2000),
+  bank: z.string().max(100),
+  accountNumber: z.string().max(100),
+  accountHolder: z.string().max(200),
+  commitment: z.string().max(2000),
+});
+const settingSchemas = {
+  middlemanInfo: middlemanInfoSchema,
+  contactInfo: contactInfoSchema,
+  siteConfig: z.record(z.string(), z.unknown()),
+} as const;
+
 function isAllowedSetting(key: string): key is AllowedSetting {
   return ALLOWED_SETTINGS.includes(key as AllowedSetting);
 }
@@ -665,7 +740,7 @@ router.put(
         throw new NotFoundError('Setting');
       }
 
-      const value = z.record(z.string(), z.unknown()).parse(req.body) as Prisma.InputJsonObject;
+      const value = settingSchemas[key].parse(req.body) as Prisma.InputJsonObject;
 
       const setting = await prisma.setting.upsert({
         where: { id: key },

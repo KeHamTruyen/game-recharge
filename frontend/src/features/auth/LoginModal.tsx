@@ -4,9 +4,15 @@ import { Icon } from "@/components/ui"
 export function LoginModal({
   onClose,
   onLogin,
+  onRegister,
+  onForgotPassword,
+  onResetPassword,
 }: {
   onClose: () => void
   onLogin: (email: string, password: string, name?: string) => Promise<void>
+  onRegister: (name: string, email: string, password: string) => Promise<void>
+  onForgotPassword: (email: string) => Promise<void>
+  onResetPassword: (email: string, code: string, password: string) => Promise<void>
 }) {
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login")
   const [displayName, setDisplayName] = useState("")
@@ -15,13 +21,21 @@ export function LoginModal({
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [resetSent, setResetSent] = useState(false)
+  const [verification, setVerification] = useState<"register" | "reset" | null>(null)
+  const [code, setCode] = useState("")
+  const [newPassword, setNewPassword] = useState("")
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (mode === "forgot") {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
         return setError("Vui lòng nhập đúng định dạng email.")
       setError("")
-      setResetSent(true)
+      try {
+        await onForgotPassword(email)
+        setVerification("reset")
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Không thể gửi mã xác minh.")
+      }
       return
     }
     if (mode === "register" && !displayName.trim())
@@ -32,7 +46,12 @@ export function LoginModal({
     if (mode === "register" && password !== confirmPassword)
       return setError("Mật khẩu xác nhận chưa khớp.")
     try {
-      await onLogin(email, password, mode === "register" ? displayName : undefined)
+      if (mode === "register") {
+        await onRegister(displayName, email, password)
+        setVerification("register")
+      } else {
+        await onLogin(email, password)
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Đăng nhập không thành công.")
     }
@@ -77,21 +96,38 @@ export function LoginModal({
             </p>
           </>
         )}
-        {resetSent ? (
+        {verification ? (
           <div className="reset-success">
             <span>
               <Icon name="check" size={22} />
             </span>
-            <strong>Đã gửi hướng dẫn</strong>
+            <strong>Nhập mã 6 số</strong>
             <p>
-              Vui lòng kiểm tra hộp thư của <b>{email}</b>. Liên kết khôi phục
-              sẽ hết hạn sau 15 phút.
+              Mã đã được gửi tới <b>{email}</b>, có hiệu lực trong 10 phút.
             </p>
+            <input value={code} onChange={(event) => setCode(event.target.value)} inputMode="numeric" maxLength={6} placeholder="000000" />
+            {verification === "reset" && (
+              <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="Mật khẩu mới" />
+            )}
             <button
               className="primary-button"
-              onClick={() => changeMode("login")}
+              onClick={async () => {
+                try {
+                  if (verification === "register") {
+                    await onLogin(email, code, displayName)
+                  } else {
+                    if (newPassword.length < 6) throw new Error("Mật khẩu mới cần có ít nhất 6 ký tự.")
+                    await onResetPassword(email, code, newPassword)
+                    setVerification(null)
+                    setMode("login")
+                    setResetSent(true)
+                  }
+                } catch (error) {
+                  setError(error instanceof Error ? error.message : "Mã xác minh không đúng.")
+                }
+              }}
             >
-              Quay lại đăng nhập
+              Xác minh
             </button>
           </div>
         ) : (

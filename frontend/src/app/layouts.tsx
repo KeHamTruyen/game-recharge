@@ -4,6 +4,7 @@ import { Icon, Toast } from "@/components/ui"
 import { platformLogos } from "@/data/mock-data"
 import { LoginModal } from "@/features/auth/LoginModal"
 import { useAppStore } from "@/app/AppStore"
+import { api } from "@/services/api"
 
 const navigation = [
   { to: "/nap-game", label: "Nạp game", icon: "game" as const },
@@ -21,7 +22,7 @@ export function PublicLayout() {
   const handleLogin = async (email: string, password: string, name?: string) => {
     const user = await store.login(email, password, name)
     setLoginOpen(false)
-    navigate(user.role === "admin" || user.role === "staff" ? "/admin" : "/tai-khoan")
+    navigate(user.role === "admin" ? "/admin" : "/tai-khoan")
   }
   const handleSupport = () => {
     if (!isSupportOnline) {
@@ -151,7 +152,15 @@ export function PublicLayout() {
         <span className="chat-dot" />
       </button>
       {loginOpen && (
-        <LoginModal onClose={() => setLoginOpen(false)} onLogin={handleLogin} />
+        <LoginModal
+          onClose={() => setLoginOpen(false)}
+          onLogin={handleLogin}
+          onRegister={async (name, email, password) => {
+            await api.auth.register(name, email, password)
+          }}
+          onForgotPassword={(email) => api.auth.requestPasswordReset(email)}
+          onResetPassword={(email, code, password) => api.auth.resetPassword(email, code, password)}
+        />
       )}
       {store.notice && (
         <Toast message={store.notice} onClose={() => store.setNotice("")} />

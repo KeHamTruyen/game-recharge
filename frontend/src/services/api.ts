@@ -16,7 +16,7 @@ type ApiUser = {
   id: string
   email: string
   name: string
-  role: "CUSTOMER" | "STAFF" | "ADMIN"
+  role: "CUSTOMER" | "ADMIN"
   status: "ACTIVE" | "BLOCKED"
 }
 type ApiService = Omit<Service, "id"> & { id: string; game: string }
@@ -41,11 +41,18 @@ type ApiTransaction = {
   createdAt: string
 }
 
+export type PaymentDetails = {
+  orderCode: string
+  amount: number
+  checkoutUrl: string
+  qrCode: string
+}
+
 const client = new HttpClient(
   import.meta.env.VITE_API_URL || "http://localhost:3000/api",
 )
 
-const roleMap = { CUSTOMER: "customer", STAFF: "staff", ADMIN: "admin" } as const
+const roleMap = { CUSTOMER: "customer", ADMIN: "admin" } as const
 const statusMap = {
   PENDING: "Chờ thanh toán",
   PROCESSING: "Đang xử lý",
@@ -131,11 +138,29 @@ export const api = {
       return mapUser(result.data.user)
     },
     async register(name: string, email: string, password: string) {
-      const result = await client.request<ApiEnvelope<{ user: ApiUser }>>("/auth/register", {
+      return client.request<ApiEnvelope<{ requiresVerification: boolean }>>("/auth/register", {
         method: "POST",
         body: JSON.stringify({ name, email, password }),
       })
+    },
+    async verifyRegistration(email: string, code: string) {
+      const result = await client.request<ApiEnvelope<{ user: ApiUser }>>("/auth/register/verify", {
+        method: "POST",
+        body: JSON.stringify({ email, code }),
+      })
       return mapUser(result.data.user)
+    },
+    async requestPasswordReset(email: string) {
+      await client.request("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      })
+    },
+    async resetPassword(email: string, code: string, password: string) {
+      await client.request("/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ email, code, password }),
+      })
     },
     async session() {
       try {
@@ -156,6 +181,7 @@ export const api = {
         client.request<ApiEnvelope<Record<string, unknown>[]>>("/catalog/topup-templates"),
         client.request<ApiEnvelope<ProductStatus[]>>("/catalog/product-statuses"),
       ])
+      const tagsResult = await client.request<ApiEnvelope<Array<{ id: string; name: string }>>>("/catalog/tags")
       const services = servicesResult.data.map((service) => ({
         ...service,
         id: service.id,
@@ -176,6 +202,7 @@ export const api = {
           icon: "check",
           color: (status.color || "green") as ProductStatus["color"],
         })),
+        tags: tagsResult.data.map((tag) => tag.name),
       }
     },
   },
@@ -187,9 +214,45 @@ export const api = {
       })
       return mapTransaction(result.data)
     },
+    async checkout(
+      items: Array<{ packageId: string | number; quantity: number }>,
+      topupInfo: Record<string, string>,
+      userEmail?: string,
+      idempotencyKey = crypto.randomUUID(),
+    ) {
+      const result = await client.request<ApiEnvelope<{
+        transactions: ApiTransaction[]
+        payment: PaymentDetails
+      }>>("/orders/checkout", {
+        method: "POST",
+        headers: { "Idempotency-Key": idempotencyKey },
+        body: JSON.stringify({
+          items: items.map((item) => ({
+            packageId: String(item.packageId),
+            quantity: item.quantity,
+          })),
+          topupInfo,
+          userEmail,
+        }),
+      })
+      return {
+        transactions: result.data.transactions.map(mapTransaction),
+        payment: result.data.payment,
+      }
+    },
     async mine() {
       const result = await client.request<ApiEnvelope<{ items: ApiTransaction[] }>>("/orders/mine?limit=100")
       return result.data.items.map(mapTransaction)
+    },
+  },
+  payments: {
+    async status(orderCode: string) {
+      const result = await client.request<ApiEnvelope<{
+        paymentStatus: "UNPAID" | "PENDING" | "PAID" | "FAILED" | "REFUNDED" | "EXPIRED"
+        status: ApiTransaction["status"]
+        paidAt: string | null
+      }>>(`/payments/status/${encodeURIComponent(orderCode)}`)
+      return result.data
     },
   },
   admin: {
@@ -200,6 +263,13 @@ export const api = {
     async createService(payload: Omit<Service, "id"> & { game: string }) {
       const result = await client.request<ApiEnvelope<ApiService>>("/admin/services", {
         method: "POST",
+        body: JSON.stringify(payload),
+      })
+      return result.data
+    },
+    async updateService(id: string | number, payload: Partial<Omit<Service, "id">>) {
+      const result = await client.request<ApiEnvelope<ApiService>>(`/admin/services/${String(id)}`, {
+        method: "PUT",
         body: JSON.stringify(payload),
       })
       return result.data
@@ -228,6 +298,20 @@ export const api = {
     },
     async deletePackage(id: string | number) {
       await client.request(`/admin/packages/${String(id)}`, { method: "DELETE" })
+    },
+    async tags() {
+      const result = await client.request<ApiEnvelope<Array<{ id: string; name: string }>>>("/admin/tags")
+      return result.data
+    },
+    async createTag(name: string) {
+      const result = await client.request<ApiEnvelope<{ id: string; name: string }>>("/admin/tags", {
+        method: "POST",
+        body: JSON.stringify({ name }),
+      })
+      return result.data
+    },
+    async deleteTag(id: string) {
+      await client.request(`/admin/tags/${encodeURIComponent(id)}`, { method: "DELETE" })
     },
     async createStatus(status: ProductStatus) {
       const result = await client.request<ApiEnvelope<ProductStatus>>("/admin/product-statuses", {
@@ -268,7 +352,7 @@ export const api = {
         id: string
         email: string
         name: string
-        role: "CUSTOMER" | "STAFF" | "ADMIN"
+        role: "CUSTOMER" | "ADMIN"
         status: "ACTIVE" | "BLOCKED"
         totalSpent: string | number
         createdAt: string
@@ -292,7 +376,7 @@ export const api = {
       id: string
       email: string
       name: string
-      role: "CUSTOMER" | "STAFF" | "ADMIN"
+      role: "CUSTOMER" | "ADMIN"
       status: "ACTIVE" | "BLOCKED"
       totalSpent: string | number
       createdAt: string

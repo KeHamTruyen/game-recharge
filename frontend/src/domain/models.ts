@@ -1,6 +1,6 @@
 export type IconName = "bag" | "bridge" | "chat" | "check" | "chevron" | "clock" | "close" | "edit" | "game" | "grid" | "headset" | "home" | "mail" | "plus" | "search" | "shield" | "spark" | "trash" | "user"
 
-export type User = { id?: string; email: string; name?: string; role: "customer" | "staff" | "admin" }
+export type User = { id?: string; email: string; name?: string; role: "customer" | "admin" }
 
 export type TransactionStatus = "Chờ thanh toán" | "Đang xử lý" | "Hoàn thành" | "Thất bại" | "Đã hoàn tiền"
 
@@ -23,7 +23,7 @@ export type ManagedUser = {
   id: string | number
   name: string
   email: string
-  role: "customer" | "staff" | "admin"
+  role: "customer" | "admin"
   status: "active" | "blocked"
   joined: string
   totalSpent: number
@@ -55,6 +55,8 @@ export type ServicePackage = {
   tags: string[]
   statusId: string
   templateId: string
+  image?: string
+  imagePosition?: string
   sortOrder: number
 }
 

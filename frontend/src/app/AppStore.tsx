@@ -164,6 +164,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         if (cancelled) return
         setServices(catalog.services)
         setGames(catalog.services.map((service) => service.name))
+        setCategories(["Tất cả", ...catalog.tags])
         setServicePackages(catalog.packages)
         setProducts(catalog.packages.map((pkg) => {
           const service = catalog.services.find((item) => item.id === pkg.serviceId)
@@ -191,11 +192,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         if (session) {
           setUser(session)
           setTransactions(
-            session.role === "admin" || session.role === "staff"
+            session.role === "admin"
               ? await api.admin.transactions()
               : await api.orders.mine(),
           )
-          if (session.role === "admin" || session.role === "staff") {
+          if (session.role === "admin") {
             setUsers(await api.admin.users())
           }
         }
@@ -218,11 +219,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     setNotice,
     async login(email, password, name) {
       const nextUser = password
-        ? name ? await api.auth.register(name, email, password) : await api.auth.login(email, password)
+        ? name ? await api.auth.verifyRegistration(email, password) : await api.auth.login(email, password)
         : { email, role: "customer" as const }
       setUser(nextUser)
       if (password) {
-        setTransactions(nextUser.role === "admin" || nextUser.role === "staff"
+        setTransactions(nextUser.role === "admin"
           ? await api.admin.transactions()
           : await api.orders.mine())
       }

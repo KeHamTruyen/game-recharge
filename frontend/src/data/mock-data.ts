@@ -883,7 +883,7 @@ export const initialUsers: ManagedUser[] = [
     id: 4,
     name: "Phạm Thu Linh",
     email: "thulinh@example.com",
-    role: "staff",
+    role: "admin",
     status: "active",
     joined: "08/02/2025",
     totalSpent: 0,

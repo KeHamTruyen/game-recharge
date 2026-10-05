@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
+import crypto from 'node:crypto';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import {
@@ -9,6 +10,7 @@ import {
   requireAuth,
 } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { sendVerificationCode } from '../utils/email.js';
 
 const router = Router();
 
@@ -39,6 +41,62 @@ const loginSchema = z.object({
   email: z.string().email('Invalid email address').toLowerCase().trim(),
   password: z.string().min(1, 'Password is required'),
 });
+const codeSchema = z.object({
+  email: z.string().email().toLowerCase().trim(),
+  code: z.string().regex(/^\d{6}$/, 'Verification code must be 6 digits'),
+});
+const resetSchema = codeSchema.extend({
+  password: registerSchema.shape.password,
+});
+
+function createCode(): string {
+  return String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
+}
+
+function hashCode(code: string): string {
+  return crypto.createHash('sha256').update(code).digest('hex');
+}
+
+async function createEmailVerification(data: {
+  email: string;
+  purpose: 'register' | 'reset';
+  name?: string;
+  passwordHash?: string;
+}): Promise<void> {
+  const code = createCode();
+  await prisma.emailVerification.deleteMany({ where: { email: data.email, purpose: data.purpose } });
+  await prisma.emailVerification.create({
+    data: {
+      ...data,
+      codeHash: hashCode(code),
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    },
+  });
+  await sendVerificationCode(data.email, code, data.purpose);
+}
+
+async function consumeCode(email: string, purpose: string, code: string) {
+  const verification = await prisma.emailVerification.findFirst({
+    where: { email, purpose, consumedAt: null },
+    orderBy: { createdAt: 'desc' },
+  });
+  if (!verification || verification.expiresAt < new Date() || verification.attempts >= 5) {
+    throw new AppError('Mã xác minh không hợp lệ hoặc đã hết hạn.', 400);
+  }
+  const matches = crypto.timingSafeEqual(
+    Buffer.from(verification.codeHash, 'hex'),
+    Buffer.from(hashCode(code), 'hex'),
+  );
+  if (!matches) {
+    await prisma.emailVerification.update({
+      where: { id: verification.id },
+      data: { attempts: { increment: 1 } },
+    });
+    throw new AppError('Mã xác minh không đúng.', 400);
+  }
+  await prisma.emailVerification.update({ where: { id: verification.id }, data: { consumedAt: new Date() } });
+  return verification;
+}
 
 // ─── POST /register ───────────────────────────────────────────────────────────
 
@@ -59,32 +117,45 @@ router.post(
       }
 
       const passwordHash = await bcrypt.hash(password, 12);
-
-      const user = await prisma.user.create({
-        data: { name, email, passwordHash, role: 'CUSTOMER', status: 'ACTIVE' },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          status: true,
-          createdAt: true,
-          totalSpent: true,
-        },
-      });
-
-      const token = signToken({ userId: user.id, email: user.email, role: user.role });
-      setAuthCookie(res, token);
-
-      res.status(201).json({
-        success: true,
-        data: { user },
-      });
+      await createEmailVerification({ email, name, passwordHash, purpose: 'register' });
+      res.status(202).json({ success: true, data: { requiresVerification: true } });
     } catch (err) {
       next(err);
     }
   }
 );
+
+router.post('/register/verify', async (req, res, next): Promise<void> => {
+  try {
+    const { email, code } = codeSchema.parse(req.body);
+    const verification = await consumeCode(email, 'register', code);
+    if (!verification.name || !verification.passwordHash) throw new AppError('Yêu cầu đăng ký không hợp lệ.', 400);
+    const user = await prisma.user.create({
+      data: { name: verification.name, email, passwordHash: verification.passwordHash, role: 'CUSTOMER', status: 'ACTIVE' },
+      select: { id: true, email: true, name: true, role: true, status: true },
+    });
+    setAuthCookie(res, signToken({ userId: user.id, email: user.email, role: user.role }));
+    res.status(201).json({ success: true, data: { user } });
+  } catch (err) { next(err); }
+});
+
+router.post('/forgot-password', async (req, res, next): Promise<void> => {
+  try {
+    const { email } = z.object({ email: z.string().email().toLowerCase().trim() }).parse(req.body);
+    const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (user) await createEmailVerification({ email, purpose: 'reset' });
+    res.json({ success: true, data: { message: 'Nếu email tồn tại, mã xác minh đã được gửi.' } });
+  } catch (err) { next(err); }
+});
+
+router.post('/reset-password', async (req, res, next): Promise<void> => {
+  try {
+    const { email, code, password } = resetSchema.parse(req.body);
+    await consumeCode(email, 'reset', code);
+    await prisma.user.update({ where: { email }, data: { passwordHash: await bcrypt.hash(password, 12) } });
+    res.json({ success: true, data: { message: 'Đặt lại mật khẩu thành công.' } });
+  } catch (err) { next(err); }
+});
 
 // ─── POST /login ──────────────────────────────────────────────────────────────
 

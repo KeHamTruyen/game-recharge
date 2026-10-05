@@ -77,6 +77,7 @@ export function AdminPage({
   onDeleteCategory,
   onAddGame,
   onDeleteGame,
+  onUpdateGame,
   middlemanInfo,
   onUpdateMiddleman,
   contactInfo,
@@ -100,10 +101,11 @@ export function AdminPage({
   onAddTopupTemplate: (template: TopupTemplate) => void
   onUpdateTopupTemplate: (id: string, template: TopupTemplate) => void
   onDeleteTopupTemplate: (id: string) => void
-  onAddCategory: (name: string) => void
-  onDeleteCategory: (name: string) => void
+  onAddCategory: (name: string) => void | Promise<void>
+  onDeleteCategory: (name: string) => void | Promise<void>
   onAddGame: (name: string) => void
   onDeleteGame: (name: string) => void
+  onUpdateGame: (name: string, updates: Partial<Service>) => void | Promise<void>
   middlemanInfo: MiddlemanInfo
   onUpdateMiddleman: (info: MiddlemanInfo) => void
   contactInfo: ContactInfo
@@ -133,6 +135,15 @@ export function AdminPage({
   )
   const [newCategory, setNewCategory] = useState("")
   const [newGame, setNewGame] = useState("")
+  const [editingGame, setEditingGame] = useState<string | null>(null)
+  const [gameName, setGameName] = useState("")
+  const [gameKey, setGameKey] = useState("")
+  const [gameDescription, setGameDescription] = useState("")
+  const [gameTone, setGameTone] = useState("blue")
+  const [gameSortOrder, setGameSortOrder] = useState("0")
+  const [gameImage, setGameImage] = useState("")
+  const [gameImagePosition, setGameImagePosition] = useState("center")
+  const [gameIsActive, setGameIsActive] = useState(true)
   const [image, setImage] = useState("")
   const [imageX, setImageX] = useState(50)
   const [imageY, setImageY] = useState(50)
@@ -782,12 +793,51 @@ export function AdminPage({
                   <Icon name="plus" size={18} /> Thêm game
                 </button>
               </form>
+              <p className="form-hint">Có thể chỉnh sửa nhanh mô tả, tone và thứ tự của từng game bên dưới.</p>
               <div className="tag-manager game-manager">
                 {games.map((item) => (
                   <div key={item}>
-                    <span>
-                      <Icon name="game" size={17} /> {item}
-                    </span>
+                    {editingGame === item ? (
+                      <div className="channel-editor-fields">
+                        <label><span>Tên game</span><input value={gameName} onChange={(event) => setGameName(event.target.value)} /></label>
+                        <label><span>Mã game</span><input value={gameKey} onChange={(event) => setGameKey(event.target.value)} /></label>
+                        <label><span>Mô tả</span><input value={gameDescription} onChange={(event) => setGameDescription(event.target.value)} /></label>
+                        <label><span>Tone</span><input value={gameTone} onChange={(event) => setGameTone(event.target.value)} /></label>
+                        <label><span>Thứ tự</span><input type="number" value={gameSortOrder} onChange={(event) => setGameSortOrder(event.target.value)} /></label>
+                        <label className="wide"><span>URL ảnh</span><input value={gameImage} onChange={(event) => setGameImage(event.target.value)} /></label>
+                        <label><span>Vị trí ảnh</span><input value={gameImagePosition} onChange={(event) => setGameImagePosition(event.target.value)} /></label>
+                        <label><span>Hiển thị</span><input type="checkbox" checked={gameIsActive} onChange={(event) => setGameIsActive(event.target.checked)} /></label>
+                        <button className="primary-button" onClick={async () => {
+                          await onUpdateGame(item, {
+                            name: gameName,
+                            game: gameKey,
+                            description: gameDescription,
+                            tone: gameTone,
+                            sortOrder: Number(gameSortOrder),
+                            image: gameImage || undefined,
+                            imagePosition: gameImagePosition,
+                            isActive: gameIsActive,
+                          })
+                          setEditingGame(null)
+                        }}>Lưu</button>
+                      </div>
+                    ) : (
+                      <span><Icon name="game" size={17} /> {item}</span>
+                    )}
+                    {editingGame !== item && (
+                      <button onClick={() => {
+                        const service = services.find((entry) => entry.name === item || entry.game === item)
+                        setEditingGame(item)
+                        setGameName(service?.name || item)
+                        setGameKey(service?.game || item)
+                        setGameDescription(service?.description || "")
+                        setGameTone(service?.tone || "blue")
+                        setGameSortOrder(String(service?.sortOrder || 0))
+                        setGameImage(service?.image || "")
+                        setGameImagePosition(service?.imagePosition || "center")
+                        setGameIsActive(service?.isActive ?? true)
+                      }} aria-label={`Sửa ${item}`}><Icon name="edit" size={17} /></button>
+                    )}
                     <button
                       onClick={() => {
                         onDeleteGame(item)

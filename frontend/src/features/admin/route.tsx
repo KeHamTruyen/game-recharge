@@ -7,13 +7,13 @@ export function AdminRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
 
-  if (store.user?.role !== "admin" && store.user?.role !== "staff") {
+  if (store.user?.role !== "admin") {
     return (
       <div className="app-shell admin-shell">
         <AdminLogin
           onLogin={async (email, password) => {
             const user = await store.login(email, password)
-            if (user.role !== "admin" && user.role !== "staff") {
+            if (user.role !== "admin") {
               await store.logout()
               store.setNotice("Tài khoản không có quyền quản trị.")
             }
@@ -52,6 +52,8 @@ export function AdminRoute() {
             tags: product.tags,
             statusId: product.statusId,
             templateId: product.templateId,
+            image: product.image || null,
+            imagePosition: product.imagePosition || null,
             sortOrder: 0,
             isActive: true,
           })
@@ -72,6 +74,8 @@ export function AdminRoute() {
             tags: updates.tags,
             statusId: updates.statusId,
             templateId: updates.templateId,
+            image: updates.image || null,
+            imagePosition: updates.imagePosition || null,
           })
           store.setServicePackages((current) => current.map((item) => item.id === id ? updated : item))
           store.setProducts((current) => current.map((item) => item.id === id ? { ...item, ...updates } : item))
@@ -123,16 +127,16 @@ export function AdminRoute() {
             ),
           )
         }}
-        onAddCategory={(name) =>
-          store.setCategories((current) =>
-            current.includes(name) ? current : [...current, name],
-          )
-        }
-        onDeleteCategory={(name) =>
-          store.setCategories((current) =>
-            current.filter((item) => item === "Tất cả" || item !== name),
-          )
-        }
+        onAddCategory={async (name) => {
+          if (store.categories.includes(name)) return
+          await api.admin.createTag(name)
+          store.setCategories((current) => [...current, name])
+        }}
+        onDeleteCategory={async (name) => {
+          const tag = (await api.admin.tags()).find((item) => item.name === name)
+          if (tag) await api.admin.deleteTag(tag.id)
+          store.setCategories((current) => current.filter((item) => item === "Tất cả" || item !== name))
+        }}
         onAddGame={async (name) => {
           if (store.services.some((item) => item.name === name || item.game === name)) return
           const service = await api.admin.createService({
@@ -156,6 +160,13 @@ export function AdminRoute() {
             store.setProducts((current) => current.filter((item) => item.game !== name))
           }
           store.setGames((current) => current.filter((item) => item !== name))
+        }}
+        onUpdateGame={async (name, updates) => {
+          const service = store.services.find((item) => item.name === name || item.game === name)
+          if (!service) return
+          const updated = await api.admin.updateService(service.id, updates)
+          store.setServices((current) => current.map((item) => item.id === service.id ? updated : item))
+          store.setGames((current) => current.map((item) => item === name ? updated.name : item))
         }}
         middlemanInfo={store.middlemanInfo}
         onUpdateMiddleman={async (info) => {
