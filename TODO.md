@@ -15,7 +15,7 @@
 - [ ] Cấu hình webhook SePay bằng HTTPS công khai tại `/api/payments/webhook`.
 - [ ] Kiểm thử giao dịch thật giá trị nhỏ: đúng tiền, thiếu tiền, thừa tiền, sai nội dung.
 - [ ] Thêm chống xử lý trùng bằng mã giao dịch ngân hàng (`referenceCode`/transaction ID) duy nhất.
-- [ ] Thêm trạng thái `EXPIRED` và job tự hết hạn order chưa thanh toán.
+- [x] Tự động chuyển order chưa thanh toán quá 15 phút sang `EXPIRED`.
 - [ ] Thêm trang kết quả thanh toán có mã order, số tiền, trạng thái và hướng dẫn tra cứu.
 - [ ] Có nút xác nhận thủ công cho admin khi webhook bị gián đoạn.
 - [ ] Không đánh dấu `COMPLETED` chỉ vì đã thanh toán; chỉ hoàn tất sau khi nạp game thành công.
@@ -38,6 +38,8 @@
 - [x] Enforce toàn bộ quyền ở backend, không chỉ ẩn nút trên frontend.
 - [x] Bắt buộc đăng nhập trước khi tạo checkout/đơn hàng.
 - [x] Giới hạn xem trạng thái thanh toán theo chủ đơn hoặc ADMIN.
+- [x] Cấu hình CORS cho `Idempotency-Key` và `X-Request-Id`.
+- [x] Cấu hình SameSite/domain cookie qua biến môi trường.
 - [x] Thêm audit log cho thay đổi catalog, user, settings và trạng thái transaction.
 
 ### Catalog và nội dung
@@ -64,11 +66,12 @@
 - [ ] Kiểm thử webhook hợp lệ, sai API key, sai mã, sai số tiền và gửi lặp.
 - [ ] Kiểm thử rate limit cho auth, orders, admin và webhook.
 - [ ] Thiết lập database test riêng và chạy test trong CI.
+- [ ] Thực hiện checklist kiểm thử trong `TESTING-CHECKLIST.md` và lưu báo cáo lỗi/nghiệm thu.
 
 ## P2 — nâng cấp mô hình đơn hàng
 
 - [ ] Cân nhắc tách `Order`, `OrderItem`, `Payment` và `Fulfillment` khi có nhiều phương thức thanh toán.
-- [ ] Cho phép mỗi cart item có `topupInfo` riêng, hoặc giới hạn giỏ hàng cùng game/template.
+- [x] Tạm thời giới hạn giỏ hàng cùng game và cùng template nạp.
 - [ ] Thêm tra cứu order cho guest bằng mã order + email.
 - [ ] Thêm cơ chế retry fulfillment sau khi thanh toán thành công.
 - [ ] Thêm xử lý hoàn tiền và đối soát giao dịch.

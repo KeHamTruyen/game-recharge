@@ -570,7 +570,7 @@ export function CheckoutPage({
                   <strong>{payment?.orderCode || orderCode}</strong>
                 </span>
                 <button
-                  onClick={() => copy(orderCode, "nội dung chuyển khoản")}
+                  onClick={() => copy(payment?.orderCode || orderCode, "nội dung chuyển khoản")}
                 >
                   Sao chép
                 </button>
@@ -621,7 +621,7 @@ export function CheckoutPage({
             <span>
               <small>{service.name}</small>
               <strong>{item.pkg.name} × {item.quantity}</strong>
-              <em>{pkg.tags.join(" · ")}</em>
+              <em>{item.pkg.tags.join(" · ")}</em>
             </span>
           </div>)}
           </div>

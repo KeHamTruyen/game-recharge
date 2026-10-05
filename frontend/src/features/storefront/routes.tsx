@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Navigate, useNavigate, useParams } from "react-router"
 import { useAppStore } from "@/app/AppStore"
 import {
@@ -59,6 +59,14 @@ export function ServiceDetailRoute() {
       productStatuses={store.productStatuses}
       onBack={() => navigate("/nap-game")}
       onAddToCart={(pkg: ServicePackage) => {
+        const firstItem = store.cart[0]
+        if (
+          firstItem &&
+          (firstItem.pkg.game !== pkg.game || firstItem.pkg.templateId !== pkg.templateId)
+        ) {
+          store.setNotice("Bạn chỉ có thể mua các gói cùng game và cùng mẫu thông tin trong một lần.")
+          return
+        }
         store.setCart((current) => {
           const existing = current.find((item) => item.pkg.id === pkg.id)
           return existing
@@ -174,13 +182,18 @@ export function CheckoutRoute() {
       onNotice={store.setNotice}
       onConfirm={async () => {
         try {
+        if (!store.user) {
+          store.setNotice("Vui lòng đăng nhập trước khi thanh toán.")
+          navigate("/nap-game")
+          return false
+        }
         const result = await api.orders.checkout(
           store.cart.map((item) => ({
             packageId: item.pkg.id,
             quantity: item.quantity,
           })),
           store.checkoutInfo,
-          store.user?.email,
+          store.user.email,
           checkoutKey,
         )
         setPayment(result.payment)

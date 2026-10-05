@@ -175,7 +175,7 @@ model Transaction {
   qrCode       String?
   paidAt       DateTime?
   paymentMetadata Json?
-  bankTransactionId String? @unique
+  bankTransactionId String?
   topupInfo    Json              @default("{}")
   topupLabels  Json              @default("{}")
   templateName String            @default("")
@@ -189,6 +189,7 @@ model Transaction {
   @@index([createdAt])
   @@index([paymentOrderCode])
   @@index([paymentStatus])
+  @@index([bankTransactionId])
   @@map("transactions")
 }
 

@@ -12,6 +12,10 @@ import {
 } from '../utils/pagination.js';
 
 const router = Router();
+const imageValueSchema = z.string().max(4_000_000).refine(
+  (value) => value.startsWith('data:image/') || z.string().url().safeParse(value).success,
+  'Image must be a valid URL or image data URI',
+);
 
 // All admin routes require an authenticated administrator.
 router.use(requireAuth, requireRole('ADMIN'), auditAdminRequest);
@@ -26,7 +30,7 @@ const serviceSchema = z.object({
   description: z.string().max(500).trim().default(''),
   iconText: z.string().max(10).trim().default(''),
   tone: z.string().max(30).trim().default('blue'),
-  image: z.string().url().nullable().optional(),
+  image: imageValueSchema.nullable().optional(),
   imagePosition: z.string().regex(/^\d{1,3}%\s+\d{1,3}%$/).nullable().optional(),
   sortOrder: z.coerce.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
@@ -118,7 +122,7 @@ const packageSchema = z.object({
   tags: z.array(z.string().max(30)).default([]),
   statusId: z.string().min(1).default('available'),
   templateId: z.string().default(''),
-  image: z.string().url().nullable().optional(),
+  image: imageValueSchema.nullable().optional(),
   imagePosition: z.string().regex(/^\d{1,3}%\s+\d{1,3}%$/).nullable().optional(),
   sortOrder: z.coerce.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
@@ -669,7 +673,7 @@ const contactChannelSchema = z.object({
   name: z.string().max(120),
   description: z.string().max(500),
   url: z.string().max(500),
-  image: z.string().max(500),
+  image: imageValueSchema,
   color: z.string().max(30),
 });
 const contactInfoSchema = z.object({

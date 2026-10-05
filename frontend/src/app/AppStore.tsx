@@ -131,22 +131,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [notice, setNotice] = useState("")
   const [apiReady, setApiReady] = useState(false)
 
-  const mergeRemoteContent = (remoteMiddleman: Record<string, unknown>, remoteContact: Record<string, unknown>) => {
+  const mergeRemoteContent = (remoteMiddleman: MiddlemanInfo, remoteContact: ContactInfo) => {
     setMiddlemanInfo((current) => ({
       ...current,
-      intro: String(remoteMiddleman.description || current.intro),
-      contactDescription: String(remoteMiddleman.supportEmail || current.contactDescription),
-      supportHours: current.supportHours,
-      fees: Array.isArray(remoteMiddleman.fees) ? remoteMiddleman.fees as typeof current.fees : current.fees,
+      ...remoteMiddleman,
     }))
     setContactInfo((current) => ({
       ...current,
-      supportHours: String(remoteContact.workingHours || current.supportHours),
-      intro: String(remoteContact.responseTime || current.intro),
-      channels: (current.channels || []).map((channel) => {
-        const url = remoteContact[channel.platform]
-        return typeof url === "string" ? { ...channel, url } : channel
-      }),
+      ...remoteContact,
     }))
   }
 
@@ -185,8 +177,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         setTopupTemplates(catalog.templates)
         setProductStatuses(catalog.statuses)
         const [remoteMiddleman, remoteContact] = await Promise.all([
-          api.settings.get<Record<string, unknown>>("middlemanInfo"),
-          api.settings.get<Record<string, unknown>>("contactInfo"),
+          api.settings.get<MiddlemanInfo>("middlemanInfo"),
+          api.settings.get<ContactInfo>("contactInfo"),
         ])
         mergeRemoteContent(remoteMiddleman, remoteContact)
         if (session) {

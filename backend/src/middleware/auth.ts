@@ -38,7 +38,8 @@ export function setAuthCookie(res: Response, token: string): void {
   res.cookie('auth_token', token, {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: env.AUTH_COOKIE_SAMESITE,
+    ...(env.AUTH_COOKIE_DOMAIN ? { domain: env.AUTH_COOKIE_DOMAIN } : {}),
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
     path: '/',
   });
@@ -48,7 +49,8 @@ export function clearAuthCookie(res: Response): void {
   res.clearCookie('auth_token', {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: env.AUTH_COOKIE_SAMESITE,
+    ...(env.AUTH_COOKIE_DOMAIN ? { domain: env.AUTH_COOKIE_DOMAIN } : {}),
     path: '/',
   });
 }

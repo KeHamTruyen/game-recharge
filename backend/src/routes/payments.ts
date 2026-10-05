@@ -75,7 +75,7 @@ router.post(
 
       await prisma.$transaction(async (tx) => {
         if (payload.referenceCode) {
-          const duplicate = await tx.transaction.findUnique({
+          const duplicate = await tx.transaction.findFirst({
             where: { bankTransactionId: payload.referenceCode },
             select: { id: true },
           });

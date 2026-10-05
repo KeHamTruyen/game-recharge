@@ -327,6 +327,21 @@ router.post(
         return;
       }
       const effectiveEmail = req.user!.email;
+      const packageIds = [...new Set(body.items.map((item) => item.packageId))];
+      const checkoutPackages = await prisma.servicePackage.findMany({
+        where: { id: { in: packageIds }, isActive: true },
+        select: { id: true, templateId: true, service: { select: { game: true } } },
+      });
+      if (
+        checkoutPackages.length !== packageIds.length ||
+        new Set(checkoutPackages.map((item) => item.templateId)).size > 1 ||
+        new Set(checkoutPackages.map((item) => item.service.game)).size > 1
+      ) {
+        throw new AppError(
+          'Cart items must belong to the same game and top-up template',
+          400,
+        );
+      }
 
       if (
         !env.SEPAY_BANK_CODE ||

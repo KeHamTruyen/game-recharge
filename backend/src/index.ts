@@ -69,16 +69,16 @@ app.use(
     },
     credentials: true, // Required for cookies
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'X-Request-Id'],
+    exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-Request-Id'],
     maxAge: 86400, // 24h preflight cache
   })
 );
 
 // ─── Body Parsing ─────────────────────────────────────────────────────────────
 
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use(cookieParser(env.COOKIE_SECRET));
 
 // ─── Trust Proxy ─────────────────────────────────────────────────────────────
@@ -137,10 +137,32 @@ async function startServer(): Promise<void> {
     });
 
     const staleOrderCheck = setInterval(() => {
+      const expirationCutoff = new Date(Date.now() - 15 * 60 * 1000);
+      void prisma.transaction.updateMany({
+        where: {
+          status: 'PENDING',
+          paymentStatus: { in: ['UNPAID', 'PENDING'] },
+          updatedAt: { lt: expirationCutoff },
+        },
+        data: { paymentStatus: 'EXPIRED' },
+      }).then((result) => {
+        if (result.count > 0) {
+          console.warn(JSON.stringify({
+            event: 'stale_orders_expired',
+            count: result.count,
+            thresholdMinutes: 15,
+          }));
+        }
+      }).catch((error: unknown) => {
+        console.error(JSON.stringify({
+          event: 'stale_order_expiration_failure',
+          error: error instanceof Error ? error.message : 'unknown_error',
+        }));
+      });
       void prisma.transaction.count({
         where: {
-          status: { in: ['PENDING', 'PROCESSING'] },
-          updatedAt: { lt: new Date(Date.now() - 15 * 60 * 1000) },
+          status: 'PROCESSING',
+          updatedAt: { lt: expirationCutoff },
         },
       }).then((count) => {
         if (count > 0) {

@@ -2131,7 +2131,7 @@ export function AdminLogin({
   onLogin,
   onStore,
 }: {
-  onLogin: (email: string) => void
+  onLogin: (email: string, password: string) => void
   onStore: () => void
 }) {
   const [email, setEmail] = useState("")
@@ -2143,7 +2143,7 @@ export function AdminLogin({
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return setError("Vui lòng nhập đúng email quản trị.")
     if (password.length < 6) return setError("Mật khẩu cần có ít nhất 6 ký tự.")
-    onLogin(email)
+    onLogin(email, password)
   }
 
   return (
