@@ -36,6 +36,8 @@
 
 - [x] Loại bỏ role STAFF; hệ thống hiện chỉ dùng CUSTOMER và ADMIN.
 - [x] Enforce toàn bộ quyền ở backend, không chỉ ẩn nút trên frontend.
+- [x] Bắt buộc đăng nhập trước khi tạo checkout/đơn hàng.
+- [x] Giới hạn xem trạng thái thanh toán theo chủ đơn hoặc ADMIN.
 - [x] Thêm audit log cho thay đổi catalog, user, settings và trạng thái transaction.
 
 ### Catalog và nội dung

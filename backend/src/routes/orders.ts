@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
-import { requireAuth, optionalAuth } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/auth.js';
 import { AppError, NotFoundError } from '../middleware/errorHandler.js';
 import {
   getPagination,
@@ -37,10 +37,6 @@ const createOrderSchema = z.object({
   packageId: z.string().min(1, 'Package ID is required'),
   quantity: z.coerce.number().int().min(1).max(100).default(1),
   topupInfo: topupInfoSchema.default({}),
-  userEmail: z
-    .string()
-    .email('Valid email is required for guest orders')
-    .optional(),
 });
 
 const checkoutSchema = z.object({
@@ -49,7 +45,6 @@ const checkoutSchema = z.object({
     quantity: z.coerce.number().int().min(1).max(100),
   })).min(1).max(100),
   topupInfo: topupInfoSchema.default({}),
-  userEmail: z.string().email('Valid email is required for guest orders').optional(),
 });
 
 const transactionSelect = {
@@ -168,16 +163,12 @@ async function createOrder(
 
 router.post(
   '/',
-  optionalAuth,
+  requireAuth,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const body = createOrderSchema.parse(req.body);
 
-      // Guest must provide email
-      const effectiveEmail = req.user?.email ?? body.userEmail;
-      if (!effectiveEmail) {
-        throw new AppError('Email is required for guest orders', 400);
-      }
+      const effectiveEmail = req.user!.email;
 
       // Load package with service
       const pkg = await prisma.servicePackage.findFirst({
@@ -276,7 +267,7 @@ router.post(
       const transaction = await prisma.transaction.create({
         data: {
           code,
-          userId: req.user?.userId ?? null,
+          userId: req.user!.userId,
           userEmail: effectiveEmail,
           serviceId: pkg.service?.id ?? null,
           packageId: pkg.id,
@@ -319,7 +310,7 @@ router.post(
 
 router.post(
   '/checkout',
-  optionalAuth,
+  requireAuth,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const body = checkoutSchema.parse(req.body);
@@ -335,10 +326,7 @@ router.post(
         res.status(201).json({ success: true, data: previous.response });
         return;
       }
-      const effectiveEmail = req.user?.email ?? body.userEmail;
-      if (!effectiveEmail) {
-        throw new AppError('Email is required for guest orders', 400);
-      }
+      const effectiveEmail = req.user!.email;
 
       if (
         !env.SEPAY_BANK_CODE ||
@@ -358,7 +346,7 @@ router.post(
             createOrder(
               tx,
               { ...item, topupInfo: body.topupInfo },
-              req.user?.userId ?? null,
+              req.user!.userId,
               effectiveEmail,
             ),
           ),

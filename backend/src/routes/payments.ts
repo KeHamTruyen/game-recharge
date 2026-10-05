@@ -1,15 +1,20 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
 router.get(
   '/status/:orderCode',
+  requireAuth,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const transaction = await prisma.transaction.findFirst({
-        where: { paymentOrderCode: req.params.orderCode },
+        where: {
+          paymentOrderCode: req.params.orderCode,
+          ...(req.user!.role === 'ADMIN' ? {} : { userId: req.user!.userId }),
+        },
         select: { paymentStatus: true, status: true, paidAt: true },
       });
       if (!transaction) {
