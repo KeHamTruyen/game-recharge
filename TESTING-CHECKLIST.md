@@ -47,7 +47,7 @@ Mong đợi:
 
 ### AUTH-005 — Validation đăng ký
 
-Kiểm tra tên rỗng/quá dài, email sai định dạng, mật khẩu dưới 6 ký tự, thiếu chữ hoa, chữ thường hoặc chữ số, mật khẩu vượt 72 ký tự.
+Kiểm tra tên rỗng/quá dài, email sai định dạng, mật khẩu dưới 6 ký tự hoặc vượt 72 ký tự.
 
 Mong đợi: request bị từ chối và không gửi email.
 
