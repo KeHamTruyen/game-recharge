@@ -30,6 +30,8 @@ export function AccountRoute() {
         store.logout()
         navigate("/nap-game")
       }}
+      onUpdateProfile={async (name) => { await store.updateProfile(name) }}
+      onChangePassword={store.changePassword}
     />
   )
 }

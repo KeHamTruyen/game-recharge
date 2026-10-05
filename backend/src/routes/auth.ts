@@ -11,6 +11,7 @@ import {
 } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { sendVerificationCode } from '../utils/email.js';
+import { authLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
@@ -47,6 +48,13 @@ const codeSchema = z.object({
 });
 const resetSchema = codeSchema.extend({
   password: registerSchema.shape.password,
+});
+const profileSchema = z.object({
+  name: registerSchema.shape.name,
+});
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: registerSchema.shape.password,
 });
 
 function createCode(): string {
@@ -102,6 +110,7 @@ async function consumeCode(email: string, purpose: string, code: string) {
 
 router.post(
   '/register',
+  authLimiter,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { name, email, password } = registerSchema.parse(req.body);
@@ -125,7 +134,7 @@ router.post(
   }
 );
 
-router.post('/register/verify', async (req, res, next): Promise<void> => {
+router.post('/register/verify', authLimiter, async (req, res, next): Promise<void> => {
   try {
     const { email, code } = codeSchema.parse(req.body);
     const verification = await consumeCode(email, 'register', code);
@@ -134,12 +143,12 @@ router.post('/register/verify', async (req, res, next): Promise<void> => {
       data: { name: verification.name, email, passwordHash: verification.passwordHash, role: 'CUSTOMER', status: 'ACTIVE' },
       select: { id: true, email: true, name: true, role: true, status: true },
     });
-    setAuthCookie(res, signToken({ userId: user.id, email: user.email, role: user.role }));
+    setAuthCookie(res, signToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: 0 }));
     res.status(201).json({ success: true, data: { user } });
   } catch (err) { next(err); }
 });
 
-router.post('/forgot-password', async (req, res, next): Promise<void> => {
+router.post('/forgot-password', authLimiter, async (req, res, next): Promise<void> => {
   try {
     const { email } = z.object({ email: z.string().email().toLowerCase().trim() }).parse(req.body);
     const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
@@ -148,7 +157,7 @@ router.post('/forgot-password', async (req, res, next): Promise<void> => {
   } catch (err) { next(err); }
 });
 
-router.post('/reset-password', async (req, res, next): Promise<void> => {
+router.post('/reset-password', authLimiter, async (req, res, next): Promise<void> => {
   try {
     const { email, code, password } = resetSchema.parse(req.body);
     await consumeCode(email, 'reset', code);
@@ -161,6 +170,7 @@ router.post('/reset-password', async (req, res, next): Promise<void> => {
 
 router.post(
   '/login',
+  authLimiter,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { email, password } = loginSchema.parse(req.body);
@@ -176,6 +186,7 @@ router.post(
           passwordHash: true,
           createdAt: true,
           totalSpent: true,
+          tokenVersion: true,
         },
       });
 
@@ -198,7 +209,7 @@ router.post(
         );
       }
 
-      const token = signToken({ userId: user.id, email: user.email, role: user.role });
+      const token = signToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion });
       setAuthCookie(res, token);
 
       const { passwordHash: _pw, ...safeUser } = user;
@@ -219,6 +230,43 @@ router.post(
 router.post('/logout', (_req: Request, res: Response): void => {
   clearAuthCookie(res);
   res.json({ success: true, data: { message: 'Logged out successfully' } });
+});
+
+router.put('/profile', requireAuth, async (req, res, next): Promise<void> => {
+  try {
+    const { name } = profileSchema.parse(req.body);
+    const user = await prisma.user.update({
+      where: { id: req.user!.userId },
+      data: { name },
+      select: { id: true, email: true, name: true, role: true, status: true },
+    });
+    res.json({ success: true, data: { user } });
+  } catch (err) { next(err); }
+});
+
+router.post('/change-password', requireAuth, async (req, res, next): Promise<void> => {
+  try {
+    const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.userId },
+      select: { passwordHash: true, tokenVersion: true },
+    });
+    if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+      throw new AppError('Mật khẩu hiện tại không đúng.', 400);
+    }
+    const updated = await prisma.user.update({
+      where: { id: req.user!.userId },
+      data: { passwordHash: await bcrypt.hash(newPassword, 12), tokenVersion: { increment: 1 } },
+      select: { id: true, email: true, name: true, role: true, status: true, tokenVersion: true },
+    });
+    setAuthCookie(res, signToken({
+      userId: updated.id,
+      email: updated.email,
+      role: updated.role,
+      tokenVersion: updated.tokenVersion,
+    }));
+    res.json({ success: true, data: { message: 'Đổi mật khẩu thành công.' } });
+  } catch (err) { next(err); }
 });
 
 // ─── GET /session ─────────────────────────────────────────────────────────────

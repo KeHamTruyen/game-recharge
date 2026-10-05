@@ -176,15 +176,22 @@ export function AccountPage({
   email,
   transactions,
   onLogout,
+  onUpdateProfile,
+  onChangePassword,
 }: {
   email: string
   transactions: Transaction[]
   onLogout: () => void
+  onUpdateProfile: (name: string) => Promise<void>
+  onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
 }) {
   const [tab, setTab] = useState<"overview" | "history" | "profile">("overview")
   const [historyPage, setHistoryPage] = useState(1)
   const [name, setName] = useState(email.split("@")[0])
   const [phone, setPhone] = useState("")
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [profileMessage, setProfileMessage] = useState("")
   const completed = transactions.filter((item) => item.status === "Hoàn thành")
   const totalSpent = completed.reduce((sum, item) => sum + item.amount, 0)
   const historyPages = Math.max(1, Math.ceil(transactions.length / 5))
@@ -275,7 +282,11 @@ export function AccountPage({
             <h2>Cập nhật tài khoản</h2>
             <p>Thông tin này được dùng để liên hệ và hỗ trợ giao dịch.</p>
           </div>
-          <form onSubmit={(event) => event.preventDefault()}>
+          <form onSubmit={async (event) => {
+            event.preventDefault()
+            await onUpdateProfile(name)
+            setProfileMessage("Đã cập nhật thông tin.")
+          }}>
             <label>
               <span>Tên hiển thị</span>
               <input
@@ -299,11 +310,18 @@ export function AccountPage({
           </form>
           <div className="password-section">
             <h3>Đổi mật khẩu</h3>
-            <div>
-              <input type="password" placeholder="Mật khẩu hiện tại" />
-              <input type="password" placeholder="Mật khẩu mới" />
+            <form onSubmit={async (event) => {
+              event.preventDefault()
+              await onChangePassword(currentPassword, newPassword)
+              setCurrentPassword("")
+              setNewPassword("")
+              setProfileMessage("Đã đổi mật khẩu.")
+            }}>
+              <input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Mật khẩu hiện tại" />
+              <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="Mật khẩu mới" />
               <button className="secondary-button">Cập nhật mật khẩu</button>
-            </div>
+            </form>
+            {profileMessage && <span className="form-success">{profileMessage}</span>}
           </div>
         </div>
       )}

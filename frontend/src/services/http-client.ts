@@ -31,8 +31,10 @@ export class HttpClient {
         ? undefined
         : await response.json().catch(() => undefined)
     if (!response.ok) {
+      const details = (body as { details?: Array<{ message?: string }> } | undefined)?.details
       throw new ApiError(
-        (body as { error?: string; message?: string } | undefined)?.error ||
+        details?.map((detail) => detail.message).filter(Boolean).join(" ") ||
+          (body as { error?: string; message?: string } | undefined)?.error ||
           (body as { message?: string } | undefined)?.message ||
           "Yêu cầu không thành công.",
         response.status,

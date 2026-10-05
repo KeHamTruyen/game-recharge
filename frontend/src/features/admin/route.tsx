@@ -190,6 +190,8 @@ export function AdminRoute() {
           const updated = await api.admin.updateTransaction(id, status)
           store.setTransactions((current) => current.map((item) => item.id === id ? updated : item))
         }}
+        onUpdateProfile={async (name) => { await store.updateProfile(name) }}
+        onChangePassword={store.changePassword}
       />
     </div>
   )

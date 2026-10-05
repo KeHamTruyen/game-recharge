@@ -173,6 +173,19 @@ export const api = {
     async logout() {
       await client.request("/auth/logout", { method: "POST" })
     },
+    async updateProfile(name: string) {
+      const result = await client.request<ApiEnvelope<{ user: ApiUser }>>("/auth/profile", {
+        method: "PUT",
+        body: JSON.stringify({ name }),
+      })
+      return mapUser(result.data.user)
+    },
+    async changePassword(currentPassword: string, newPassword: string) {
+      await client.request("/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify({ currentPassword, newPassword }),
+      })
+    },
   },
   catalog: {
     async load() {

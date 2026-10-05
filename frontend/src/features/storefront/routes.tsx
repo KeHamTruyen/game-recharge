@@ -49,7 +49,7 @@ export function ServiceDetailRoute() {
   }
 
   const packages = store.servicePackages.filter(
-    (p) => p.serviceId === service.id,
+    (p) => String(p.serviceId) === String(service.id),
   )
 
   return (
@@ -62,7 +62,7 @@ export function ServiceDetailRoute() {
         const firstItem = store.cart[0]
         if (
           firstItem &&
-          (firstItem.pkg.game !== pkg.game || firstItem.pkg.templateId !== pkg.templateId)
+          (String(firstItem.pkg.serviceId) !== String(pkg.serviceId) || firstItem.pkg.templateId !== pkg.templateId)
         ) {
           store.setNotice("Bạn chỉ có thể mua các gói cùng game và cùng mẫu thông tin trong một lần.")
           return

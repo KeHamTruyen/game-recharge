@@ -10,6 +10,7 @@ export interface JwtPayload {
   userId: string;
   email: string;
   role: Role;
+  tokenVersion?: number;
 }
 
 // Extend Express Request to carry the authenticated user
@@ -75,7 +76,7 @@ export async function requireAuth(
     // Verify user still exists and is active
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
-      select: { id: true, email: true, role: true, status: true },
+      select: { id: true, email: true, role: true, status: true, tokenVersion: true },
     });
 
     if (!user || user.status === 'BLOCKED') {
@@ -84,7 +85,12 @@ export async function requireAuth(
       return;
     }
 
-    req.user = { userId: user.id, email: user.email, role: user.role };
+    if (user.tokenVersion !== (payload.tokenVersion ?? 0)) {
+      clearAuthCookie(res);
+      res.status(401).json({ success: false, error: 'Session expired' });
+      return;
+    }
+    req.user = { userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion };
     next();
   } catch {
     clearAuthCookie(res);
@@ -110,11 +116,13 @@ export async function optionalAuth(
     const payload = verifyToken(token);
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
-      select: { id: true, email: true, role: true, status: true },
+      select: { id: true, email: true, role: true, status: true, tokenVersion: true },
     });
 
     if (user && user.status === 'ACTIVE') {
-      req.user = { userId: user.id, email: user.email, role: user.role };
+      if (user.tokenVersion === (payload.tokenVersion ?? 0)) {
+        req.user = { userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion };
+      }
     }
   } catch {
     // Ignore invalid tokens for optional auth

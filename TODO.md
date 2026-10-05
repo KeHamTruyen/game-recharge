@@ -51,8 +51,8 @@
 
 ### Tài khoản
 
-- [ ] Thêm endpoint đổi mật khẩu và kết nối form tài khoản/admin.
-- [ ] Thu hồi session/token cũ sau khi đổi mật khẩu.
+- [x] Thêm endpoint đổi mật khẩu và kết nối form tài khoản/admin.
+- [x] Thu hồi session/token cũ sau khi đổi mật khẩu bằng `tokenVersion`.
 - [x] Hoàn thiện email OTP 6 số khi đăng ký, có thời hạn và giới hạn thử.
 - [x] Thêm email OTP reset password; email order/thanh toán vẫn chưa tích hợp.
 
@@ -84,5 +84,6 @@
 - [x] SePay VietQR động và webhook API key ở mức tích hợp ban đầu.
 - [x] Frontend polling trạng thái thanh toán.
 - [x] Email OTP 6 số cho đăng ký và quên mật khẩu; lưu hash, hết hạn 10 phút, tối đa 5 lần thử.
+- [x] Đồng bộ validation mật khẩu và hiển thị chi tiết lỗi từ backend.
 
 > Không chuyển các mục thanh toán sang trạng thái hoàn tất production cho đến khi đã cấu hình webhook HTTPS, chạy giao dịch thật giá trị nhỏ và kiểm thử đầy đủ.

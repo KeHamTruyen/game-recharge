@@ -42,7 +42,8 @@ export function LoginModal({
       return setError("Vui lòng nhập tên hiển thị.")
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return setError("Vui lòng nhập đúng định dạng email.")
-    if (password.length < 6) return setError("Mật khẩu cần có ít nhất 6 ký tự.")
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,72}$/.test(password))
+      return setError("Mật khẩu cần có chữ hoa, chữ thường, chữ số và dài 6-72 ký tự.")
     if (mode === "register" && password !== confirmPassword)
       return setError("Mật khẩu xác nhận chưa khớp.")
     try {
@@ -116,7 +117,8 @@ export function LoginModal({
                   if (verification === "register") {
                     await onLogin(email, code, displayName)
                   } else {
-                    if (newPassword.length < 6) throw new Error("Mật khẩu mới cần có ít nhất 6 ký tự.")
+                    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,72}$/.test(newPassword))
+                      throw new Error("Mật khẩu mới cần có chữ hoa, chữ thường, chữ số và dài 6-72 ký tự.")
                     await onResetPassword(email, code, newPassword)
                     setVerification(null)
                     setMode("login")

@@ -7,7 +7,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-import { authLimiter, apiLimiter, adminLimiter, orderLimiter, paymentStatusLimiter, paymentWebhookLimiter } from './middleware/rateLimiter.js';
+import { apiLimiter, adminLimiter, orderLimiter, paymentStatusLimiter, paymentWebhookLimiter } from './middleware/rateLimiter.js';
 import { requestContext } from './middleware/requestContext.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { prisma } from './lib/prisma.js';
@@ -103,7 +103,7 @@ app.get('/health', (_req, res) => {
 // ─── API Routes ───────────────────────────────────────────────────────────────
 
 // Auth routes — strict rate limiting
-app.use('/api/auth', authLimiter, authRouter);
+app.use('/api/auth', apiLimiter, authRouter);
 
 // Catalog — public browsing, general API limit
 app.use('/api/catalog', apiLimiter, catalogRouter);

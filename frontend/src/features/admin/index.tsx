@@ -86,6 +86,8 @@ export function AdminPage({
   transactions,
   onUpdateUser,
   onUpdateTransaction,
+  onUpdateProfile,
+  onChangePassword,
 }: {
   products: Product[]
   services: Service[]
@@ -114,6 +116,8 @@ export function AdminPage({
   transactions: Transaction[]
   onUpdateUser: (id: number, updates: Partial<ManagedUser>) => void
   onUpdateTransaction: (id: number, status: TransactionStatus) => void
+  onUpdateProfile: (name: string) => Promise<void>
+  onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
 }) {
   const [tab, setTab] =
     useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount">(
@@ -859,7 +863,7 @@ export function AdminPage({
           ) : tab === "contacts" ? (
             <ContactAdminEditor info={contactInfo} onChange={onUpdateContact} />
           ) : (
-            <AdminAccount />
+            <AdminAccount onUpdateProfile={onUpdateProfile} onChangePassword={onChangePassword} />
           )}
         </div>
       </div>
@@ -1642,9 +1646,19 @@ export function AdminUsers({
   )
 }
 
-export function AdminAccount() {
+export function AdminAccount({
+  onUpdateProfile,
+  onChangePassword,
+}: {
+  onUpdateProfile: (name: string) => Promise<void>
+  onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
+}) {
   const [name, setName] = useState("NEXA Administrator")
   const [email, setEmail] = useState("admin@nexatopup.vn")
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [message, setMessage] = useState("")
   return (
     <div className="admin-account-page">
       <div className="panel-heading">
@@ -1663,7 +1677,11 @@ export function AdminAccount() {
       </div>
       <form
         className="admin-account-form"
-        onSubmit={(event) => event.preventDefault()}
+        onSubmit={async (event) => {
+          event.preventDefault()
+          await onUpdateProfile(name)
+          setMessage("Đã cập nhật thông tin.")
+        }}
       >
         <h3>Thông tin cá nhân</h3>
         <label>
@@ -1684,23 +1702,32 @@ export function AdminAccount() {
       </form>
       <form
         className="admin-account-form security"
-        onSubmit={(event) => event.preventDefault()}
+        onSubmit={async (event) => {
+          event.preventDefault()
+          if (newPassword !== confirmPassword) throw new Error("Mật khẩu xác nhận không khớp.")
+          await onChangePassword(currentPassword, newPassword)
+          setCurrentPassword("")
+          setNewPassword("")
+          setConfirmPassword("")
+          setMessage("Đã đổi mật khẩu.")
+        }}
       >
         <h3>Đổi mật khẩu</h3>
         <label>
           <span>Mật khẩu hiện tại</span>
-          <input type="password" />
+          <input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} />
         </label>
         <label>
           <span>Mật khẩu mới</span>
-          <input type="password" />
+          <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
         </label>
         <label>
           <span>Xác nhận mật khẩu mới</span>
-          <input type="password" />
+          <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
         </label>
         <button className="secondary-button">Cập nhật mật khẩu</button>
       </form>
+      {message && <span className="form-success">{message}</span>}
     </div>
   )
 }

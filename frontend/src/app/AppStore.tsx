@@ -81,6 +81,8 @@ type AppStoreValue = AppSnapshot & {
   setNotice: Setter<string>
   login(email: string, password?: string, name?: string): Promise<User>
   logout(): Promise<void>
+  updateProfile(name: string): Promise<User>
+  changePassword(currentPassword: string, newPassword: string): Promise<void>
 }
 
 const AppStoreContext = createContext<AppStoreValue | null>(null)
@@ -220,6 +222,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           : await api.orders.mine())
       }
       return nextUser
+    },
+    async updateProfile(name) {
+      const nextUser = await api.auth.updateProfile(name)
+      setUser(nextUser)
+      return nextUser
+    },
+    async changePassword(currentPassword, newPassword) {
+      await api.auth.changePassword(currentPassword, newPassword)
     },
     async logout() {
       if (apiReady) await api.auth.logout()
