@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { Navigate, useNavigate, useParams } from "react-router"
+import { Navigate, useNavigate, useOutletContext, useParams } from "react-router"
+import type { PublicLayoutContext } from "@/app/layouts"
 import { useAppStore } from "@/app/AppStore"
 import {
   CheckoutPage,
@@ -134,6 +135,7 @@ export function TopupInformationRoute() {
 export function CheckoutRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
+  const { openLogin } = useOutletContext<PublicLayoutContext>()
 
   const pkg = store.selectedPackage || store.cart[0]?.pkg
   const service = store.selectedService
@@ -184,7 +186,7 @@ export function CheckoutRoute() {
         try {
         if (!store.user) {
           store.setNotice("Vui lòng đăng nhập trước khi thanh toán.")
-          navigate("/nap-game")
+          openLogin()
           return false
         }
         const result = await api.orders.checkout(

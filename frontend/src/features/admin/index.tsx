@@ -88,6 +88,8 @@ export function AdminPage({
   onUpdateTransaction,
   onUpdateProfile,
   onChangePassword,
+  adminName,
+  adminEmail,
 }: {
   products: Product[]
   services: Service[]
@@ -118,6 +120,8 @@ export function AdminPage({
   onUpdateTransaction: (id: number, status: TransactionStatus) => void
   onUpdateProfile: (name: string) => Promise<void>
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
+  adminName: string
+  adminEmail: string
 }) {
   const [tab, setTab] =
     useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount">(
@@ -863,7 +867,12 @@ export function AdminPage({
           ) : tab === "contacts" ? (
             <ContactAdminEditor info={contactInfo} onChange={onUpdateContact} />
           ) : (
-            <AdminAccount onUpdateProfile={onUpdateProfile} onChangePassword={onChangePassword} />
+            <AdminAccount
+              initialName={adminName}
+              initialEmail={adminEmail}
+              onUpdateProfile={onUpdateProfile}
+              onChangePassword={onChangePassword}
+            />
           )}
         </div>
       </div>
@@ -1647,18 +1656,26 @@ export function AdminUsers({
 }
 
 export function AdminAccount({
+  initialName,
+  initialEmail,
   onUpdateProfile,
   onChangePassword,
 }: {
+  initialName: string
+  initialEmail: string
   onUpdateProfile: (name: string) => Promise<void>
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
 }) {
-  const [name, setName] = useState("NEXA Administrator")
-  const [email, setEmail] = useState("admin@nexatopup.vn")
+  const [name, setName] = useState(initialName)
+  const [email, setEmail] = useState(initialEmail)
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [message, setMessage] = useState("")
+  useEffect(() => {
+    setName(initialName)
+    setEmail(initialEmail)
+  }, [initialName, initialEmail])
   return (
     <div className="admin-account-page">
       <div className="panel-heading">
@@ -1679,8 +1696,13 @@ export function AdminAccount({
         className="admin-account-form"
         onSubmit={async (event) => {
           event.preventDefault()
-          await onUpdateProfile(name)
-          setMessage("Đã cập nhật thông tin.")
+          setMessage("")
+          try {
+            await onUpdateProfile(name)
+            setMessage("Đã cập nhật thông tin.")
+          } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Không thể cập nhật thông tin.")
+          }
         }}
       >
         <h3>Thông tin cá nhân</h3>
@@ -1704,12 +1726,17 @@ export function AdminAccount({
         className="admin-account-form security"
         onSubmit={async (event) => {
           event.preventDefault()
-          if (newPassword !== confirmPassword) throw new Error("Mật khẩu xác nhận không khớp.")
-          await onChangePassword(currentPassword, newPassword)
-          setCurrentPassword("")
-          setNewPassword("")
-          setConfirmPassword("")
-          setMessage("Đã đổi mật khẩu.")
+          setMessage("")
+          try {
+            if (newPassword !== confirmPassword) throw new Error("Mật khẩu xác nhận không khớp.")
+            await onChangePassword(currentPassword, newPassword)
+            setCurrentPassword("")
+            setNewPassword("")
+            setConfirmPassword("")
+            setMessage("Đã đổi mật khẩu.")
+          } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Không thể đổi mật khẩu.")
+          }
         }}
       >
         <h3>Đổi mật khẩu</h3>

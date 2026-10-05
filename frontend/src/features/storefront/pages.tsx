@@ -167,7 +167,7 @@ export function ServiceDetailPage({
       <div className="service-detail-header">
         <div className={`service-detail-icon tone-${service.tone}`}>
           {service.image ? (
-            <img src={service.image} alt="" style={{ objectPosition: service.imagePosition || "50% 50%" }} />
+            <img src={service.image} alt={`Nạp game ${service.name}`} style={{ objectPosition: service.imagePosition || "50% 50%" }} />
           ) : (
             <span>{service.iconText}</span>
           )}
@@ -226,7 +226,7 @@ export function ServiceDetailPage({
                   {service.image ? (
                     <img
                       src={service.image}
-                      alt=""
+                      alt={`Nạp game ${service.name}`}
                       style={{
                         objectPosition: service.imagePosition || "50% 50%",
                       }}
@@ -611,7 +611,7 @@ export function CheckoutPage({
               {service.image ? (
                 <img
                   src={service.image}
-                  alt=""
+                  alt={`Gói nạp ${product.name}`}
                   style={{ objectPosition: service.imagePosition || "50% 50%" }}
                 />
               ) : (
@@ -795,7 +795,7 @@ export function LegacyTopupInformationPage({
             {product.image ? (
               <img
                 src={product.image}
-                alt=""
+                alt={`Nạp game ${service.name}`}
                 style={{ objectPosition: product.imagePosition || "50% 50%" }}
               />
             ) : (

@@ -284,8 +284,13 @@ export function AccountPage({
           </div>
           <form onSubmit={async (event) => {
             event.preventDefault()
-            await onUpdateProfile(name)
-            setProfileMessage("Đã cập nhật thông tin.")
+            setProfileMessage("")
+            try {
+              await onUpdateProfile(name)
+              setProfileMessage("Đã cập nhật thông tin.")
+            } catch (error) {
+              setProfileMessage(error instanceof Error ? error.message : "Không thể cập nhật thông tin.")
+            }
           }}>
             <label>
               <span>Tên hiển thị</span>
@@ -312,10 +317,15 @@ export function AccountPage({
             <h3>Đổi mật khẩu</h3>
             <form onSubmit={async (event) => {
               event.preventDefault()
-              await onChangePassword(currentPassword, newPassword)
-              setCurrentPassword("")
-              setNewPassword("")
-              setProfileMessage("Đã đổi mật khẩu.")
+              setProfileMessage("")
+              try {
+                await onChangePassword(currentPassword, newPassword)
+                setCurrentPassword("")
+                setNewPassword("")
+                setProfileMessage("Đã đổi mật khẩu.")
+              } catch (error) {
+                setProfileMessage(error instanceof Error ? error.message : "Không thể đổi mật khẩu.")
+              }
             }}>
               <input type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} placeholder="Mật khẩu hiện tại" />
               <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="Mật khẩu mới" />

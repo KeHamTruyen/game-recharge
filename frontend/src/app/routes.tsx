@@ -1,10 +1,12 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router"
 import { AppStoreProvider } from "@/app/AppStore"
 import { PublicLayout } from "@/app/layouts"
+import { Seo } from "@/app/Seo"
 
 function AppRoot() {
   return (
     <AppStoreProvider>
+      <Seo />
       <Outlet />
     </AppStoreProvider>
   )

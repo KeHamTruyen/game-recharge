@@ -96,7 +96,11 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
   const headEnd = config.customScripts?.headEnd ?? ''
   const bodyStart = config.customScripts?.bodyStart ?? ''
   const bodyEnd = config.customScripts?.bodyEnd ?? ''
-  const robotsTxt = config.robots?.index === false ? 'User-agent: *\nDisallow: /\n' : ''
+  const siteUrl = (process.env.VITE_SITE_URL || 'https://nexatopup.vn').replace(/\/+$/, '')
+  const robotsTxt = config.robots?.index === false
+    ? 'User-agent: *\nDisallow: /\n'
+    : `User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n`
+  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${['/nap-game', '/trung-gian', '/lien-he'].map((route) => `  <url><loc>${siteUrl}${route}</loc></url>`).join('\n')}\n</urlset>\n`
 
   return {
     name: 'figma-site-configuration',
@@ -109,13 +113,18 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
       })
     },
     generateBundle() {
-      if (!robotsTxt) return
-
+      this.emitFile({
+      type: 'asset',
+      fileName: 'robots.txt',
+      source: robotsTxt,
+      })
+      if (config.robots?.index !== false) {
       this.emitFile({
         type: 'asset',
-        fileName: 'robots.txt',
-        source: robotsTxt,
+        fileName: 'sitemap.xml',
+        source: sitemapXml,
       })
+      }
     },
     transformIndexHtml: {
       order: 'pre',

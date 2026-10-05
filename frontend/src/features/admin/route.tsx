@@ -33,6 +33,8 @@ export function AdminRoute() {
         onLogout={() => store.logout()}
       />
       <AdminPage
+        adminName={store.user.name}
+        adminEmail={store.user.email}
         products={store.products}
         services={store.services}
         categories={store.categories}

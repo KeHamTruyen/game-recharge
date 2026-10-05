@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { NavLink, Outlet, useNavigate } from "react-router"
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router"
 import { Icon, Toast } from "@/components/ui"
 import { platformLogos } from "@/data/mock-data"
 import { LoginModal } from "@/features/auth/LoginModal"
@@ -12,9 +12,14 @@ const navigation = [
   { to: "/lien-he", label: "Liên hệ", icon: "headset" as const },
 ]
 
+export type PublicLayoutContext = {
+  openLogin: () => void
+}
+
 export function PublicLayout() {
   const store = useAppStore()
   const navigate = useNavigate()
+  const location = useLocation()
   const [loginOpen, setLoginOpen] = useState(false)
   const hour = new Date().getHours()
   const isSupportOnline = hour >= 9 && hour < 22
@@ -22,7 +27,8 @@ export function PublicLayout() {
   const handleLogin = async (email: string, password: string, name?: string) => {
     const user = await store.login(email, password, name)
     setLoginOpen(false)
-    navigate(user.role === "admin" ? "/admin" : "/tai-khoan")
+    if (user.role === "admin") navigate("/admin")
+    else if (location.pathname === "/tai-khoan") navigate("/tai-khoan")
   }
   const handleSupport = () => {
     if (!isSupportOnline) {
@@ -141,7 +147,7 @@ export function PublicLayout() {
         </nav>
       </header>
       <main>
-        <Outlet />
+        <Outlet context={{ openLogin: () => setLoginOpen(true) }} />
       </main>
       <button
         className={`chat-fab ${isSupportOnline ? "online" : "offline"}`}
