@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useEffect, useState } from "react"
 import type { ContactInfo, MiddlemanInfo, Transaction } from "@/domain/models"
 import { Icon, Pagination, formatPrice } from "@/components/ui"
 
@@ -114,7 +114,7 @@ export function MiddlemanPage({ info }: { info: MiddlemanInfo }) {
           <Icon name="shield" size={24} />
         </span>
         <div>
-          <small>CAM KẾT TRUNG GIAN UY TÍN TẠI NEXA</small>
+          <small>CAM KẾT TRUNG GIAN UY TÍN TẠI DUKE1305</small>
           <p>{info.commitment}</p>
         </div>
       </div>
@@ -178,12 +178,14 @@ export function AccountPage({
   onLogout,
   onUpdateProfile,
   onChangePassword,
+  onRefresh,
 }: {
   email: string
   transactions: Transaction[]
   onLogout: () => void
   onUpdateProfile: (name: string) => Promise<void>
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
+  onRefresh?: () => Promise<Transaction[]>
 }) {
   const [tab, setTab] = useState<"overview" | "history" | "profile">("overview")
   const [historyPage, setHistoryPage] = useState(1)
@@ -192,6 +194,28 @@ export function AccountPage({
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [profileMessage, setProfileMessage] = useState("")
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // Tự động làm mới dữ liệu giao dịch khi vào trang tài khoản
+  useEffect(() => {
+    if (!onRefresh) return
+    onRefresh()
+    const timer = setInterval(() => {
+      onRefresh()
+    }, 15000)
+    return () => clearInterval(timer)
+  }, [onRefresh])
+
+  const handleManualRefresh = async () => {
+    if (!onRefresh || isRefreshing) return
+    setIsRefreshing(true)
+    try {
+      await onRefresh()
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
   const completed = transactions.filter((item) => item.status === "Hoàn thành")
   const totalSpent = completed.reduce((sum, item) => sum + item.amount, 0)
   const historyPages = Math.max(1, Math.ceil(transactions.length / 5))
@@ -209,9 +233,23 @@ export function AccountPage({
           <h1>Xin chào, game thủ</h1>
           <p>{email}</p>
         </div>
-        <button className="secondary-button" onClick={onLogout}>
-          Đăng xuất
-        </button>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          {onRefresh && (
+            <button
+              className="ghost-button"
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              title="Làm mới trạng thái đơn hàng"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              <Icon name="clock" size={16} />
+              {isRefreshing ? "Đang đồng bộ..." : "Làm mới đơn"}
+            </button>
+          )}
+          <button className="secondary-button" onClick={onLogout}>
+            Đăng xuất
+          </button>
+        </div>
       </div>
       <div className="account-tabs">
         <button

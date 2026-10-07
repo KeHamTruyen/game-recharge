@@ -48,8 +48,18 @@ export type PaymentDetails = {
   qrCode: string
 }
 
+function getDefaultApiUrl(): string {
+  if (typeof window !== "undefined" && window.location) {
+    const hostname = window.location.hostname
+    if (hostname && hostname !== "localhost" && hostname !== "127.0.0.1") {
+      return `${window.location.protocol}//${hostname}:3000/api`
+    }
+  }
+  return "http://localhost:3000/api"
+}
+
 const client = new HttpClient(
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api",
+  import.meta.env.VITE_API_URL || getDefaultApiUrl(),
 )
 
 const roleMap = { CUSTOMER: "customer", ADMIN: "admin" } as const
@@ -130,10 +140,10 @@ function mapTemplate(item: Record<string, unknown>): TopupTemplate {
 
 export const api = {
   auth: {
-    async login(email: string, password: string) {
+    async login(email: string, password: string, scope?: "storefront" | "admin") {
       const result = await client.request<ApiEnvelope<{ user: ApiUser }>>("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, ...(scope ? { scope } : {}) }),
       })
       return mapUser(result.data.user)
     },
@@ -323,8 +333,26 @@ export const api = {
       })
       return result.data
     },
+    async updateTag(id: string, name: string) {
+      const result = await client.request<ApiEnvelope<{ id: string; name: string }>>(`/admin/tags/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: JSON.stringify({ name }),
+      })
+      return result.data
+    },
     async deleteTag(id: string) {
       await client.request(`/admin/tags/${encodeURIComponent(id)}`, { method: "DELETE" })
+    },
+    async uploadImage(payload: { filename?: string; data: string }) {
+      const result = await client.request<ApiEnvelope<{ url: string }>>("/admin/upload", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      })
+      return result.data
+    },
+    async mediaList() {
+      const result = await client.request<ApiEnvelope<string[]>>("/admin/media")
+      return result.data
     },
     async createStatus(status: ProductStatus) {
       const result = await client.request<ApiEnvelope<ProductStatus>>("/admin/product-statuses", {

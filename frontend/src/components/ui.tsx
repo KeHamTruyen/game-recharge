@@ -1,4 +1,4 @@
-import { PointerEvent as ReactPointerEvent, useRef } from "react"
+import { useEffect, PointerEvent as ReactPointerEvent, useRef } from "react"
 import type { IconName, Product, ProductStatus, Service, ServicePackage } from "@/domain/models"
 import { initialProductStatuses } from "@/data/mock-data"
 
@@ -34,6 +34,20 @@ export function Icon({ name, size = 20 }: { name: IconName size?: number }) {
       <>
         <path d="M12 20h9" />
         <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4L16.5 3.5Z" />
+      </>
+    ),
+    eye: (
+      <>
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+        <circle cx="12" cy="12" r="3" />
+      </>
+    ),
+    "eye-off": (
+      <>
+        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+        <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+        <line x1="2" y1="2" x2="22" y2="22" />
       </>
     ),
     game: (
@@ -286,15 +300,93 @@ export function ProductCard({
 export function ServiceCard({
   service,
   onClick,
+  onImagePositionChange,
 }: {
   service: Service
-  onClick: () => void
+  onClick?: () => void
+  onImagePositionChange?: (x: number, y: number) => void
 }) {
+  const dragState = useRef<{
+    pointerId: number
+    startX: number
+    startY: number
+    originX: number
+    originY: number
+    width: number
+    height: number
+  } | null>(null)
+
+  const currentPosition = (service.imagePosition || "50% 50%")
+    .split(" ")
+    .map((value) => Number.parseFloat(value))
+
+  const startImageDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!service.image || !onImagePositionChange) return
+    const rect = event.currentTarget.getBoundingClientRect()
+    dragState.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: currentPosition[0] || 50,
+      originY: currentPosition[1] || 50,
+      width: rect.width,
+      height: rect.height,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const moveImage = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragState.current
+    if (!drag || drag.pointerId !== event.pointerId || !onImagePositionChange)
+      return
+    const x = Math.max(
+      0,
+      Math.min(
+        100,
+        drag.originX - ((event.clientX - drag.startX) / drag.width) * 100,
+      ),
+    )
+    const y = Math.max(
+      0,
+      Math.min(
+        100,
+        drag.originY - ((event.clientY - drag.startY) / drag.height) * 100,
+      ),
+    )
+    onImagePositionChange(Math.round(x), Math.round(y))
+  }
+
+  const stopImageDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragState.current?.pointerId === event.pointerId) {
+      dragState.current = null
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+  }
+
   return (
-    <article className="service-card" onClick={onClick} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && onClick()}>
-      <div className={`service-art tone-${service.tone}`}>
+    <article
+      className="service-card"
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={(e) => onClick && e.key === "Enter" && onClick()}
+    >
+      <div
+        className={`service-art tone-${service.tone}${
+          service.image && onImagePositionChange ? " image-draggable" : ""
+        }`}
+        onPointerDown={startImageDrag}
+        onPointerMove={moveImage}
+        onPointerUp={stopImageDrag}
+        onPointerCancel={stopImageDrag}
+      >
         {service.image ? (
-          <img className="product-image" src={service.image} alt={service.name} style={{ objectPosition: service.imagePosition || "50% 50%" }} />
+          <img
+            className="product-image"
+            src={service.image}
+            alt={service.name}
+            style={{ objectPosition: service.imagePosition || "50% 50%" }}
+          />
         ) : (
           <div className="art-symbol">
             <span>{service.iconText}</span>
@@ -345,15 +437,25 @@ export function TrustStrip() {
 export function Toast({
   message,
   onClose,
+  duration = 3500,
 }: {
   message: string
   onClose: () => void
+  duration?: number
 }) {
+  useEffect(() => {
+    if (!message || !duration) return
+    const timer = setTimeout(() => {
+      onClose()
+    }, duration)
+    return () => clearTimeout(timer)
+  }, [message, duration, onClose])
+
   return (
-    <div className="toast">
+    <div className="toast" role="status" aria-live="polite">
       <Icon name="clock" size={20} />
       <span>{message}</span>
-      <button onClick={onClose}>
+      <button onClick={onClose} aria-label="Đóng thông báo">
         <Icon name="close" size={17} />
       </button>
     </div>

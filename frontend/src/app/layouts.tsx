@@ -25,15 +25,20 @@ export function PublicLayout() {
   const isSupportOnline = hour >= 9 && hour < 22
 
   const handleLogin = async (email: string, password: string, name?: string) => {
-    const user = await store.login(email, password, name)
+    const user = await store.login(email, password, name, "storefront")
+    if (user.role === "admin") {
+      await store.logout()
+      throw new Error(
+        "Tài khoản quản trị viên không thể đăng nhập tại đây. Vui lòng truy cập trang quản trị riêng (/admin).",
+      )
+    }
     setLoginOpen(false)
-    if (user.role === "admin") navigate("/admin")
-    else if (location.pathname === "/tai-khoan") navigate("/tai-khoan")
+    if (location.pathname === "/tai-khoan") navigate("/tai-khoan")
   }
   const handleSupport = () => {
     if (!isSupportOnline) {
       store.setNotice(
-        "Hiện đang ngoài giờ hỗ trợ. Đội ngũ NEXA sẽ trực tuyến lại lúc 09:00.",
+        "Hiện đang ngoài giờ hỗ trợ. Đội ngũ DUKE1305 sẽ trực tuyến lại lúc 09:00.",
       )
       return
     }
@@ -58,7 +63,7 @@ export function PublicLayout() {
               <Icon name="spark" size={19} />
             </span>
             <span>
-              NEXA<span>TOPUP</span>
+              DUKE<span>1305</span>
             </span>
           </NavLink>
           <nav className="desktop-nav" aria-label="Điều hướng chính">
@@ -84,27 +89,56 @@ export function PublicLayout() {
                           <small>Hiển thị toàn bộ sản phẩm</small>
                         </span>
                       </NavLink>
-                      {store.games.map((game) => (
-                        <NavLink
-                          key={game}
-                          to={`/nap-game?game=${encodeURIComponent(game)}`}
-                        >
-                          <span className="game-dropdown-icon">
-                            <Icon name="game" size={17} />
-                          </span>
-                          <span>
-                            <strong>{game}</strong>
-                            <small>
-                              {
-                                store.products.filter(
-                                  (product) => product.game === game,
-                                ).length
-                              }{" "}
-                              dịch vụ
-                            </small>
-                          </span>
-                        </NavLink>
-                      ))}
+                      {store.games
+                        .filter((gameName) => {
+                          const svc = store.services.find(
+                            (s) => s.name === gameName || s.game === gameName,
+                          )
+                          return svc ? svc.isActive !== false : true
+                        })
+                        .map((game) => {
+                          const svc = store.services.find(
+                            (s) => s.name === game || s.game === game,
+                          )
+                          const pkgCount = store.servicePackages.filter(
+                            (pkg) =>
+                              (svc && pkg.serviceId === svc.id) ||
+                              store.products.some(
+                                (p) => p.id === pkg.id && p.game === game,
+                              ),
+                          ).filter((pkg) => pkg.isActive !== false).length
+
+                          return (
+                            <NavLink
+                              key={game}
+                              to={`/nap-game?game=${encodeURIComponent(game)}`}
+                            >
+                              <span className="game-dropdown-icon">
+                                {svc?.image ? (
+                                  <img
+                                    src={svc.image}
+                                    alt=""
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      borderRadius: "7px",
+                                      objectFit: "cover",
+                                      objectPosition: svc.imagePosition || "50% 50%",
+                                    }}
+                                  />
+                                ) : (
+                                  <Icon name="game" size={18} />
+                                )}
+                              </span>
+                              <span>
+                                <strong>{game}</strong>
+                                <small>
+                                  {pkgCount} dịch vụ
+                                </small>
+                              </span>
+                            </NavLink>
+                          )
+                        })}
                     </div>
                   </div>
                 </div>
@@ -119,11 +153,17 @@ export function PublicLayout() {
             <button
               className="login-button"
               onClick={() =>
-                store.user ? navigate("/tai-khoan") : setLoginOpen(true)
+                store.user
+                  ? navigate(store.user.role === "admin" ? "/admin" : "/tai-khoan")
+                  : setLoginOpen(true)
               }
             >
               <Icon name="user" size={17} />{" "}
-              {store.user ? "Tài khoản" : "Đăng nhập"}
+              {store.user
+                ? store.user.role === "admin"
+                  ? "Quản trị"
+                  : "Tài khoản"
+                : "Đăng nhập"}
             </button>
           </div>
         </div>
@@ -138,11 +178,19 @@ export function PublicLayout() {
             type="button"
             className={store.user ? "account-nav-button signed-in" : "account-nav-button"}
             onClick={() =>
-              store.user ? navigate("/tai-khoan") : setLoginOpen(true)
+              store.user
+                ? navigate(store.user.role === "admin" ? "/admin" : "/tai-khoan")
+                : setLoginOpen(true)
             }
           >
             <Icon name="user" size={19} />
-            <span>{store.user ? "Tài khoản" : "Đăng nhập"}</span>
+            <span>
+              {store.user
+                ? store.user.role === "admin"
+                  ? "Quản trị"
+                  : "Tài khoản"
+                : "Đăng nhập"}
+            </span>
           </button>
         </nav>
       </header>

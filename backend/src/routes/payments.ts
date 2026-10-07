@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import crypto from 'node:crypto';
 import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -32,11 +33,15 @@ router.post(
   '/webhook',
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authorization = req.header('authorization');
-      if (
-        !env.SEPAY_API_KEY ||
-        authorization !== `Apikey ${env.SEPAY_API_KEY}`
-      ) {
+      const authorization = req.header('authorization') || '';
+      const expectedHeader = `Apikey ${env.SEPAY_API_KEY || ''}`;
+      const isAuthValid =
+        Boolean(env.SEPAY_API_KEY) &&
+        crypto.timingSafeEqual(
+          crypto.createHash('sha256').update(authorization).digest(),
+          crypto.createHash('sha256').update(expectedHeader).digest()
+        );
+      if (!isAuthValid) {
         res.status(401).json({ success: false, error: 'Invalid webhook credentials' });
         return;
       }
@@ -54,7 +59,7 @@ router.post(
         return;
       }
 
-      const orderCode = payload.content.match(/NEXA[A-Z0-9]+/)?.[0];
+      const orderCode = payload.content.match(/(?:DUKE|NEXA)[A-Z0-9]+/i)?.[0]?.toUpperCase();
       if (!orderCode) {
         res.status(200).json({ success: true });
         return;
@@ -84,7 +89,7 @@ router.post(
         await tx.transaction.updateMany({
           where: {
             paymentOrderCode: orderCode,
-            paymentStatus: { in: ['PENDING', 'UNPAID'] },
+            paymentStatus: { in: ['PENDING', 'UNPAID', 'EXPIRED'] },
           },
           data: {
             paymentStatus: 'PAID',

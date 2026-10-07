@@ -1,0 +1,214 @@
+import { describe, it, before, after } from 'node:test';
+import assert from 'node:assert';
+import bcrypt from 'bcrypt';
+import { createTestClient, TestClient, prisma } from './helpers.js';
+
+describe('Admin Panel Operations & Audit Logging', () => {
+  let adminClient: TestClient;
+  const adminEmail = 'admin-crud@test.com';
+  const password = 'Password123!';
+
+  let createdServiceId: string;
+  let createdPackageId: string;
+  let createdTagId: string;
+  let testTransactionId: string;
+
+  before(async () => {
+    adminClient = await createTestClient();
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: { passwordHash, role: 'ADMIN', status: 'ACTIVE', tokenVersion: 0 },
+      create: { email: adminEmail, name: 'Admin CRUD', passwordHash, role: 'ADMIN', status: 'ACTIVE', tokenVersion: 0 },
+    });
+
+    // Ensure status exists
+    let status = await prisma.productStatus.findFirst();
+    if (!status) {
+      status = await prisma.productStatus.create({
+        data: { id: 'status-admin-test', name: 'Có sẵn', iconName: 'CheckCircle', color: 'green', purchasable: true },
+      });
+    }
+
+    // Create a transaction fixture for status updates
+    const tx = await prisma.transaction.create({
+      data: {
+        code: `NXTEST${Date.now()}`,
+        userEmail: 'customer@test.com',
+        packageName: 'Admin Test Item',
+        gameName: 'Admin Test Game',
+        amount: 50000,
+        quantity: 1,
+        status: 'PENDING',
+        paymentStatus: 'UNPAID',
+      },
+    });
+    testTransactionId = tx.id;
+
+    // Login as admin
+    const loginRes = await adminClient.post('/api/auth/login', { email: adminEmail, password });
+    assert.strictEqual(loginRes.status, 200);
+  });
+
+  after(async () => {
+    if (createdPackageId) {
+      await prisma.servicePackage.deleteMany({ where: { id: createdPackageId } }).catch(() => {});
+    }
+    if (createdServiceId) {
+      await prisma.service.deleteMany({ where: { id: createdServiceId } }).catch(() => {});
+    }
+    if (createdTagId) {
+      await prisma.catalogTag.deleteMany({ where: { id: createdTagId } }).catch(() => {});
+    }
+    if (testTransactionId) {
+      await prisma.transaction.deleteMany({ where: { id: testTransactionId } }).catch(() => {});
+    }
+    await prisma.auditLog.deleteMany({ where: { path: { in: ['/services', '/packages', '/tags', '/settings/siteConfig'] } } }).catch(() => {});
+    await prisma.user.deleteMany({ where: { email: adminEmail } }).catch(() => {});
+    await adminClient.close();
+  });
+
+  it('POST /api/admin/services creates a service with audit log and X-Request-Id', async () => {
+    const res = await adminClient.post('/api/admin/services', {
+      name: 'Admin Test Service',
+      game: 'Admin Test Game',
+      description: 'Created during admin tests',
+      iconText: 'AT',
+      tone: 'emerald',
+      isActive: true,
+      sortOrder: 10,
+    });
+
+    assert.strictEqual(res.status, 201);
+    assert.strictEqual(res.body.success, true);
+    assert.ok(res.body.data.id);
+    assert.ok(res.headers.get('x-request-id'), 'Response must have X-Request-Id header');
+
+    createdServiceId = res.body.data.id;
+
+    // Check audit log created in database
+    const audit = await prisma.auditLog.findFirst({
+      where: {
+        method: 'POST',
+        path: '/services',
+        statusCode: 201,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    assert.ok(audit, 'Audit log entry should exist');
+  });
+
+  it('POST /api/admin/services rejects invalid payload (empty name)', async () => {
+    const res = await adminClient.post('/api/admin/services', {
+      name: '',
+      game: 'Valid Game',
+    });
+    assert.strictEqual(res.status, 400);
+    assert.strictEqual(res.body.success, false);
+  });
+
+  it('PUT /api/admin/services/:id updates service', async () => {
+    const res = await adminClient.put(`/api/admin/services/${createdServiceId}`, {
+      description: 'Updated description for test service',
+      sortOrder: 20,
+    });
+
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.success, true);
+    assert.strictEqual(res.body.data.description, 'Updated description for test service');
+    assert.strictEqual(res.body.data.sortOrder, 20);
+  });
+
+  it('POST /api/admin/packages creates a service package', async () => {
+    const status = await prisma.productStatus.findFirst();
+    const res = await adminClient.post('/api/admin/packages', {
+      serviceId: createdServiceId,
+      name: 'Admin Test Gem Pack',
+      price: 99000,
+      oldPrice: 120000,
+      statusId: status?.id ?? 'status-admin-test',
+      tags: ['special', 'deal'],
+      isActive: true,
+      sortOrder: 1,
+    });
+
+    assert.strictEqual(res.status, 201);
+    assert.strictEqual(res.body.success, true);
+    assert.ok(res.body.data.id);
+    assert.deepStrictEqual(res.body.data.tags, ['special', 'deal']);
+
+    createdPackageId = res.body.data.id;
+  });
+
+  it('POST /api/admin/packages rejects negative price', async () => {
+    const res = await adminClient.post('/api/admin/packages', {
+      serviceId: createdServiceId,
+      name: 'Negative Price Pack',
+      price: -5000,
+    });
+    assert.strictEqual(res.status, 400);
+  });
+
+  it('PUT /api/admin/packages/:id updates package', async () => {
+    const res = await adminClient.put(`/api/admin/packages/${createdPackageId}`, {
+      price: 89000,
+      name: 'Updated Gem Pack',
+    });
+
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.success, true);
+    assert.strictEqual(res.body.data.price, '89000');
+    assert.strictEqual(res.body.data.name, 'Updated Gem Pack');
+  });
+
+  it('POST /api/admin/tags and DELETE /api/admin/tags/:id', async () => {
+    const tagRes = await adminClient.post('/api/admin/tags', {
+      name: `test-tag-${Date.now()}`,
+    });
+    assert.strictEqual(tagRes.status, 201);
+    createdTagId = tagRes.body.data.id;
+
+    const delRes = await adminClient.delete(`/api/admin/tags/${createdTagId}`);
+    assert.strictEqual(delRes.status, 200);
+    assert.strictEqual(delRes.body.success, true);
+    createdTagId = '';
+  });
+
+  it('PATCH /api/admin/transactions/:id/status updates transaction status', async () => {
+    const res = await adminClient.patch(`/api/admin/transactions/${testTransactionId}/status`, {
+      status: 'PROCESSING',
+    });
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.success, true);
+    assert.strictEqual(res.body.data.status, 'PROCESSING');
+
+    // Verify DB
+    const tx = await prisma.transaction.findUnique({ where: { id: testTransactionId } });
+    assert.strictEqual(tx?.status, 'PROCESSING');
+  });
+
+  it('PUT /api/admin/settings/:key updates site settings', async () => {
+    const res = await adminClient.put('/api/admin/settings/siteConfig', {
+      siteName: 'NEXA TOPUP',
+      maintenanceMode: false,
+    });
+
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.success, true);
+  });
+
+  it('DELETE /api/admin/packages/:id deletes package', async () => {
+    const res = await adminClient.delete(`/api/admin/packages/${createdPackageId}`);
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.success, true);
+    createdPackageId = '';
+  });
+
+  it('DELETE /api/admin/services/:id deletes service', async () => {
+    const res = await adminClient.delete(`/api/admin/services/${createdServiceId}`);
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.success, true);
+    createdServiceId = '';
+  });
+});

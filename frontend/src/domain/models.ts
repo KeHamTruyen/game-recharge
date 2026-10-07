@@ -1,4 +1,4 @@
-export type IconName = "bag" | "bridge" | "chat" | "check" | "chevron" | "clock" | "close" | "edit" | "game" | "grid" | "headset" | "home" | "mail" | "plus" | "search" | "shield" | "spark" | "trash" | "user"
+export type IconName = "bag" | "bridge" | "chat" | "check" | "chevron" | "clock" | "close" | "edit" | "eye" | "eye-off" | "game" | "grid" | "headset" | "home" | "mail" | "plus" | "search" | "shield" | "spark" | "trash" | "user"
 
 export type User = { id?: string; email: string; name?: string; role: "customer" | "admin" }
 
@@ -80,6 +80,7 @@ export type Product = {
   templateId: string
   image?: string
   imagePosition?: string
+  isActive?: boolean
 }
 
 export type TopupFieldType = "text" | "number" | "email" | "select" | "textarea"

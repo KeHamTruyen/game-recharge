@@ -131,7 +131,7 @@ async function main() {
     update: { role: 'ADMIN', status: 'ACTIVE' },
     create: {
       email: adminEmail,
-      name: 'NEXA Admin',
+      name: 'DUKE1305 Admin',
       passwordHash: adminPasswordHash,
       role: 'ADMIN',
       status: 'ACTIVE',
@@ -437,6 +437,59 @@ async function main() {
   }
   console.log('✅ Honkai Impact 3 seeded');
 
+  // Aniimo
+  const aniimo = await prisma.service.upsert({
+    where: { id: 'svc-aniimo' },
+    update: {
+      image: '/uploads/animo.jpg',
+      imagePosition: 'center',
+    },
+    create: {
+      id: 'svc-aniimo',
+      name: 'Aniimo',
+      game: 'Aniimo',
+      description: 'Nạp tài nguyên và gói ưu đãi cho game Aniimo nhanh chóng, bảo mật.',
+      iconText: 'ANI',
+      tone: 'emerald',
+      image: '/uploads/animo.jpg',
+      imagePosition: 'center',
+      sortOrder: 7,
+      isActive: true,
+    },
+  });
+
+  const aniimoPackages = [
+    { name: 'Gói Tân Thủ Aniimo', description: 'Gói ưu đãi khởi đầu Aniimo', price: 49000, tags: ['starter'], statusId: 'available', templateId: 'genshin-uid', note: 'Ưu đãi', image: '/uploads/animo.jpg' },
+    { name: 'Thẻ Tháng Aniimo Pass', description: 'Nhận quà mỗi ngày 30 ngày', price: 119000, tags: ['monthly'], statusId: 'available', templateId: 'genshin-uid', note: 'Bán chạy', image: '/uploads/animo.jpg' },
+    { name: 'Gói 980 Đá Aniimo', description: '980 Đá nạp trực tiếp qua UID', price: 349000, tags: ['hot'], statusId: 'available', templateId: 'genshin-uid', note: 'Phổ biến', image: '/uploads/animo.jpg' },
+    { name: 'Gói 1980 Đá Aniimo', description: '1980 Đá nạp trực tiếp qua UID', price: 699000, tags: ['premium'], statusId: 'available', templateId: 'genshin-uid', note: 'Giá tốt', image: '/uploads/animo.jpg' },
+  ];
+
+  for (let i = 0; i < aniimoPackages.length; i++) {
+    const pkg = aniimoPackages[i];
+    if (pkg) {
+      await prisma.servicePackage.upsert({
+        where: { id: `pkg-aniimo-${i + 1}` },
+        update: { image: pkg.image },
+        create: {
+          id: `pkg-aniimo-${i + 1}`,
+          serviceId: aniimo.id,
+          name: pkg.name,
+          description: pkg.description,
+          price: pkg.price,
+          note: pkg.note,
+          tags: pkg.tags,
+          statusId: pkg.statusId,
+          templateId: pkg.templateId,
+          image: pkg.image,
+          sortOrder: i + 1,
+          isActive: true,
+        },
+      });
+    }
+  }
+  console.log('✅ Aniimo seeded');
+
   // ─── Default Settings ─────────────────────────────────────────────────────
   await prisma.setting.upsert({
     where: { id: 'middlemanInfo' },
@@ -453,7 +506,7 @@ async function main() {
           { step: 4, text: 'Transaction marked complete.' },
         ],
         guaranteeHours: 24,
-        supportEmail: 'support@nexatopup.vn',
+        supportEmail: 'support@duke1305.vn',
       },
     },
   });
@@ -464,11 +517,11 @@ async function main() {
     create: {
       id: 'contactInfo',
       value: {
-        email: 'support@nexatopup.vn',
-        facebook: 'https://facebook.com/nexatopup',
+        email: 'support@duke1305.vn',
+        facebook: 'https://facebook.com/duke1305',
         zalo: '0900000000',
-        discord: 'https://discord.gg/nexatopup',
-        telegram: 'https://t.me/nexatopup',
+        discord: 'https://discord.gg/duke1305',
+        telegram: 'https://t.me/duke1305',
         workingHours: '8:00 - 22:00 (GMT+7)',
         responseTime: 'Within 30 minutes',
       },
@@ -481,7 +534,7 @@ async function main() {
     create: {
       id: 'siteConfig',
       value: {
-        siteName: 'NEXA TOPUP',
+        siteName: 'DUKE1305',
         tagline: 'Fast, Safe & Affordable Game Top-Ups',
         currency: 'VND',
         currencySymbol: '₫',
@@ -492,6 +545,17 @@ async function main() {
   });
 
   console.log('✅ Settings seeded');
+
+  // ─── Catalog Tags ────────────────────────────────────────────────────────
+  const initialTags = ['Nạp game', 'Thẻ tháng', 'Thẻ hành trình', 'Ưu đãi', 'hot', 'value', 'starter', 'monthly', 'popular', 'bonus', 'premium'];
+  for (const name of initialTags) {
+    await prisma.catalogTag.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
+  console.log('✅ Catalog tags seeded');
   console.log('\n🎉 Database seeding complete!');
 }
 

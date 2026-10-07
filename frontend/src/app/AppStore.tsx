@@ -79,10 +79,52 @@ type AppStoreValue = AppSnapshot & {
   setCart: Setter<CartItem[]>
   setCheckoutInfo: Setter<Record<string, string>>
   setNotice: Setter<string>
-  login(email: string, password?: string, name?: string): Promise<User>
+  login(email: string, password?: string, name?: string, scope?: "storefront" | "admin"): Promise<User>
   logout(): Promise<void>
   updateProfile(name: string): Promise<User>
   changePassword(currentPassword: string, newPassword: string): Promise<void>
+  refreshTransactions(): Promise<Transaction[]>
+}
+
+function sanitizeBrandText(text?: string): string {
+  if (!text) return ""
+  return text
+    .replace(/DUKE\s*1035/gi, "DUKE1305")
+    .replace(/duke1035/gi, "duke1305")
+    .replace(/NEXA\s*TOPUP/gi, "DUKE1305")
+    .replace(/NEXATOPUP/gi, "DUKE1305")
+    .replace(/NEXA/gi, "DUKE1305")
+    .replace(/nexatopup\.vn/gi, "duke1305.vn")
+}
+
+function sanitizeContactInfo(info: ContactInfo): ContactInfo {
+  return {
+    ...info,
+    intro: sanitizeBrandText(info.intro),
+    supportHours: info.supportHours || "09:00 → 22:00 hàng ngày",
+    commitmentTitle: sanitizeBrandText(info.commitmentTitle),
+    commitment: sanitizeBrandText(info.commitment),
+    channels: (info.channels || []).map((ch) => ({
+      ...ch,
+      name: sanitizeBrandText(ch.name),
+      description: sanitizeBrandText(ch.description),
+      label: sanitizeBrandText(ch.label),
+    })),
+  }
+}
+
+function sanitizeMiddlemanInfo(info: MiddlemanInfo): MiddlemanInfo {
+  return {
+    ...info,
+    intro: sanitizeBrandText(info.intro),
+    contactDescription: sanitizeBrandText(info.contactDescription),
+    zaloName: sanitizeBrandText(info.zaloName),
+    accepted: sanitizeBrandText(info.accepted),
+    rejected: sanitizeBrandText(info.rejected),
+    warning: sanitizeBrandText(info.warning),
+    accountHolder: sanitizeBrandText(info.accountHolder),
+    commitment: sanitizeBrandText(info.commitment),
+  }
 }
 
 const AppStoreContext = createContext<AppStoreValue | null>(null)
@@ -92,14 +134,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     const stored = localStorageRepository.load(fallbackSnapshot)
     return {
       ...stored,
-      middlemanInfo: {
+      middlemanInfo: sanitizeMiddlemanInfo({
         ...initialMiddlemanInfo,
         ...stored.middlemanInfo,
         fees: stored.middlemanInfo?.fees?.length
           ? stored.middlemanInfo.fees
           : initialMiddlemanInfo.fees,
-      },
-      contactInfo: {
+      }),
+      contactInfo: sanitizeContactInfo({
         ...initialContactInfo,
         ...stored.contactInfo,
         intro: stored.contactInfo?.intro || initialContactInfo.intro,
@@ -109,7 +151,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         channels: stored.contactInfo?.channels?.length
           ? stored.contactInfo.channels
           : initialContactInfo.channels,
-      },
+      }),
     }
   })
   const [products, setProducts] = useState(initial.products)
@@ -134,14 +176,18 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [apiReady, setApiReady] = useState(false)
 
   const mergeRemoteContent = (remoteMiddleman: MiddlemanInfo, remoteContact: ContactInfo) => {
-    setMiddlemanInfo((current) => ({
-      ...current,
-      ...remoteMiddleman,
-    }))
-    setContactInfo((current) => ({
-      ...current,
-      ...remoteContact,
-    }))
+    if (remoteMiddleman && typeof remoteMiddleman === "object") {
+      setMiddlemanInfo((current) => sanitizeMiddlemanInfo({
+        ...current,
+        ...remoteMiddleman,
+      }))
+    }
+    if (remoteContact && typeof remoteContact === "object") {
+      setContactInfo((current) => sanitizeContactInfo({
+        ...current,
+        ...remoteContact,
+      }))
+    }
   }
 
   useEffect(() => {
@@ -157,8 +203,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       .then(async ([session, catalog]) => {
         if (cancelled) return
         setServices(catalog.services)
-        setGames(catalog.services.map((service) => service.name))
-        setCategories(["Tất cả", ...catalog.tags])
+        const allTags = Array.from(new Set([...catalog.tags, ...catalog.packages.flatMap((pkg) => pkg.tags)])).filter((t) => t && t !== "Tất cả")
+        setCategories(["Tất cả", ...allTags])
         setServicePackages(catalog.packages)
         setProducts(catalog.packages.map((pkg) => {
           const service = catalog.services.find((item) => item.id === pkg.serviceId)
@@ -174,6 +220,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
             tone: service?.tone || "cyan",
             statusId: pkg.statusId,
             templateId: pkg.templateId,
+            image: pkg.image,
+            imagePosition: pkg.imagePosition,
+            isActive: pkg.isActive,
           }
         }))
         setTopupTemplates(catalog.templates)
@@ -211,9 +260,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     setUsers, setTransactions, setServices, setServicePackages, setSelectedProduct,
     setSelectedPackage, setSelectedService, setSelectedQuantity, setCart, setCheckoutInfo,
     setNotice,
-    async login(email, password, name) {
+    async login(email, password, name, scope) {
       const nextUser = password
-        ? name ? await api.auth.verifyRegistration(email, password) : await api.auth.login(email, password)
+        ? name ? await api.auth.verifyRegistration(email, password) : await api.auth.login(email, password, scope)
         : { email, role: "customer" as const }
       setUser(nextUser)
       if (password) {
@@ -235,6 +284,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       if (apiReady) await api.auth.logout()
       setUser(null)
       setTransactions([])
+    },
+    async refreshTransactions() {
+      if (!user) return []
+      const nextTx = user.role === "admin"
+        ? await api.admin.transactions()
+        : await api.orders.mine()
+      setTransactions(nextTx)
+      return nextTx
     },
   }), [
     products, productStatuses, topupTemplates, categories, games, middlemanInfo,

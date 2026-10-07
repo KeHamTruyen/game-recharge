@@ -37,6 +37,7 @@ const registerSchema = z.object({
 const loginSchema = z.object({
   email: z.string().email('Invalid email address').toLowerCase().trim(),
   password: z.string().min(1, 'Password is required'),
+  scope: z.enum(['storefront', 'admin']).optional(),
 });
 const codeSchema = z.object({
   email: z.string().email().toLowerCase().trim(),
@@ -157,7 +158,13 @@ router.post('/reset-password', authLimiter, async (req, res, next): Promise<void
   try {
     const { email, code, password } = resetSchema.parse(req.body);
     await consumeCode(email, 'reset', code);
-    await prisma.user.update({ where: { email }, data: { passwordHash: await bcrypt.hash(password, 12) } });
+    await prisma.user.update({
+      where: { email },
+      data: {
+        passwordHash: await bcrypt.hash(password, 12),
+        tokenVersion: { increment: 1 },
+      },
+    });
     res.json({ success: true, data: { message: 'Đặt lại mật khẩu thành công.' } });
   } catch (err) { next(err); }
 });
@@ -169,7 +176,7 @@ router.post(
   authLimiter,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { email, password } = loginSchema.parse(req.body);
+      const { email, password, scope } = loginSchema.parse(req.body);
 
       const user = await prisma.user.findUnique({
         where: { email },
@@ -203,6 +210,17 @@ router.post(
           'Your account has been suspended. Please contact support.',
           403
         );
+      }
+
+      if (scope === 'storefront' && user.role === 'ADMIN') {
+        throw new AppError(
+          'Tài khoản quản trị viên không thể đăng nhập tại đây. Vui lòng truy cập trang quản trị riêng (/admin).',
+          403
+        );
+      }
+
+      if (scope === 'admin' && user.role !== 'ADMIN') {
+        throw new AppError('Tài khoản không có quyền quản trị.', 403);
       }
 
       const token = signToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion });

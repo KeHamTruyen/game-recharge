@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
+import path from 'node:path';
 import { apiLimiter, adminLimiter, orderLimiter, paymentStatusLimiter, paymentWebhookLimiter } from './middleware/rateLimiter.js';
 import { requestContext } from './middleware/requestContext.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
@@ -52,6 +53,22 @@ app.use(
 
 const allowedOrigins = env.CORS_ORIGIN.split(',').map((o) => o.trim());
 
+function isLocalOrPrivateNetwork(origin: string): boolean {
+  try {
+    const url = new URL(origin);
+    const hostname = url.hostname;
+    return (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('10.') ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -61,7 +78,10 @@ app.use(
         return;
       }
 
-      if (allowedOrigins.includes(origin)) {
+      if (
+        allowedOrigins.includes(origin) ||
+        (env.NODE_ENV !== 'production' && isLocalOrPrivateNetwork(origin))
+      ) {
         callback(null, true);
       } else {
         callback(new Error(`CORS policy: origin ${origin} is not allowed`));
@@ -80,6 +100,16 @@ app.use(
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 app.use(cookieParser(env.COOKIE_SECRET));
+
+// ─── Static Files (Uploads) ──────────────────────────────────────────────────
+app.use(
+  '/uploads',
+  express.static(path.join(process.cwd(), 'uploads'), {
+    setHeaders: (res) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    },
+  })
+);
 
 // ─── Trust Proxy ─────────────────────────────────────────────────────────────
 // Required for rate-limiting behind nginx/load balancer
@@ -131,7 +161,7 @@ async function startServer(): Promise<void> {
     console.log('✅ Database connected');
 
     const server = app.listen(env.PORT, () => {
-      console.log(`🚀 NEXA TOPUP API running on http://localhost:${env.PORT}`);
+      console.log(`🚀 DUKE1305 API running on http://localhost:${env.PORT}`);
       console.log(`   Environment: ${env.NODE_ENV}`);
       console.log(`   CORS allowed: ${allowedOrigins.join(', ')}`);
     });
@@ -179,6 +209,7 @@ async function startServer(): Promise<void> {
         }));
       });
     }, 5 * 60 * 1000);
+    staleOrderCheck.unref();
 
     // ─── Graceful Shutdown ─────────────────────────────────────────────────
     const shutdown = async (signal: string): Promise<void> => {
@@ -208,6 +239,15 @@ async function startServer(): Promise<void> {
   }
 }
 
-void startServer();
+const isTest =
+  process.env.NODE_ENV === 'test' ||
+  process.argv.includes('--test') ||
+  process.execArgv.includes('--test') ||
+  Boolean(process.env.NODE_TEST_CONTEXT) ||
+  Boolean(process.env.TEST);
+if (!isTest) {
+  void startServer();
+}
 
+export { app, startServer };
 export default app;

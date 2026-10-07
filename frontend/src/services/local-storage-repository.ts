@@ -20,12 +20,13 @@ export type AppSnapshot = {
   transactions?: Transaction[]
 }
 
-const STORAGE_KEY = "nexa-app-snapshot-v1"
+const STORAGE_KEY = "duke1305-app-snapshot-v1"
+const LEGACY_STORAGE_KEY = "duke1035-app-snapshot-v1"
 
 export const localStorageRepository = {
   load(fallback: AppSnapshot): AppSnapshot {
     try {
-      const value = localStorage.getItem(STORAGE_KEY)
+      const value = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY)
       return value ? { ...fallback, ...JSON.parse(value) } : fallback
     } catch {
       return fallback

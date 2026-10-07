@@ -12,7 +12,7 @@ export function AdminRoute() {
       <div className="app-shell admin-shell">
         <AdminLogin
           onLogin={async (email, password) => {
-            const user = await store.login(email, password)
+            const user = await store.login(email, password, undefined, "admin")
             if (user.role !== "admin") {
               await store.logout()
               store.setNotice("Tài khoản không có quyền quản trị.")
@@ -78,9 +78,10 @@ export function AdminRoute() {
             templateId: updates.templateId,
             image: updates.image || null,
             imagePosition: updates.imagePosition || null,
+            isActive: updates.isActive !== undefined ? updates.isActive : undefined,
           })
           store.setServicePackages((current) => current.map((item) => item.id === id ? updated : item))
-          store.setProducts((current) => current.map((item) => item.id === id ? { ...item, ...updates } : item))
+          store.setProducts((current) => current.map((item) => item.id === id ? { ...item, ...updates, isActive: updated.isActive } : item))
         }}
         onAddProductStatus={async (status) => {
           const created = await api.admin.createStatus(status)
@@ -117,27 +118,87 @@ export function AdminRoute() {
           )
         }}
         onDeleteTopupTemplate={async (id) => {
-          await api.admin.deleteTemplate(id)
-          const fallback =
-            store.topupTemplates.find((item) => item.id !== id)?.id || ""
-          store.setTopupTemplates((current) =>
-            current.filter((item) => item.id !== id),
-          )
-          store.setProducts((current) =>
-            current.map((item) =>
-              item.templateId === id ? { ...item, templateId: fallback } : item,
-            ),
-          )
+          try {
+            await api.admin.deleteTemplate(id)
+            store.setTopupTemplates((current) =>
+              current.filter((item) => item.id !== id),
+            )
+            store.setProducts((current) =>
+              current.map((item) =>
+                item.templateId === id ? { ...item, templateId: "" } : item,
+              ),
+            )
+            store.setServicePackages((current) =>
+              current.map((item) =>
+                item.templateId === id ? { ...item, templateId: "" } : item,
+              ),
+            )
+            store.setNotice("Đã xóa mẫu thông tin nạp thành công.")
+          } catch (error) {
+            store.setNotice(error instanceof Error ? error.message : "Xóa mẫu thông tin thất bại.")
+          }
         }}
         onAddCategory={async (name) => {
           if (store.categories.includes(name)) return
-          await api.admin.createTag(name)
-          store.setCategories((current) => [...current, name])
+          try {
+            await api.admin.createTag(name)
+            store.setCategories((current) => [...current, name])
+            store.setNotice(`Đã thêm tag "${name}" thành công.`)
+          } catch (error) {
+            store.setNotice(error instanceof Error ? error.message : "Thêm tag thất bại.")
+          }
+        }}
+        onUpdateCategory={async (oldName, newName) => {
+          try {
+            const tags = await api.admin.tags()
+            const tag = tags.find((item) => item.name === oldName)
+            if (tag) {
+              await api.admin.updateTag(tag.id, newName)
+            }
+            store.setCategories((current) =>
+              current.map((item) => (item === oldName ? newName : item))
+            )
+            store.setServicePackages((current) =>
+              current.map((item) => ({
+                ...item,
+                tags: item.tags.map((t) => (t === oldName ? newName : t)),
+              }))
+            )
+            store.setProducts((current) =>
+              current.map((item) => ({
+                ...item,
+                tags: item.tags.map((t) => (t === oldName ? newName : t)),
+              }))
+            )
+            store.setNotice(`Đã đổi tên tag thành "${newName}".`)
+          } catch (error) {
+            store.setNotice(error instanceof Error ? error.message : "Cập nhật tag thất bại.")
+          }
         }}
         onDeleteCategory={async (name) => {
-          const tag = (await api.admin.tags()).find((item) => item.name === name)
-          if (tag) await api.admin.deleteTag(tag.id)
-          store.setCategories((current) => current.filter((item) => item === "Tất cả" || item !== name))
+          try {
+            const tags = await api.admin.tags()
+            const tag = tags.find((item) => item.name === name)
+            if (tag) {
+              await api.admin.deleteTag(tag.id)
+            }
+            store.setCategories((current) => current.filter((item) => item === "Tất cả" || item !== name))
+            store.setServicePackages((current) =>
+              current.map((item) => ({
+                ...item,
+                tags: item.tags.filter((t) => t !== name),
+              }))
+            )
+            store.setProducts((current) =>
+              current.map((item) => ({
+                ...item,
+                tags: item.tags.filter((t) => t !== name),
+              }))
+            )
+            store.setNotice(`Đã xóa tag "${name}" thành công.`)
+          } catch (error) {
+            store.setNotice(error instanceof Error ? error.message : "Xóa tag thất bại.")
+          }
         }}
         onAddGame={async (name) => {
           if (store.services.some((item) => item.name === name || item.game === name)) return
@@ -155,20 +216,35 @@ export function AdminRoute() {
         }}
         onDeleteGame={async (name) => {
           const service = store.services.find((item) => item.name === name || item.game === name)
-          if (service) {
-            await api.admin.deleteService(service.id)
-            store.setServices((current) => current.filter((item) => item.id !== service.id))
-            store.setServicePackages((current) => current.filter((item) => item.serviceId !== service.id))
-            store.setProducts((current) => current.filter((item) => item.game !== name))
+          try {
+            if (service) {
+              await api.admin.deleteService(service.id)
+              store.setServices((current) => current.filter((item) => item.id !== service.id))
+              store.setServicePackages((current) => current.filter((item) => item.serviceId !== service.id))
+              store.setProducts((current) => current.filter((item) => item.game !== name))
+            }
+            store.setGames((current) => current.filter((item) => item !== name))
+            store.setNotice(`Đã xóa game "${name}" thành công.`)
+          } catch (error) {
+            store.setNotice(error instanceof Error ? error.message : "Xóa game thất bại.")
           }
-          store.setGames((current) => current.filter((item) => item !== name))
         }}
         onUpdateGame={async (name, updates) => {
           const service = store.services.find((item) => item.name === name || item.game === name)
           if (!service) return
-          const updated = await api.admin.updateService(service.id, updates)
-          store.setServices((current) => current.map((item) => item.id === service.id ? updated : item))
-          store.setGames((current) => current.map((item) => item === name ? updated.name : item))
+          try {
+            const updated = await api.admin.updateService(service.id, updates)
+            store.setServices((current) => current.map((item) => item.id === service.id ? updated : item))
+            store.setGames((current) => current.map((item) => item === name ? (updated.name || item) : item))
+            if (updated.name && updated.name !== name) {
+              store.setProducts((current) =>
+                current.map((item) => item.game === name ? { ...item, game: updated.name } : item)
+              )
+            }
+            store.setNotice(`Đã cập nhật thông tin game "${updated.name || name}" thành công.`)
+          } catch (error) {
+            store.setNotice(error instanceof Error ? error.message : "Cập nhật game thất bại.")
+          }
         }}
         middlemanInfo={store.middlemanInfo}
         onUpdateMiddleman={async (info) => {

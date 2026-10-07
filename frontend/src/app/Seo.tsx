@@ -2,8 +2,8 @@ import { useEffect } from "react"
 import { useLocation } from "react-router"
 import { useAppStore } from "@/app/AppStore"
 
-const siteName = "NEXA TOPUP"
-const defaultDescription = "Nạp game nhanh, an toàn và minh bạch với NEXA TOPUP."
+const siteName = "DUKE1305"
+const defaultDescription = "Nạp game nhanh, an toàn và minh bạch với DUKE1305."
 
 function setMeta(name: string, content: string, property = false) {
   const attribute = property ? "property" : "name"
@@ -33,7 +33,7 @@ export function Seo() {
       : location.pathname === "/trung-gian"
         ? { title: `Dịch vụ trung gian game | ${siteName}`, description: "Dịch vụ trung gian giao dịch game an toàn, minh bạch và hỗ trợ nhanh." }
         : location.pathname === "/lien-he"
-          ? { title: `Liên hệ hỗ trợ nạp game | ${siteName}`, description: "Liên hệ NEXA TOPUP để được hỗ trợ nạp game và xử lý giao dịch." }
+          ? { title: `Liên hệ hỗ trợ nạp game | ${siteName}`, description: "Liên hệ DUKE1305 để được hỗ trợ nạp game và xử lý giao dịch." }
           : location.pathname === "/nap-game"
             ? { title: `Nạp game online nhanh, an toàn | ${siteName}`, description: "Nạp game chính hãng, giá tốt, thanh toán an toàn và hỗ trợ 24/7." }
             : { title: siteName, description: defaultDescription }

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useEffect, useMemo, useState } from "react"
 import type {
   ContactChannel,
   ContactInfo,
@@ -16,7 +16,7 @@ import type {
   TransactionStatus,
 } from "@/domain/models"
 import { platformLogos } from "@/data/mock-data"
-import { Icon, Pagination, ProductCard, formatPrice } from "@/components/ui"
+import { Icon, Pagination, ProductCard, ServiceCard, formatPrice } from "@/components/ui"
 
 export function AdminHeader({
   email,
@@ -35,7 +35,7 @@ export function AdminHeader({
             <Icon name="shield" size={19} />
           </span>
           <span>
-            NEXA<span>ADMIN</span>
+            DUKE<span>1305 ADMIN</span>
           </span>
         </div>
         <div className="admin-header-label">
@@ -58,6 +58,228 @@ export function AdminHeader({
   )
 }
 
+export function AdminImagePicker({
+  value,
+  onChange,
+  label = "Ảnh",
+  galleryImages = [],
+}: {
+  value: string
+  onChange: (image: string) => void
+  label?: string
+  galleryImages?: string[]
+}) {
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false)
+  const [isManualUrl, setIsManualUrl] = useState(false)
+  const [serverImages, setServerImages] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    import("@/services/api").then(({ api }) => {
+      api.admin
+        .mediaList()
+        .then((res) => {
+          if (active && Array.isArray(res)) {
+            setServerImages(res)
+          }
+        })
+        .catch(() => {})
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const [localHistory, setLocalHistory] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("duke1305_uploaded_gallery")
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  const allImages = useMemo(() => {
+    const list = new Set<string>()
+    for (const img of serverImages) if (img) list.add(img)
+    for (const img of galleryImages) if (img) list.add(img)
+    for (const img of localHistory) if (img) list.add(img)
+    if (value) list.add(value)
+    return Array.from(list)
+  }, [serverImages, galleryImages, localHistory, value])
+
+  const handleUploadFile = async (file?: File) => {
+    if (!file) return
+    setIsUploading(true)
+    try {
+      const reader = new FileReader()
+      const dataUri = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(String(reader.result))
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+
+      let finalUrl = dataUri
+      try {
+        const { api } = await import("@/services/api")
+        const res = await api.admin.uploadImage({
+          filename: file.name,
+          data: dataUri,
+        })
+        if (res?.url) {
+          finalUrl = res.url
+        }
+      } catch {
+        // Fallback to dataUri if server upload route fails
+      }
+
+      onChange(finalUrl)
+      setLocalHistory((prev) => {
+        const next = Array.from(new Set([finalUrl, ...prev]))
+        try {
+          localStorage.setItem(
+            "duke1305_uploaded_gallery",
+            JSON.stringify(next.slice(0, 30)),
+          )
+        } catch {}
+        return next
+      })
+    } catch (err) {
+      console.error("Upload error:", err)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  return (
+    <div className="admin-image-picker-wrap">
+      <div className="admin-image-picker-header">
+        <span>{label}</span>
+        <button
+          type="button"
+          className="admin-image-picker-url-toggle"
+          onClick={() => setIsManualUrl(!isManualUrl)}
+        >
+          {isManualUrl ? "Đóng nhập link URL" : "Nhập link URL"}
+        </button>
+      </div>
+
+      {isManualUrl && (
+        <div style={{ marginBottom: "6px" }}>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Dán link ảnh (https://... hoặc /uploads/...)"
+          />
+        </div>
+      )}
+
+      <div className="admin-image-picker-controls">
+        <label className="admin-image-picker-btn upload-btn">
+          <Icon name="plus" size={14} />
+          <span>{isUploading ? "Đang tải ảnh lên..." : "Tải ảnh từ máy"}</span>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            style={{ display: "none" }}
+            onChange={(e) => handleUploadFile(e.target.files?.[0])}
+            disabled={isUploading}
+          />
+        </label>
+
+        <button
+          type="button"
+          className={`admin-image-picker-btn gallery-btn ${isGalleryOpen ? "active" : ""}`}
+          onClick={() => setIsGalleryOpen(!isGalleryOpen)}
+        >
+          <Icon name="grid" size={14} />
+          <span>Kho ảnh ({allImages.length})</span>
+        </button>
+
+        {value && (
+          <button
+            type="button"
+            className="admin-image-picker-btn clear-btn"
+            onClick={() => onChange("")}
+            title="Xóa ảnh"
+          >
+            <Icon name="close" size={13} /> Xóa ảnh
+          </button>
+        )}
+      </div>
+
+      {value && (
+        <div className="admin-image-picker-preview">
+          <img
+            src={value}
+            alt="Ảnh đã chọn"
+            onError={(e) => {
+              ;(e.target as HTMLImageElement).style.opacity = "0.4"
+            }}
+          />
+          <div className="preview-meta">
+            <strong>Ảnh đang chọn</strong>
+            <small title={value}>
+              {value.startsWith("data:") ? "Ảnh tải trực tiếp từ máy" : value}
+            </small>
+          </div>
+        </div>
+      )}
+
+      {isGalleryOpen && (
+        <div className="admin-image-gallery-drawer">
+          <div className="gallery-drawer-head">
+            <strong>Kho ảnh đã tải & sử dụng ({allImages.length})</strong>
+            <small>Bấm vào ảnh bất kỳ để áp dụng ngay</small>
+          </div>
+          {allImages.length === 0 ? (
+            <div className="gallery-empty">
+              <Icon name="grid" size={18} />
+              <span>
+                Chưa có ảnh nào trong kho. Hãy bấm &quot;Tải ảnh từ máy&quot; để thêm ảnh đầu tiên!
+              </span>
+            </div>
+          ) : (
+            <div className="gallery-thumbnails-grid">
+              {allImages.map((imgSrc, idx) => {
+                const isSelected = value === imgSrc
+                return (
+                  <button
+                    key={`${imgSrc}-${idx}`}
+                    type="button"
+                    className={`gallery-thumb-item ${isSelected ? "selected" : ""}`}
+                    onClick={() => {
+                      onChange(imgSrc)
+                      setIsGalleryOpen(false)
+                    }}
+                    title={imgSrc.startsWith("data:") ? "Ảnh tải lên" : imgSrc}
+                  >
+                    <img
+                      src={imgSrc}
+                      alt={`Gallery item ${idx + 1}`}
+                      onError={(e) => {
+                        ;(e.target as HTMLImageElement).parentElement!.style.display =
+                          "none"
+                      }}
+                    />
+                    {isSelected && (
+                      <span className="selected-badge">
+                        <Icon name="check" size={12} />
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function AdminPage({
   products,
   services,
@@ -74,6 +296,7 @@ export function AdminPage({
   onUpdateTopupTemplate,
   onDeleteTopupTemplate,
   onAddCategory,
+  onUpdateCategory,
   onDeleteCategory,
   onAddGame,
   onDeleteGame,
@@ -106,6 +329,7 @@ export function AdminPage({
   onUpdateTopupTemplate: (id: string, template: TopupTemplate) => void
   onDeleteTopupTemplate: (id: string) => void
   onAddCategory: (name: string) => void | Promise<void>
+  onUpdateCategory?: (oldName: string, newName: string) => void | Promise<void>
   onDeleteCategory: (name: string) => void | Promise<void>
   onAddGame: (name: string) => void
   onDeleteGame: (name: string) => void
@@ -124,12 +348,12 @@ export function AdminPage({
   adminEmail: string
 }) {
   const [tab, setTab] =
-    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount">(
+    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount" | "analytics">(
       "products",
     )
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const selectTab = (
-    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount",
+    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount" | "analytics",
   ) => {
     setTab(nextTab)
     setSidebarOpen(false)
@@ -142,6 +366,7 @@ export function AdminPage({
     categories[1] ? [categories[1]] : [],
   )
   const [newCategory, setNewCategory] = useState("")
+  const [editingTag, setEditingTag] = useState<{ oldName: string; name: string } | null>(null)
   const [newGame, setNewGame] = useState("")
   const [editingGame, setEditingGame] = useState<string | null>(null)
   const [gameName, setGameName] = useState("")
@@ -150,7 +375,8 @@ export function AdminPage({
   const [gameTone, setGameTone] = useState("blue")
   const [gameSortOrder, setGameSortOrder] = useState("0")
   const [gameImage, setGameImage] = useState("")
-  const [gameImagePosition, setGameImagePosition] = useState("center")
+  const [gameImageX, setGameImageX] = useState(50)
+  const [gameImageY, setGameImageY] = useState(50)
   const [gameIsActive, setGameIsActive] = useState(true)
   const [image, setImage] = useState("")
   const [imageX, setImageX] = useState(50)
@@ -160,6 +386,7 @@ export function AdminPage({
   const [productTemplateId, setProductTemplateId] = useState(
     topupTemplates[0]?.id || "",
   )
+  const [productIsActive, setProductIsActive] = useState(true)
   const [productFormError, setProductFormError] = useState("")
   const [productSaved, setProductSaved] = useState(false)
   const [addProductOpen, setAddProductOpen] = useState(false)
@@ -174,8 +401,6 @@ export function AdminPage({
     if (!price || Number(price) <= 0)
       return setProductFormError("Giá bán phải lớn hơn 0.")
     const parsedPrice = Number(price)
-    if (selectedTags.length === 0)
-      return setProductFormError("Sản phẩm cần có ít nhất một tag.")
     if (!productTemplateId)
       return setProductFormError("Vui lòng chọn mẫu thông tin nạp.")
     const payload = {
@@ -191,6 +416,7 @@ export function AdminPage({
       statusId: productStatusId,
       image: image || undefined,
       imagePosition: `${imageX}% ${imageY}%`,
+      isActive: productIsActive,
     }
     if (editingProductId !== null) onUpdateProduct(editingProductId, payload)
     else onAddProduct(payload)
@@ -202,6 +428,7 @@ export function AdminPage({
     setImageY(50)
     setProductStatusId(productStatuses[0]?.id || "available")
     setProductTemplateId(topupTemplates[0]?.id || "")
+    setProductIsActive(true)
     setEditingProductId(null)
     setProductFormError("")
     setProductSaved(true)
@@ -233,6 +460,7 @@ export function AdminPage({
     setImageY(50)
     setProductStatusId(productStatuses[0]?.id || "available")
     setProductTemplateId(topupTemplates[0]?.id || "")
+    setProductIsActive(true)
     setEditingProductId(null)
     setProductFormError("")
   }
@@ -251,6 +479,7 @@ export function AdminPage({
     setImageY(position[1] || 50)
     setProductStatusId(product.statusId)
     setProductTemplateId(product.templateId)
+    setProductIsActive(product.isActive !== false)
     setEditingProductId(product.id)
     setProductFormError("")
     setAddProductOpen(true)
@@ -283,11 +512,29 @@ export function AdminPage({
     adminProductPage * 8,
   )
 
+  const totalCompletedRevenue = useMemo(() => {
+    return transactions
+      .filter((t) => t.status === "Hoàn thành")
+      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+  }, [transactions])
+
+  const existingGalleryImages = useMemo(() => {
+    const set = new Set<string>()
+    set.add("/uploads/animo.jpg")
+    for (const s of services) {
+      if (s.image) set.add(s.image)
+    }
+    for (const p of products) {
+      if (p.image) set.add(p.image)
+    }
+    return Array.from(set)
+  }, [services, products])
+
   return (
     <section className="admin-page page-width">
       <div className="admin-heading">
         <div>
-          <span className="section-kicker">NEXA CONSOLE</span>
+          <span className="section-kicker">DUKE1305 CONSOLE</span>
           <h1>Trung tâm quản trị</h1>
           <p>Quản lý sản phẩm, dịch vụ và danh mục hiển thị.</p>
         </div>
@@ -305,16 +552,21 @@ export function AdminPage({
         <Icon name={sidebarOpen ? "close" : "grid"} size={17} />
         {sidebarOpen ? "Đóng danh mục" : "Mở danh mục"}
       </button>
-      <div className="admin-summary">
+      <div className="admin-summary" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
         <div>
           <small>Sản phẩm</small>
           <strong>{products.length}</strong>
           <Icon name="bag" />
         </div>
         <div>
-          <small>Danh mục</small>
-          <strong>{categories.length - 1}</strong>
-          <Icon name="grid" />
+          <small>Doanh thu hoàn tất</small>
+          <strong>{formatPrice(totalCompletedRevenue)}</strong>
+          <Icon name="spark" />
+        </div>
+        <div>
+          <small>Đơn hàng</small>
+          <strong>{transactions.length}</strong>
+          <Icon name="clock" />
         </div>
         <div>
           <small>Danh sách game</small>
@@ -340,6 +592,18 @@ export function AdminPage({
             <Icon name="bag" size={18} /> Sản phẩm
           </button>
           <button
+            className={tab === "analytics" ? "active" : ""}
+            onClick={() => selectTab("analytics")}
+          >
+            <Icon name="spark" size={18} /> Thống kê & Doanh thu
+          </button>
+          <button
+            className={tab === "transactions" ? "active" : ""}
+            onClick={() => selectTab("transactions")}
+          >
+            <Icon name="clock" size={18} /> Giao dịch
+          </button>
+          <button
             className={tab === "templates" ? "active" : ""}
             onClick={() => selectTab("templates")}
           >
@@ -350,12 +614,6 @@ export function AdminPage({
             onClick={() => selectTab("statuses")}
           >
             <Icon name="check" size={18} /> Trạng thái sản phẩm
-          </button>
-          <button
-            className={tab === "transactions" ? "active" : ""}
-            onClick={() => selectTab("transactions")}
-          >
-            <Icon name="clock" size={18} /> Giao dịch
           </button>
           <button
             className={tab === "users" ? "active" : ""}
@@ -457,19 +715,44 @@ export function AdminPage({
                           {productStatuses.find(
                             (item) => item.id === product.statusId,
                           )?.name || "Chưa có trạng thái"}
+                          {product.isActive === false && (
+                            <span style={{ color: "#ef7587", marginLeft: "6px", fontWeight: 600 }}>
+                              · (Đang ẩn)
+                            </span>
+                          )}
                         </small>
                       </span>
                       <strong>{formatPrice(product.price)}</strong>
                       <span className="product-actions">
                         <button
+                          type="button"
+                          onClick={() => {
+                            const newActive = product.isActive === false ? true : false
+                            onUpdateProduct(product.id, { isActive: newActive })
+                          }}
+                          aria-label={product.isActive === false ? "Hiện gói nạp" : "Ẩn gói nạp"}
+                          title={product.isActive === false ? "Đang ẩn - Bấm để hiển thị lên website" : "Đang hiện - Bấm để ẩn khỏi website"}
+                          style={{
+                            color: product.isActive === false ? "#ef7587" : "#4ae0a8",
+                          }}
+                        >
+                          <Icon name={product.isActive === false ? "eye-off" : "eye"} size={17} />
+                        </button>
+                        <button
                           onClick={() => openProductEditor(product)}
                           aria-label={`Chỉnh sửa ${product.name}`}
+                          title={`Chỉnh sửa ${product.name}`}
                         >
                           <Icon name="edit" size={17} />
                         </button>
                         <button
-                          onClick={() => onDeleteProduct(product.id)}
+                          onClick={() => {
+                            if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}" không?`)) {
+                              onDeleteProduct(product.id)
+                            }
+                          }}
                           aria-label={`Xóa ${product.name}`}
+                          title={`Xóa ${product.name}`}
                         >
                           <Icon name="trash" size={17} />
                         </button>
@@ -561,7 +844,7 @@ export function AdminPage({
                           />
                         </label>
                         <fieldset className="tag-picker">
-                          <legend>Chọn nhiều tag</legend>
+                          <legend>Gắn tag danh mục (Không bắt buộc)</legend>
                           {categories
                             .filter((item) => item !== "Tất cả")
                             .map((item) => (
@@ -575,19 +858,12 @@ export function AdminPage({
                               </label>
                             ))}
                         </fieldset>
-                        <label className="image-upload">
-                          <span>Ảnh sản phẩm</span>
-                          <input
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp"
-                            onChange={(event) =>
-                              chooseImage(event.target.files?.[0])
-                            }
-                          />
-                          <span className="upload-button">
-                            {image ? "Đổi ảnh" : "Chọn ảnh từ máy"}
-                          </span>
-                        </label>
+                        <AdminImagePicker
+                          value={image}
+                          onChange={(newImg) => setImage(newImg)}
+                          label="Ảnh sản phẩm"
+                          galleryImages={existingGalleryImages}
+                        />
                         {image && (
                           <div className="image-crop-controls">
                             <div>
@@ -648,6 +924,15 @@ export function AdminPage({
                               </option>
                             ))}
                           </select>
+                        </label>
+                        <label className="modal-availability" style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", margin: "10px 0" }}>
+                          <input
+                            type="checkbox"
+                            checked={productIsActive}
+                            onChange={(e) => setProductIsActive(e.target.checked)}
+                            style={{ width: "auto", accentColor: "#39dbf8" }}
+                          />
+                          <span>Bật hiển thị gói nạp này trên website (đang {productIsActive ? "Hiện" : "Ẩn"})</span>
                         </label>
                         {productFormError && (
                           <span className="admin-form-message error">
@@ -716,10 +1001,18 @@ export function AdminPage({
               onAdd={onAddProductStatus}
               onDelete={onDeleteProductStatus}
             />
+          ) : tab === "analytics" ? (
+            <AdminAnalytics
+              transactions={transactions}
+              games={games}
+              services={services}
+              onNavigateToTransactions={() => selectTab("transactions")}
+            />
           ) : tab === "transactions" ? (
             <AdminTransactions
               transactions={transactions}
               onUpdate={onUpdateTransaction}
+              onViewAnalytics={() => selectTab("analytics")}
             />
           ) : tab === "users" ? (
             <AdminUsers users={users} onUpdate={onUpdateUser} />
@@ -727,8 +1020,10 @@ export function AdminPage({
             <>
               <div className="panel-heading">
                 <div>
-                  <h2>Danh mục & tag</h2>
-                  <p>Chỉnh các bộ lọc xuất hiện trên trang nạp game.</p>
+                  <h2>Danh mục & tag phân loại</h2>
+                  <p>
+                    Quản lý các tag gán cho sản phẩm/gói nạp và xuất hiện trên bộ lọc (ví dụ: hot, value, starter, monthly, nạp game...).
+                  </p>
                 </div>
               </div>
               <form
@@ -742,30 +1037,118 @@ export function AdminPage({
                 }}
               >
                 <label>
-                  <span>Tên danh mục mới</span>
+                  <span>Tên tag mới</span>
                   <input
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
-                    placeholder="Ví dụ: Gói giới hạn"
+                    placeholder="Ví dụ: hot, value, starter, thẻ tháng..."
                   />
                 </label>
-                <button className="primary-button">
+                <button className="primary-button" type="submit">
                   <Icon name="plus" size={18} /> Thêm tag
                 </button>
               </form>
               <div className="tag-manager">
-                {categories.map((item) => (
-                  <div key={item}>
-                    <span>
-                      <Icon name="grid" size={17} /> {item}
-                    </span>
-                    {item !== "Tất cả" && (
-                      <button onClick={() => onDeleteCategory(item)}>
-                        <Icon name="trash" size={17} />
-                      </button>
-                    )}
-                  </div>
-                ))}
+                {categories.map((item) => {
+                  const usage = products.filter((p) => p.tags.includes(item)).length
+                  const isAll = item === "Tất cả"
+                  const isEditing = editingTag?.oldName === item
+
+                  if (isEditing) {
+                    return (
+                      <div key={item} className="tag-manager-item editing">
+                        <form
+                          className="tag-manager-edit-form"
+                          onSubmit={async (e) => {
+                            e.preventDefault()
+                            if (editingTag && editingTag.name.trim()) {
+                              if (onUpdateCategory) {
+                                await onUpdateCategory(editingTag.oldName, editingTag.name.trim())
+                              }
+                              setEditingTag(null)
+                            }
+                          }}
+                        >
+                          <input
+                            autoFocus
+                            value={editingTag.name}
+                            onChange={(e) =>
+                              setEditingTag({ ...editingTag, name: e.target.value })
+                            }
+                            placeholder="Nhập tên tag mới..."
+                          />
+                          <button
+                            type="submit"
+                            className="primary-button"
+                            style={{ height: "34px", padding: "0 10px", fontSize: "10px" }}
+                          >
+                            Lưu
+                          </button>
+                          <button
+                            type="button"
+                            style={{
+                              height: "34px",
+                              padding: "0 8px",
+                              fontSize: "10px",
+                              background: "transparent",
+                              color: "#8490a3",
+                              border: "1px solid #293449",
+                              borderRadius: "7px",
+                            }}
+                            onClick={() => setEditingTag(null)}
+                          >
+                            Hủy
+                          </button>
+                        </form>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div key={item} className="tag-manager-item">
+                      <div className="tag-manager-info">
+                        <Icon name="grid" size={17} />
+                        <div>
+                          <strong>{item}</strong>
+                          {isAll ? (
+                            <small style={{ color: "#38dbf8", display: "block" }}>Bộ lọc mặc định</small>
+                          ) : (
+                            <small style={{ color: "#626e82", display: "block" }}>{usage} gói nạp đang dùng</small>
+                          )}
+                        </div>
+                      </div>
+                      {!isAll && (
+                        <div className="tag-manager-actions">
+                          <button
+                            type="button"
+                            onClick={() => setEditingTag({ oldName: item, name: item })}
+                            title={`Sửa tag "${item}"`}
+                            aria-label={`Sửa tag ${item}`}
+                          >
+                            <Icon name="edit" size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            className="tag-delete"
+                            onClick={() => {
+                              const confirmMsg =
+                                usage > 0
+                                  ? `Bạn có chắc chắn muốn xóa tag "${item}"?\n\nTag này đang được gắn trên ${usage} gói nạp và sẽ được gỡ bỏ khỏi các gói đó.`
+                                  : `Bạn có chắc chắn muốn xóa tag "${item}" không?`
+                              if (window.confirm(confirmMsg)) {
+                                onDeleteCategory(item)
+                              }
+                            }}
+                            title={`Xóa tag "${item}"`}
+                            aria-label={`Xóa tag ${item}`}
+                          >
+                            <Icon name="trash" size={15} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </>
           ) : tab === "games" ? (
@@ -801,63 +1184,278 @@ export function AdminPage({
                   <Icon name="plus" size={18} /> Thêm game
                 </button>
               </form>
-              <p className="form-hint">Có thể chỉnh sửa nhanh mô tả, tone và thứ tự của từng game bên dưới.</p>
               <div className="tag-manager game-manager">
-                {games.map((item) => (
-                  <div key={item}>
-                    {editingGame === item ? (
-                      <div className="channel-editor-fields">
-                        <label><span>Tên game</span><input value={gameName} onChange={(event) => setGameName(event.target.value)} /></label>
-                        <label><span>Mã game</span><input value={gameKey} onChange={(event) => setGameKey(event.target.value)} /></label>
-                        <label><span>Mô tả</span><input value={gameDescription} onChange={(event) => setGameDescription(event.target.value)} /></label>
-                        <label><span>Tone</span><input value={gameTone} onChange={(event) => setGameTone(event.target.value)} /></label>
-                        <label><span>Thứ tự</span><input type="number" value={gameSortOrder} onChange={(event) => setGameSortOrder(event.target.value)} /></label>
-                        <label className="wide"><span>URL ảnh</span><input value={gameImage} onChange={(event) => setGameImage(event.target.value)} /></label>
-                        <label><span>Vị trí ảnh</span><input value={gameImagePosition} onChange={(event) => setGameImagePosition(event.target.value)} /></label>
-                        <label><span>Hiển thị</span><input type="checkbox" checked={gameIsActive} onChange={(event) => setGameIsActive(event.target.checked)} /></label>
-                        <button className="primary-button" onClick={async () => {
-                          await onUpdateGame(item, {
-                            name: gameName,
-                            game: gameKey,
-                            description: gameDescription,
-                            tone: gameTone,
-                            sortOrder: Number(gameSortOrder),
-                            image: gameImage || undefined,
-                            imagePosition: gameImagePosition,
-                            isActive: gameIsActive,
-                          })
-                          setEditingGame(null)
-                        }}>Lưu</button>
+                {games.map((item) => {
+                  const service = services.find(
+                    (entry) => entry.name === item || entry.game === item,
+                  )
+                  const count = products.filter((p) => p.game === item).length
+
+                  return (
+                    <div key={item} className="tag-manager-item">
+                      <div className="tag-manager-info">
+                        <Icon name="game" size={17} />
+                        <div>
+                          <strong>{item}</strong>
+                          <small style={{ color: "#626e82", display: "block" }}>
+                            {count} gói nạp · Tone: {service?.tone || "blue"}
+                            {service && !service.isActive ? " · (Đang ẩn)" : ""}
+                          </small>
+                        </div>
                       </div>
-                    ) : (
-                      <span><Icon name="game" size={17} /> {item}</span>
-                    )}
-                    {editingGame !== item && (
-                      <button onClick={() => {
-                        const service = services.find((entry) => entry.name === item || entry.game === item)
-                        setEditingGame(item)
-                        setGameName(service?.name || item)
-                        setGameKey(service?.game || item)
-                        setGameDescription(service?.description || "")
-                        setGameTone(service?.tone || "blue")
-                        setGameSortOrder(String(service?.sortOrder || 0))
-                        setGameImage(service?.image || "")
-                        setGameImagePosition(service?.imagePosition || "center")
-                        setGameIsActive(service?.isActive ?? true)
-                      }} aria-label={`Sửa ${item}`}><Icon name="edit" size={17} /></button>
-                    )}
-                    <button
-                      onClick={() => {
-                        onDeleteGame(item)
-                        if (game === item)
-                          setGame(games.find((entry) => entry !== item) || "")
+                      <div className="tag-manager-actions">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!service) return
+                            const nextActive = service.isActive === false ? true : false
+                            onUpdateGame(item, { isActive: nextActive })
+                          }}
+                          aria-label={service?.isActive === false ? "Hiện game này" : "Ẩn game này"}
+                          title={service?.isActive === false ? "Game đang ẩn - Bấm để hiển thị trên website" : "Game đang hiện - Bấm để ẩn khỏi website"}
+                          style={{
+                            color: service?.isActive === false ? "#ef7587" : "#4ae0a8",
+                          }}
+                        >
+                          <Icon name={service?.isActive === false ? "eye-off" : "eye"} size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingGame(item)
+                            setGameName(service?.name || item)
+                            setGameKey(service?.game || item)
+                            setGameDescription(service?.description || "")
+                            setGameTone(service?.tone || "blue")
+                            setGameSortOrder(String(service?.sortOrder ?? 0))
+                            setGameImage(service?.image || "")
+                            const pos = (service?.imagePosition || "50% 50%")
+                              .split(" ")
+                              .map(Number)
+                            setGameImageX(!isNaN(pos[0]) ? pos[0] : 50)
+                            setGameImageY(!isNaN(pos[1]) ? pos[1] : 50)
+                            setGameIsActive(service?.isActive ?? true)
+                          }}
+                          title={`Chỉnh sửa game "${item}"`}
+                          aria-label={`Sửa ${item}`}
+                        >
+                          <Icon name="edit" size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          className="tag-delete"
+                          onClick={() => {
+                            const confirmMsg =
+                              count > 0
+                                ? `Game "${item}" đang có ${count} sản phẩm/gói nạp.\n\nNếu xóa, các gói nạp này cũng sẽ bị xóa khỏi hệ thống.\n\nBạn có chắc chắn muốn xóa game này không?`
+                                : `Bạn có chắc chắn muốn xóa game "${item}" không?`
+                            if (window.confirm(confirmMsg)) {
+                              onDeleteGame(item)
+                              if (game === item)
+                                setGame(games.find((entry) => entry !== item) || "")
+                            }
+                          }}
+                          title={`Xóa game "${item}"`}
+                          aria-label={`Xóa ${item}`}
+                        >
+                          <Icon name="trash" size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {editingGame !== null && (
+                <div
+                  className="product-modal-backdrop"
+                  onMouseDown={(event) =>
+                    event.target === event.currentTarget && setEditingGame(null)
+                  }
+                >
+                  <div className="product-modal">
+                    <div className="product-modal-head">
+                      <div>
+                        <span className="section-kicker">CẤU HÌNH DỊCH VỤ GAME</span>
+                        <h2>Chỉnh sửa game: {editingGame}</h2>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditingGame(null)}
+                        aria-label="Đóng"
+                      >
+                        <Icon name="close" size={20} />
+                      </button>
+                    </div>
+                    <form
+                      className="product-modal-body"
+                      onSubmit={async (e) => {
+                        e.preventDefault()
+                        if (!gameName.trim()) return
+                        await onUpdateGame(editingGame, {
+                          name: gameName.trim(),
+                          game: gameKey.trim() || gameName.trim(),
+                          description: gameDescription.trim(),
+                          tone: gameTone,
+                          sortOrder: Number(gameSortOrder) || 0,
+                          image: gameImage.trim() || undefined,
+                          imagePosition: `${gameImageX}% ${gameImageY}%`,
+                          isActive: gameIsActive,
+                        })
+                        setEditingGame(null)
                       }}
                     >
-                      <Icon name="trash" size={17} />
-                    </button>
+                      <div className="product-create-form">
+                        <div className="form-pair">
+                          <label>
+                            <span>Tên hiển thị của game</span>
+                            <input
+                              value={gameName}
+                              onChange={(e) => setGameName(e.target.value)}
+                              placeholder="Ví dụ: Honkai: Star Rail"
+                              required
+                            />
+                          </label>
+                          <label>
+                            <span>Mã định danh (Key/Slug)</span>
+                            <input
+                              value={gameKey}
+                              onChange={(e) => setGameKey(e.target.value)}
+                              placeholder="Ví dụ: honkai-star-rail"
+                            />
+                          </label>
+                        </div>
+
+                        <div className="form-pair">
+                          <label>
+                            <span>Tone màu chủ đạo</span>
+                            <select
+                              value={gameTone}
+                              onChange={(e) => setGameTone(e.target.value)}
+                            >
+                              <option value="cyan">Cyan (Xanh lơ)</option>
+                              <option value="blue">Blue (Xanh dương)</option>
+                              <option value="violet">Violet (Tím)</option>
+                              <option value="yellow">Yellow (Vàng kim)</option>
+                              <option value="amber">Amber (Cam hổ phách)</option>
+                              <option value="red">Red (Đỏ)</option>
+                              <option value="pink">Pink (Hồng)</option>
+                              <option value="emerald">Emerald (Xanh ngọc)</option>
+                            </select>
+                          </label>
+                          <label>
+                            <span>Thứ tự sắp xếp</span>
+                            <input
+                              type="number"
+                              value={gameSortOrder}
+                              onChange={(e) => setGameSortOrder(e.target.value)}
+                              placeholder="0, 1, 2..."
+                            />
+                          </label>
+                        </div>
+
+                        <label>
+                          <span>Mô tả game</span>
+                          <input
+                            value={gameDescription}
+                            onChange={(e) => setGameDescription(e.target.value)}
+                            placeholder="Mô tả tóm tắt dịch vụ nạp cho game..."
+                          />
+                        </label>
+
+                        <AdminImagePicker
+                          value={gameImage}
+                          onChange={(newImg) => setGameImage(newImg)}
+                          label="Ảnh đại diện game"
+                          galleryImages={existingGalleryImages}
+                        />
+
+                        {gameImage && (
+                          <div className="image-crop-controls">
+                            <div>
+                              <span>
+                                Kéo trực tiếp ảnh trên card để chọn vùng hiển thị
+                              </span>
+                              <b>
+                                {gameImageX}% · {gameImageY}%
+                              </b>
+                            </div>
+                            <div className="crop-actions">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setGameImageX(50)
+                                  setGameImageY(50)
+                                }}
+                              >
+                                Đặt lại vị trí
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setGameImage("")}
+                              >
+                                Xóa ảnh
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        <label className="modal-availability" style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
+                          <input
+                            type="checkbox"
+                            checked={gameIsActive}
+                            onChange={(e) => setGameIsActive(e.target.checked)}
+                            style={{ width: "auto", accentColor: "#39dbf8" }}
+                          />
+                          <span>Bật hiển thị game này trên website</span>
+                        </label>
+
+                        <div
+                          className="product-modal-actions"
+                          style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end", gap: "8px" }}
+                        >
+                          <button type="button" onClick={() => setEditingGame(null)}>
+                            Hủy
+                          </button>
+                          <button type="submit" className="primary-button">
+                            <Icon name="check" size={17} /> Lưu thay đổi
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="modal-preview">
+                        <div>
+                          <span className="section-kicker">XEM TRƯỚC</span>
+                          <p>
+                            {gameImage
+                              ? "Giữ và kéo ảnh trên card để chọn đúng vùng muốn hiển thị."
+                              : "Chọn ảnh để xem trước và điều chỉnh vùng hiển thị."}
+                          </p>
+                        </div>
+                        <div className="preview-card-wrap">
+                          <ServiceCard
+                            service={{
+                              id: 0,
+                              name: gameName || "Tên game",
+                              description: gameDescription,
+                              iconText: (gameName || "GAME").slice(0, 3).toUpperCase(),
+                              tone: gameTone,
+                              image: gameImage || undefined,
+                              imagePosition: `${gameImageX}% ${gameImageY}%`,
+                              isActive: gameIsActive,
+                              sortOrder: Number(gameSortOrder) || 0,
+                            }}
+                            onImagePositionChange={(x, y) => {
+                              setGameImageX(x)
+                              setGameImageY(y)
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </form>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </>
           ) : tab === "middleman" ? (
             <MiddlemanAdminEditor
@@ -1028,11 +1626,22 @@ export function TopupTemplateManager({
                 <Icon name="edit" size={17} /> Sửa
               </button>
               <button
-                disabled={usage > 0}
-                onClick={() => onDelete(template.id)}
+                type="button"
+                onClick={() => {
+                  const confirmMsg =
+                    usage > 0
+                      ? `Mẫu "${template.name}" đang được sử dụng bởi ${usage} gói nạp.\n\nNếu xóa, các gói nạp này sẽ được gỡ mẫu thông tin (chuyển sang không dùng mẫu).\n\nBạn có chắc chắn muốn xóa không?`
+                      : `Bạn có chắc chắn muốn xóa mẫu thông tin "${template.name}" không?`
+                  if (window.confirm(confirmMsg)) {
+                    onDelete(template.id)
+                  }
+                }}
                 title={
-                  usage > 0 ? "Không thể xóa mẫu đang được sử dụng" : "Xóa mẫu"
+                  usage > 0
+                    ? `Đang có ${usage} gói nạp sử dụng. Nhấn để xóa.`
+                    : "Xóa mẫu thông tin"
                 }
+                aria-label={`Xóa mẫu ${template.name}`}
               >
                 <Icon name="trash" size={17} />
               </button>
@@ -1247,6 +1856,34 @@ export function TopupTemplateManager({
                 <span className="admin-form-message error">{error}</span>
               )}
               <div className="template-editor-actions">
+                {templates.some((item) => item.id === draft.id) && (
+                  <button
+                    type="button"
+                    style={{
+                      marginRight: "auto",
+                      color: "#ff6b81",
+                      borderColor: "rgba(255, 107, 129, 0.4)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    onClick={() => {
+                      const usage = products.filter(
+                        (product) => product.templateId === draft.id,
+                      ).length
+                      const confirmMsg =
+                        usage > 0
+                          ? `Mẫu "${draft.name}" đang được sử dụng bởi ${usage} gói nạp.\n\nNếu xóa, các gói nạp này sẽ được gỡ mẫu thông tin.\n\nBạn có chắc chắn muốn xóa không?`
+                          : `Bạn có chắc chắn muốn xóa mẫu thông tin "${draft.name}" không?`
+                      if (window.confirm(confirmMsg)) {
+                        onDelete(draft.id)
+                        setDraft(null)
+                      }
+                    }}
+                  >
+                    <Icon name="trash" size={16} /> Xóa mẫu
+                  </button>
+                )}
                 <button onClick={() => setDraft(null)}>Hủy</button>
                 <button className="primary-button" onClick={save}>
                   <Icon name="check" size={17} /> Lưu mẫu
@@ -1387,8 +2024,17 @@ export function ProductStatusManager({
               </span>
               {status.id !== "available" ? (
                 <button
-                  onClick={() => onDelete(status.id)}
+                  onClick={() => {
+                    const confirmMsg =
+                      usage > 0
+                        ? `Trạng thái "${status.name}" đang được sử dụng bởi ${usage} sản phẩm.\n\nNếu xóa, các sản phẩm này sẽ được chuyển về trạng thái khả dụng mặc định.\n\nBạn có chắc chắn muốn xóa không?`
+                        : `Bạn có chắc chắn muốn xóa trạng thái "${status.name}" không?`
+                    if (window.confirm(confirmMsg)) {
+                      onDelete(status.id)
+                    }
+                  }}
                   aria-label={`Xóa ${status.name}`}
+                  title={`Xóa ${status.name}`}
                 >
                   <Icon name="trash" size={17} />
                 </button>
@@ -1403,12 +2049,467 @@ export function ProductStatusManager({
   )
 }
 
+export function AdminAnalytics({
+  transactions,
+  games,
+  services,
+  onNavigateToTransactions,
+}: {
+  transactions: Transaction[]
+  games: string[]
+  services: Service[]
+  onNavigateToTransactions?: () => void
+}) {
+  const [timeFilter, setTimeFilter] = useState<"all" | "30days" | "7days">("all")
+  const [metricView, setMetricView] = useState<"revenue" | "orders">("revenue")
+
+  const toneGradients: Record<string, { bar: string; dot: string; glow: string }> = {
+    violet: { bar: "linear-gradient(90deg, #7c3aed, #a855f7)", dot: "#a855f7", glow: "rgba(168, 85, 247, 0.4)" },
+    blue: { bar: "linear-gradient(90deg, #2563eb, #38bdf8)", dot: "#38bdf8", glow: "rgba(56, 189, 248, 0.4)" },
+    yellow: { bar: "linear-gradient(90deg, #d97706, #fbbf24)", dot: "#fbbf24", glow: "rgba(251, 191, 36, 0.4)" },
+    amber: { bar: "linear-gradient(90deg, #d97706, #f59e0b)", dot: "#f59e0b", glow: "rgba(245, 158, 11, 0.4)" },
+    cyan: { bar: "linear-gradient(90deg, #0891b2, #22d3ee)", dot: "#22d3ee", glow: "rgba(34, 211, 238, 0.4)" },
+    red: { bar: "linear-gradient(90deg, #dc2626, #f87171)", dot: "#f87171", glow: "rgba(248, 113, 113, 0.4)" },
+    pink: { bar: "linear-gradient(90deg, #db2777, #f472b6)", dot: "#f472b6", glow: "rgba(244, 114, 182, 0.4)" },
+    emerald: { bar: "linear-gradient(90deg, #059669, #34d399)", dot: "#34d399", glow: "rgba(52, 211, 153, 0.4)" },
+  }
+
+  // Filter transactions by date
+  const filteredTransactions = useMemo(() => {
+    if (timeFilter === "all") return transactions
+    const now = Date.now()
+    const daysLimit = timeFilter === "7days" ? 7 : 30
+    const cutoff = now - daysLimit * 24 * 60 * 60 * 1000
+
+    return transactions.filter((t) => {
+      let timestamp = 0
+      if (t.date && t.date.includes("/")) {
+        const [dPart, tPart] = t.date.split(" ")
+        const [d, m, y] = (dPart || "").split("/").map(Number)
+        const [hh, mm] = (tPart || "0:0").split(":").map(Number)
+        timestamp = new Date(y || 2025, (m || 1) - 1, d || 1, hh || 0, mm || 0).getTime()
+      } else if (t.date) {
+        timestamp = new Date(t.date).getTime()
+      }
+      return !isNaN(timestamp) && timestamp >= cutoff
+    })
+  }, [transactions, timeFilter])
+
+  // Aggregate stats per game
+  const { gameStats, totals, topRevenueGame, topOrdersGame } = useMemo(() => {
+    const allGameNames = Array.from(
+      new Set([
+        ...games,
+        ...filteredTransactions.map((t) => t.game).filter(Boolean),
+      ]),
+    )
+
+    let totalRevenue = 0
+    let totalCompleted = 0
+    let totalOrders = 0
+
+    const stats = allGameNames.map((gameName) => {
+      const gameTransactions = filteredTransactions.filter((t) => t.game === gameName)
+      const service = services.find((s) => s.name === gameName || s.game === gameName)
+      const completedList = gameTransactions.filter((t) => t.status === "Hoàn thành")
+      const processingList = gameTransactions.filter((t) => t.status === "Đang xử lý")
+      const pendingList = gameTransactions.filter((t) => t.status === "Chờ thanh toán")
+      const failedList = gameTransactions.filter(
+        (t) => t.status === "Thất bại" || t.status === "Đã hoàn tiền",
+      )
+
+      const revenue = completedList.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+      const orderCount = gameTransactions.length
+      const completedCount = completedList.length
+      const aov = completedCount > 0 ? Math.round(revenue / completedCount) : 0
+      const rate = orderCount > 0 ? Math.round((completedCount / orderCount) * 100) : 0
+
+      totalRevenue += revenue
+      totalCompleted += completedCount
+      totalOrders += orderCount
+
+      const tone = service?.tone || "cyan"
+      const colors = toneGradients[tone] || {
+        bar: "linear-gradient(90deg, #0891b2, #22d3ee)",
+        dot: "#22d3ee",
+        glow: "rgba(34, 211, 238, 0.4)",
+      }
+
+      return {
+        game: gameName,
+        service,
+        tone,
+        colors,
+        revenue,
+        orderCount,
+        completedCount,
+        processingCount: processingList.length,
+        pendingCount: pendingList.length,
+        failedCount: failedList.length,
+        aov,
+        completionRate: rate,
+      }
+    })
+
+    const sorted = [...stats].sort((a, b) => {
+      if (metricView === "revenue") {
+        return b.revenue - a.revenue || b.orderCount - a.orderCount
+      }
+      return b.orderCount - a.orderCount || b.revenue - a.revenue
+    })
+
+    const topRev = [...stats].sort((a, b) => b.revenue - a.revenue)[0]
+    const topOrd = [...stats].sort((a, b) => b.orderCount - a.orderCount)[0]
+
+    return {
+      gameStats: sorted,
+      totals: {
+        revenue: totalRevenue,
+        completed: totalCompleted,
+        orders: totalOrders,
+        aov: totalCompleted > 0 ? Math.round(totalRevenue / totalCompleted) : 0,
+        rate: totalOrders > 0 ? Math.round((totalCompleted / totalOrders) * 100) : 0,
+      },
+      topRevenueGame: topRev,
+      topOrdersGame: topOrd,
+    }
+  }, [filteredTransactions, games, services, metricView])
+
+  const maxRevenue = Math.max(...gameStats.map((g) => g.revenue), 1)
+  const maxOrders = Math.max(...gameStats.map((g) => g.orderCount), 1)
+
+  return (
+    <div className="analytics-page">
+      <div className="data-page-heading">
+        <div>
+          <h2>Thống kê doanh thu & đơn hàng theo game</h2>
+          <p>Báo cáo chi tiết hiệu suất kinh doanh, tỷ trọng đóng góp và xu hướng theo từng tựa game.</p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="analytics-btn-group">
+            <button
+              type="button"
+              className={timeFilter === "all" ? "active" : ""}
+              onClick={() => setTimeFilter("all")}
+            >
+              Tất cả
+            </button>
+            <button
+              type="button"
+              className={timeFilter === "30days" ? "active" : ""}
+              onClick={() => setTimeFilter("30days")}
+            >
+              30 ngày qua
+            </button>
+            <button
+              type="button"
+              className={timeFilter === "7days" ? "active" : ""}
+              onClick={() => setTimeFilter("7days")}
+            >
+              7 ngày qua
+            </button>
+          </div>
+          {onNavigateToTransactions && (
+            <button
+              type="button"
+              className="quick-analytics-btn"
+              onClick={onNavigateToTransactions}
+            >
+              <Icon name="clock" size={15} /> Xem giao dịch ➔
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="analytics-kpi-grid">
+        <div className="analytics-kpi-card">
+          <small>Tổng doanh thu thực tế</small>
+          <strong>{formatPrice(totals.revenue)}</strong>
+          <p>
+            <span className="kpi-badge">{totals.completed} đơn hoàn thành</span>
+            <span>Tỷ lệ: {totals.rate}%</span>
+          </p>
+        </div>
+
+        <div className="analytics-kpi-card accent-purple">
+          <small>Tổng số đơn hàng</small>
+          <strong>{totals.orders} đơn</strong>
+          <p>
+            <span className="kpi-badge" style={{ background: "rgba(168, 85, 247, 0.15)", color: "#c084fc" }}>
+              ĐTB: {formatPrice(totals.aov)}
+            </span>
+          </p>
+        </div>
+
+        <div className="analytics-kpi-card accent-amber">
+          <small>Game doanh thu dẫn đầu</small>
+          <strong>{topRevenueGame && topRevenueGame.revenue > 0 ? topRevenueGame.game : "Chưa có dữ liệu"}</strong>
+          <p>
+            {topRevenueGame && topRevenueGame.revenue > 0 ? (
+              <>
+                <span className="kpi-badge" style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24" }}>
+                  {formatPrice(topRevenueGame.revenue)}
+                </span>
+                <span>
+                  {totals.revenue > 0 ? `(${((topRevenueGame.revenue / totals.revenue) * 100).toFixed(1)}%)` : ""}
+                </span>
+              </>
+            ) : (
+              <span>Chưa có doanh thu</span>
+            )}
+          </p>
+        </div>
+
+        <div className="analytics-kpi-card accent-emerald">
+          <small>Game có nhiều đơn nhất</small>
+          <strong>{topOrdersGame && topOrdersGame.orderCount > 0 ? topOrdersGame.game : "Chưa có dữ liệu"}</strong>
+          <p>
+            {topOrdersGame && topOrdersGame.orderCount > 0 ? (
+              <>
+                <span className="kpi-badge" style={{ background: "rgba(16, 185, 129, 0.15)", color: "#34d399" }}>
+                  {topOrdersGame.orderCount} đơn hàng
+                </span>
+                <span>
+                  {totals.orders > 0 ? `(${((topOrdersGame.orderCount / totals.orders) * 100).toFixed(1)}%)` : ""}
+                </span>
+              </>
+            ) : (
+              <span>Chưa có đơn hàng</span>
+            )}
+          </p>
+        </div>
+      </div>
+
+      {/* Main Chart Panel */}
+      <div className="analytics-chart-panel">
+        <div className="analytics-panel-header">
+          <div>
+            <h3>
+              <Icon name="spark" size={18} />
+              Biểu đồ so sánh giữa các game
+            </h3>
+            <p>
+              Hiển thị độ tương quan {metricView === "revenue" ? "doanh thu (VNĐ)" : "số lượng đơn hàng"} giữa các tựa game
+            </p>
+          </div>
+          <div className="analytics-btn-group">
+            <button
+              type="button"
+              className={metricView === "revenue" ? "active" : ""}
+              onClick={() => setMetricView("revenue")}
+            >
+              💰 Theo doanh thu (VNĐ)
+            </button>
+            <button
+              type="button"
+              className={metricView === "orders" ? "active" : ""}
+              onClick={() => setMetricView("orders")}
+            >
+              📦 Theo số lượng đơn
+            </button>
+          </div>
+        </div>
+
+        {/* Share Bar */}
+        <div className="share-bar-wrap">
+          <div className="share-bar">
+            {gameStats
+              .filter((g) => (metricView === "revenue" ? g.revenue > 0 : g.orderCount > 0))
+              .map((g) => {
+                const pct =
+                  metricView === "revenue"
+                    ? totals.revenue > 0 ? (g.revenue / totals.revenue) * 100 : 0
+                    : totals.orders > 0 ? (g.orderCount / totals.orders) * 100 : 0
+                return (
+                  <div
+                    key={g.game}
+                    className="share-bar-segment"
+                    style={{ width: `${pct}%`, background: g.colors.bar }}
+                    title={`${g.game}: ${pct.toFixed(1)}%`}
+                  />
+                )
+              })}
+          </div>
+          <div className="share-bar-legend">
+            {gameStats
+              .filter((g) => (metricView === "revenue" ? g.revenue > 0 : g.orderCount > 0))
+              .map((g) => {
+                const pct =
+                  metricView === "revenue"
+                    ? totals.revenue > 0 ? (g.revenue / totals.revenue) * 100 : 0
+                    : totals.orders > 0 ? (g.orderCount / totals.orders) * 100 : 0
+                return (
+                  <div key={g.game} className="share-legend-item">
+                    <span className="share-legend-dot" style={{ background: g.colors.dot }} />
+                    <span>{g.game}</span>
+                    <strong style={{ color: "#e2e8f0" }}>{pct.toFixed(1)}%</strong>
+                  </div>
+                )
+              })}
+          </div>
+        </div>
+
+        {/* Bars List */}
+        <div className="game-bars-list">
+          {gameStats.map((item, index) => {
+            const pctShare =
+              metricView === "revenue"
+                ? totals.revenue > 0 ? (item.revenue / totals.revenue) * 100 : 0
+                : totals.orders > 0 ? (item.orderCount / totals.orders) * 100 : 0
+            const barWidth =
+              metricView === "revenue"
+                ? maxRevenue > 0 ? Math.max(4, Math.round((item.revenue / maxRevenue) * 100)) : 4
+                : maxOrders > 0 ? Math.max(4, Math.round((item.orderCount / maxOrders) * 100)) : 4
+
+            const rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : ""
+
+            return (
+              <div key={item.game} className="game-bar-row">
+                <div className={`game-rank-badge ${rankClass}`}>
+                  #{index + 1}
+                </div>
+                <div className="game-info-col">
+                  <div className="game-avatar-small">
+                    {item.service?.image ? (
+                      <img src={item.service.image} alt={item.game} />
+                    ) : (
+                      item.service?.iconText || item.game.slice(0, 3).toUpperCase()
+                    )}
+                  </div>
+                  <span className="game-name-text" title={item.game}>
+                    {item.game}
+                  </span>
+                </div>
+                <div className="game-track-wrap">
+                  <div
+                    className="game-bar-fill"
+                    style={{
+                      width: `${barWidth}%`,
+                      background: item.colors.bar,
+                      boxShadow: `0 0 14px ${item.colors.glow}`,
+                    }}
+                    title={`${item.game}: ${metricView === "revenue" ? formatPrice(item.revenue) : `${item.orderCount} đơn`} (${pctShare.toFixed(1)}%)`}
+                  />
+                </div>
+                <div className="game-value-col">
+                  <strong>
+                    {metricView === "revenue" ? formatPrice(item.revenue) : `${item.orderCount} đơn`}
+                  </strong>
+                  <small>
+                    {pctShare.toFixed(1)}% tổng số {metricView === "revenue" ? "doanh thu" : "đơn"}
+                  </small>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Detailed Breakdown Table */}
+      <div className="analytics-chart-panel">
+        <div className="analytics-panel-header">
+          <div>
+            <h3>
+              <Icon name="grid" size={18} />
+              Bảng xếp hạng chi tiết theo game
+            </h3>
+            <p>Tổng hợp các chỉ số đơn hàng, tỷ lệ hoàn tất và giá trị đơn trung bình (AOV)</p>
+          </div>
+        </div>
+
+        <div className="analytics-table-wrap">
+          <table className="analytics-table">
+            <thead>
+              <tr>
+                <th style={{ width: "50px" }}>Hạng</th>
+                <th>Tựa Game</th>
+                <th>Doanh thu thực tế</th>
+                <th>Tỷ trọng</th>
+                <th>Tổng đơn</th>
+                <th>Hoàn thành</th>
+                <th>Đang xử lý</th>
+                <th>Chờ / Hủy</th>
+                <th>Đơn giá TB (AOV)</th>
+                <th>Tỷ lệ nạp xong</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gameStats.map((item, index) => {
+                const revPct = totals.revenue > 0 ? ((item.revenue / totals.revenue) * 100).toFixed(1) : "0.0"
+                const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`
+
+                return (
+                  <tr key={item.game}>
+                    <td>
+                      <strong style={{ fontSize: "14px" }}>{medal}</strong>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div className="game-avatar-small" style={{ width: "28px", height: "28px" }}>
+                          {item.service?.image ? (
+                            <img src={item.service.image} alt={item.game} />
+                          ) : (
+                            item.service?.iconText || item.game.slice(0, 3).toUpperCase()
+                          )}
+                        </div>
+                        <strong style={{ color: "#f8fafc" }}>{item.game}</strong>
+                      </div>
+                    </td>
+                    <td>
+                      <strong style={{ color: item.revenue > 0 ? "#34d399" : "#64748b" }}>
+                        {formatPrice(item.revenue)}
+                      </strong>
+                    </td>
+                    <td>
+                      <span className="kpi-badge">{revPct}%</span>
+                    </td>
+                    <td>
+                      <strong>{item.orderCount}</strong>
+                    </td>
+                    <td>
+                      <span style={{ color: "#34d399", fontWeight: 600 }}>{item.completedCount}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: "#fbbf24", fontWeight: 600 }}>{item.processingCount}</span>
+                    </td>
+                    <td>
+                      <span style={{ color: "#94a3b8" }}>{item.pendingCount + item.failedCount}</span>
+                    </td>
+                    <td>{formatPrice(item.aov)}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ width: "60px", height: "6px", background: "#1a2436", borderRadius: "3px", overflow: "hidden" }}>
+                          <div
+                            style={{
+                              width: `${item.completionRate}%`,
+                              height: "100%",
+                              background: item.completionRate >= 80 ? "#10b981" : item.completionRate >= 50 ? "#f59e0b" : "#64748b",
+                            }}
+                          />
+                        </div>
+                        <span>{item.completionRate}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function AdminTransactions({
   transactions,
   onUpdate,
+  onViewAnalytics,
 }: {
   transactions: Transaction[]
   onUpdate: (id: number, status: TransactionStatus) => void
+  onViewAnalytics?: () => void
 }) {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("Tất cả")
@@ -1440,7 +2541,18 @@ export function AdminTransactions({
           <h2>Giao dịch & đơn hàng</h2>
           <p>Theo dõi thanh toán và cập nhật trạng thái xử lý.</p>
         </div>
-        <span>{transactions.length} giao dịch</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {onViewAnalytics && (
+            <button
+              type="button"
+              className="quick-analytics-btn"
+              onClick={onViewAnalytics}
+            >
+              <Icon name="spark" size={15} /> Thống kê theo game ↗
+            </button>
+          )}
+          <span>{transactions.length} giao dịch</span>
+        </div>
       </div>
       <div className="data-filters transaction-filters">
         <label className="admin-search">
@@ -1549,17 +2661,65 @@ export function AdminTransactions({
               {selected.topupInfo &&
               Object.keys(selected.topupInfo).length > 0 ? (
                 <div className="submitted-info-list">
-                  {Object.entries(selected.topupInfo).map(([key, value]) => (
-                    <div key={key}>
-                      <span>{selected.topupLabels?.[key] || key}</span>
-                      <strong>{value}</strong>
-                      <button
-                        onClick={() => navigator.clipboard?.writeText(value)}
-                      >
-                        Sao chép
-                      </button>
-                    </div>
-                  ))}
+                  {Object.entries(selected.topupInfo).map(([key, value]) => {
+                    const rawLabel = selected.topupLabels?.[key]
+                    const fallbackDictionary: Record<string, string> = {
+                      uid: "UID",
+                      server: "Server",
+                      charactername: "Tên nhân vật",
+                      character: "Tên nhân vật",
+                      riotid: "Riot ID",
+                      tagline: "Tagline",
+                      contactemail: "Email liên hệ",
+                      region: "Khu vực",
+                      zoneid: "Zone ID",
+                      playerid: "Player ID",
+                      roleid: "Role ID",
+                      note: "Ghi chú",
+                    }
+                    const normalizedKey = key.toLowerCase().replace(/[^a-z0-9]/g, "")
+                    const standardLabel = fallbackDictionary[normalizedKey]
+                    const displayLabel =
+                      standardLabel ||
+                      (rawLabel && rawLabel !== value && rawLabel.toLowerCase() !== key.toLowerCase()
+                        ? rawLabel
+                        : key)
+
+                    let displayValue = String(value ?? "")
+                    if (normalizedKey === "server") {
+                      const serverMap: Record<string, string> = {
+                        asia: "Asia",
+                        europe: "Europe",
+                        america: "America",
+                        sar: "TW / HK / MO",
+                      }
+                      displayValue = serverMap[displayValue.toLowerCase()] || displayValue
+                    } else if (normalizedKey === "region") {
+                      const regionMap: Record<string, string> = {
+                        ap: "Asia Pacific",
+                        eu: "Europe",
+                        na: "North America",
+                        latam: "Latin America",
+                        br: "Brazil",
+                        kr: "Korea",
+                        vietnam: "Việt Nam",
+                      }
+                      displayValue = regionMap[displayValue.toLowerCase()] || displayValue
+                    }
+
+                    return (
+                      <div key={key}>
+                        <span>{displayLabel}</span>
+                        <strong>{displayValue}</strong>
+                        <button
+                          type="button"
+                          onClick={() => navigator.clipboard?.writeText(String(value))}
+                        >
+                          Sao chép
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
               ) : (
                 <div className="order-no-info">
@@ -2207,7 +3367,7 @@ export function AdminLogin({
           <Icon name="shield" size={20} />
         </span>
         <span>
-          NEXA<span>ADMIN</span>
+          DUKE<span>1305 ADMIN</span>
         </span>
       </div>
       <div className="admin-login-card">
@@ -2229,7 +3389,7 @@ export function AdminLogin({
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="admin@nexatopup.vn"
+                placeholder="admin@duke1305.vn"
               />
             </div>
           </label>

@@ -16,7 +16,7 @@ const router = Router();
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function generateOrderCode(): string {
-  const prefix = 'NX';
+  const prefix = 'DUKE';
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `${prefix}${timestamp}${random}`;
@@ -90,6 +90,7 @@ async function createOrder(
   }
 
   let templateName = '';
+  const labelMap = new Map<string, string>();
   if (pkg.templateId) {
     const template = await tx.topupTemplate.findUnique({
       where: { id: pkg.templateId },
@@ -130,6 +131,11 @@ async function createOrder(
         }
       }
     }
+    for (const field of fields) {
+      if (field.key && field.label) {
+        labelMap.set(String(field.key), String(field.label));
+      }
+    }
     for (const key of Object.keys(input.topupInfo)) {
       if (allowedKeys.size > 0 && !allowedKeys.has(key)) {
         throw new AppError(`Unknown top-up field: ${key}`, 400);
@@ -137,8 +143,28 @@ async function createOrder(
     }
   }
 
+  const fallbackFieldLabels: Record<string, string> = {
+    uid: 'UID',
+    server: 'Server',
+    charactername: 'Tên nhân vật',
+    character: 'Tên nhân vật',
+    riotid: 'Riot ID',
+    tagline: 'Tagline',
+    region: 'Khu vực',
+    zoneid: 'Zone ID',
+    playerid: 'Player ID',
+    roleid: 'Role ID',
+    account: 'Tài khoản',
+    email: 'Email liên hệ',
+    phone: 'Số điện thoại',
+    note: 'Ghi chú',
+  };
+
   const topupLabels = Object.fromEntries(
-    Object.entries(input.topupInfo).map(([key, value]) => [key, String(value)]),
+    Object.keys(input.topupInfo).map((key) => {
+      const label = labelMap.get(key) || fallbackFieldLabels[key.toLowerCase()] || key;
+      return [key, label];
+    }),
   );
   let code = generateOrderCode();
   for (let attempts = 0; attempts < 5; attempts += 1) {
@@ -243,10 +269,40 @@ router.post(
         }
       }
 
-      // Build topupLabels (human-readable field names → values)
+      // Build topupLabels (human-readable field names -> field labels)
+      const labelMap = new Map<string, string>();
+      if (pkg.templateId) {
+        const tpl = await prisma.topupTemplate.findUnique({
+          where: { id: pkg.templateId },
+          select: { fields: true },
+        });
+        const fields = Array.isArray(tpl?.fields) ? tpl.fields as Array<Record<string, unknown>> : [];
+        for (const field of fields) {
+          if (field.key && field.label) {
+            labelMap.set(String(field.key), String(field.label));
+          }
+        }
+      }
+      const fallbackFieldLabels: Record<string, string> = {
+        uid: 'UID',
+        server: 'Server',
+        charactername: 'Tên nhân vật',
+        character: 'Tên nhân vật',
+        riotid: 'Riot ID',
+        tagline: 'Tagline',
+        region: 'Khu vực',
+        zoneid: 'Zone ID',
+        playerid: 'Player ID',
+        roleid: 'Role ID',
+        account: 'Tài khoản',
+        email: 'Email liên hệ',
+        phone: 'Số điện thoại',
+        note: 'Ghi chú',
+      };
+
       const topupLabels: Record<string, string> = {};
-      for (const [key, val] of Object.entries(body.topupInfo)) {
-        topupLabels[key] = String(val);
+      for (const key of Object.keys(body.topupInfo)) {
+        topupLabels[key] = labelMap.get(key) || fallbackFieldLabels[key.toLowerCase()] || key;
       }
 
       const amount = new Prisma.Decimal(pkg.price).mul(body.quantity);
@@ -343,18 +399,6 @@ router.post(
         );
       }
 
-      if (
-        !env.SEPAY_BANK_CODE ||
-        !env.SEPAY_ACCOUNT_NUMBER ||
-        !env.SEPAY_ACCOUNT_NAME
-      ) {
-        throw new AppError(
-          'SePay bank account is not configured',
-          500,
-          false,
-        );
-      }
-
       const transactions = await prisma.$transaction(async (tx) =>
         Promise.all(
           body.items.map((item) =>
@@ -368,7 +412,19 @@ router.post(
         ),
       );
 
-      const paymentOrderCode = `NEXA${Date.now().toString(36).toUpperCase()}`;
+      if (
+        !env.SEPAY_BANK_CODE ||
+        !env.SEPAY_ACCOUNT_NUMBER ||
+        !env.SEPAY_ACCOUNT_NAME
+      ) {
+        throw new AppError(
+          'SePay bank account is not configured',
+          500,
+          false,
+        );
+      }
+
+      const paymentOrderCode = `DUKE${Date.now().toString(36).toUpperCase()}`;
       const totalAmount = transactions.reduce(
         (total, transaction) => total + Number(transaction.amount),
         0,
@@ -465,6 +521,7 @@ router.get(
           select: {
             id: true,
             code: true,
+            userEmail: true,
             packageName: true,
             gameName: true,
             amount: true,

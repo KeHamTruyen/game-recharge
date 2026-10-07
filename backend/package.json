@@ -1,7 +1,7 @@
 {
   "name": "nexa-topup-backend",
   "version": "1.0.0",
-  "description": "NEXA TOPUP - Game Recharge Backend API",
+  "description": "DUKE1305 - Game Recharge Backend API",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -13,7 +13,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:backup": "powershell -ExecutionPolicy Bypass -File scripts/backup.ps1",
-    "db:restore": "powershell -ExecutionPolicy Bypass -File scripts/restore.ps1"
+    "db:restore": "powershell -ExecutionPolicy Bypass -File scripts/restore.ps1",
+    "test": "node --import tsx --test \"tests/**/*.test.ts\""
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

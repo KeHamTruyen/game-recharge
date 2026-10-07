@@ -32,8 +32,8 @@ react(),
     },
     server: {
       host: process.env.FIGMA_DEV_SERVER_HOST || '0.0.0.0',
-      port: parseInt(process.env.PORT || '8443'),
-      strictPort: true,
+      port: parseInt(process.env.PORT || '5173'),
+      strictPort: false,
       watch: {
         ignored: [
           '**/.figma/**',
@@ -42,7 +42,7 @@ react(),
     },
     preview: {
       host: process.env.FIGMA_DEV_SERVER_HOST || '0.0.0.0',
-      port: parseInt(process.env.PORT || '8443'),
+      port: parseInt(process.env.PORT || '5173'),
     },
   }
 })
@@ -96,7 +96,7 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
   const headEnd = config.customScripts?.headEnd ?? ''
   const bodyStart = config.customScripts?.bodyStart ?? ''
   const bodyEnd = config.customScripts?.bodyEnd ?? ''
-  const siteUrl = (process.env.VITE_SITE_URL || 'https://nexatopup.vn').replace(/\/+$/, '')
+  const siteUrl = (process.env.VITE_SITE_URL || 'https://duke1305.vn').replace(/\/+$/, '')
   const robotsTxt = config.robots?.index === false
     ? 'User-agent: *\nDisallow: /\n'
     : `User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n`

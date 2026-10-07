@@ -247,6 +247,12 @@ export function ServiceDetailPage({
                   </div>
                 </div>
                 <div className="package-card-footer">
+                  <div className="package-pricing">
+                    {pkg.oldPrice ? (
+                      <span className="package-old-price">{formatPrice(pkg.oldPrice)}</span>
+                    ) : null}
+                    <span className="package-price">{formatPrice(pkg.price)}</span>
+                  </div>
                   <div className={`package-status status-${status?.color || "green"}`}>
                     <span>
                       <Icon name={status?.icon || "check"} size={10} />
@@ -281,6 +287,8 @@ export function TopupInformationPage({
   onQuantityChange,
   onQuantityChangeForPackage,
   onRemoveFromCart,
+  isLoggedIn,
+  onRequireLogin,
   onBack,
   onContinue,
 }: {
@@ -289,6 +297,8 @@ export function TopupInformationPage({
   cart: CartItem[]
   template?: TopupTemplate
   quantity: number
+  isLoggedIn?: boolean
+  onRequireLogin?: () => void
   onQuantityChange: (quantity: number) => void
   onQuantityChangeForPackage: (id: string | number, quantity: number) => void
   onRemoveFromCart: (id: string | number) => void
@@ -307,7 +317,13 @@ export function TopupInformationPage({
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    if (!template) return onContinue({})
+    if (!template) {
+      if (!isLoggedIn && onRequireLogin) {
+        onRequireLogin()
+        return
+      }
+      return onContinue({})
+    }
     const nextErrors: Record<string, string> = {}
     template.fields.forEach((field) => {
       const value = values[field.key]?.trim() || ""
@@ -321,7 +337,13 @@ export function TopupInformationPage({
         nextErrors[field.key] = "Email chưa đúng định dạng."
     })
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length === 0) setShowConfirmation(true)
+    if (Object.keys(nextErrors).length === 0) {
+      if (!isLoggedIn && onRequireLogin) {
+        onRequireLogin()
+        return
+      }
+      setShowConfirmation(true)
+    }
   }
 
   return (
@@ -455,6 +477,10 @@ export function TopupInformationPage({
                 className="primary-button"
                 onClick={() => {
                   setShowConfirmation(false)
+                  if (!isLoggedIn && onRequireLogin) {
+                    onRequireLogin()
+                    return
+                  }
                   onContinue(values)
                 }}
               >
@@ -495,7 +521,7 @@ export function CheckoutPage({
   onNotice: (message: string) => void
   onConfirm: () => boolean | PaymentDetails | void | Promise<boolean | PaymentDetails | void>
 }) {
-  const orderCode = `NEXA${String(pkg.id).padStart(4, "0")}-${Date.now().toString(36).toUpperCase().slice(-4)}`
+  const orderCode = `DUKE${String(pkg.id).padStart(4, "0")}-${Date.now().toString(36).toUpperCase().slice(-4)}`
   const totalAmount = cart.reduce((total, item) => total + item.pkg.price * item.quantity, 0)
   const [orderConfirmed, setOrderConfirmed] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -553,7 +579,7 @@ export function CheckoutPage({
               </div>
               <div>
                 <small>Chủ tài khoản</small>
-                <strong>NEXA TOPUP</strong>
+                <strong>DUKE1305</strong>
               </div>
               <div className="copy-field">
                 <span>

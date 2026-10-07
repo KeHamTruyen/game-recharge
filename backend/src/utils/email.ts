@@ -14,6 +14,10 @@ const transporter = env.SMTP_HOST
 
 export async function sendVerificationCode(email: string, code: string, purpose: 'register' | 'reset'): Promise<void> {
   if (!transporter || !env.MAIL_FROM) {
+    if (env.NODE_ENV !== 'production') {
+      console.info(`\n📧 [DEV EMAIL OTP] Mã xác minh cho ${email} (${purpose}): >>> ${code} <<<\n`);
+      return;
+    }
     throw new Error('Email delivery is not configured. Set SMTP_HOST and MAIL_FROM.');
   }
 
@@ -21,7 +25,7 @@ export async function sendVerificationCode(email: string, code: string, purpose:
   await transporter.sendMail({
     from: env.MAIL_FROM,
     to: email,
-    subject: `NEXA TOPUP - Mã ${action}`,
+    subject: `DUKE1305 - Mã ${action}`,
     text: `Mã xác minh của bạn là ${code}. Mã có hiệu lực trong 10 phút và chỉ dùng một lần.`,
     html: `<p>Mã xác minh cho yêu cầu <b>${action}</b> của bạn là:</p><h2>${code}</h2><p>Mã có hiệu lực trong 10 phút và chỉ dùng một lần.</p>`,
   });

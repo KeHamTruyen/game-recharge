@@ -69,14 +69,13 @@ export function ServiceDetailRoute() {
           return
         }
         store.setCart((current) => {
-          const existing = current.find((item) => item.pkg.id === pkg.id)
-          return existing
-            ? current.filter((item) => item.pkg.id !== pkg.id)
-            : [...current, { pkg, quantity: 1 }]
+          const isSelected = current.some((item) => String(item.pkg.id) === String(pkg.id))
+          if (isSelected) {
+            return current.filter((item) => String(item.pkg.id) !== String(pkg.id))
+          }
+          return [...current, { pkg, quantity: 1 }]
         })
         store.setSelectedService(service)
-        const isSelected = store.cart.some((item) => item.pkg.id === pkg.id)
-        store.setNotice(isSelected ? `${pkg.name} đã được bỏ khỏi giỏ hàng.` : `${pkg.name} đã được chọn.`)
       }}
       cartCount={store.cart.reduce((total, item) => total + item.quantity, 0)}
       cartTotal={store.cart.reduce((total, item) => total + item.pkg.price * item.quantity, 0)}
@@ -98,6 +97,7 @@ export function ServiceDetailRoute() {
 export function TopupInformationRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
+  const { openLogin } = useOutletContext<PublicLayoutContext>()
 
   const pkg = store.selectedPackage || store.cart[0]?.pkg
   const service = store.selectedService
@@ -112,6 +112,11 @@ export function TopupInformationRoute() {
         (item) => item.id === pkg.templateId,
       )}
       quantity={store.selectedQuantity}
+      isLoggedIn={Boolean(store.user)}
+      onRequireLogin={() => {
+        store.setNotice("Vui lòng đăng nhập trước khi tiếp tục thanh toán.")
+        openLogin()
+      }}
       onQuantityChange={store.setSelectedQuantity}
       onQuantityChangeForPackage={(id, quantity) => {
         const nextQuantity = Math.max(0, Math.min(10, quantity))
@@ -124,6 +129,11 @@ export function TopupInformationRoute() {
       onBack={() => navigate(`/nap-game/${service.id}`)}
       onContinue={(values) => {
         store.setCheckoutInfo(values)
+        if (!store.user) {
+          store.setNotice("Vui lòng đăng nhập trước khi tiếp tục thanh toán.")
+          openLogin()
+          return
+        }
         navigate("/thanh-toan")
       }}
     />
@@ -140,6 +150,7 @@ export function CheckoutRoute() {
   const pkg = store.selectedPackage || store.cart[0]?.pkg
   const service = store.selectedService
   if (!pkg || !service || store.cart.length === 0) return <Navigate to="/nap-game" replace />
+  if (!store.user) return <Navigate to="/nap-game/thong-tin" replace />
 
   const template = store.topupTemplates.find(
     (item) => item.id === pkg.templateId,

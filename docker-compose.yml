@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # -------------------------------------------------------------
+  # 1. Cơ sở dữ liệu PostgreSQL
+  # -------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: duke1305_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-duke1305_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-duke1305_secure_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-duke1305_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - duke_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-duke1305_user} -d ${POSTGRES_DB:-duke1305_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------------------------------------
+  # 2. Backend Node.js API (Express + Prisma)
+  # -------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: duke1305_backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-duke1305_user}:${POSTGRES_PASSWORD:-duke1305_secure_pass}@postgres:5432/${POSTGRES_DB:-duke1305_db}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-change_this_to_a_long_random_jwt_secret_key_123456}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@duke1305.vn}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@2025!Security}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      SEPAY_API_KEY: ${SEPAY_API_KEY:-}
+      SEPAY_BANK_CODE: ${SEPAY_BANK_CODE:-}
+      SEPAY_ACCOUNT_NUMBER: ${SEPAY_ACCOUNT_NUMBER:-}
+      SEPAY_ACCOUNT_NAME: ${SEPAY_ACCOUNT_NAME:-}
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - duke_network
+
+  # -------------------------------------------------------------
+  # 3. Frontend Web Server (React + Vite + Nginx)
+  # -------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: duke1305_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "${PORT:-80}:80"
+    networks:
+      - duke_network
+
+volumes:
+  postgres_data:
+    name: duke1305_postgres_data
+  backend_uploads:
+    name: duke1305_backend_uploads
+
+networks:
+  duke_network:
+    name: duke1305_network
+    driver: bridge
+

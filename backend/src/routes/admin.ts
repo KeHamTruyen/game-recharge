@@ -1,9 +1,11 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import fs from 'node:fs';
+import path from 'node:path';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
-import { NotFoundError } from '../middleware/errorHandler.js';
+import { AppError, NotFoundError } from '../middleware/errorHandler.js';
 import { auditAdminRequest } from '../middleware/requestContext.js';
 import {
   getPagination,
@@ -12,9 +14,12 @@ import {
 } from '../utils/pagination.js';
 
 const router = Router();
-const imageValueSchema = z.string().max(4_000_000).refine(
-  (value) => value.startsWith('data:image/') || z.string().url().safeParse(value).success,
-  'Image must be a valid URL or image data URI',
+const imageValueSchema = z.string().max(10_000_000).refine(
+  (value) =>
+    value.startsWith('data:image/') ||
+    value.startsWith('/') ||
+    z.string().url().safeParse(value).success,
+  'Image must be a valid URL, local path, or image data URI',
 );
 
 // All admin routes require an authenticated administrator.
@@ -231,15 +236,144 @@ router.post('/tags', requireRole('ADMIN'), async (req, res, next) => {
   }
 });
 
+router.put('/tags/:id', requireRole('ADMIN'), async (req, res, next) => {
+  try {
+    const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
+    const { name } = z.object({ name: z.string().min(1).max(30).trim() }).parse(req.body);
+    const existing = await prisma.catalogTag.findUnique({ where: { id } });
+    if (!existing) {
+      throw new AppError('Tag not found', 404);
+    }
+    const updated = await prisma.catalogTag.update({
+      where: { id },
+      data: { name },
+    });
+    if (existing.name !== name) {
+      const packages = await prisma.servicePackage.findMany({
+        where: { tags: { has: existing.name } },
+      });
+      for (const pkg of packages) {
+        const nextTags = Array.from(new Set(pkg.tags.map((t) => (t === existing.name ? name : t))));
+        await prisma.servicePackage.update({
+          where: { id: pkg.id },
+          data: { tags: nextTags },
+        });
+      }
+    }
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.delete('/tags/:id', requireRole('ADMIN'), async (req, res, next) => {
   try {
     const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
-    await prisma.catalogTag.delete({ where: { id } });
+    const existing = await prisma.catalogTag.findUnique({ where: { id } });
+    if (existing) {
+      const packages = await prisma.servicePackage.findMany({
+        where: { tags: { has: existing.name } },
+      });
+      for (const pkg of packages) {
+        const nextTags = pkg.tags.filter((t) => t !== existing.name);
+        await prisma.servicePackage.update({
+          where: { id: pkg.id },
+          data: { tags: nextTags },
+        });
+      }
+      await prisma.catalogTag.delete({ where: { id } });
+    }
     res.json({ success: true, data: { message: 'Tag deleted' } });
   } catch (err) {
     next(err);
   }
 });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MEDIA & IMAGE GALLERY
+// ══════════════════════════════════════════════════════════════════════════════
+
+// POST /admin/upload
+router.post(
+  '/upload',
+  requireRole('ADMIN'),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { filename, data } = z
+        .object({
+          filename: z.string().max(200).optional().default('image.png'),
+          data: z.string().min(1).max(10_000_000),
+        })
+        .parse(req.body);
+
+      let buffer: Buffer;
+      let ext = 'png';
+
+      if (data.startsWith('data:image/')) {
+        const matches = data.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+        if (!matches || !matches[2]) {
+          throw new AppError('Invalid image data format', 400);
+        }
+        ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+        buffer = Buffer.from(matches[2], 'base64');
+      } else {
+        buffer = Buffer.from(data, 'base64');
+      }
+
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      const cleanBase = filename.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
+      const safeName = `${Date.now()}_${cleanBase}.${ext}`;
+      const filePath = path.join(uploadsDir, safeName);
+      fs.writeFileSync(filePath, buffer);
+
+      // In dev environment, sync with frontend public uploads if folder exists
+      try {
+        const frontendPublicUploads = path.join(process.cwd(), '..', 'frontend', 'public', 'uploads');
+        if (fs.existsSync(path.dirname(frontendPublicUploads))) {
+          if (!fs.existsSync(frontendPublicUploads)) {
+            fs.mkdirSync(frontendPublicUploads, { recursive: true });
+          }
+          fs.writeFileSync(path.join(frontendPublicUploads, safeName), buffer);
+        }
+      } catch {
+        // ignore sync error
+      }
+
+      const fileUrl = `/uploads/${safeName}`;
+      res.json({ success: true, data: { url: fileUrl } });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// GET /admin/media
+router.get(
+  '/media',
+  async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      const files: string[] = [];
+      if (fs.existsSync(uploadsDir)) {
+        const dirFiles = fs
+          .readdirSync(uploadsDir)
+          .filter((f) => /\.(png|jpe?g|webp|svg|gif)$/i.test(f))
+          .sort()
+          .reverse();
+        for (const f of dirFiles) {
+          files.push(`/uploads/${f}`);
+        }
+      }
+      res.json({ success: true, data: files });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // PRODUCT STATUSES CRUD
@@ -397,7 +531,13 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
-      await prisma.topupTemplate.delete({ where: { id } });
+      await prisma.$transaction([
+        prisma.servicePackage.updateMany({
+          where: { templateId: id },
+          data: { templateId: '' },
+        }),
+        prisma.topupTemplate.delete({ where: { id } }),
+      ]);
       res.json({ success: true, data: { message: 'Template deleted' } });
     } catch (err) {
       next(err);
@@ -633,14 +773,19 @@ router.patch(
 
       const data = updateSchema.parse(req.body);
 
-      if (Object.keys(data).length === 0) {
-        res.status(400).json({ success: false, error: 'No valid fields to update' });
-        return;
+      if (
+        id === req.user!.userId &&
+        (data.status === 'BLOCKED' || (data.role && data.role !== 'ADMIN'))
+      ) {
+        throw new AppError('Bạn không thể tự khóa hoặc hạ quyền tài khoản của chính mình.', 400);
       }
 
       const user = await prisma.user.update({
         where: { id },
-        data,
+        data: {
+          ...data,
+          ...(data.status === 'BLOCKED' || data.role ? { tokenVersion: { increment: 1 } } : {}),
+        },
         select: {
           id: true,
           email: true,

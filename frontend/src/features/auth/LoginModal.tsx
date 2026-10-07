@@ -214,11 +214,9 @@ export function LoginModal({
             )}
           </form>
         )}
-        {mode !== "forgot" && (
+        {mode === "register" && (
           <small>
-            {mode === "register"
-              ? "Bằng cách đăng ký, bạn đồng ý với điều khoản sử dụng và chính sách bảo mật."
-              : "Email có chứa “admin” sẽ được chuyển đến cổng quản trị trong bản prototype."}
+            Bằng cách đăng ký, bạn đồng ý với điều khoản sử dụng và chính sách bảo mật.
           </small>
         )}
       </div>

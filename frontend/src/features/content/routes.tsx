@@ -20,11 +20,12 @@ export function AccountRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
   if (!store.user) return <Navigate to="/nap-game" replace />
+  if (store.user.role === "admin") return <Navigate to="/admin" replace />
   return (
     <AccountPage
       email={store.user.email}
       transactions={store.transactions.filter(
-        (item) => item.email === store.user?.email,
+        (item) => !item.email || item.email.toLowerCase() === store.user?.email.toLowerCase(),
       )}
       onLogout={() => {
         store.logout()
