@@ -4113,13 +4113,28 @@
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
+.matrix-swipe-hint {
+  display: none;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #38dbf8;
+  background: rgba(56, 219, 248, 0.08);
+  border: 1px dashed rgba(56, 219, 248, 0.35);
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
 .element-matrix-scroll-box {
   position: relative;
   overflow-x: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 219, 248, 0.4) #0a0f1b;
 }
 
 .element-matrix-table {
@@ -5239,6 +5254,40 @@
 }
 
 /* Top Aniimo Columns & Cards */
+.final-roles-container {
+  display: grid;
+  gap: 16px;
+  background: #0a0f1b;
+  border: 1px solid #19273c;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.final-roles-container.cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.final-roles-container.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.final-role-column {
+  background: #090e18;
+  border: 1px solid #141f32;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.final-role-header {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #19273c;
+  text-align: center;
+}
+
 .col-final-dps,
 .col-final-break,
 .col-hs-heal,
@@ -5945,3 +5994,251 @@
   border-color: #f59e0b !important;
   color: #fff !important;
 }
+
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE ENHANCEMENTS FOR WIKI ANIIMO
+   ========================================================================== */
+
+@media (max-width: 960px) {
+  .builder-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .builder-main-panel {
+    padding: 16px 12px;
+  }
+  .builder-panel-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .builder-code-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .builder-action-btn {
+    flex: 1 1 calc(50% - 8px);
+    text-align: center;
+    font-size: 11.5px;
+    padding: 8px 10px;
+  }
+  .final-roles-container.cols-3,
+  .final-roles-container.cols-2 {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 12px 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .wiki-page-container {
+    padding-block: 16px 110px;
+    padding-inline: 10px;
+  }
+  .tool-accordion-section {
+    margin-bottom: 14px;
+    border-radius: 12px;
+  }
+  .tool-accordion-header {
+    padding: 12px 14px;
+  }
+  .tool-accordion-header h3 {
+    font-size: 14px;
+  }
+  .acc-title-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  .tool-accordion-body {
+    padding: 14px 10px;
+  }
+  .matrix-swipe-hint {
+    display: block;
+  }
+  .elem-table-toggle-bar {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .elem-table-toggle-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  /* Calculation Summary Table on Mobile */
+  .calc-result-table,
+  .calc-result-table tbody,
+  .calc-result-table tr {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .calc-result-table thead {
+    display: none;
+  }
+  .calc-result-table td {
+    display: block;
+    width: 100%;
+    padding: 12px 10px;
+    border-bottom: 1px solid #1a273b;
+    box-sizing: border-box;
+  }
+  .calc-result-table .cell-type-label {
+    background: #0d1627;
+  }
+  .calc-result-table .cell-adv-content::before {
+    content: "✓ Nên Dùng (Advantage):";
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    color: #34d399;
+    margin-bottom: 6px;
+  }
+  .calc-result-table .cell-dis-content::before {
+    content: "✕ Cần Tránh (Disadvantage):";
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    color: #f87171;
+    margin-bottom: 6px;
+  }
+  /* Roles columns on Mobile */
+  .final-role-column {
+    background: #0c1424;
+    border: 1px solid #1d293d;
+    padding: 12px 10px;
+  }
+  .final-aniimo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    gap: 8px;
+  }
+  .final-aniimo-card {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+  .final-avatar {
+    width: 36px;
+    height: 36px;
+  }
+  .final-card-info strong {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 680px) {
+  /* Element Matrix Table Scaling for Mobile Screens */
+  .element-matrix-table {
+    border-spacing: 2px;
+  }
+  .def-col-header,
+  .atk-row-header,
+  .matrix-data-cell {
+    width: 29px;
+    height: 29px;
+    min-width: 29px;
+    max-width: 29px;
+    border-radius: 4px;
+  }
+  .element-sym-img {
+    width: 15px;
+    height: 15px;
+  }
+  .cell-adv,
+  .cell-dis,
+  .cell-neu {
+    font-size: 10.5px;
+  }
+  .attacker-header-banner {
+    width: 22px;
+    min-width: 22px;
+    max-width: 22px;
+    padding: 3px 0;
+  }
+  .attacker-vertical-text {
+    font-size: 9.5px;
+    gap: 3px;
+  }
+  .defender-header-banner {
+    font-size: 10px;
+    height: 26px;
+    padding: 3px;
+  }
+  .corner-logo-cell {
+    padding: 2px;
+  }
+  .corner-brand-img {
+    width: 18px;
+    height: 18px;
+  }
+  .corner-brand-text {
+    font-size: 7px;
+  }
+  .element-matrix-legend-bar {
+    gap: 8px;
+    padding: 8px;
+    font-size: 11px;
+  }
+  .legend-item {
+    gap: 4px;
+    font-size: 10.5px;
+  }
+  .legend-symbol {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+  /* Team Builder 4 Slots on Mobile */
+  .builder-slots-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .builder-slot {
+    min-height: 175px;
+    padding: 20px 6px 10px;
+  }
+  .slot-img {
+    width: 52px;
+    height: 52px;
+  }
+  .slot-title {
+    font-size: 11.5px;
+  }
+  .slot-taxonomies-row {
+    gap: 4px;
+  }
+  .slot-elem-badge,
+  .slot-role {
+    font-size: 9.5px;
+    padding: 2px 5px;
+  }
+  /* Tier List on Mobile */
+  .tier-row-wrapper {
+    grid-template-columns: 80px 1fr;
+  }
+  .tier-badge-label {
+    padding: 10px 4px;
+  }
+  .tier-letter {
+    font-size: 24px;
+  }
+  .tier-desc-text {
+    display: none;
+  }
+  .tier-monster-item {
+    width: 58px;
+    padding: 4px;
+  }
+  /* Aniimo List Grid on Mobile */
+  .aniimo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .aniimo-card-img-wrap {
+    height: 130px;
+  }
+  .aniimo-card-title {
+    font-size: 12px;
+  }
+}
+

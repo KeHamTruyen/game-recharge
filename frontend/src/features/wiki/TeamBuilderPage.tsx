@@ -1162,6 +1162,7 @@ export default function TeamBuilderPage() {
 
                 {/* 9x9 Matrix Table */}
                 <div className="element-matrix-scroll-box">
+                  <div className="matrix-swipe-hint">⇄ Vuốt sang ngang để xem toàn bộ 9 hệ</div>
                   <table className="element-matrix-table">
                     <thead>
                       <tr>
@@ -1660,7 +1661,7 @@ export default function TeamBuilderPage() {
 
         {openAccordions.calcResult && (
           <div className="tool-accordion-body">
-            <table className="tool-calc-table">
+            <table className="tool-calc-table calc-result-table">
               <thead>
                 <tr>
                   <th className="col-type-title">Loại Aniimo</th>
@@ -1774,140 +1775,133 @@ export default function TeamBuilderPage() {
 
         {openAccordions.topAttack && (
           <div className="tool-accordion-body">
-            <table className="tool-calc-table">
-              <thead>
-                <tr>
-                  <th className="col-final-dps">
-                    <div className="final-th-badge">
-                      <img
-                        src="/wiki/icons/class-dps.png"
-                        alt="DPS"
-                        className="final-role-badge-img"
-                      />
-                      <span className="final-th-text">DPS</span>
-                    </div>
-                  </th>
-                  <th className="col-final-break">
-                    <div className="final-th-badge">
-                      <img
-                        src="/wiki/icons/class-break.png"
-                        alt="BREAK"
-                        className="final-role-badge-img"
-                      />
-                      <span className="final-th-text">BREAK</span>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    {hasBossSelected ? (
-                      topAttackAniimos.dps.length === 0 ? (
-                        <span className="no-elem-text">
-                          Không có Aniimo phù hợp
-                        </span>
-                      ) : (
-                        <div className="final-aniimo-grid">
-                          {topAttackAniimos.dps.map((m) => (
-                            <div
-                              key={m.id}
-                              className="final-aniimo-card"
-                              onClick={() => handleQuickAddMonster(m)}
-                              title="Nhấp để thêm vào đội hình"
-                            >
-                              <img
-                                src={formatImageUrl(m.thumbnail)}
-                                alt={m.title}
-                                className="final-avatar"
-                              />
-                              <div className="final-card-info">
-                                <strong>{m.title}</strong>
-                                <span className="final-elem-tag">
-                                  {m.taxonomies.elements?.[0]?.icon && (
-                                    <img
-                                      src={formatImageUrl(
-                                        m.taxonomies.elements[0].icon,
-                                      )}
-                                      alt=""
-                                      className="card-mini-elem-icon"
-                                    />
+            <div className="final-roles-container cols-2">
+              <div className="final-role-column">
+                <div className="final-role-header col-final-dps">
+                  <div className="final-th-badge">
+                    <img
+                      src="/wiki/icons/class-dps.png"
+                      alt="DPS"
+                      className="final-role-badge-img"
+                    />
+                    <span className="final-th-text">DPS (Chủ Lực)</span>
+                  </div>
+                </div>
+                {hasBossSelected ? (
+                  topAttackAniimos.dps.length === 0 ? (
+                    <span className="no-elem-text">
+                      Không có Aniimo phù hợp
+                    </span>
+                  ) : (
+                    <div className="final-aniimo-grid">
+                      {topAttackAniimos.dps.map((m) => (
+                        <div
+                          key={m.id}
+                          className="final-aniimo-card"
+                          onClick={() => handleQuickAddMonster(m)}
+                          title="Nhấp để thêm vào đội hình"
+                        >
+                          <img
+                            src={formatImageUrl(m.thumbnail)}
+                            alt={m.title}
+                            className="final-avatar"
+                          />
+                          <div className="final-card-info">
+                            <strong>{m.title}</strong>
+                            <span className="final-elem-tag">
+                              {m.taxonomies.elements?.[0]?.icon && (
+                                <img
+                                  src={formatImageUrl(
+                                    m.taxonomies.elements[0].icon,
                                   )}
-                                  {m.taxonomies.elements?.[0]?.name}
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                className="quick-add-btn"
-                                title="Thêm vào slot"
-                              >
-                                +
-                              </button>
-                            </div>
-                          ))}
+                                  alt=""
+                                  className="card-mini-elem-icon"
+                                />
+                              )}
+                              {m.taxonomies.elements?.[0]?.name}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="quick-add-btn"
+                            title="Thêm vào slot"
+                          >
+                            +
+                          </button>
                         </div>
-                      )
-                    ) : (
-                      <span className="require-prompt">
-                        -cần chọn Nguyên Tố ở trên-
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    {hasBossSelected ? (
-                      topAttackAniimos.break.length === 0 ? (
-                        <span className="no-elem-text">
-                          Không có Aniimo phù hợp
-                        </span>
-                      ) : (
-                        <div className="final-aniimo-grid">
-                          {topAttackAniimos.break.map((m) => (
-                            <div
-                              key={m.id}
-                              className="final-aniimo-card"
-                              onClick={() => handleQuickAddMonster(m)}
-                              title="Nhấp để thêm vào đội hình"
-                            >
-                              <img
-                                src={formatImageUrl(m.thumbnail)}
-                                alt={m.title}
-                                className="final-avatar"
-                              />
-                              <div className="final-card-info">
-                                <strong>{m.title}</strong>
-                                <span className="final-elem-tag">
-                                  {m.taxonomies.elements?.[0]?.icon && (
-                                    <img
-                                      src={formatImageUrl(
-                                        m.taxonomies.elements[0].icon,
-                                      )}
-                                      alt=""
-                                      className="card-mini-elem-icon"
-                                    />
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  <span className="require-prompt">
+                    -cần chọn Nguyên Tố ở trên-
+                  </span>
+                )}
+              </div>
+
+              <div className="final-role-column">
+                <div className="final-role-header col-final-break">
+                  <div className="final-th-badge">
+                    <img
+                      src="/wiki/icons/class-break.png"
+                      alt="BREAK"
+                      className="final-role-badge-img"
+                    />
+                    <span className="final-th-text">BREAK (Phá Giáp)</span>
+                  </div>
+                </div>
+                {hasBossSelected ? (
+                  topAttackAniimos.break.length === 0 ? (
+                    <span className="no-elem-text">
+                      Không có Aniimo phù hợp
+                    </span>
+                  ) : (
+                    <div className="final-aniimo-grid">
+                      {topAttackAniimos.break.map((m) => (
+                        <div
+                          key={m.id}
+                          className="final-aniimo-card"
+                          onClick={() => handleQuickAddMonster(m)}
+                          title="Nhấp để thêm vào đội hình"
+                        >
+                          <img
+                            src={formatImageUrl(m.thumbnail)}
+                            alt={m.title}
+                            className="final-avatar"
+                          />
+                          <div className="final-card-info">
+                            <strong>{m.title}</strong>
+                            <span className="final-elem-tag">
+                              {m.taxonomies.elements?.[0]?.icon && (
+                                <img
+                                  src={formatImageUrl(
+                                    m.taxonomies.elements[0].icon,
                                   )}
-                                  {m.taxonomies.elements?.[0]?.name}
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                className="quick-add-btn"
-                                title="Thêm vào slot"
-                              >
-                                +
-                              </button>
-                            </div>
-                          ))}
+                                  alt=""
+                                  className="card-mini-elem-icon"
+                                />
+                              )}
+                              {m.taxonomies.elements?.[0]?.name}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="quick-add-btn"
+                            title="Thêm vào slot"
+                          >
+                            +
+                          </button>
                         </div>
-                      )
-                    ) : (
-                      <span className="require-prompt">
-                        -cần chọn Nguyên Tố ở trên-
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  <span className="require-prompt">
+                    -cần chọn Nguyên Tố ở trên-
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -1932,151 +1926,145 @@ export default function TeamBuilderPage() {
 
         {openAccordions.topSupport && (
           <div className="tool-accordion-body">
-            <table className="tool-calc-table">
-              <thead>
-                <tr>
-                  <th className="col-hs-heal">
-                    <div className="final-th-badge">
+            <div className="final-roles-container cols-3">
+              <div className="final-role-column">
+                <div className="final-role-header col-hs-heal">
+                  <div className="final-th-badge">
+                    <img
+                      src="/wiki/icons/class-healer.png"
+                      alt="HEAL"
+                      className="final-role-badge-img"
+                    />
+                    <span className="final-th-text">HEAL (Hồi Máu)</span>
+                  </div>
+                </div>
+                <div className="final-aniimo-grid">
+                  {topSupportAniimos.heal.map((m) => (
+                    <div
+                      key={m.id}
+                      className="final-aniimo-card"
+                      onClick={() => handleQuickAddMonster(m)}
+                    >
                       <img
-                        src="/wiki/icons/class-healer.png"
-                        alt="HEAL"
-                        className="final-role-badge-img"
+                        src={formatImageUrl(m.thumbnail)}
+                        alt={m.title}
+                        className="final-avatar"
                       />
-                      <span className="final-th-text">HEAL (Hồi Máu)</span>
+                      <div className="final-card-info">
+                        <strong>{m.title}</strong>
+                        <span className="final-elem-tag">
+                          {m.taxonomies.elements?.[0]?.icon && (
+                            <img
+                              src={formatImageUrl(
+                                m.taxonomies.elements[0].icon,
+                              )}
+                              alt=""
+                              className="card-mini-elem-icon"
+                            />
+                          )}
+                          {m.taxonomies.elements?.[0]?.name}
+                        </span>
+                      </div>
+                      <button type="button" className="quick-add-btn">
+                        +
+                      </button>
                     </div>
-                  </th>
-                  <th className="col-hs-support">
-                    <div className="final-th-badge">
+                  ))}
+                </div>
+              </div>
+
+              <div className="final-role-column">
+                <div className="final-role-header col-hs-support">
+                  <div className="final-th-badge">
+                    <img
+                      src="/wiki/icons/class-support.png"
+                      alt="SUPPORT"
+                      className="final-role-badge-img"
+                    />
+                    <span className="final-th-text">SUPPORT (Hỗ Trợ)</span>
+                  </div>
+                </div>
+                <div className="final-aniimo-grid">
+                  {topSupportAniimos.support.map((m) => (
+                    <div
+                      key={m.id}
+                      className="final-aniimo-card"
+                      onClick={() => handleQuickAddMonster(m)}
+                    >
                       <img
-                        src="/wiki/icons/class-support.png"
-                        alt="SUPPORT"
-                        className="final-role-badge-img"
+                        src={formatImageUrl(m.thumbnail)}
+                        alt={m.title}
+                        className="final-avatar"
                       />
-                      <span className="final-th-text">SUPPORT (Hỗ Trợ)</span>
+                      <div className="final-card-info">
+                        <strong>{m.title}</strong>
+                        <span className="final-elem-tag">
+                          {m.taxonomies.elements?.[0]?.icon && (
+                            <img
+                              src={formatImageUrl(
+                                m.taxonomies.elements[0].icon,
+                              )}
+                              alt=""
+                              className="card-mini-elem-icon"
+                            />
+                          )}
+                          {m.taxonomies.elements?.[0]?.name}
+                        </span>
+                      </div>
+                      <button type="button" className="quick-add-btn">
+                        +
+                      </button>
                     </div>
-                  </th>
-                  <th className="col-hs-regen">
-                    <div className="final-th-badge">
+                  ))}
+                </div>
+              </div>
+
+              <div className="final-role-column">
+                <div className="final-role-header col-hs-regen">
+                  <div className="final-th-badge">
+                    <img
+                      src="/wiki/icons/class-regen.png"
+                      alt="REGEN"
+                      className="final-role-badge-img"
+                    />
+                    <span className="final-th-text">REGEN (Hồi Khí)</span>
+                  </div>
+                </div>
+                <div className="final-aniimo-grid">
+                  {topSupportAniimos.regen.map((m) => (
+                    <div
+                      key={m.id}
+                      className="final-aniimo-card"
+                      onClick={() => handleQuickAddMonster(m)}
+                    >
                       <img
-                        src="/wiki/icons/class-regen.png"
-                        alt="REGEN"
-                        className="final-role-badge-img"
+                        src={formatImageUrl(m.thumbnail)}
+                        alt={m.title}
+                        className="final-avatar"
                       />
-                      <span className="final-th-text">REGEN (Hồi Khí)</span>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <div className="final-aniimo-grid">
-                      {topSupportAniimos.heal.map((m) => (
-                        <div
-                          key={m.id}
-                          className="final-aniimo-card"
-                          onClick={() => handleQuickAddMonster(m)}
-                        >
-                          <img
-                            src={formatImageUrl(m.thumbnail)}
-                            alt={m.title}
-                            className="final-avatar"
-                          />
-                          <div className="final-card-info">
-                            <strong>{m.title}</strong>
-                            <span className="final-elem-tag">
-                              {m.taxonomies.elements?.[0]?.icon && (
-                                <img
-                                  src={formatImageUrl(
-                                    m.taxonomies.elements[0].icon,
-                                  )}
-                                  alt=""
-                                  className="card-mini-elem-icon"
-                                />
+                      <div className="final-card-info">
+                        <strong>{m.title}</strong>
+                        <span className="final-elem-tag">
+                          {m.taxonomies.elements?.[0]?.icon && (
+                            <img
+                              src={formatImageUrl(
+                                m.taxonomies.elements[0].icon,
                               )}
-                              {m.taxonomies.elements?.[0]?.name}
-                            </span>
-                          </div>
-                          <button type="button" className="quick-add-btn">
-                            +
-                          </button>
-                        </div>
-                      ))}
+                              alt=""
+                              className="card-mini-elem-icon"
+                            />
+                          )}
+                          {m.taxonomies.elements?.[0]?.name}
+                        </span>
+                      </div>
+                      <button type="button" className="quick-add-btn">
+                        +
+                      </button>
                     </div>
-                  </td>
-                  <td>
-                    <div className="final-aniimo-grid">
-                      {topSupportAniimos.support.map((m) => (
-                        <div
-                          key={m.id}
-                          className="final-aniimo-card"
-                          onClick={() => handleQuickAddMonster(m)}
-                        >
-                          <img
-                            src={formatImageUrl(m.thumbnail)}
-                            alt={m.title}
-                            className="final-avatar"
-                          />
-                          <div className="final-card-info">
-                            <strong>{m.title}</strong>
-                            <span className="final-elem-tag">
-                              {m.taxonomies.elements?.[0]?.icon && (
-                                <img
-                                  src={formatImageUrl(
-                                    m.taxonomies.elements[0].icon,
-                                  )}
-                                  alt=""
-                                  className="card-mini-elem-icon"
-                                />
-                              )}
-                              {m.taxonomies.elements?.[0]?.name}
-                            </span>
-                          </div>
-                          <button type="button" className="quick-add-btn">
-                            +
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="final-aniimo-grid">
-                      {topSupportAniimos.regen.map((m) => (
-                        <div
-                          key={m.id}
-                          className="final-aniimo-card"
-                          onClick={() => handleQuickAddMonster(m)}
-                        >
-                          <img
-                            src={formatImageUrl(m.thumbnail)}
-                            alt={m.title}
-                            className="final-avatar"
-                          />
-                          <div className="final-card-info">
-                            <strong>{m.title}</strong>
-                            <span className="final-elem-tag">
-                              {m.taxonomies.elements?.[0]?.icon && (
-                                <img
-                                  src={formatImageUrl(
-                                    m.taxonomies.elements[0].icon,
-                                  )}
-                                  alt=""
-                                  className="card-mini-elem-icon"
-                                />
-                              )}
-                              {m.taxonomies.elements?.[0]?.name}
-                            </span>
-                          </div>
-                          <button type="button" className="quick-add-btn">
-                            +
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
