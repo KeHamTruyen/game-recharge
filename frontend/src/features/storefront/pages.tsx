@@ -441,9 +441,30 @@ export function TopupInformationPage({
               Vui lòng kiểm tra lại thông tin tài khoản và gói nạp trước khi
               chuyển sang bước thanh toán.
             </p>
-            <div className="confirmation-summary">
-              <span>{pkg.name}</span>
-              <strong>{formatPrice(pkg.price * quantity)}</strong>
+            <div className="confirmation-summary" style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "220px", overflowY: "auto", textAlign: "left", padding: "12px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              {cart.length > 0 ? (
+                <>
+                  {cart.map((item) => (
+                    <div key={item.pkg.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "14px" }}>
+                      <span style={{ color: "#cbd5e1", maxWidth: "68%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {item.pkg.name} <strong style={{ color: "#f8fafc" }}>× {item.quantity}</strong>
+                      </span>
+                      <strong style={{ color: "#e2e8f0" }}>{formatPrice(item.pkg.price * item.quantity)}</strong>
+                    </div>
+                  ))}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "8px", marginTop: "2px" }}>
+                    <span style={{ fontWeight: 600, color: "#94a3b8" }}>Tổng thanh toán</span>
+                    <strong style={{ fontSize: "16px", color: "#38dbf8" }}>
+                      {formatPrice(cart.reduce((sum, item) => sum + item.pkg.price * item.quantity, 0))}
+                    </strong>
+                  </div>
+                </>
+              ) : (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "14px", width: "100%" }}>
+                  <span>{pkg.name} <strong style={{ color: "#f8fafc" }}>× {quantity}</strong></span>
+                  <strong>{formatPrice(pkg.price * quantity)}</strong>
+                </div>
+              )}
             </div>
             <div className="confirmation-actions">
               <button

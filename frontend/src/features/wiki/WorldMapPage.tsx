@@ -19,6 +19,8 @@ interface MapMarker {
   isUnderground?: boolean
 }
 
+const getMarkerKey = (m: MapMarker) => `${m.mapId || "default"}_${m.id}_${m.item_id || ""}_${m.x}_${m.y}`
+
 interface ZonePolygon {
   id: string
   name: string
@@ -378,13 +380,13 @@ export default function WorldMapPage() {
     }))
   }
 
-  const toggleCollected = (markerId: string) => {
+  const toggleCollected = (markerKey: string) => {
     setCollectedMarkers((prev) => {
       const next = new Set(prev)
-      if (next.has(markerId)) {
-        next.delete(markerId)
+      if (next.has(markerKey)) {
+        next.delete(markerKey)
       } else {
-        next.add(markerId)
+        next.add(markerKey)
       }
       try {
         localStorage.setItem(COLLECTED_STORAGE_KEY, JSON.stringify([...next]))
@@ -904,12 +906,13 @@ export default function WorldMapPage() {
                 }
                 const left = marker.normX * 100
                 const top = marker.normY * 100
-                const isSelected = selectedMarker?.id === marker.id
-                const isCollected = collectedMarkers.has(marker.id)
+                const markerKey = getMarkerKey(marker)
+                const isSelected = selectedMarker ? getMarkerKey(selectedMarker) === markerKey : false
+                const isCollected = collectedMarkers.has(markerKey) || collectedMarkers.has(marker.id)
 
                 return (
                   <div
-                    key={marker.id}
+                    key={markerKey}
                     className={`game-map-pin ${isSelected ? "selected" : ""} ${
                       isCollected ? "is-collected" : ""
                     }`}
@@ -1051,17 +1054,21 @@ export default function WorldMapPage() {
                 </div>
               </div>
               <div className="detail-collect-action">
-                <button
-                  type="button"
-                  className={`collect-toggle-btn ${
-                    collectedMarkers.has(selectedMarker.id) ? "collected" : ""
-                  }`}
-                  onClick={() => toggleCollected(selectedMarker.id)}
-                >
-                  {collectedMarkers.has(selectedMarker.id)
-                    ? "✓ Đã Thu Thập (Bỏ đánh dấu)"
-                    : "📌 Đánh Dấu Đã Thu Thập"}
-                </button>
+                {(() => {
+                  const selKey = getMarkerKey(selectedMarker)
+                  const isColl = collectedMarkers.has(selKey) || collectedMarkers.has(selectedMarker.id)
+                  return (
+                    <button
+                      type="button"
+                      className={`collect-toggle-btn ${isColl ? "collected" : ""}`}
+                      onClick={() => toggleCollected(selKey)}
+                    >
+                      {isColl
+                        ? "✓ Đã Thu Thập (Bỏ đánh dấu)"
+                        : "📌 Đánh Dấu Đã Thu Thập"}
+                    </button>
+                  )
+                })()}
               </div>
             </div>
           )}

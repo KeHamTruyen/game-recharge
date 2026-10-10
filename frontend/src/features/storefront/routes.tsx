@@ -263,10 +263,27 @@ export function CheckoutRoute() {
 
   const pkg = store.cart[0]?.pkg
   const service = store.selectedService
-  const [payment, setPayment] = useState<PaymentDetails | null>(null)
+  const [payment, setPayment] = useState<PaymentDetails | null>(() => {
+    try {
+      const saved = sessionStorage.getItem("nexa_checkout_payment")
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
   const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "PAID">("PENDING")
   const [checkoutKey] = useState(() => crypto.randomUUID())
   const { setNotice } = store
+
+  useEffect(() => {
+    try {
+      if (payment) {
+        sessionStorage.setItem("nexa_checkout_payment", JSON.stringify(payment))
+      } else {
+        sessionStorage.removeItem("nexa_checkout_payment")
+      }
+    } catch {}
+  }, [payment])
 
   useEffect(() => {
     if (!payment || paymentStatus === "PAID") return
@@ -276,6 +293,8 @@ export function CheckoutRoute() {
         const result = await api.payments.status(payment.orderCode)
         if (!cancelled && result.paymentStatus === "PAID") {
           setPaymentStatus("PAID")
+          sessionStorage.removeItem("nexa_checkout_payment")
+          store.setCart([])
           setNotice("Đã nhận thanh toán. Đơn hàng đang được xử lý.")
         }
       } catch {

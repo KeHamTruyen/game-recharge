@@ -37,12 +37,16 @@ export function refreshWiki(): Promise<void> {
 }
 
 export async function writeWiki(path: string, method: string, body?: unknown) {
-  const response = await client.request<{ data?: WikiEntry }>(`/wiki${path}`, {
+  const response = await client.request<{ success?: boolean; data?: any }>(`/wiki${path}`, {
     method,
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   })
   // Read after an in-flight poll finishes so a stale poll cannot replace the write.
   if (pending) await pending.catch(() => {})
-  await refreshWiki()
-  return response.data
+  try {
+    await refreshWiki()
+  } catch (refreshErr) {
+    console.warn("Wiki write succeeded but background refresh failed:", refreshErr)
+  }
+  return response.data !== undefined ? response.data : response
 }

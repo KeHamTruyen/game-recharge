@@ -422,17 +422,33 @@ export function getEffectiveTierList(): TierDefinition[] {
   return rawAniipediaTierList as TierDefinition[]
 }
 
+export function getEffectiveTierMap(): Record<string, { rank: string; label: string; color: string }> {
+  const tiers = getEffectiveTierList()
+  const map: Record<string, { rank: string; label: string; color: string }> = {}
+  tiers.forEach((tier) => {
+    tier.names.forEach((name: string) => {
+      map[name.toLowerCase().trim()] = {
+        rank: tier.rank,
+        label: tier.label,
+        color: tier.color,
+      }
+    })
+  })
+  return map
+}
+
 export async function saveTierList(tiers: TierDefinition[]): Promise<void> {
+  await writeWiki("/tier-list", "PUT", tiers)
   localStorage.setItem(TIER_STORAGE_KEY, JSON.stringify(tiers))
-  try {
-    await writeWiki("/tier-list", "PUT", tiers)
-  } catch (err) {
-    console.warn("Backend sync failed for tier-list, saved locally:", err)
-  }
   window.dispatchEvent(new CustomEvent("wiki-data-changed"))
 }
 
-export function resetTierListToDefault(): void {
+export async function resetTierListToDefault(): Promise<void> {
+  try {
+    await writeWiki("/tier-list", "DELETE")
+  } catch (err) {
+    console.warn("Server reset tier list warning:", err)
+  }
   localStorage.removeItem(TIER_STORAGE_KEY)
   window.dispatchEvent(new CustomEvent("wiki-data-changed"))
 }
@@ -443,7 +459,7 @@ export async function syncAniipediaTierList(): Promise<{
   total: number
 }> {
   const res = await writeWiki("/sync-aniipedia", "POST", {})
-  const resultData = (res as any)?.data
+  const resultData = (res as any)?.tiers ? (res as any) : (res as any)?.data
   if (resultData && Array.isArray(resultData.tiers)) {
     localStorage.setItem(TIER_STORAGE_KEY, JSON.stringify(resultData.tiers))
     window.dispatchEvent(new CustomEvent("wiki-data-changed"))

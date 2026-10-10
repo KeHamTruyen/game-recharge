@@ -289,11 +289,58 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     null,
   )
 
-  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [selectedService, setSelectedService] = useState<Service | null>(() => {
+    try {
+      const saved = sessionStorage.getItem("nexa_selected_service")
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
 
-  const [selectedQuantity, setSelectedQuantity] = useState(1)
+  const [selectedQuantity, setSelectedQuantity] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("nexa_selected_qty")
+      return saved ? Number(saved) || 1 : 1
+    } catch {
+      return 1
+    }
+  })
 
-  const [cart, setCart] = useState<CartItem[]>([])
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const saved = sessionStorage.getItem("nexa_cart")
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    try {
+      if (selectedService) {
+        sessionStorage.setItem("nexa_selected_service", JSON.stringify(selectedService))
+      } else {
+        sessionStorage.removeItem("nexa_selected_service")
+      }
+    } catch {}
+  }, [selectedService])
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("nexa_selected_qty", String(selectedQuantity))
+    } catch {}
+  }, [selectedQuantity])
+
+  useEffect(() => {
+    try {
+      if (cart.length > 0) {
+        sessionStorage.setItem("nexa_cart", JSON.stringify(cart))
+      } else {
+        sessionStorage.removeItem("nexa_cart")
+      }
+    } catch {}
+  }, [cart])
 
   const [checkoutInfo, setCheckoutInfo] = useState<Record<string, string>>({})
 

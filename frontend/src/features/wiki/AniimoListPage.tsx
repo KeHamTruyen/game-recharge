@@ -1,19 +1,8 @@
 import React, { useState, useMemo, useEffect } from "react"
-import { getEffectiveAniimos, formatImageUrl } from "./wikiData"
+import { getEffectiveAniimos, formatImageUrl, getEffectiveTierMap } from "./wikiData"
 import { AniimoDetailModal } from "./AniimoDetailModal"
-import rawAniipediaTierList from "@/data/wiki/aniipedia_tier_list.json"
 import type { AniimoMonster } from "./types"
 import { Icon } from "@/components/ui"
-
-const tierRankMap: Record<string, { rank: string; color: string }> = {}
-rawAniipediaTierList.forEach((tier) => {
-  tier.names.forEach((name: string) => {
-    tierRankMap[name.toLowerCase().trim()] = {
-      rank: tier.rank,
-      color: tier.color,
-    }
-  })
-})
 
 const ELEMENTS = [
   { name: "Tất cả", slug: "all", icon: "" },
@@ -52,6 +41,7 @@ export default function AniimoListPage() {
   const isAdmin = user?.role === "admin"
 
   const [monsters, setMonsters] = useState(getEffectiveAniimos())
+  const [tierRankMap, setTierRankMap] = useState(() => getEffectiveTierMap())
   const [selectedMonster, setSelectedMonster] = useState<AniimoMonster | null>(
     null,
   )
@@ -61,7 +51,10 @@ export default function AniimoListPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    const handleUpdate = () => setMonsters(getEffectiveAniimos())
+    const handleUpdate = () => {
+      setMonsters(getEffectiveAniimos())
+      setTierRankMap(getEffectiveTierMap())
+    }
     window.addEventListener("wiki-data-changed", handleUpdate)
     return () => window.removeEventListener("wiki-data-changed", handleUpdate)
   }, [])

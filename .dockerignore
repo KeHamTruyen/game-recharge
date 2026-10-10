@@ -2,7 +2,6 @@
 **/dist
 **/.env*
 **/backups
-**/uploads
 **/*.log
 .git
 .cache

@@ -11,6 +11,10 @@ import {
   buildPaginatedResult,
   getPaginationSkipTake,
 } from '../utils/pagination.js';
+import {
+  sanitizeTopupInfoForStorage,
+  maskTopupInfo,
+} from '../utils/crypto.js';
 
 const router = Router();
 
@@ -175,7 +179,7 @@ async function createOrder(
       packageId: pkg.id, packageName: pkg.name, gameName: pkg.service?.game ?? '',
       amount: new Prisma.Decimal(pkg.price).mul(input.quantity),
       quantity: input.quantity, status: 'PENDING',
-      topupInfo: input.topupInfo, topupLabels, templateName,
+      topupInfo: sanitizeTopupInfoForStorage(input.topupInfo), topupLabels, templateName,
     },
     select: transactionSelect,
   });
@@ -189,7 +193,11 @@ router.post('/', requireAuth, async (req, res, next): Promise<void> => {
     const body = createOrderSchema.parse(req.body);
     const transaction = await prisma.$transaction((tx) =>
       createOrder(tx, body, req.user!.userId, req.user!.email));
-    res.status(201).json({ success: true, data: transaction });
+    const isStaffOrAdmin = req.user!.role === 'ADMIN';
+    res.status(201).json({
+      success: true,
+      data: { ...transaction, topupInfo: maskTopupInfo(transaction.topupInfo, isStaffOrAdmin) },
+    });
   } catch (error) { next(error); }
 });
 
@@ -242,7 +250,11 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
         where: { id: { in: transactions.map((item) => item.id) } }, data: paymentFields,
       });
       const data = JSON.parse(JSON.stringify({
-        transactions: transactions.map((item) => ({ ...item, ...paymentFields })),
+        transactions: transactions.map((item) => ({
+          ...item,
+          ...paymentFields,
+          topupInfo: maskTopupInfo(item.topupInfo, false),
+        })),
         payment: {
           orderCode: paymentOrderCode, amount, checkoutUrl: qrCode, qrCode,
           bankCode: env.SEPAY_BANK_CODE, accountNumber: env.SEPAY_ACCOUNT_NUMBER,
@@ -345,11 +357,21 @@ router.get(
 
       // Only allow the owner or an administrator.
       const isOwner = transaction.userId === req.user!.userId;
-      if (!isOwner && req.user!.role !== 'ADMIN') {
+      const isStaffOrAdmin = req.user!.role === 'ADMIN';
+      if (!isOwner && !isStaffOrAdmin) {
         throw new AppError('You do not have permission to view this order', 403);
       }
 
-      res.json({ success: true, data: transaction });
+      // Passwords are only decrypted for staff/admin during fulfillment (PENDING or PROCESSING)
+      const canViewPassword = isStaffOrAdmin && (transaction.status === 'PENDING' || transaction.status === 'PROCESSING');
+
+      res.json({
+        success: true,
+        data: {
+          ...transaction,
+          topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword),
+        },
+      });
     } catch (err) {
       next(err);
     }

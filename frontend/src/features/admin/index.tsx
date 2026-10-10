@@ -1723,35 +1723,39 @@ export function AdminPage({
                           imagePosition: `${gameImageX}% ${gameImageY}%`,
                         }
 
-                        if (topupSvc && onUpdateService) {
-                          await onUpdateService(topupSvc.id, {
-                            ...commonUpdates,
-                            isActive: topupIsActive,
-                          })
-                        } else if (!topupSvc && topupIsActive && onAddService) {
-                          await onAddService({
-                            ...commonUpdates,
-                            category: "topup",
-                            iconText: gameName.trim().slice(0, 3).toUpperCase(),
-                            isActive: true,
-                          })
-                        }
+                        try {
+                          if (topupSvc && onUpdateService) {
+                            await onUpdateService(topupSvc.id, {
+                              ...commonUpdates,
+                              isActive: topupIsActive,
+                            })
+                          } else if (!topupSvc && topupIsActive && onAddService) {
+                            await onAddService({
+                              ...commonUpdates,
+                              category: "topup",
+                              iconText: gameName.trim().slice(0, 3).toUpperCase(),
+                              isActive: true,
+                            })
+                          }
 
-                        if (boostSvc && onUpdateService) {
-                          await onUpdateService(boostSvc.id, {
-                            ...commonUpdates,
-                            isActive: boostingIsActive,
-                          })
-                        } else if (!boostSvc && boostingIsActive && onAddService) {
-                          await onAddService({
-                            ...commonUpdates,
-                            category: "boosting",
-                            iconText: gameName.trim().slice(0, 3).toUpperCase(),
-                            isActive: true,
-                          })
-                        }
+                          if (boostSvc && onUpdateService) {
+                            await onUpdateService(boostSvc.id, {
+                              ...commonUpdates,
+                              isActive: boostingIsActive,
+                            })
+                          } else if (!boostSvc && boostingIsActive && onAddService) {
+                            await onAddService({
+                              ...commonUpdates,
+                              category: "boosting",
+                              iconText: gameName.trim().slice(0, 3).toUpperCase(),
+                              isActive: true,
+                            })
+                          }
 
-                        setEditingGame(null)
+                          setEditingGame(null)
+                        } catch (err: any) {
+                          alert("Lưu thông tin game thất bại: " + (err?.message || "Lỗi mạng hoặc hệ thống"))
+                        }
                       }}
                     >
                       <div className="product-create-form">

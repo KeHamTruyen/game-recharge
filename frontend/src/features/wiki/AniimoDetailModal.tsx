@@ -1,32 +1,14 @@
-import React, { useState } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import type { AniimoMonster } from "./types"
 import {
   formatImageUrl,
   getAniimoReviews,
   addAniimoReview,
   saveAniimo,
+  getEffectiveTierMap,
 } from "./wikiData"
-import rawAniipediaTierList from "@/data/wiki/aniipedia_tier_list.json"
 import { useAppStore } from "@/app/AppStore"
 import { Link } from "react-router"
-
-const tierRankMap: Record<
-  string,
-  {
-    rank: string
-    label: string
-    color: string
-  }
-> = {}
-rawAniipediaTierList.forEach((tier) => {
-  tier.names.forEach((name: string) => {
-    tierRankMap[name.toLowerCase().trim()] = {
-      rank: tier.rank,
-      label: tier.label,
-      color: tier.color,
-    }
-  })
-})
 
 interface ModalProps {
   monster: AniimoMonster | null
@@ -77,6 +59,23 @@ function AniimoDetailContent({
     monster.forms_and_maps?.basic?.map || "",
   )
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [tierRankMap, setTierRankMap] = useState(() => getEffectiveTierMap())
+
+  useEffect(() => {
+    const handleUpdate = () => setTierRankMap(getEffectiveTierMap())
+    window.addEventListener("wiki-data-changed", handleUpdate)
+    return () => window.removeEventListener("wiki-data-changed", handleUpdate)
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose()
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onClose])
 
   const tierInfo = tierRankMap[currentMonster.title.toLowerCase().trim()]
   const element = currentMonster.taxonomies.elements?.[0]
@@ -158,15 +157,18 @@ function AniimoDetailContent({
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={onClose} role="presentation">
       <div
         className="aniimo-modal-container"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="aniimo-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="aniimo-modal-header">
           <div className="aniimo-modal-title-group">
             <span className="aniimo-modal-no">#{currentMonster.no}</span>
-            <h2>{currentMonster.title}</h2>
+            <h2 id="aniimo-modal-title">{currentMonster.title}</h2>
             {element && (
               <span className="aniimo-elem-pill">
                 {element.icon && (

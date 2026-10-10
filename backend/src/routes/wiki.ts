@@ -265,6 +265,14 @@ router.put('/tier-list', requireRole('ADMIN'), auditAdminRequest, async (req, re
   } catch (error) { next(error); }
 });
 
+router.delete('/tier-list', requireRole('ADMIN'), auditAdminRequest, async (_req, res, next) => {
+  try {
+    const key = 'tierlist:default';
+    await prisma.wikiEntry.deleteMany({ where: { key } });
+    res.json({ success: true, message: 'Tier list reset to default' });
+  } catch (error) { next(error); }
+});
+
 router.post('/sync-aniipedia', requireRole('ADMIN'), auditAdminRequest, async (req, res, next) => {
   try {
     const tierMeta: Record<string, { label: string; color: string; rank: string }> = {
@@ -321,18 +329,11 @@ router.post('/sync-aniipedia', requireRole('ADMIN'), auditAdminRequest, async (r
         });
       }
     } catch (fetchErr) {
-      console.warn('Aniipedia live fetch failed, fallback will be used if needed:', fetchErr);
+      console.warn('Aniipedia live fetch failed:', fetchErr);
     }
 
     if (!parsedTiers.length || parsedTiers.every((t) => t.names.length === 0)) {
-      parsedTiers = [
-        { rank: 'SS', label: 'God Tier / Meta Tối Thượng', color: '#EF4444', names: ['Thornblade', 'Irisalis', 'Grizbo', 'Scorchhowl', 'Waleetle', 'Pawney', 'Ignitis', 'Cornet', 'Minespine'] },
-        { rank: 'S', label: 'Top Tier / Rất Mạnh', color: '#F59E0B', names: ['Irisal', 'Lunara', 'Helion', 'Infergon', 'Sherro', 'Pomawk', 'Inferlupa', 'Helgon', 'Shrubclaw', 'Glynsera', 'Fulmintis', 'Geoclaw'] },
-        { rank: 'A', label: 'Great Tier / Khá Mạnh & Ổn Định', color: '#10B981', names: ['Rookey', 'Stellarys', 'Panpanta', 'Nimbis', 'Braker', 'Voltapup', 'Barkbite', 'Voltruff', 'Toxifly', 'Lantoon', 'Florafox', 'Pyropup', 'Aquatail', 'Frostclaw'] },
-        { rank: 'B', label: 'Good Tier / Tiềm Năng & Dụng Tốt', color: '#3B82F6', names: ['Baleetle', 'Tubster', 'Flameruff', 'Tromber', 'Emberpup', 'Celestis', 'Chirpi', 'Sproutling', 'Splashy', 'Pebblet', 'Sparky', 'Breezy'] },
-        { rank: 'C', label: 'Average Tier / Trung Bình / Tình Huống', color: '#8B5CF6', names: ['Glacy', 'Susuta', 'Sheldon', 'Mossy', 'Drizzlet', 'Fuzzy', 'Snapper', 'Pufftail'] },
-        { rank: 'D', label: 'Underperforming / Hạn Chế', color: '#64748B', names: ['Nimbi', 'Pranky', 'Dewy', 'Tinyfin', 'Leaflet', 'Chirplet'] },
-      ];
+      throw new AppError('Không thể lấy dữ liệu mới từ Aniipedia (kết nối thất bại hoặc cấu trúc trang thay đổi). Bảng xếp hạng hiện tại được giữ nguyên.', 502);
     }
 
     const totalMonsters = parsedTiers.reduce((sum, t) => sum + t.names.length, 0);

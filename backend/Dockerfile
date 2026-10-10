@@ -38,11 +38,12 @@ COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist ./dist
 
-# Tạo thư mục uploads nếu chưa có
-RUN mkdir -p uploads
+# Tạo thư mục uploads và chuẩn bị ảnh mẫu ban đầu
+RUN mkdir -p uploads seed_uploads
+COPY uploads ./seed_uploads/
 
 EXPOSE 3000
 
-# Chạy migrate và khởi động ứng dụng
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+# Chạy migrate, sao chép ảnh mẫu vào uploads volume nếu chưa có, và khởi động ứng dụng
+CMD ["sh", "-c", "npx prisma migrate deploy && cp -n /app/seed_uploads/* /app/uploads/ 2>/dev/null || true; node dist/index.js"]
 

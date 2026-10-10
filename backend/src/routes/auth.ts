@@ -31,7 +31,10 @@ const registerSchema = z.object({
   password: z
     .string()
     .min(6, 'Password must be at least 6 characters')
-    .max(72, 'Password must not exceed 72 characters'),
+    .max(72, 'Password must not exceed 72 characters')
+    .refine((val) => Buffer.byteLength(val, 'utf8') <= 72, {
+      message: 'Password must not exceed 72 bytes (UTF-8)',
+    }),
 });
 
 const loginSchema = z.object({

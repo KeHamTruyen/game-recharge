@@ -190,13 +190,13 @@ export default function TierListPage() {
     }
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (
       window.confirm(
         "Bạn có chắc muốn đặt lại toàn bộ Tier List về mặc định ban đầu?",
       )
     ) {
-      resetTierListToDefault()
+      await resetTierListToDefault()
       const def = getEffectiveTierList()
       setTiers(def)
       setWorkingTiers(def)

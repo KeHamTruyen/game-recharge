@@ -125,7 +125,7 @@ async function main() {
       warning: 'Tài khoản được bảo mật tuyệt đối. Cam kết không dùng phần mềm thứ ba và không tiêu hao tài nguyên ngoài thỏa thuận.',
       fields: [
         { key: 'account', label: 'Tài khoản / Email đăng nhập', type: 'text', placeholder: 'Nhập username hoặc email', required: true, hint: 'Tài khoản dùng để đăng nhập vào game' },
-        { key: 'password', label: 'Mật khẩu', type: 'text', placeholder: 'Nhập mật khẩu game', required: true, hint: 'Thông tin được mã hóa an toàn' },
+        { key: 'password', label: 'Mật khẩu', type: 'password', placeholder: 'Nhập mật khẩu game', required: true, hint: 'Thông tin được mã hóa an toàn' },
         {
           key: 'server',
           label: 'Server / Khu vực',

@@ -278,6 +278,7 @@ export function AdminRoute() {
             store.setNotice(`Đã cập nhật thông tin game "${updates.name || name}" thành công.`)
           } catch (error) {
             store.setNotice(error instanceof Error ? error.message : "Cập nhật game thất bại.")
+            throw error
           }
         }}
         onUpdateService={async (serviceId, updates) => {
@@ -291,6 +292,7 @@ export function AdminRoute() {
             store.setNotice(`Đã chuyển trạng thái ${typeLabel} game "${updated.name}" sang: ${statusLabel}.`)
           } catch (error) {
             store.setNotice(error instanceof Error ? error.message : "Cập nhật dịch vụ thất bại.")
+            throw error
           }
         }}
         middlemanInfo={store.middlemanInfo}

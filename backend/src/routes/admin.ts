@@ -178,6 +178,22 @@ router.post(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const data = packageSchema.parse(req.body);
+
+      const statusExists = await prisma.productStatus.findUnique({
+        where: { id: data.statusId },
+      });
+      if (!statusExists) {
+        throw new AppError(`ProductStatus '${data.statusId}' does not exist`, 400);
+      }
+      if (data.templateId && data.templateId.trim() !== '') {
+        const templateExists = await prisma.topupTemplate.findUnique({
+          where: { id: data.templateId },
+        });
+        if (!templateExists) {
+          throw new AppError(`TopupTemplate '${data.templateId}' does not exist`, 400);
+        }
+      }
+
       const pkg = await prisma.servicePackage.create({ data });
       res.status(201).json({ success: true, data: pkg });
     } catch (err) {
@@ -194,6 +210,23 @@ router.put(
     try {
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
       const data = packageSchema.partial().omit({ serviceId: true }).parse(req.body);
+
+      if (data.statusId) {
+        const statusExists = await prisma.productStatus.findUnique({
+          where: { id: data.statusId },
+        });
+        if (!statusExists) {
+          throw new AppError(`ProductStatus '${data.statusId}' does not exist`, 400);
+        }
+      }
+      if (data.templateId && data.templateId.trim() !== '') {
+        const templateExists = await prisma.topupTemplate.findUnique({
+          where: { id: data.templateId },
+        });
+        if (!templateExists) {
+          throw new AppError(`TopupTemplate '${data.templateId}' does not exist`, 400);
+        }
+      }
 
       const pkg = await prisma.servicePackage.update({ where: { id }, data });
       res.json({ success: true, data: pkg });
@@ -437,8 +470,30 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
-      await prisma.productStatus.delete({ where: { id } });
-      res.json({ success: true, data: { message: 'Status deleted' } });
+      const fallbackId = (req.query['fallbackId'] as string) || undefined;
+
+      let fallback = fallbackId
+        ? await prisma.productStatus.findUnique({ where: { id: fallbackId } })
+        : null;
+
+      if (!fallback) {
+        fallback = await prisma.productStatus.findFirst({
+          where: { id: { not: id } },
+          orderBy: { id: 'asc' },
+        });
+      }
+
+      await prisma.$transaction(async (tx) => {
+        if (fallback) {
+          await tx.servicePackage.updateMany({
+            where: { statusId: id },
+            data: { statusId: fallback.id },
+          });
+        }
+        await tx.productStatus.delete({ where: { id } });
+      });
+
+      res.json({ success: true, data: { message: 'Status deleted', fallbackId: fallback?.id } });
     } catch (err) {
       next(err);
     }
@@ -449,13 +504,32 @@ router.delete(
 // TOPUP TEMPLATES CRUD
 // ══════════════════════════════════════════════════════════════════════════════
 
+const templateFieldSchema = z.object({
+  id: z.string().optional(),
+  key: z.string().min(1).max(100),
+  label: z.string().min(1).max(150),
+  type: z.string().min(1).max(50).default('text'),
+  placeholder: z.string().max(200).optional().default(''),
+  required: z.boolean().optional().default(true),
+  hint: z.string().max(300).optional(),
+  helpText: z.string().max(300).optional(),
+  pattern: z.string().max(200).optional(),
+  options: z.array(z.union([
+    z.string().max(150),
+    z.object({
+      value: z.string().max(150),
+      label: z.string().max(150),
+    }),
+  ])).optional().default([]),
+}).passthrough();
+
 const topupTemplateSchema = z.object({
   id: z.string().min(1).max(60),
   name: z.string().min(1).max(100),
   game: z.string().min(1).max(100),
   description: z.string().max(500).default(''),
-  warning: z.string().max(300).default(''),
-  fields: z.array(z.record(z.string(), z.unknown())).or(z.record(z.string(), z.unknown())),
+  warning: z.string().max(500).default(''),
+  fields: z.array(templateFieldSchema).min(1, 'Template must have at least one field'),
 });
 
 router.get(
