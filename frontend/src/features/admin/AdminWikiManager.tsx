@@ -138,14 +138,14 @@ export function AdminWikiManager() {
           }`}
           onClick={() => setSubTab("giftcodes")}
         >
-          🎁 Quản Lý Giftcode ({giftcodes.length})
+          🎁 Giftcode ({giftcodes.length})
         </button>
         <button
           type="button"
           className={`wiki-subtab-btn ${subTab === "aniimos" ? "active" : ""}`}
           onClick={() => setSubTab("aniimos")}
         >
-          🐾 Chỉnh Sửa Thông Tin Aniimo (98 Thú Cưng)
+          🐾 Thú Cưng Aniimo ({aniimos.length})
         </button>
       </div>
 

@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react"
-import { Outlet, Link } from "react-router"
+import { Outlet } from "react-router"
 import { refreshWiki } from "./wikiStore"
-import { useAppStore } from "@/app/AppStore"
 
 export default function WikiLayout() {
-  const { user } = useAppStore()
-  const isAdmin = user?.role === "admin"
   const [error, setError] = useState("")
 
   useEffect(() => {
@@ -33,23 +30,6 @@ export default function WikiLayout() {
 
   return (
     <>
-      {isAdmin && (
-        <aside className="admin-wiki-sticky-bar" aria-label="Thanh quản trị Wiki">
-          <div className="page-width admin-wiki-bar-inner">
-            <div className="admin-wiki-bar-badge">
-              <span className="admin-wiki-pulse-dot" />
-              <strong>⚡ ADMIN WIKI DIRECT EDIT</strong>
-              <span className="admin-wiki-desc">
-                Bạn có thể sửa bài viết, giftcode &amp; chỉ số Aniimo trực tiếp ngay trên trang
-              </span>
-            </div>
-            <Link to="/admin" className="admin-wiki-bar-link">
-              Quản Trị Hệ Thống ➔
-            </Link>
-          </div>
-        </aside>
-      )}
-
       {error && (
         <p className="page-width" role="alert">
           {error}{" "}

@@ -543,24 +543,6 @@ export default function WorldMapPage() {
 
   return (
     <div className="inner-page page-width wiki-page-container">
-      {/* Top Banner Notice - Cloned exactly like target design */}
-      <div className="map-top-sync-banner">
-        <span>
-          📢 Lưu ý: Bạn có thể cuộn chuột để Phóng to / Thu nhỏ và kéo thả tự do
-          trên bản đồ nha
-        </span>
-        <button
-          type="button"
-          className="map-banner-sync-btn"
-          onClick={() => {
-            setPanOffset({ x: 0, y: 0 })
-            setZoomLevel(0.85)
-          }}
-        >
-          🔄 Đặt lại góc nhìn
-        </button>
-      </div>
-
       <div className="game-map-wrapper">
         {/* Top Floating Action Bar */}
         <div className="map-floating-top-bar">
@@ -651,19 +633,6 @@ export default function WorldMapPage() {
               title="Bật/Tắt ranh giới các phân khu"
             >
               <span>🗺️ Ranh Giới</span>
-            </button>
-
-            <button
-              type="button"
-              className="map-action-pill map-action-pill-create"
-              onClick={() => {
-                alert(
-                  "Tính năng Tạo Ghim: Bạn có thể nhấp vào bất kỳ điểm nào trên bản đồ để xem chi tiết hoặc thêm ghi chú cá nhân!",
-                )
-              }}
-              title="Thêm điểm ghim mới"
-            >
-              <span>➕ Tạo Ghim</span>
             </button>
           </div>
         </div>

@@ -2860,17 +2860,40 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-wiki-manager .product-list-toolbar {
+  width: 100%;
+  max-width: 100%;
+}
+
+.admin-wiki-manager .product-list-toolbar p {
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .admin-wiki-tabs {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   border-bottom: 1px solid #1e283a;
   padding-bottom: 12px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+.admin-wiki-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .wiki-subtab-btn {
-  padding: 10px 18px;
+  padding: 9px 16px;
   background: #0d1422;
   border: 1px solid #1e293b;
   border-radius: 10px;
@@ -2879,6 +2902,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .wiki-subtab-btn.active,
@@ -2893,6 +2918,8 @@
   border: 1px solid #1e283a;
   border-radius: 14px;
   padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-wiki-form h3 {
@@ -2903,7 +2930,7 @@
 
 .admin-wiki-form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
@@ -2927,6 +2954,16 @@
   border-radius: 8px;
   color: #f1f5f9;
   font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 .admin-code-pill {
@@ -2936,11 +2973,13 @@
   border-radius: 6px;
   color: #38dbf8;
   font-weight: 700;
+  display: inline-block;
 }
 
 .admin-wiki-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 480px;
 }
 
 .admin-wiki-table th {
@@ -2971,6 +3010,7 @@
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
+  white-space: nowrap;
 }
 
 .table-btn.edit {
@@ -2990,6 +3030,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .admin-monsters-list {
@@ -2998,17 +3040,20 @@
   gap: 8px;
   max-height: 600px;
   overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-monster-row {
   display: grid;
-  grid-template-columns: 48px 1fr 280px 110px;
+  grid-template-columns: 48px 1fr auto 110px;
   align-items: center;
   gap: 14px;
   padding: 10px 14px;
   background: #0d1422;
   border: 1px solid #1e283a;
   border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .admin-monster-thumb {
@@ -3019,15 +3064,26 @@
   object-fit: contain;
 }
 
+.admin-monster-main {
+  min-width: 0;
+}
+
 .admin-monster-main strong {
   display: block;
   font-size: 13px;
   color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .admin-monster-main small {
   font-size: 11px;
   color: #64748b;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .admin-monster-stats-peek {
@@ -3035,10 +3091,27 @@
   gap: 10px;
   font-size: 11px;
   color: #94a3b8;
+  flex-wrap: wrap;
 }
 
 .admin-monster-stats-peek strong {
   color: #38dbf8;
+}
+
+@media (max-width: 768px) {
+  .admin-monster-row {
+    grid-template-columns: 44px 1fr auto;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .admin-monster-stats-peek {
+    grid-column: 1 / -1;
+    background: rgba(8, 13, 22, 0.6);
+    padding: 6px 10px;
+    border-radius: 6px;
+    gap: 8px;
+  }
 }
 
 .admin-edit-modal-box {
@@ -6665,47 +6738,40 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
   }
 
   .map-action-pill,
   .map-filter-drawer-toggle {
-    flex: 1 1 0;
+    flex: 1;
     min-width: 0;
     justify-content: center;
-    padding: 6px 4px;
-    font-size: 10px;
-    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 11.5px;
+    border-radius: 9px;
     white-space: nowrap;
     box-sizing: border-box;
-    gap: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .map-filter-drawer-toggle .filter-count-badge {
-    padding: 1px 4px;
-    font-size: 9.5px;
-    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 10.5px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .map-level-toggle-pill {
-    padding: 5px 8px;
-    font-size: 10.5px;
-    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 9px;
     white-space: nowrap;
     flex-shrink: 0;
-  }
-
-  .map-top-sync-banner {
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 8px 12px;
-    font-size: 11px;
-  }
-
-  .map-banner-sync-btn {
-    white-space: nowrap;
-    font-size: 10.5px;
-    padding: 4px 8px;
   }
 
   .underground-plan-select {
