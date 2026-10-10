@@ -1151,12 +1151,12 @@ export const initialServicePackages: ServicePackage[] = [
 
 export const platformLogos: Record<Exclude<ContactPlatform, "custom">, string> =
   {
-    zalo: "https://cdn.simpleicons.org/zalo/0068FF",
-    youtube: "https://cdn.simpleicons.org/youtube/FF0000",
-    discord: "https://cdn.simpleicons.org/discord/5865F2",
-    facebook: "https://cdn.simpleicons.org/facebook/1877F2",
-    telegram: "https://cdn.simpleicons.org/telegram/26A5E4",
-    email: "https://cdn.simpleicons.org/gmail/EA4335",
+    zalo: "/icons/zalo.svg",
+    youtube: "/icons/youtube.svg",
+    discord: "/icons/discord.svg",
+    facebook: "/icons/facebook.svg",
+    telegram: "/icons/telegram.svg",
+    email: "/icons/email.svg",
   }
 
 export const initialMiddlemanInfo: MiddlemanInfo = {

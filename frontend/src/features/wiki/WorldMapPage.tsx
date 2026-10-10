@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useRef, useEffect } from "react"
-import keyMarkers from "@/data/wiki/map_key_markers.json"
 import mapZones from "@/data/wiki/map_zones.json"
 import { formatImageUrl } from "./wikiData"
 
@@ -343,22 +342,47 @@ export default function WorldMapPage() {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [searchQuery, setSearchQuery] = useState("")
+  const [keyMarkers, setKeyMarkers] = useState<MapMarker[]>([])
+  const [isLoadingMarkers, setIsLoadingMarkers] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    import("@/data/wiki/map_key_markers.json").then((mod) => {
+      if (active) {
+        setKeyMarkers((mod.default || mod) as MapMarker[])
+        setIsLoadingMarkers(false)
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
   const [collectedMarkers, setCollectedMarkers] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(COLLECTED_STORAGE_KEY)
       if (!saved) return new Set()
       const list = JSON.parse(saved)
-      if (!Array.isArray(list)) return new Set()
+      return Array.isArray(list) ? new Set(list) : new Set()
+    } catch {
+      return new Set()
+    }
+  })
 
-      // Comprehensive index of all markers:
-      // 1. currentKeys: canonical format `${mapId}_${id}_${item_id}_${normX}_${normY}`
-      // 2. intermediateMap: commit 926a907 format `${mapId}_${id}_${item_id}_${x}_${y}`
-      // 3. legacyIdMap: raw format `${id}`
+  // Migration for legacy marker IDs and intermediate format runs once keyMarkers are loaded
+  useEffect(() => {
+    if (keyMarkers.length === 0) return
+    try {
+      const saved = localStorage.getItem(COLLECTED_STORAGE_KEY)
+      if (!saved) return
+      const list = JSON.parse(saved)
+      if (!Array.isArray(list)) return
+
       const currentKeys = new Set<string>()
       const intermediateMap = new Map<string, string[]>()
       const legacyIdMap = new Map<string, string[]>()
 
-      ;(keyMarkers as MapMarker[]).forEach((m) => {
+      keyMarkers.forEach((m) => {
         const uKey = getMarkerKey(m)
         currentKeys.add(uKey)
 
@@ -371,26 +395,28 @@ export default function WorldMapPage() {
       })
 
       const migrated = new Set<string>()
+      let hasChanges = false
+
       list.forEach((entry: string) => {
         if (currentKeys.has(entry)) {
           migrated.add(entry)
         } else if (intermediateMap.has(entry)) {
+          hasChanges = true
           intermediateMap.get(entry)!.forEach((mk) => migrated.add(mk))
         } else if (legacyIdMap.has(entry)) {
+          hasChanges = true
           legacyIdMap.get(entry)!.forEach((mk) => migrated.add(mk))
         } else {
           migrated.add(entry)
         }
       })
 
-      try {
+      if (hasChanges) {
         localStorage.setItem(COLLECTED_STORAGE_KEY, JSON.stringify([...migrated]))
-      } catch {}
-      return migrated
-    } catch {
-      return new Set()
-    }
-  })
+        setCollectedMarkers(migrated)
+      }
+    } catch {}
+  }, [keyMarkers])
 
   const mapViewportRef = useRef<HTMLDivElement>(null)
 
@@ -484,6 +510,7 @@ export default function WorldMapPage() {
     activeLayers,
     currentLevel,
     searchQuery,
+    keyMarkers,
   ])
 
   // Mouse pan handling
@@ -593,11 +620,45 @@ export default function WorldMapPage() {
     return (keyMarkers as MapMarker[]).filter(
       (m) => (m.mapId || "country-of-time") === selectedArea.id,
     ).length
-  }, [selectedArea.id])
+  }, [selectedArea.id, keyMarkers])
 
   return (
     <div className="inner-page page-width wiki-page-container">
       <div className="game-map-wrapper">
+        {isLoadingMarkers && (
+          <div
+            style={{
+              position: "absolute",
+              top: 14,
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 99,
+              backgroundColor: "rgba(13, 19, 31, 0.92)",
+              border: "1px solid rgba(56, 219, 248, 0.4)",
+              color: "#38dbf8",
+              padding: "6px 14px",
+              borderRadius: "9999px",
+              fontSize: "12px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+              backdropFilter: "blur(6px)",
+            }}
+          >
+            <span
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                border: "2px solid #38dbf8",
+                borderTopColor: "transparent",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+            <span>Đang nạp 3.500+ điểm thám hiểm...</span>
+          </div>
+        )}
         {/* Top Floating Action Bar */}
         <div className="map-floating-top-bar">
           {/* Left / Upper HUD: Level toggle & Region Switcher */}

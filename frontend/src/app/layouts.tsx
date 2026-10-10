@@ -663,7 +663,15 @@ export function PublicLayout() {
         onClick={handleSupport}
         aria-label="Mở Zalo hỗ trợ"
       >
-        <img src={platformLogos.zalo} alt="Zalo" />
+        <img
+          src={platformLogos.zalo || "/icons/zalo.svg"}
+          alt="Zalo"
+          onError={(e) => {
+            if (e.currentTarget.src !== "/icons/zalo.svg") {
+              e.currentTarget.src = "/icons/zalo.svg"
+            }
+          }}
+        />
         <span className="chat-dot" />
       </button>
       {loginOpen && (

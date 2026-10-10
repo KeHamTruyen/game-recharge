@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react"
 import type { ContactInfo, MiddlemanInfo, Transaction } from "@/domain/models"
 import { Icon, Pagination, formatPrice } from "@/components/ui"
+import { platformLogos } from "@/data/mock-data"
 
 export function MiddlemanPage({ info }: { info: MiddlemanInfo }) {
   return (
@@ -148,7 +149,22 @@ export function ContactPage({ info }: { info: ContactInfo }) {
             rel="noreferrer"
           >
             <span className="channel-image">
-              <img src={channel.image} alt="" />
+              <img
+                src={
+                  (channel.platform && platformLogos[channel.platform as keyof typeof platformLogos]) ||
+                  channel.image ||
+                  "/icons/zalo.svg"
+                }
+                alt=""
+                onError={(e) => {
+                  const fallback =
+                    (channel.platform && platformLogos[channel.platform as keyof typeof platformLogos]) ||
+                    "/icons/zalo.svg"
+                  if (e.currentTarget.src !== fallback) {
+                    e.currentTarget.src = fallback
+                  }
+                }}
+              />
             </span>
             <span className="channel-content">
               <small>{channel.label}</small>

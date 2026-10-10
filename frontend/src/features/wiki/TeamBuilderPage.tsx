@@ -1,4 +1,4 @@
-import { libraryFullData } from "./libraryData"
+import carriedItemsData from "@/data/wiki/carried_items.json"
 
 import React, { useState, useEffect, useMemo } from "react"
 
@@ -410,12 +410,7 @@ export default function TeamBuilderPage() {
   // Carried Items list from library
 
   const carriedItems = useMemo(() => {
-    return libraryFullData.filter(
-      (i) =>
-        i.categoryGroup === "Trang Bị & Khí Cụ" ||
-        (i.category || "").toLowerCase().includes("mang theo") ||
-        (i.rawCategory || "").toLowerCase().includes("carried"),
-    )
+    return (carriedItemsData as unknown) as LibraryItem[]
   }, [])
 
   // Helper to load a team into the builder (edit mode or clone mode)
