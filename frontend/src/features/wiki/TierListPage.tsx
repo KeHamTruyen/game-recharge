@@ -196,13 +196,17 @@ export default function TierListPage() {
         "Bạn có chắc muốn đặt lại toàn bộ Tier List về mặc định ban đầu?",
       )
     ) {
-      await resetTierListToDefault()
-      const def = getEffectiveTierList()
-      setTiers(def)
-      setWorkingTiers(def)
-      setIsEditing(false)
-      setSaveToast("Đã khôi phục bảng xếp hạng mặc định!")
-      setTimeout(() => setSaveToast(null), 3500)
+      try {
+        await resetTierListToDefault()
+        const def = getEffectiveTierList()
+        setTiers(def)
+        setWorkingTiers(def)
+        setIsEditing(false)
+        setSaveToast("Đã khôi phục bảng xếp hạng mặc định!")
+        setTimeout(() => setSaveToast(null), 3500)
+      } catch (err: any) {
+        alert("Khôi phục bảng xếp hạng thất bại: " + (err?.message || "Lỗi kết nối máy chủ"))
+      }
     }
   }
 

@@ -17,6 +17,7 @@ import type {
 } from "@/domain/models"
 import { platformLogos } from "@/data/mock-data"
 import { Icon, Pagination, ProductCard, ServiceCard, formatPrice } from "@/components/ui"
+import { api } from "@/services/api"
 
 export function AdminHeader({
   email,
@@ -3083,6 +3084,23 @@ export function AdminTransactions({
   const [status, setStatus] = useState("Tất cả")
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Transaction | null>(null)
+
+  useEffect(() => {
+    if (!selected?.id) return
+    let active = true
+    api.admin.getTransaction(selected.id)
+      .then((decrypted) => {
+        if (active && decrypted) {
+          setSelected(decrypted)
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not fetch decrypted transaction details:", err)
+      })
+    return () => {
+      active = false
+    }
+  }, [selected?.id])
   const statuses: Array<"Tất cả" | TransactionStatus> = [
     "Tất cả",
     "Chờ thanh toán",

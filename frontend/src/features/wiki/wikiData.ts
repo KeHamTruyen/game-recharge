@@ -444,11 +444,7 @@ export async function saveTierList(tiers: TierDefinition[]): Promise<void> {
 }
 
 export async function resetTierListToDefault(): Promise<void> {
-  try {
-    await writeWiki("/tier-list", "DELETE")
-  } catch (err) {
-    console.warn("Server reset tier list warning:", err)
-  }
+  await writeWiki("/tier-list", "DELETE")
   localStorage.removeItem(TIER_STORAGE_KEY)
   window.dispatchEvent(new CustomEvent("wiki-data-changed"))
 }

@@ -90,6 +90,7 @@ async function createOrder(
   }
 
   let templateName = '';
+  let templateFields: Array<Record<string, unknown>> = [];
   const labelMap = new Map<string, string>();
   if (pkg.templateId) {
     const template = await tx.topupTemplate.findUnique({
@@ -97,11 +98,11 @@ async function createOrder(
       select: { name: true, fields: true },
     });
     templateName = template?.name ?? '';
-    const fields = Array.isArray(template?.fields)
+    templateFields = Array.isArray(template?.fields)
       ? template.fields as Array<Record<string, unknown>>
       : [];
-    const allowedKeys = new Set(fields.map((field) => String(field.key || '')));
-    for (const field of fields) {
+    const allowedKeys = new Set(templateFields.map((field) => String(field.key || '')));
+    for (const field of templateFields) {
       const key = String(field.key || '');
       const value = input.topupInfo[key];
       if (field.required && (value === undefined || String(value).trim() === '')) {
@@ -131,7 +132,7 @@ async function createOrder(
         }
       }
     }
-    for (const field of fields) {
+    for (const field of templateFields) {
       if (field.key && field.label) {
         labelMap.set(String(field.key), String(field.label));
       }
@@ -179,7 +180,7 @@ async function createOrder(
       packageId: pkg.id, packageName: pkg.name, gameName: pkg.service?.game ?? '',
       amount: new Prisma.Decimal(pkg.price).mul(input.quantity),
       quantity: input.quantity, status: 'PENDING',
-      topupInfo: sanitizeTopupInfoForStorage(input.topupInfo), topupLabels, templateName,
+      topupInfo: sanitizeTopupInfoForStorage(input.topupInfo, templateFields), topupLabels, templateName,
     },
     select: transactionSelect,
   });

@@ -45,5 +45,5 @@ COPY uploads ./seed_uploads/
 EXPOSE 3000
 
 # Chạy migrate, sao chép ảnh mẫu vào uploads volume nếu chưa có, và khởi động ứng dụng
-CMD ["sh", "-c", "npx prisma migrate deploy && cp -n /app/seed_uploads/* /app/uploads/ 2>/dev/null || true; node dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && (cp -n /app/seed_uploads/* /app/uploads/ 2>/dev/null || true) && node dist/index.js"]
 

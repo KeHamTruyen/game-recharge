@@ -727,6 +727,13 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       async logout() {
         await api.auth.logout()
 
+        try {
+          sessionStorage.removeItem("nexa_checkout_payment")
+          sessionStorage.removeItem("nexa_cart")
+          sessionStorage.removeItem("nexa_selected_service")
+          sessionStorage.removeItem("nexa_selected_qty")
+        } catch {}
+
         setUser(null)
         setUsers([])
         setTransactions([])

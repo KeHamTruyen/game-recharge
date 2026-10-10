@@ -364,8 +364,9 @@ export const api = {
       })
       return { ...result.data, icon: "check" as const }
     },
-    async deleteStatus(id: string) {
-      await client.request(`/admin/product-statuses/${encodeURIComponent(id)}`, { method: "DELETE" })
+    async deleteStatus(id: string, fallbackId?: string) {
+      const query = fallbackId ? `?fallbackId=${encodeURIComponent(fallbackId)}` : ""
+      await client.request(`/admin/product-statuses/${encodeURIComponent(id)}${query}`, { method: "DELETE" })
     },
     async createTemplate(template: TopupTemplate) {
       const result = await client.request<ApiEnvelope<Record<string, unknown>>>("/admin/topup-templates", {
@@ -413,6 +414,10 @@ export const api = {
     },
     async transactions() {
       return (await allPages<ApiTransaction>("/admin/transactions")).map(mapTransaction)
+    },
+    async getTransaction(id: string | number) {
+      const result = await client.request<ApiEnvelope<ApiTransaction>>(`/admin/transactions/${encodeURIComponent(String(id))}`)
+      return mapTransaction(result.data)
     },
     async updateUser(id: string | number, updates: Partial<ManagedUser>) {
     const result = await client.request<ApiEnvelope<{

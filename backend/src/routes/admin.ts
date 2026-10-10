@@ -12,6 +12,7 @@ import {
   buildPaginatedResult,
   getPaginationSkipTake,
 } from '../utils/pagination.js';
+import { maskTopupInfo } from '../utils/crypto.js';
 
 const router = Router();
 const imageValueSchema = z.string().max(10_000_000).refine(
@@ -483,6 +484,17 @@ router.delete(
         });
       }
 
+      const packageCount = await prisma.servicePackage.count({
+        where: { statusId: id },
+      });
+
+      if (packageCount > 0 && !fallback) {
+        throw new AppError(
+          'Không thể xóa trạng thái này vì vẫn có gói sản phẩm đang sử dụng và không có trạng thái thay thế hợp lệ.',
+          400
+        );
+      }
+
       await prisma.$transaction(async (tx) => {
         if (fallback) {
           await tx.servicePackage.updateMany({
@@ -695,9 +707,44 @@ router.get(
         prisma.transaction.count({ where }),
       ]);
 
+      const maskedList = transactions.map((t) => ({
+        ...t,
+        topupInfo: maskTopupInfo(t.topupInfo, false),
+      }));
+
       res.json({
         success: true,
-        data: buildPaginatedResult(transactions, total, page, limit),
+        data: buildPaginatedResult(maskedList, total, page, limit),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// GET /admin/transactions/:id - Get decrypted transaction details for fulfillment
+router.get(
+  '/transactions/:id',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
+      const transaction = await prisma.transaction.findFirst({
+        where: { OR: [{ id }, { code: id }] },
+        include: {
+          service: { select: { id: true, name: true, iconText: true } },
+          user: { select: { id: true, name: true, email: true } },
+        },
+      });
+      if (!transaction) throw new NotFoundError('Transaction');
+
+      const canViewPassword = transaction.status === 'PENDING' || transaction.status === 'PROCESSING';
+
+      res.json({
+        success: true,
+        data: {
+          ...transaction,
+          topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword),
+        },
       });
     } catch (err) {
       next(err);

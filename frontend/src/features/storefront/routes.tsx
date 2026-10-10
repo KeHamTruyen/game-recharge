@@ -263,10 +263,30 @@ export function CheckoutRoute() {
 
   const pkg = store.cart[0]?.pkg
   const service = store.selectedService
+  const cartSignature = store.cart.map((i) => `${i.pkg.id}:${i.quantity}`).sort().join(",")
+  const cartTotalAmount = store.cart.reduce((sum, i) => sum + i.pkg.price * i.quantity, 0)
+
   const [payment, setPayment] = useState<PaymentDetails | null>(() => {
     try {
       const saved = sessionStorage.getItem("nexa_checkout_payment")
-      return saved ? JSON.parse(saved) : null
+      if (!saved) return null
+      const parsed = JSON.parse(saved)
+      const data = parsed.payment || parsed
+      if (!data || !data.orderCode) return null
+
+      if (store.user && parsed.userEmail && store.user.email !== parsed.userEmail) {
+        sessionStorage.removeItem("nexa_checkout_payment")
+        return null
+      }
+      if (cartSignature && parsed.cartSignature && cartSignature !== parsed.cartSignature) {
+        sessionStorage.removeItem("nexa_checkout_payment")
+        return null
+      }
+      if (cartTotalAmount > 0 && parsed.totalAmount && cartTotalAmount !== parsed.totalAmount) {
+        sessionStorage.removeItem("nexa_checkout_payment")
+        return null
+      }
+      return data
     } catch {
       return null
     }
@@ -276,14 +296,23 @@ export function CheckoutRoute() {
   const { setNotice } = store
 
   useEffect(() => {
-    try {
-      if (payment) {
-        sessionStorage.setItem("nexa_checkout_payment", JSON.stringify(payment))
-      } else {
-        sessionStorage.removeItem("nexa_checkout_payment")
+    if (payment) {
+      const stored = sessionStorage.getItem("nexa_checkout_payment")
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored)
+          if (
+            (store.user && parsed.userEmail && store.user.email !== parsed.userEmail) ||
+            (cartSignature && parsed.cartSignature && cartSignature !== parsed.cartSignature) ||
+            (cartTotalAmount > 0 && parsed.totalAmount && cartTotalAmount !== parsed.totalAmount)
+          ) {
+            setPayment(null)
+            sessionStorage.removeItem("nexa_checkout_payment")
+          }
+        } catch {}
       }
-    } catch {}
-  }, [payment])
+    }
+  }, [store.user?.email, cartSignature, cartTotalAmount, payment])
 
   useEffect(() => {
     if (!payment || paymentStatus === "PAID") return
@@ -342,6 +371,14 @@ export function CheckoutRoute() {
           checkoutKey,
         )
         setPayment(result.payment)
+        try {
+          sessionStorage.setItem("nexa_checkout_payment", JSON.stringify({
+            payment: result.payment,
+            userEmail: store.user.email,
+            cartSignature,
+            totalAmount: cartTotalAmount,
+          }))
+        } catch {}
         store.setTransactions((current) => [...result.transactions, ...current])
         store.setNotice("Đơn hàng đã được ghi nhận và chuyển sang trạng thái chờ thanh toán.")
         return result.payment

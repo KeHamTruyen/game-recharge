@@ -26,6 +26,8 @@ const envSchema = z.object({
     .min(32, 'COOKIE_SECRET must be at least 32 characters long'),
   AUTH_COOKIE_SAMESITE: z.enum(['strict', 'lax', 'none']).default('strict'),
   AUTH_COOKIE_DOMAIN: z.string().optional(),
+  // Data encryption key (separate from JWT)
+  DATA_ENCRYPTION_KEY: z.string().min(16).optional(),
 
   SEPAY_API_KEY: z.string().optional(),
   SEPAY_BANK_CODE: z.string().optional(),
