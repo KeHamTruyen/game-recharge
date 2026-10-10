@@ -225,9 +225,6 @@ export function ServiceDetailPage({
                 </div>
                 <div className="package-card-footer">
                   <div className="package-pricing">
-                    {pkg.oldPrice ? (
-                      <span className="package-old-price">{formatPrice(pkg.oldPrice)}</span>
-                    ) : null}
                     <span className="package-price">{formatPrice(pkg.price)}</span>
                   </div>
                   <div className={`package-status status-${status?.color || "green"}`}>
