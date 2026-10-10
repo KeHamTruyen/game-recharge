@@ -132,6 +132,100 @@ export async function deleteGiftcode(id: string) {
   await writeWiki(`/giftcodes/${encodeURIComponent(id)}`, "DELETE")
 }
 
+export interface GuideArticle {
+  id: string
+  title: string
+  category: string
+  readTime: string
+  summary: string
+  content: string[]
+}
+
+export const DEFAULT_GUIDES: GuideArticle[] = [
+  {
+    id: "tan-thu-khoi-dau",
+    title: "Cẩm Nang Tân Thủ: 7 Ngày Khởi Đầu Thu Phục Aniimo Hiệu Quả Nhất",
+    category: "Tân Thủ",
+    readTime: "5 phút",
+    summary:
+      "Tối ưu lộ trình những ngày đầu trải nghiệm game: cách chọn Aniimo khởi đầu, nhận đủ các mốc quà tân thủ và mở khóa bản đồ thế giới nhanh chóng.",
+    content: [
+      "1. Chọn Aniimo khởi đầu phù hợp: Khi bắt đầu cuộc phiêu lưu, hãy ưu tiên các thú cưng có khả năng cân bằng giữa sát thương (DPS) và hồi phục. Emberpup hoặc Glacy là 2 lựa chọn cực tốt cho tân thủ.",
+      "2. Nhập toàn bộ Giftcode tân thủ: Mở mục Giftcode trên Wiki để nhận hàng ngàn tinh thể và các vật phẩm ấp trứng miễn phí.",
+      "3. Chú ý chỉ số Phá Giáp (BREAK): Trong Aniimo, việc phá giáp quái vật nhanh sẽ giúp team gây sát thương gấp 2-3 lần. Luôn kẹp ít nhất 1 thú cưng hệ Phá Giáp trong đội hình.",
+      "4. Khám phá bản đồ thế giới: Đừng bỏ qua các rương kho báu và trứng ấp nằm rải rác ở Bình Nguyên Gió Hôn.",
+    ],
+  },
+  {
+    id: "toi-uu-tai-nguyen",
+    title: "Mẹo Tối Ưu Tinh Thể & Xu Voxel Cho Người Chơi Free-To-Play (F2P)",
+    category: "Tài Nguyên",
+    readTime: "4 phút",
+    summary:
+      "Cách tích lũy và sử dụng Tinh Thể Ánh Sáng (Lumin Crystals), Xu Bạn Đồng Hành để không bị thâm hụt tài nguyên khi nâng cấp đội hình.",
+    content: [
+      "1. Đừng nâng đều tất cả Aniimo: Hãy tập trung 100% tài nguyên nâng max cấp cho 1 chủ lực DPS và 1 Hỗ Trợ chính trước.",
+      "2. Tiêu phí Tinh Thể vào đâu: Ưu tiên mở rộng túi đồ và mua các gói vật phẩm tăng tốc ấp trứng thay vì quay gacha vô tội vạ.",
+      "3. Hoàn thành nhiệm vụ ngày (Daily Quests): Đây là nguồn thu nhập đá quý và exp ổn định nhất mỗi ngày.",
+    ],
+  },
+  {
+    id: "bi-quyet-ap-trung",
+    title: "Bí Quyết Ấp Trứng & Săn Biến Thể Hiếm (Shiny / Rare Variant)",
+    category: "Ấp Trứng & Bắt Thú",
+    readTime: "6 phút",
+    summary:
+      "Toàn tập về hệ thống ấp trứng Máy Ấp Trứng (Hatchinator), tỉ lệ nở ra biến thể đặc biệt và các điều kiện thời tiết để bắt thú hiếm.",
+    content: [
+      "1. Kiểm tra thời tiết môi trường: Một số thú cưng chỉ xuất hiện ngoài tự nhiên khi trời mưa sấm sét hoặc ban đêm.",
+      "2. Sử dụng đúng loại thức ăn: Mỗi chủng loài Aniimo thích một loại quả/mồi khác nhau, dùng đúng mồi sẽ tăng 40% tỉ lệ bắt thành công.",
+      "3. Máy Ấp Trứng cổ đại: Trứng Cổ Đại thu thập từ chiến dịch Egg Heist luôn có tỉ lệ cao nở ra các Aniimo tư chất bậc S.",
+    ],
+  },
+  {
+    id: "xay-dung-doi-hinh-meta",
+    title: "Hướng Dẫn Build Đội Hình Chuẩn Meta Cho Mọi Phó Bản & Đấu Trường",
+    category: "Chiến Thuật",
+    readTime: "7 phút",
+    summary:
+      "Phân tích công thức chuẩn: 1 Tanker/Break + 2 DPS Nguyên Tố + 1 Healer/Buffer giúp bạn vượt qua mọi tầng tháp và Boss thế giới.",
+    content: [
+      "1. Công thức 4 vị trí vàng: 1 Thú cưng Phá Giáp đứng đầu + 1 DPS chủ lực đơn mục tiêu + 1 DPS diện rộng (AOE) + 1 Healer hồi máu.",
+      "2. Kết hợp nguyên tố khắc chế: Lửa > Cây > Đất > Sét > Nước > Lửa. Nắm rõ vòng tuần hoàn này để gây thêm 50% sát thương lên Boss.",
+      "3. Sử dụng công cụ Tool Build trên Wiki DUKE1305 để thử nghiệm cộng hưởng chỉ số trước khi dồn đá nâng cấp.",
+    ],
+  },
+]
+
+export function getEffectiveGuides(): GuideArticle[] {
+  const map = new Map<string, GuideArticle>(
+    DEFAULT_GUIDES.map((g) => [g.id, g]),
+  )
+
+  for (const entry of getWikiEntries("guide")) {
+    const id = entry.key.slice("guide:".length)
+    if (entry.deleted) {
+      map.delete(id)
+    } else if (entry.data) {
+      map.set(id, { ...map.get(id), ...entry.data, id } as GuideArticle)
+    }
+  }
+
+  return [...map.values()]
+}
+
+export async function saveGuide(guide: GuideArticle, isNew: boolean) {
+  await writeWiki(
+    isNew ? "/guides" : `/guides/${encodeURIComponent(guide.id)}`,
+    isNew ? "POST" : "PUT",
+    guide,
+  )
+}
+
+export async function deleteGuide(id: string) {
+  await writeWiki(`/guides/${encodeURIComponent(id)}`, "DELETE")
+}
+
 export async function saveAniimo(monster: AniimoMonster) {
   await writeWiki(`/aniimos/${monster.id}`, "PUT", monster)
 }

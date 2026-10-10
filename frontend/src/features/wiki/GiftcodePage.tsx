@@ -2,41 +2,52 @@ import React, { useState, useEffect } from "react"
 import {
   getEffectiveGiftcodes,
   addGiftcodeContribution,
+  saveGiftcode,
+  deleteGiftcode,
   voteGiftcode,
 } from "./wikiData"
 import type { GiftcodeItem } from "./types"
 import { useAppStore } from "@/app/AppStore"
-import { Link } from "react-router"
 import { Icon } from "@/components/ui"
 
 export default function GiftcodePage() {
   const { user, setNotice } = useAppStore()
+  const isAdmin = user?.role === "admin"
+
   const [submitting, setSubmitting] = useState(false)
   const [codes, setCodes] = useState<GiftcodeItem[]>(getEffectiveGiftcodes())
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [filterQuery, setFilterQuery] = useState("")
 
-  // Contribute Modal state
+  // Contribute / Edit Modal state
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [newCode, setNewCode] = useState("")
-  const [newReward, setNewReward] = useState("")
-  const [newNote, setNewNote] = useState("")
+  const [editingCodeItem, setEditingCodeItem] = useState<GiftcodeItem | null>(null)
+  const [modalCode, setModalCode] = useState("")
+  const [modalReward, setModalReward] = useState("")
+  const [modalNote, setModalNote] = useState("")
   const [contributeSuccess, setContributeSuccess] = useState(false)
 
+  const loadData = () => {
+    setCodes(getEffectiveGiftcodes())
+  }
+
   useEffect(() => {
-    const handleUpdate = () => setCodes(getEffectiveGiftcodes())
+    loadData()
+    const handleUpdate = () => loadData()
     window.addEventListener("wiki-data-changed", handleUpdate)
     return () => window.removeEventListener("wiki-data-changed", handleUpdate)
   }, [])
 
   const handleCopy = async (code: string) => {
     try {
-    await navigator.clipboard.writeText(code)
-    setCopiedCode(code)
-    setTimeout(() => {
-      setCopiedCode(null)
-    }, 2000)
-    } catch { setNotice("Không thể sao chép. Vui lòng sao chép mã thủ công.") }
+      await navigator.clipboard.writeText(code)
+      setCopiedCode(code)
+      setTimeout(() => {
+        setCopiedCode(null)
+      }, 2000)
+    } catch {
+      setNotice("Không thể sao chép. Vui lòng sao chép mã thủ công.")
+    }
   }
 
   const handleVote = async (codeId: string, type: "up" | "report") => {
@@ -44,44 +55,108 @@ export default function GiftcodePage() {
       alert("Vui lòng đăng nhập để bình chọn tình trạng mã quà tặng!")
       return
     }
-    try { await voteGiftcode(codeId, type) }
-    catch (error) { setNotice(error instanceof Error ? error.message : "Không thể bình chọn.") }
+    try {
+      await voteGiftcode(codeId, type)
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Không thể bình chọn.")
+    }
   }
 
-  const handleSubmitContribution = async (e: React.FormEvent) => {
+  const handleOpenAddModal = () => {
+    setEditingCodeItem(null)
+    setModalCode("")
+    setModalReward("")
+    setModalNote("")
+    setIsModalOpen(true)
+  }
+
+  const handleOpenEditModal = (item: GiftcodeItem) => {
+    setEditingCodeItem(item)
+    setModalCode(item.code)
+    setModalReward(item.reward)
+    setModalNote("")
+    setIsModalOpen(true)
+  }
+
+  const handleDeleteCode = async (item: GiftcodeItem) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa mã "${item.code}" không?`)) {
+      return
+    }
+
+    try {
+      await deleteGiftcode(item.id)
+      loadData()
+      setNotice(`Đã xóa giftcode "${item.code}" thành công!`)
+    } catch (err: any) {
+      setNotice(err?.message || "Lỗi khi xóa giftcode")
+    }
+  }
+
+  const handleSubmitModal = async (e: React.FormEvent) => {
     e.preventDefault()
     if (submitting) return
     if (!user) {
-      alert("Vui lòng đăng nhập để đóng góp mã giftcode!")
+      alert("Vui lòng đăng nhập tài khoản!")
       return
     }
-    if (!newCode.trim() || !newReward.trim()) {
+    if (!modalCode.trim() || !modalReward.trim()) {
       alert("Vui lòng nhập đầy đủ mã và phần thưởng!")
       return
     }
 
-    const item: GiftcodeItem = {
-      id: "gift_" + Date.now(),
-      code: newCode.trim().toUpperCase(),
-      reward: newReward.trim() + (newNote.trim() ? ` (${newNote.trim()})` : ""),
-      created_at: "Vừa xong",
-      author: user.name || user.email.split("@")[0],
-      isCommunity: true,
-      upvotes: 1,
-      reports: 0,
-    }
-
     setSubmitting(true)
     try {
-    await addGiftcodeContribution(item)
-    setNewCode("")
-    setNewReward("")
-    setNewNote("")
-    setIsModalOpen(false)
-    setContributeSuccess(true)
-    setTimeout(() => setContributeSuccess(false), 4000)
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Không thể lưu giftcode.") }
-    finally { setSubmitting(false) }
+      if (editingCodeItem && isAdmin) {
+        // Admin direct edit
+        const updated: GiftcodeItem = {
+          ...editingCodeItem,
+          code: modalCode.trim().toUpperCase(),
+          reward: modalReward.trim() + (modalNote.trim() ? ` (${modalNote.trim()})` : ""),
+        }
+        await saveGiftcode(updated, false)
+        setNotice(`Đã cập nhật giftcode "${updated.code}" thành công!`)
+      } else if (isAdmin) {
+        // Admin direct add
+        const item: GiftcodeItem = {
+          id: "gift_admin_" + Date.now(),
+          code: modalCode.trim().toUpperCase(),
+          reward: modalReward.trim() + (modalNote.trim() ? ` (${modalNote.trim()})` : ""),
+          created_at: new Date().toLocaleDateString("vi-VN"),
+          author: "DUKE1305 (Admin)",
+          isCommunity: false,
+          upvotes: 1,
+          reports: 0,
+        }
+        await saveGiftcode(item, true)
+        setNotice(`Đã thêm giftcode "${item.code}" thành công!`)
+      } else {
+        // Regular user contribution
+        const item: GiftcodeItem = {
+          id: "gift_" + Date.now(),
+          code: modalCode.trim().toUpperCase(),
+          reward: modalReward.trim() + (modalNote.trim() ? ` (${modalNote.trim()})` : ""),
+          created_at: "Vừa xong",
+          author: user.name || user.email.split("@")[0],
+          isCommunity: true,
+          upvotes: 1,
+          reports: 0,
+        }
+        await addGiftcodeContribution(item)
+        setContributeSuccess(true)
+        setTimeout(() => setContributeSuccess(false), 4000)
+      }
+
+      loadData()
+      setIsModalOpen(false)
+      setModalCode("")
+      setModalReward("")
+      setModalNote("")
+      setEditingCodeItem(null)
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Không thể lưu giftcode.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const filteredCodes = codes.filter((item) => {
@@ -99,64 +174,24 @@ export default function GiftcodePage() {
         <div className="wiki-badge-pill">
           <span className="wiki-dot-live"></span> CẬP NHẬT MỚI NHẤT
         </div>
-        <h1 className="wiki-hero-title">🎁 Giftcode Aniimo Mới Nhất</h1>
+        <h1 className="wiki-hero-title">🎁 Tổng Hợp Giftcode Aniimo Mới Nhất</h1>
         <p className="wiki-hero-desc">
-          Tổng hợp tất cả giftcode tân thủ & sự kiện trong Aniimo còn hạn sử
-          dụng. Nhấn vào mã để sao chép ngay. Bạn cũng có thể đóng góp mã mới
-          cho cộng đồng!
+          Danh sách mã quà tặng (Giftcode) game Aniimo còn hạn sử dụng. Hãy sao
+          chép và nhập mã ngay trong game để nhận miễn phí Tinh Thể Ánh Sáng,
+          trứng ấp và các vật phẩm giá trị!
         </p>
       </div>
 
       {contributeSuccess && (
-        <div className="builder-publish-alert" style={{ marginBottom: "20px" }}>
-          <div className="alert-left">
-            <span className="alert-icon">✨</span>
-            <div>
-              <strong>Cảm ơn bạn đã đóng góp!</strong>
-              <p>
-                Mã giftcode của bạn đã được thêm và chia sẻ tới toàn thể cộng
-                đồng.
-              </p>
-            </div>
-          </div>
+        <div className="wiki-alert-success">
+          🎉 Cảm ơn bạn! Mã giftcode của bạn đã được gửi thành công và đang được
+          hiển thị cho cộng đồng.
         </div>
       )}
 
-      {/* Guide Steps */}
-      <div className="wiki-guide-steps">
-        <h3>📖 Hướng Dẫn Cách Nhập Giftcode Trong Game:</h3>
-        <div className="wiki-steps-grid">
-          <div className="wiki-step-card">
-            <span className="step-num">1</span>
-            <p>Vào game Aniimo và hoàn thành hướng dẫn mở đầu.</p>
-          </div>
-          <div className="wiki-step-card">
-            <span className="step-num">2</span>
-            <p>
-              Mở <strong>Cài Đặt (Settings)</strong> hoặc Menu chính góc trên
-              màn hình.
-            </p>
-          </div>
-          <div className="wiki-step-card">
-            <span className="step-num">3</span>
-            <p>
-              Chọn mục <strong>Tài Khoản (Account)</strong> ➔{" "}
-              <strong>Đổi Mã (Redeem Code)</strong>.
-            </p>
-          </div>
-          <div className="wiki-step-card">
-            <span className="step-num">4</span>
-            <p>
-              Nhập mã code và bấm <strong>Nhận Thưởng</strong> để nhận quà qua
-              Hòm Thư.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Toolbar */}
-      <div className="giftcode-action-bar">
-        <div className="search-box wiki-search">
+      {/* Filter & Action Toolbar */}
+      <div className="giftcode-toolbar">
+        <div className="giftcode-search-box">
           <Icon name="search" size={16} />
           <input
             type="text"
@@ -174,10 +209,11 @@ export default function GiftcodePage() {
               alert("Vui lòng đăng nhập tài khoản để đóng góp mã giftcode!")
               return
             }
-            setIsModalOpen(true)
+            handleOpenAddModal()
           }}
         >
-          <span>🎁</span> Đóng Góp Giftcode Mới
+          <span>{isAdmin ? "➕" : "🎁"}</span>{" "}
+          {isAdmin ? "Thêm Mã Giftcode Trực Tiếp" : "Đóng Góp Giftcode Mới"}
         </button>
       </div>
 
@@ -205,7 +241,30 @@ export default function GiftcodePage() {
                     </span>
                   )}
                 </div>
-                <span className="giftcode-date">{item.created_at}</span>
+
+                <div className="giftcode-header-right">
+                  <span className="giftcode-date">{item.created_at}</span>
+                  {isAdmin && (
+                    <div className="giftcode-admin-btns">
+                      <button
+                        type="button"
+                        className="wiki-inline-edit-btn"
+                        onClick={() => handleOpenEditModal(item)}
+                        title="Chỉnh sửa giftcode này"
+                      >
+                        ✏️ Sửa
+                      </button>
+                      <button
+                        type="button"
+                        className="wiki-inline-delete-btn"
+                        onClick={() => handleDeleteCode(item)}
+                        title="Xóa giftcode này"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="giftcode-code-box">
@@ -247,12 +306,18 @@ export default function GiftcodePage() {
         })}
       </div>
 
-      {/* Contribute Giftcode Modal */}
+      {/* Modal: Contribute (User) or Edit/Add (Admin) */}
       {isModalOpen && (
         <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}>
           <div className="item-modal-box" onClick={(e) => e.stopPropagation()}>
             <div className="item-modal-header">
-              <h3>🎁 Đóng Góp Mã Giftcode Mới</h3>
+              <h3>
+                {isAdmin
+                  ? editingCodeItem
+                    ? "✏️ Chỉnh Sửa Mã Giftcode (Admin)"
+                    : "➕ Thêm Mã Giftcode Mới (Admin)"
+                  : "🎁 Đóng Góp Mã Giftcode Mới"}
+              </h3>
               <button
                 className="aniimo-modal-close"
                 onClick={() => setIsModalOpen(false)}
@@ -260,56 +325,65 @@ export default function GiftcodePage() {
                 ✕
               </button>
             </div>
-            <form
-              onSubmit={handleSubmitContribution}
-              className="item-modal-body"
-            >
-              <div className="item-modal-prop">
-                <small>Người đóng góp:</small>
-                <strong>{user?.name || user?.email}</strong>
-              </div>
 
-              <div className="publish-field">
-                <label>Mã Giftcode:</label>
+            <form onSubmit={handleSubmitModal} className="contribute-form">
+              <div className="form-group">
+                <label>Mã Giftcode (Viết hoa, không dấu) *</label>
                 <input
                   type="text"
+                  required
                   placeholder="Ví dụ: ANIIMO2026, WELCOMEVIP..."
-                  value={newCode}
-                  onChange={(e) => setNewCode(e.target.value)}
-                  required
-                  style={{ textTransform: "uppercase" }}
+                  value={modalCode}
+                  onChange={(e) => setModalCode(e.target.value.toUpperCase())}
+                  className="wiki-input"
                 />
               </div>
 
-              <div className="publish-field">
-                <label>Phần Thưởng:</label>
+              <div className="form-group">
+                <label>Phần Thưởng Nhận Được *</label>
                 <input
                   type="text"
-                  placeholder="Ví dụ: 100 Kim Cương, 5 Vé Quay, 1000 Vàng..."
-                  value={newReward}
-                  onChange={(e) => setNewReward(e.target.value)}
                   required
+                  placeholder="Ví dụ: 500 Tinh Thể, 2 Trứng Cổ Đại..."
+                  value={modalReward}
+                  onChange={(e) => setModalReward(e.target.value)}
+                  className="wiki-input"
                 />
               </div>
 
-              <div className="publish-field">
-                <label>Ghi Chú / Hạn Dùng (Tùy chọn):</label>
+              <div className="form-group">
+                <label>Ghi chú / Hạn sử dụng (Không bắt buộc)</label>
                 <input
                   type="text"
-                  placeholder="Ví dụ: Dành cho tân thủ, Hết hạn 31/12..."
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
+                  placeholder="Ví dụ: Hạn đến hết tháng 12..."
+                  value={modalNote}
+                  onChange={(e) => setModalNote(e.target.value)}
+                  className="wiki-input"
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="publish-btn"
-                style={{ marginTop: "12px" }}
-              >
-                🚀 Gửi Đóng Góp Mã Quà
-              </button>
+              <div className="modal-actions-row">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Hủy Bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-primary"
+                >
+                  {submitting
+                    ? "Đang xử lý..."
+                    : isAdmin
+                      ? editingCodeItem
+                        ? "💾 Lưu Thay Đổi"
+                        : "➕ Đăng Mã Ngay"
+                      : "Gửi Đóng Góp"}
+                </button>
+              </div>
             </form>
           </div>
         </div>

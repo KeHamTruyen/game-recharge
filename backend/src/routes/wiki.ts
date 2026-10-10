@@ -189,4 +189,61 @@ router.post('/aniimos/:id/reviews', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
+router.post('/guides', requireRole('ADMIN'), auditAdminRequest, async (req, res, next) => {
+  try {
+    const guideSchema = z.object({
+      title: z.string().trim().min(1).max(300),
+      category: z.string().trim().min(1).max(100),
+      readTime: z.string().trim().max(50).optional().default('5 phút'),
+      summary: z.string().trim().min(1).max(2000),
+      content: z.array(z.string().trim().min(1).max(5000)).min(1),
+    });
+    const body = guideSchema.parse(req.body);
+    const id = (req.body.id && typeof req.body.id === 'string' && /^[\w-]{1,100}$/.test(req.body.id))
+      ? req.body.id
+      : `guide_${randomUUID()}`;
+    const key = `guide:${id}`;
+    const entry = await prisma.wikiEntry.upsert({
+      where: { key },
+      create: { key, kind: 'guide', authorId: req.user!.userId, data: { ...body, id } },
+      update: { data: { ...body, id }, deleted: false },
+    });
+    res.status(201).json({ success: true, data: entry });
+  } catch (error) { next(error); }
+});
+
+router.put('/guides/:id', requireRole('ADMIN'), auditAdminRequest, async (req, res, next) => {
+  try {
+    const id = idSchema.parse(req.params.id);
+    const guideSchema = z.object({
+      title: z.string().trim().min(1).max(300),
+      category: z.string().trim().min(1).max(100),
+      readTime: z.string().trim().max(50).optional().default('5 phút'),
+      summary: z.string().trim().min(1).max(2000),
+      content: z.array(z.string().trim().min(1).max(5000)).min(1),
+    });
+    const body = guideSchema.parse(req.body);
+    const key = `guide:${id}`;
+    const entry = await prisma.wikiEntry.upsert({
+      where: { key },
+      create: { key, kind: 'guide', authorId: req.user!.userId, data: { ...body, id } },
+      update: { data: { ...body, id }, deleted: false },
+    });
+    res.json({ success: true, data: entry });
+  } catch (error) { next(error); }
+});
+
+router.delete('/guides/:id', requireRole('ADMIN'), auditAdminRequest, async (req, res, next) => {
+  try {
+    const id = idSchema.parse(req.params.id);
+    const key = `guide:${id}`;
+    await prisma.wikiEntry.upsert({
+      where: { key },
+      create: { key, kind: 'guide', data: { id }, deleted: true },
+      update: { deleted: true },
+    });
+    res.json({ success: true });
+  } catch (error) { next(error); }
+});
+
 export default router;

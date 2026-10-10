@@ -6691,4 +6691,300 @@
   }
 }
 
+/* ==========================================================================
+   Admin Wiki In-Place Direct Editing Styles
+   ========================================================================== */
+.admin-wiki-sticky-bar {
+  background: linear-gradient(90deg, rgba(234, 179, 8, 0.12), rgba(13, 20, 34, 0.95) 30%, rgba(234, 179, 8, 0.1));
+  border-bottom: 1px solid rgba(234, 179, 8, 0.35);
+  padding: 8px 16px;
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 60px;
+  z-index: 45;
+}
+
+.admin-wiki-bar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-wiki-bar-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #fef08a;
+  flex-wrap: wrap;
+}
+
+.admin-wiki-pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #eab308;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #eab308;
+  animation: pulseDot 1.5s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.admin-wiki-desc {
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.admin-wiki-bar-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #facc15;
+  text-decoration: none;
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.admin-wiki-bar-link:hover {
+  background: #eab308;
+  color: #0d1422;
+}
+
+.wiki-inline-edit-btn {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wiki-inline-edit-btn:hover,
+.wiki-inline-edit-btn.active {
+  background: #38bdf8;
+  color: #0d1422;
+  border-color: #38bdf8;
+}
+
+.wiki-inline-delete-btn {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.wiki-inline-delete-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+.wiki-admin-inline-actions {
+  margin-top: 10px;
+}
+
+.wiki-admin-add-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border: 1px solid #38bdf8;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.wiki-admin-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5);
+}
+
+.guide-card-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.guide-admin-btn-group,
+.giftcode-admin-btns {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.giftcode-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.aniimo-card-admin-edit-btn {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(2, 132, 199, 0.9);
+  color: #fff;
+  border: 1px solid #38bdf8;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  transition: all 0.15s;
+}
+
+.aniimo-card-admin-edit-btn:hover {
+  background: #38bdf8;
+  color: #070b12;
+}
+
+.wiki-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: #090e18;
+  border: 1px solid #1e2c44;
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.wiki-input:focus {
+  border-color: #38dbf8;
+  box-shadow: 0 0 8px rgba(56, 219, 248, 0.3);
+}
+
+.aniimo-admin-edit-box {
+  background: #070c16;
+  border: 1px solid #23344d;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.admin-edit-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.admin-edit-box-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #38dbf8;
+}
+
+.save-success-tag {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid #10b981;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.aniimo-stats-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.stat-input-group label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.admin-edit-actions,
+.wiki-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.wiki-form-group {
+  margin-bottom: 12px;
+}
+
+.wiki-form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 5px;
+}
+
+.wiki-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.wiki-form-submit-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border: 1px solid #38bdf8;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wiki-form-submit-btn:hover {
+  background: #38bdf8;
+  color: #070b12;
+}
+
+.wiki-form-cancel-btn {
+  background: #141e30;
+  border: 1px solid #23344d;
+  color: #94a3b8;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.wiki-form-cancel-btn:hover {
+  color: #f1f5f9;
+}
+
+
 

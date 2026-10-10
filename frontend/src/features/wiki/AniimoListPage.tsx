@@ -45,11 +45,17 @@ const ROLES = [
   { name: "REGEN", slug: "role-regen", icon: "/wiki/icons/class-regen.png" },
 ]
 
+import { useAppStore } from "@/app/AppStore"
+
 export default function AniimoListPage() {
+  const { user } = useAppStore()
+  const isAdmin = user?.role === "admin"
+
   const [monsters, setMonsters] = useState(getEffectiveAniimos())
   const [selectedMonster, setSelectedMonster] = useState<AniimoMonster | null>(
     null,
   )
+  const [startInEditMode, setStartInEditMode] = useState(false)
   const [selectedElement, setSelectedElement] = useState("all")
   const [selectedRole, setSelectedRole] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -169,10 +175,27 @@ export default function AniimoListPage() {
             <div
               key={m.id}
               className="aniimo-card"
-              onClick={() => setSelectedMonster(m)}
+              onClick={() => {
+                setStartInEditMode(false)
+                setSelectedMonster(m)
+              }}
             >
               <div className="aniimo-card-img-wrap">
                 <span className="aniimo-no-tag">#{m.no}</span>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className="aniimo-card-admin-edit-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setStartInEditMode(true)
+                      setSelectedMonster(m)
+                    }}
+                    title="Sửa thông tin trực tiếp (Admin)"
+                  >
+                    ✏️ Sửa
+                  </button>
+                )}
                 <img
                   src={formatImageUrl(m.thumbnail)}
                   alt={m.title}
@@ -249,6 +272,7 @@ export default function AniimoListPage() {
       <AniimoDetailModal
         monster={selectedMonster}
         onClose={() => setSelectedMonster(null)}
+        initialEditMode={startInEditMode}
       />
     </div>
   )
