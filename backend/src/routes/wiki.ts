@@ -246,4 +246,23 @@ router.delete('/guides/:id', requireRole('ADMIN'), auditAdminRequest, async (req
   } catch (error) { next(error); }
 });
 
+router.put('/tier-list', requireRole('ADMIN'), auditAdminRequest, async (req, res, next) => {
+  try {
+    const tierSchema = z.array(z.object({
+      rank: z.string().trim().min(1).max(20),
+      label: z.string().trim().min(1).max(200),
+      color: z.string().trim().min(1).max(50),
+      names: z.array(z.string().trim().min(1).max(200)),
+    }));
+    const tiers = tierSchema.parse(req.body);
+    const key = 'tierlist:default';
+    const entry = await prisma.wikiEntry.upsert({
+      where: { key },
+      create: { key, kind: 'tierlist', authorId: req.user!.userId, data: { tiers } },
+      update: { data: { tiers }, deleted: false },
+    });
+    res.json({ success: true, data: entry });
+  } catch (error) { next(error); }
+});
+
 export default router;

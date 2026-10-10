@@ -6,6 +6,8 @@ import rawTierStats from "@/data/wiki/tier_stats.json"
 
 import rawTeams from "@/data/wiki/teams.json"
 
+import rawAniipediaTierList from "@/data/wiki/aniipedia_tier_list.json"
+
 import { getWikiEntries, writeWiki } from "./wikiStore"
 
 import type {
@@ -392,4 +394,45 @@ export function getRoleIcon(key: string | undefined): string {
   if (lower.includes("regen")) return GAME_ROLE_ICONS["role-regen"]
 
   return ""
+}
+
+export interface TierDefinition {
+  rank: string
+  label: string
+  color: string
+  names: string[]
+}
+
+const TIER_STORAGE_KEY = "custom_wiki_tier_list"
+
+export function getEffectiveTierList(): TierDefinition[] {
+  const custom = getWikiEntries("tierlist").find(
+    (e) => !e.deleted && (e.data as any)?.tiers,
+  )
+  if (custom && Array.isArray((custom.data as any).tiers)) {
+    return (custom.data as any).tiers as TierDefinition[]
+  }
+  const local = localStorage.getItem(TIER_STORAGE_KEY)
+  if (local) {
+    try {
+      const parsed = JSON.parse(local)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    } catch {}
+  }
+  return rawAniipediaTierList as TierDefinition[]
+}
+
+export async function saveTierList(tiers: TierDefinition[]): Promise<void> {
+  localStorage.setItem(TIER_STORAGE_KEY, JSON.stringify(tiers))
+  try {
+    await writeWiki("/tier-list", "PUT", tiers)
+  } catch (err) {
+    console.warn("Backend sync failed for tier-list, saved locally:", err)
+  }
+  window.dispatchEvent(new CustomEvent("wiki-data-changed"))
+}
+
+export function resetTierListToDefault(): void {
+  localStorage.removeItem(TIER_STORAGE_KEY)
+  window.dispatchEvent(new CustomEvent("wiki-data-changed"))
 }

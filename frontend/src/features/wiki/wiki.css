@@ -964,6 +964,358 @@
   display: none;
 }
 
+/* Tier List Admin Direct Editing */
+.tier-admin-bar {
+  background: linear-gradient(135deg, rgba(13, 20, 34, 0.95), rgba(15, 23, 42, 0.95));
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.15);
+}
+
+.tier-admin-bar-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tier-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.tier-admin-bar-desc {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.tier-admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tier-save-btn {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border: 1px solid #34d399;
+  color: #ffffff;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+  transition: all 0.15s ease;
+}
+
+.tier-save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.6);
+}
+
+.tier-cancel-btn {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tier-cancel-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fff;
+}
+
+.tier-reset-btn {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid #334155;
+  color: #94a3b8;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tier-reset-btn:hover {
+  color: #f1f5f9;
+  border-color: #64748b;
+}
+
+.tier-edit-toggle-btn {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tier-edit-toggle-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
+  color: #fff;
+  border-color: #38bdf8;
+}
+
+.tier-remove-chip-btn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  border: 1px solid #f87171;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  transition: transform 0.12s;
+}
+
+.tier-remove-chip-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Aniimo Bank Section Below Tier List */
+.tier-admin-bank-container {
+  margin-top: 28px;
+  background: #090e18;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.tier-bank-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tier-bank-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tier-bank-header p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.tier-bank-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.tier-bank-search {
+  flex: 1;
+  min-width: 220px;
+}
+
+.tier-bank-search input {
+  width: 100%;
+  padding: 8px 12px;
+  background: #040810;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  color: #f1f5f9;
+  font-size: 12px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.tier-bank-search input:focus {
+  border-color: #38bdf8;
+}
+
+.tier-bank-filter-pills {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tier-bank-pill {
+  padding: 5px 10px;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  color: #8fa0ba;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.tier-bank-pill.active,
+.tier-bank-pill:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #e0f2fe;
+}
+
+.tier-bank-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.tier-bank-card {
+  background: #0d1422;
+  border: 1px solid #1a2538;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.15s;
+}
+
+.tier-bank-card:hover {
+  border-color: #2a3d58;
+}
+
+.tier-bank-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tier-bank-card-thumb {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #040810;
+  flex-shrink: 0;
+}
+
+.tier-bank-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tier-bank-card-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.tier-bank-card-meta {
+  font-size: 10px;
+  color: #64748b;
+  display: block;
+}
+
+.tier-bank-card-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.tier-bank-quick-ranks {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tier-rank-mini-btn {
+  flex: 1;
+  min-width: 22px;
+  padding: 3px 0;
+  border-radius: 4px;
+  border: 1px solid #1e293b;
+  background: #080d16;
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.tier-rank-mini-btn:hover {
+  border-color: #38bdf8;
+  color: #fff;
+}
+
+.tier-rank-mini-btn.active {
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.tier-rank-mini-btn.remove-rank:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.tier-toast-notice {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
 /* Recommended Teams Page */
 .teams-feed-grid {
   display: grid;
