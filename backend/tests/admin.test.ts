@@ -233,4 +233,70 @@ describe('Admin Panel Operations & Audit Logging', () => {
       await prisma.user.delete({ where: { id: customer.id } });
     }
   });
+
+  it('DELETE /api/admin/product-statuses/:id rejects fallbackId === id or invalid fallbackId', async () => {
+    const testStatus = await prisma.productStatus.create({
+      data: { id: 'status-delete-test', name: 'Test Delete', iconName: 'AlertCircle', color: 'red', purchasable: true },
+    });
+
+    try {
+      // Trying fallbackId === id must return 400
+      const resSelf = await adminClient.delete(`/api/admin/product-statuses/${testStatus.id}?fallbackId=${testStatus.id}`);
+      assert.strictEqual(resSelf.status, 400);
+
+      // Trying non-existent fallbackId must return 400
+      const resInvalid = await adminClient.delete(`/api/admin/product-statuses/${testStatus.id}?fallbackId=nonexistent-status-xyz`);
+      assert.strictEqual(resInvalid.status, 400);
+    } finally {
+      await prisma.productStatus.delete({ where: { id: testStatus.id } }).catch(() => {});
+    }
+  });
+
+  it('GET /api/admin/transactions/:id decrypts sensitive fields and preserves legacy passwords for admin', async () => {
+    // 1. Transaction with encrypted custom field name (e.g. 'credential' via enc:...)
+    const { encryptSensitive } = await import('../src/utils/crypto.js');
+    const secretText = 'superSecretPassword123';
+    const encryptedText = encryptSensitive(secretText);
+
+    const tx1 = await prisma.transaction.create({
+      data: {
+        code: `ENC_TEST_${Date.now()}`,
+        userEmail: 'customer@test.invalid',
+        packageName: 'Encrypted Package',
+        gameName: 'Enc Game',
+        amount: 50000,
+        quantity: 1,
+        status: 'PENDING',
+        topupInfo: { credential: encryptedText, uid: '123456' },
+      },
+    });
+
+    // 2. Legacy transaction with plaintext password
+    const legacyPassword = 'plainTextPasswordOld';
+    const tx2 = await prisma.transaction.create({
+      data: {
+        code: `LEGACY_TEST_${Date.now()}`,
+        userEmail: 'customer@test.invalid',
+        packageName: 'Legacy Package',
+        gameName: 'Legacy Game',
+        amount: 50000,
+        quantity: 1,
+        status: 'PROCESSING',
+        topupInfo: { password: legacyPassword, uid: '654321' },
+      },
+    });
+
+    try {
+      const res1 = await adminClient.get(`/api/admin/transactions/${tx1.id}`);
+      assert.strictEqual(res1.status, 200);
+      assert.strictEqual(res1.body.data.topupInfo.credential, secretText);
+
+      const res2 = await adminClient.get(`/api/admin/transactions/${tx2.id}`);
+      assert.strictEqual(res2.status, 200);
+      assert.strictEqual(res2.body.data.topupInfo.password, legacyPassword);
+    } finally {
+      await prisma.transaction.deleteMany({ where: { id: { in: [tx1.id, tx2.id] } } }).catch(() => {});
+    }
+  });
 });
+

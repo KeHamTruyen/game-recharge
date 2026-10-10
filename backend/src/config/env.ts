@@ -28,6 +28,7 @@ const envSchema = z.object({
   AUTH_COOKIE_DOMAIN: z.string().optional(),
   // Data encryption key (separate from JWT)
   DATA_ENCRYPTION_KEY: z.string().min(16).optional(),
+  PREVIOUS_ENCRYPTION_KEYS: z.string().optional(),
 
   SEPAY_API_KEY: z.string().optional(),
   SEPAY_BANK_CODE: z.string().optional(),

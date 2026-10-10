@@ -265,6 +265,13 @@ export function CheckoutRoute() {
   const service = store.selectedService
   const cartSignature = store.cart.map((i) => `${i.pkg.id}:${i.quantity}`).sort().join(",")
   const cartTotalAmount = store.cart.reduce((sum, i) => sum + i.pkg.price * i.quantity, 0)
+  const topupSignature = JSON.stringify(
+    Object.fromEntries(
+      Object.entries(store.checkoutInfo || {})
+        .map(([k, v]) => [k, String(v ?? "").trim()])
+        .sort(([a], [b]) => a.localeCompare(b))
+    )
+  )
 
   const [payment, setPayment] = useState<PaymentDetails | null>(() => {
     try {
@@ -286,6 +293,10 @@ export function CheckoutRoute() {
         sessionStorage.removeItem("nexa_checkout_payment")
         return null
       }
+      if (parsed.topupSignature && topupSignature !== parsed.topupSignature) {
+        sessionStorage.removeItem("nexa_checkout_payment")
+        return null
+      }
       return data
     } catch {
       return null
@@ -304,7 +315,8 @@ export function CheckoutRoute() {
           if (
             (store.user && parsed.userEmail && store.user.email !== parsed.userEmail) ||
             (cartSignature && parsed.cartSignature && cartSignature !== parsed.cartSignature) ||
-            (cartTotalAmount > 0 && parsed.totalAmount && cartTotalAmount !== parsed.totalAmount)
+            (cartTotalAmount > 0 && parsed.totalAmount && cartTotalAmount !== parsed.totalAmount) ||
+            (parsed.topupSignature && topupSignature !== parsed.topupSignature)
           ) {
             setPayment(null)
             sessionStorage.removeItem("nexa_checkout_payment")
@@ -312,7 +324,7 @@ export function CheckoutRoute() {
         } catch {}
       }
     }
-  }, [store.user?.email, cartSignature, cartTotalAmount, payment])
+  }, [store.user?.email, cartSignature, cartTotalAmount, topupSignature, payment])
 
   useEffect(() => {
     if (!payment || paymentStatus === "PAID") return
@@ -337,6 +349,15 @@ export function CheckoutRoute() {
       window.clearInterval(timer)
     }
   }, [payment, paymentStatus, setNotice])
+
+  if (!store.apiReady) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center gap-3 text-slate-400">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
+        <span className="text-sm">Đang tải thông tin phiên đăng nhập...</span>
+      </div>
+    )
+  }
 
   if (!pkg || !service) return <Navigate to="/nap-game" replace />
   if (!store.user) return <Navigate to="/nap-game/thong-tin" replace />
@@ -377,6 +398,7 @@ export function CheckoutRoute() {
             userEmail: store.user.email,
             cartSignature,
             totalAmount: cartTotalAmount,
+            topupSignature,
           }))
         } catch {}
         store.setTransactions((current) => [...result.transactions, ...current])

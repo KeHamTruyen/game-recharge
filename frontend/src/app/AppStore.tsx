@@ -342,7 +342,24 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     } catch {}
   }, [cart])
 
-  const [checkoutInfo, setCheckoutInfo] = useState<Record<string, string>>({})
+  const [checkoutInfo, setCheckoutInfo] = useState<Record<string, string>>(() => {
+    try {
+      const saved = sessionStorage.getItem("nexa_checkout_info")
+      return saved ? JSON.parse(saved) : {}
+    } catch {
+      return {}
+    }
+  })
+
+  useEffect(() => {
+    try {
+      if (Object.keys(checkoutInfo).length > 0) {
+        sessionStorage.setItem("nexa_checkout_info", JSON.stringify(checkoutInfo))
+      } else {
+        sessionStorage.removeItem("nexa_checkout_info")
+      }
+    } catch {}
+  }, [checkoutInfo])
 
   const [notice, setNotice] = useState("")
 
@@ -729,6 +746,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
         try {
           sessionStorage.removeItem("nexa_checkout_payment")
+          sessionStorage.removeItem("nexa_checkout_info")
           sessionStorage.removeItem("nexa_cart")
           sessionStorage.removeItem("nexa_selected_service")
           sessionStorage.removeItem("nexa_selected_qty")

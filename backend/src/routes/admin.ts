@@ -471,11 +471,19 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
-      const fallbackId = (req.query['fallbackId'] as string) || undefined;
+      const rawFallbackId = (req.query['fallbackId'] as string) || undefined;
 
-      let fallback = fallbackId
-        ? await prisma.productStatus.findUnique({ where: { id: fallbackId } })
+      if (rawFallbackId && rawFallbackId === id) {
+        throw new AppError('Trạng thái thay thế không được trùng với trạng thái đang xóa.', 400);
+      }
+
+      let fallback = rawFallbackId
+        ? await prisma.productStatus.findFirst({ where: { id: rawFallbackId, NOT: { id } } })
         : null;
+
+      if (rawFallbackId && !fallback) {
+        throw new AppError('Trạng thái thay thế được chỉ định không tồn tại hoặc không hợp lệ.', 400);
+      }
 
       if (!fallback) {
         fallback = await prisma.productStatus.findFirst({
@@ -732,10 +740,22 @@ router.get(
         where: { OR: [{ id }, { code: id }] },
         include: {
           service: { select: { id: true, name: true, iconText: true } },
+          package: { select: { id: true, name: true, templateId: true } },
           user: { select: { id: true, name: true, email: true } },
         },
       });
       if (!transaction) throw new NotFoundError('Transaction');
+
+      let templateFields: Array<Record<string, unknown>> | undefined;
+      if (transaction.package?.templateId) {
+        const tmpl = await prisma.topupTemplate.findUnique({
+          where: { id: transaction.package.templateId },
+          select: { fields: true },
+        });
+        if (tmpl?.fields && Array.isArray(tmpl.fields)) {
+          templateFields = tmpl.fields as Array<Record<string, unknown>>;
+        }
+      }
 
       const canViewPassword = transaction.status === 'PENDING' || transaction.status === 'PROCESSING';
 
@@ -743,7 +763,7 @@ router.get(
         success: true,
         data: {
           ...transaction,
-          topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword),
+          topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword, templateFields),
         },
       });
     } catch (err) {

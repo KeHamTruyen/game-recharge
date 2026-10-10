@@ -350,21 +350,34 @@ export default function WorldMapPage() {
       const list = JSON.parse(saved)
       if (!Array.isArray(list)) return new Set()
 
-      // One-time migration: Convert legacy marker.id into unique markerKey
+      // Comprehensive index of all markers:
+      // 1. currentKeys: canonical format `${mapId}_${id}_${item_id}_${normX}_${normY}`
+      // 2. intermediateMap: commit 926a907 format `${mapId}_${id}_${item_id}_${x}_${y}`
+      // 3. legacyIdMap: raw format `${id}`
+      const currentKeys = new Set<string>()
+      const intermediateMap = new Map<string, string[]>()
       const legacyIdMap = new Map<string, string[]>()
+
       ;(keyMarkers as MapMarker[]).forEach((m) => {
         const uKey = getMarkerKey(m)
+        currentKeys.add(uKey)
+
+        const interKey = `${m.mapId || "default"}_${m.id}_${m.item_id || ""}_${m.x}_${m.y}`
+        if (!intermediateMap.has(interKey)) intermediateMap.set(interKey, [])
+        intermediateMap.get(interKey)!.push(uKey)
+
         if (!legacyIdMap.has(m.id)) legacyIdMap.set(m.id, [])
         legacyIdMap.get(m.id)!.push(uKey)
       })
 
       const migrated = new Set<string>()
       list.forEach((entry: string) => {
-        if (entry.includes(".")) {
+        if (currentKeys.has(entry)) {
           migrated.add(entry)
+        } else if (intermediateMap.has(entry)) {
+          intermediateMap.get(entry)!.forEach((mk) => migrated.add(mk))
         } else if (legacyIdMap.has(entry)) {
-          const matched = legacyIdMap.get(entry)!
-          matched.forEach((mk) => migrated.add(mk))
+          legacyIdMap.get(entry)!.forEach((mk) => migrated.add(mk))
         } else {
           migrated.add(entry)
         }
@@ -407,12 +420,21 @@ export default function WorldMapPage() {
     }))
   }
 
-  const toggleCollected = (markerKey: string, legacyId?: string) => {
+  const toggleCollected = (markerKey: string, marker?: MapMarker) => {
     setCollectedMarkers((prev) => {
       const next = new Set(prev)
-      if (next.has(markerKey) || (legacyId && next.has(legacyId))) {
+      const interKey = marker
+        ? `${marker.mapId || "default"}_${marker.id}_${marker.item_id || ""}_${marker.x}_${marker.y}`
+        : undefined
+      const isCollected =
+        next.has(markerKey) ||
+        (marker && next.has(marker.id)) ||
+        (interKey && next.has(interKey))
+
+      if (isCollected) {
         next.delete(markerKey)
-        if (legacyId) next.delete(legacyId)
+        if (marker) next.delete(marker.id)
+        if (interKey) next.delete(interKey)
       } else {
         next.add(markerKey)
       }
@@ -1089,7 +1111,7 @@ export default function WorldMapPage() {
                     <button
                       type="button"
                       className={`collect-toggle-btn ${isColl ? "collected" : ""}`}
-                      onClick={() => toggleCollected(selKey, selectedMarker.id)}
+                      onClick={() => toggleCollected(selKey, selectedMarker)}
                     >
                       {isColl
                         ? "✓ Đã Thu Thập (Bỏ đánh dấu)"

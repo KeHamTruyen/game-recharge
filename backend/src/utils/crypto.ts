@@ -13,11 +13,24 @@ const primarySecretSource =
 
 const PRIMARY_KEY = createHash('sha256').update(primarySecretSource).digest();
 
-// Fallback keys in case JWT_SECRET or COOKIE_SECRET was previously used
+// Parse previous encryption keys for graceful secret rotation
+const previousConfigKeys = (
+  env.PREVIOUS_ENCRYPTION_KEYS ||
+  process.env.PREVIOUS_ENCRYPTION_KEYS ||
+  ''
+)
+  .split(',')
+  .map((k) => k.trim())
+  .filter(Boolean)
+  .map((k) => createHash('sha256').update(k).digest());
+
+// Fallback keys in case JWT_SECRET, COOKIE_SECRET or PREVIOUS_ENCRYPTION_KEYS was previously used
 const FALLBACK_KEYS: Buffer[] = [
   PRIMARY_KEY,
+  ...previousConfigKeys,
   createHash('sha256').update(env.JWT_SECRET || 'duke1305_fallback_key_salt_32bytes').digest(),
   createHash('sha256').update(env.COOKIE_SECRET || 'duke1305_fallback_key_salt_32bytes').digest(),
+  createHash('sha256').update('duke1305_fallback_key_salt_32bytes').digest(),
 ];
 
 /**
@@ -126,9 +139,17 @@ export function maskTopupInfo(
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of entries) {
-    if (isSensitiveFieldKey(key, templateFields)) {
-      if (isStaffOrAdmin && typeof value === 'string' && value.startsWith('enc:')) {
-        result[key] = decryptSensitive(value);
+    const isEncrypted = typeof value === 'string' && value.startsWith('enc:');
+    const isSensitive = isEncrypted || isSensitiveFieldKey(key, templateFields);
+
+    if (isSensitive) {
+      if (isStaffOrAdmin) {
+        if (isEncrypted) {
+          result[key] = decryptSensitive(value as string);
+        } else {
+          // Plaintext password in legacy records: visible to staff/admin for fulfillment
+          result[key] = value;
+        }
       } else {
         result[key] = '••••••••';
       }
