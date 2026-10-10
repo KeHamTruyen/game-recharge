@@ -33,6 +33,7 @@ export type ManagedUser = {
 export type Service = {
   id: string | number
   name: string
+  game?: string
   description: string
   iconText: string
   tone: string
@@ -50,14 +51,15 @@ export type ServicePackage = {
   name: string
   description: string
   price: number
-  oldPrice: number
+  oldPrice?: number | null
   note: string
   tags: string[]
   statusId: string
   templateId: string
-  image?: string
-  imagePosition?: string
+  image?: string | null
+  imagePosition?: string | null
   sortOrder: number
+  isActive?: boolean
 }
 
 export type CartItem = {
@@ -72,14 +74,14 @@ export type Product = {
   game: string
   tags: string[]
   price: number
-  oldPrice: number
+  oldPrice?: number | null
   note: string
   art: string
   tone: string
   statusId: string
   templateId: string
-  image?: string
-  imagePosition?: string
+  image?: string | null
+  imagePosition?: string | null
   isActive?: boolean
 }
 
@@ -121,7 +123,7 @@ export type MiddlemanInfo = {
   zaloName: string
   zaloPhone: string
   zaloUrl: string
-  fees: { range: string fee: string }[]
+  fees: { range: string; fee: string }[]
   feeNote: string
   accepted: string
   rejected: string

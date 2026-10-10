@@ -1,0 +1,3006 @@
+[
+  {
+    "id": 9233,
+    "date": "2026-09-02T20:19:32",
+    "date_gmt": "2026-09-02T13:19:32",
+    "guid": {
+      "rendered": "https://koiseki.com/?page_id=9233"
+    },
+    "modified": "2026-09-20T17:16:53",
+    "modified_gmt": "2026-09-20T10:16:53",
+    "slug": "tool-damage-test",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/tool-damage-test/",
+    "title": {
+      "rendered": "Tool Tính Sát Thương Aniimo"
+    },
+    "content": {
+      "rendered": "<p><div class=\"koiseki-link-table-card\"><div class=\"koiseki-link-table-icon-wrap\"><img decoding=\"async\" src=\"https://koiseki.com/wp-content/uploads/2026/08/logo_koiseki_web.png\" alt=\"Koiseki Logo\" class=\"koiseki-link-table-img\" /></div><div class=\"koiseki-link-table-right\"><div class=\"koiseki-link-table-text-box\">Koi nhận Nạp Giá Rẻ - Trung Gian Đổi Mail - Cày Hộ Acc game Aniimo, mọi người liên hệ Zalo khi có nhu cầu nha, đừng quên ấn Đăng Ký kênh, cám ơn mọi người rất nhiều!</div><div class=\"koiseki-link-table-buttons-row\"><a href=\"https://zalo.me/0962936360\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"koiseki-link-btn\"><span class=\"koiseki-link-btn-text\">Liên Hệ Zalo</span></a><a href=\"https://www.youtube.com/@Koiseki?sub_confirmation=1\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"koiseki-link-btn\"><span class=\"koiseki-link-btn-text\">Kênh Youtube</span></a></div></div></div>\t\t\t\t\t\t\t\t<a href=\"https://koiseki.com/aniimo/\" target=\"_blank\"><br />\n\t\t\t\t<svg aria-hidden=\"true\" viewBox=\"0 0 576 512\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z\"></path></svg><br />\n\t\t\t\t\t\t\t\t\tXEM CLIP HƯỚNG DẪN BUILD<br />\n\t\t\t\t\t</a><br />\n\t\t\t\t\t\t\t\t\t*Nguồn dữ liệu: MinMax&#8217;s Aniipedia\t\t[aniimo_build_table]\t\t\t</p>\n<h5>Ghi Chú</h5>\n<p>Toàn bộ thông tin của các Aniimo đều được dựa vào dữ liệu của phiên bản game gần nhất. Koi sẽ liên tục cập nhật thông tin khi game có thay đổi. Nếu ai thấy thông tin chỗ nào bị sai lệch thì cứ báo để Koi sửa nha.</p>\n<p>\t\t\t\t\t\t\t\t<a href=\"https://koiseki.com/aniimo/\" target=\"_blank\"><br />\n\t\t\t\t<svg aria-hidden=\"true\" viewBox=\"0 0 512 512\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M428.8 137.6h-86.177a115.52 115.52 0 0 0 2.176-22.4c0-47.914-35.072-83.2-92-83.2-45.314 0-57.002 48.537-75.707 78.784-7.735 12.413-16.994 23.317-25.851 33.253l-.131.146-.129.148C135.662 161.807 127.764 168 120.8 168h-2.679c-5.747-4.952-13.536-8-22.12-8H32c-17.673 0-32 12.894-32 28.8v230.4C0 435.106 14.327 448 32 448h64c8.584 0 16.373-3.048 22.12-8h2.679c28.688 0 67.137 40 127.2 40h21.299c62.542 0 98.8-38.658 99.94-91.145 12.482-17.813 18.491-40.785 15.985-62.791A93.148 93.148 0 0 0 393.152 304H428.8c45.435 0 83.2-37.584 83.2-83.2 0-45.099-38.101-83.2-83.2-83.2zm0 118.4h-91.026c12.837 14.669 14.415 42.825-4.95 61.05 11.227 19.646 1.687 45.624-12.925 53.625 6.524 39.128-10.076 61.325-50.6 61.325H248c-45.491 0-77.21-35.913-120-39.676V215.571c25.239-2.964 42.966-21.222 59.075-39.596 11.275-12.65 21.725-25.3 30.799-39.875C232.355 112.712 244.006 80 252.8 80c23.375 0 44 8.8 44 35.2 0 35.2-26.4 53.075-26.4 70.4h158.4c18.425 0 35.2 16.5 35.2 35.2 0 18.975-16.225 35.2-35.2 35.2zM88 384c0 13.255-10.745 24-24 24s-24-10.745-24-24 10.745-24 24-24 24 10.745 24 24z\"></path></svg><br />\n\t\t\t\t\t\t\t\t\tXEM THÊM TRANG KHÁC<br />\n\t\t\t\t\t</a></p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>XEM CLIP HƯỚNG DẪN BUILD *Nguồn dữ liệu: MinMax&#8217;s Aniipedia [aniimo_build_table] Ghi Chú Toàn bộ thông tin của các Aniimo đều được dựa vào dữ liệu của phiên bản game gần nhất. Koi sẽ liên tục cập nhật thông tin khi game có thay đổi. Nếu ai thấy thông tin chỗ nào bị sai lệch [&hellip;]</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "no-sidebar",
+      "site-content-layout": "page-builder",
+      "ast-site-content-layout": "full-width-container",
+      "site-content-style": "unboxed",
+      "site-sidebar-style": "unboxed",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "disabled",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "disabled",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "enabled",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-9233",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/9233",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=9233"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 16,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/9233/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 9255,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/9233/revisions/9255"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=9233"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 9146,
+    "date": "2026-08-27T23:43:33",
+    "date_gmt": "2026-08-27T16:43:33",
+    "guid": {
+      "rendered": "https://koiseki.com/?page_id=9146"
+    },
+    "modified": "2026-09-20T17:16:48",
+    "modified_gmt": "2026-09-20T10:16:48",
+    "slug": "map",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/map/",
+    "title": {
+      "rendered": "Bản Đồ Thế Giới Aniimo"
+    },
+    "content": {
+      "rendered": "<div class=\"koiseki-link-table-card\"><div class=\"koiseki-link-table-icon-wrap\"><img decoding=\"async\" src=\"https://koiseki.com/wp-content/uploads/2026/08/logo_koiseki_web.png\" alt=\"Koiseki Logo\" class=\"koiseki-link-table-img\" /></div><div class=\"koiseki-link-table-right\"><div class=\"koiseki-link-table-text-box\">Koi nhận Nạp Giá Rẻ - Trung Gian Đổi Mail - Cày Hộ Acc game Aniimo, mọi người liên hệ Zalo khi có nhu cầu nha, đừng quên ấn Đăng Ký kênh, cám ơn mọi người rất nhiều!</div><div class=\"koiseki-link-table-buttons-row\"><a href=\"https://zalo.me/0962936360\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"koiseki-link-btn\"><span class=\"koiseki-link-btn-text\">Liên Hệ Zalo</span></a><a href=\"https://www.youtube.com/@Koiseki?sub_confirmation=1\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"koiseki-link-btn\"><span class=\"koiseki-link-btn-text\">Kênh Youtube</span></a></div></div></div>\n<h3>Bản Đồ Thế Giới Aniimo<br />(Aniimo World Map)</h3>\n<p>\t\t\t\t\tLưu ý: cẩn thận khi ấn nút hiện [Tất Cả] trên máy yếu\t\t\t\t\t*Nguồn dữ liệu: MinMax&#8217;s Aniipedia\t\t[aniimo_koiseki_map]\t\t\t</p>\n<h5>Ghi Chú Aniimo World Map</h5>\n<p>Dữ liệu của trang Bản Đồ Thế Giới Aniimo (Aniimo World Map) sẽ được cập nhật mới liên tục khi game ra mắt chính thức. Trong quá trình sử dụng bản đồ, chỗ nào bị sai lệch hay thiếu sót thì mọi người nhắn zalo cho Koi để bổ sung nha.</p>\n<p>\t\t\t\t\t\t\t\t<a href=\"https://koiseki.com/aniimo/\" target=\"_blank\"><br />\n\t\t\t\t<svg aria-hidden=\"true\" viewBox=\"0 0 512 512\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M428.8 137.6h-86.177a115.52 115.52 0 0 0 2.176-22.4c0-47.914-35.072-83.2-92-83.2-45.314 0-57.002 48.537-75.707 78.784-7.735 12.413-16.994 23.317-25.851 33.253l-.131.146-.129.148C135.662 161.807 127.764 168 120.8 168h-2.679c-5.747-4.952-13.536-8-22.12-8H32c-17.673 0-32 12.894-32 28.8v230.4C0 435.106 14.327 448 32 448h64c8.584 0 16.373-3.048 22.12-8h2.679c28.688 0 67.137 40 127.2 40h21.299c62.542 0 98.8-38.658 99.94-91.145 12.482-17.813 18.491-40.785 15.985-62.791A93.148 93.148 0 0 0 393.152 304H428.8c45.435 0 83.2-37.584 83.2-83.2 0-45.099-38.101-83.2-83.2-83.2zm0 118.4h-91.026c12.837 14.669 14.415 42.825-4.95 61.05 11.227 19.646 1.687 45.624-12.925 53.625 6.524 39.128-10.076 61.325-50.6 61.325H248c-45.491 0-77.21-35.913-120-39.676V215.571c25.239-2.964 42.966-21.222 59.075-39.596 11.275-12.65 21.725-25.3 30.799-39.875C232.355 112.712 244.006 80 252.8 80c23.375 0 44 8.8 44 35.2 0 35.2-26.4 53.075-26.4 70.4h158.4c18.425 0 35.2 16.5 35.2 35.2 0 18.975-16.225 35.2-35.2 35.2zM88 384c0 13.255-10.745 24-24 24s-24-10.745-24-24 10.745-24 24-24 24 10.745 24 24z\"></path></svg><br />\n\t\t\t\t\t\t\t\t\tXEM THÊM TRANG KHÁC<br />\n\t\t\t\t\t</a></p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>Bản Đồ Thế Giới Aniimo(Aniimo World Map) Lưu ý: cẩn thận khi ấn nút hiện [Tất Cả] trên máy yếu *Nguồn dữ liệu: MinMax&#8217;s Aniipedia [aniimo_koiseki_map] Ghi Chú Aniimo World Map Dữ liệu của trang Bản Đồ Thế Giới Aniimo (Aniimo World Map) sẽ được cập nhật mới liên tục khi game ra mắt chính [&hellip;]</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 9274,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "no-sidebar",
+      "site-content-layout": "page-builder",
+      "ast-site-content-layout": "full-width-container",
+      "site-content-style": "unboxed",
+      "site-sidebar-style": "unboxed",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "disabled",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "disabled",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "enabled",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-9146",
+      "page",
+      "type-page",
+      "status-publish",
+      "has-post-thumbnail",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/9146",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=9146"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 39,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/9146/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 9468,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/9146/revisions/9468"
+        }
+      ],
+      "wp:featuredmedia": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media/9274"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=9146"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 4076,
+    "date": "2025-10-22T02:19:58",
+    "date_gmt": "2025-10-21T19:19:58",
+    "guid": {
+      "rendered": "https://koiseki.com/reset-password/"
+    },
+    "modified": "2025-10-22T03:42:38",
+    "modified_gmt": "2025-10-21T20:42:38",
+    "slug": "cai-lai-mat-khau",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/cai-lai-mat-khau/",
+    "title": {
+      "rendered": "Cài Lại Mật Khẩu"
+    },
+    "content": {
+      "rendered": "<p>[user_registration_reset_password_form]</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>[user_registration_reset_password_form]</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "default",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-4076",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4076",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=4076"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 1,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4076/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 4130,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4076/revisions/4130"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=4076"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 4075,
+    "date": "2025-10-22T02:19:58",
+    "date_gmt": "2025-10-21T19:19:58",
+    "guid": {
+      "rendered": "https://koiseki.com/lost-password/"
+    },
+    "modified": "2025-10-22T03:44:38",
+    "modified_gmt": "2025-10-21T20:44:38",
+    "slug": "quen-mat-khau",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/quen-mat-khau/",
+    "title": {
+      "rendered": "Quên Mật Khẩu"
+    },
+    "content": {
+      "rendered": "<p>[user_registration_lost_password]</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>[user_registration_lost_password]</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "default",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-4075",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4075",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=4075"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 1,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4075/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 4124,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4075/revisions/4124"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=4075"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 4074,
+    "date": "2025-10-22T02:19:58",
+    "date_gmt": "2025-10-21T19:19:58",
+    "guid": {
+      "rendered": "https://koiseki.com/my-account/"
+    },
+    "modified": "2025-10-22T17:17:45",
+    "modified_gmt": "2025-10-22T10:17:45",
+    "slug": "tai-khoan",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/tai-khoan/",
+    "title": {
+      "rendered": "Tài Khoản"
+    },
+    "content": {
+      "rendered": "<p>[user_registration_my_account]</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>[user_registration_my_account]</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "default",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-4074",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4074",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=4074"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 2,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4074/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 4145,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4074/revisions/4145"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=4074"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 4073,
+    "date": "2025-10-22T02:19:58",
+    "date_gmt": "2025-10-21T19:19:58",
+    "guid": {
+      "rendered": "https://koiseki.com/login-2/"
+    },
+    "modified": "2025-10-22T03:43:24",
+    "modified_gmt": "2025-10-21T20:43:24",
+    "slug": "dang-nhap",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/dang-nhap/",
+    "title": {
+      "rendered": "Đăng Nhập"
+    },
+    "content": {
+      "rendered": "<p>[user_registration_login]</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>[user_registration_login]</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "default",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-4073",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4073",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=4073"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 1,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4073/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 4122,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4073/revisions/4122"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=4073"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 4072,
+    "date": "2025-10-22T02:19:58",
+    "date_gmt": "2025-10-21T19:19:58",
+    "guid": {
+      "rendered": "https://koiseki.com/registration/"
+    },
+    "modified": "2025-10-22T03:41:35",
+    "modified_gmt": "2025-10-21T20:41:35",
+    "slug": "dang-ki",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/dang-ki/",
+    "title": {
+      "rendered": "Đăng Kí"
+    },
+    "content": {
+      "rendered": "<p>[user_registration_form id=&#8221;4071&#8243;]</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>[user_registration_form id=&#8221;4071&#8243;]</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "default",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-4072",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4072",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=4072"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 1,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4072/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 4129,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4072/revisions/4129"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=4072"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 4065,
+    "date": "2025-10-22T02:07:06",
+    "date_gmt": "2025-10-21T19:07:06",
+    "guid": {
+      "rendered": "https://koiseki.com/logout/"
+    },
+    "modified": "2025-10-22T03:43:37",
+    "modified_gmt": "2025-10-21T20:43:37",
+    "slug": "dang-xuat",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/dang-xuat/",
+    "title": {
+      "rendered": "Đăng Xuất"
+    },
+    "content": {
+      "rendered": "",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "default",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-4065",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4065",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=4065"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 1,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4065/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 4123,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/4065/revisions/4123"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=4065"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 1613,
+    "date": "2025-10-12T21:37:41",
+    "date_gmt": "2025-10-12T14:37:41",
+    "guid": {
+      "rendered": "https://koiseki.com/shop/"
+    },
+    "modified": "2026-08-24T21:00:53",
+    "modified_gmt": "2026-08-24T14:00:53",
+    "slug": "koiseki-manga-shop",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/koiseki-manga-shop/",
+    "title": {
+      "rendered": "Koiseki Manga Shop"
+    },
+    "content": {
+      "rendered": "",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 8975,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "disabled",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "default",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-1613",
+      "page",
+      "type-page",
+      "status-publish",
+      "has-post-thumbnail",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/1613",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=1613"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 8,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/1613/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 6996,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/1613/revisions/6996"
+        }
+      ],
+      "wp:featuredmedia": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media/8975"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=1613"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 1885,
+    "date": "2025-10-12T21:37:39",
+    "date_gmt": "2025-10-12T14:37:39",
+    "guid": {
+      "rendered": "https://koiseki.com/checkout-2/"
+    },
+    "modified": "2025-10-12T21:37:53",
+    "modified_gmt": "2025-10-12T14:37:53",
+    "slug": "checkout-2",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/checkout-2/",
+    "title": {
+      "rendered": "Checkout"
+    },
+    "content": {
+      "rendered": "<p>[woocommerce_checkout]</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>[woocommerce_checkout]</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "default",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-1885",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/1885",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=1885"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 1,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/1885/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 1897,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/1885/revisions/1897"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=1885"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 1884,
+    "date": "2025-10-12T21:37:39",
+    "date_gmt": "2025-10-12T14:37:39",
+    "guid": {
+      "rendered": "https://koiseki.com/cart/"
+    },
+    "modified": "2025-10-22T01:10:45",
+    "modified_gmt": "2025-10-21T18:10:45",
+    "slug": "cart",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/cart/",
+    "title": {
+      "rendered": "Cart"
+    },
+    "content": {
+      "rendered": "<p>[woocommerce_cart]</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>[woocommerce_cart]</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "default",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-1884",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/1884",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=1884"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 1,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/1884/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 1896,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/1884/revisions/1896"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=1884"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "date": "2025-10-12T21:37:39",
+    "date_gmt": "2025-10-12T14:37:39",
+    "guid": {
+      "rendered": "https://koiseki.com/home/"
+    },
+    "modified": "2026-09-19T12:16:16",
+    "modified_gmt": "2026-09-19T05:16:16",
+    "slug": "trang-chu",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/",
+    "title": {
+      "rendered": "Trang Chủ"
+    },
+    "content": {
+      "rendered": "<h3 style=\"text-align: center;\">Chào mừng bạn đến với thế giới của Koiseki !</h3>\n<p><a href=\"https://koiseki.com/aniimo/\" target=\"_blank\" rel=\"noopener\"><br />\n<img decoding=\"async\" src=\"https://api.koiseki.com/wp-content/uploads/2026/08/aniimo_home_thumb-1.jpg\" sizes=\"(max-width: 2560px) 100vw, 2560px\" srcset=\"https://api.koiseki.com/wp-content/uploads/2026/08/aniimo_home_thumb-1.jpg 2560w, https://api.koiseki.com/wp-content/uploads/2026/08/aniimo_home_thumb-1-600x338.jpg 600w, https://api.koiseki.com/wp-content/uploads/2026/08/aniimo_home_thumb-1-1024x576.jpg 1024w, https://api.koiseki.com/wp-content/uploads/2026/08/aniimo_home_thumb-1-768x432.jpg 768w, https://api.koiseki.com/wp-content/uploads/2026/08/aniimo_home_thumb-1-1536x864.jpg 1536w, https://api.koiseki.com/wp-content/uploads/2026/08/aniimo_home_thumb-1-2048x1152.jpg 2048w\" alt=\"aniimo home thumb\" width=\"2560\" height=\"1440\" /> </a></p>\n<p>&nbsp;</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "<p>Chào mừng bạn đến với thế giới của Koiseki ! &nbsp;</p>\n",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "no-sidebar",
+      "site-content-layout": "page-builder",
+      "ast-site-content-layout": "full-width-container",
+      "site-content-style": "unboxed",
+      "site-sidebar-style": "unboxed",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "disabled",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "disabled",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "enabled",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "default",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "set",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-9",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/9",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=9"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 610,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/9/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 9472,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/9/revisions/9472"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=9"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 14,
+    "date": "2025-10-11T15:21:33",
+    "date_gmt": "2025-10-11T08:21:33",
+    "guid": {
+      "rendered": "https://koiseki.com/index.php/thanh-toan/"
+    },
+    "modified": "2025-10-11T15:21:33",
+    "modified_gmt": "2025-10-11T08:21:33",
+    "slug": "thanh-toan",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/thanh-toan/",
+    "title": {
+      "rendered": "Thanh toán"
+    },
+    "content": {
+      "rendered": "<p>[woocommerce_checkout]</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "default",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-14",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/14",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=14"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 0,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/14/revisions"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=14"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 13,
+    "date": "2025-10-11T15:21:33",
+    "date_gmt": "2025-10-11T08:21:33",
+    "guid": {
+      "rendered": "https://koiseki.com/index.php/gio-hang/"
+    },
+    "modified": "2025-10-11T20:01:00",
+    "modified_gmt": "2025-10-11T13:01:00",
+    "slug": "gio-hang",
+    "status": "publish",
+    "type": "page",
+    "link": "https://api.koiseki.com/gio-hang/",
+    "title": {
+      "rendered": "Giỏ hàng"
+    },
+    "content": {
+      "rendered": "<p>[woocommerce_cart]</p>\n",
+      "protected": false
+    },
+    "excerpt": {
+      "rendered": "",
+      "protected": false
+    },
+    "author": 1,
+    "featured_media": 0,
+    "parent": 0,
+    "menu_order": 0,
+    "comment_status": "closed",
+    "ping_status": "closed",
+    "template": "",
+    "meta": {
+      "_acf_changed": false,
+      "site-sidebar-layout": "default",
+      "site-content-layout": "",
+      "ast-site-content-layout": "default",
+      "site-content-style": "default",
+      "site-sidebar-style": "default",
+      "ast-global-header-display": "",
+      "ast-banner-title-visibility": "",
+      "ast-main-header-display": "",
+      "ast-hfb-above-header-display": "",
+      "ast-hfb-below-header-display": "",
+      "ast-hfb-mobile-header-display": "",
+      "site-post-title": "",
+      "ast-breadcrumbs-content": "",
+      "ast-featured-img": "",
+      "footer-sml-layout": "",
+      "ast-disable-related-posts": "",
+      "theme-transparent-header-meta": "",
+      "adv-header-id-meta": "",
+      "stick-header-meta": "",
+      "header-above-stick-meta": "",
+      "header-main-stick-meta": "",
+      "header-below-stick-meta": "",
+      "astra-migrate-meta-layouts": "default",
+      "ast-page-background-enabled": "default",
+      "ast-page-background-meta": {
+        "desktop": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "ast-content-background-meta": {
+        "desktop": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "tablet": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        },
+        "mobile": {
+          "background-color": "var(--ast-global-color-5)",
+          "background-image": "",
+          "background-repeat": "repeat",
+          "background-position": "center center",
+          "background-size": "auto",
+          "background-attachment": "scroll",
+          "background-type": "",
+          "background-media": "",
+          "overlay-type": "",
+          "overlay-color": "",
+          "overlay-opacity": "",
+          "overlay-gradient": ""
+        }
+      },
+      "footnotes": ""
+    },
+    "class_list": [
+      "post-13",
+      "page",
+      "type-page",
+      "status-publish",
+      "hentry"
+    ],
+    "acf": [],
+    "_links": {
+      "self": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/13",
+          "targetHints": {
+            "allow": [
+              "GET"
+            ]
+          }
+        }
+      ],
+      "collection": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages"
+        }
+      ],
+      "about": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/types/page"
+        }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/users/1"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/comments?post=13"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 1,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/13/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 30,
+          "href": "https://api.koiseki.com/wp-json/wp/v2/pages/13/revisions/30"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https://api.koiseki.com/wp-json/wp/v2/media?parent=13"
+        }
+      ],
+      "curies": [
+        {
+          "name": "wp",
+          "href": "https://api.w.org/{rel}",
+          "templated": true
+        }
+      ]
+    }
+  }
+]

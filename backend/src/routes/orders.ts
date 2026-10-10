@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { randomUUID, createHash } from 'node:crypto';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
@@ -16,13 +17,8 @@ const router = Router();
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function generateOrderCode(): string {
-  const prefix = 'DUKE';
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `${prefix}${timestamp}${random}`;
+  return `DUKE${randomUUID().replaceAll('-', '').toUpperCase()}`;
 }
-
-// ─── Validation Schemas ───────────────────────────────────────────────────────
 
 const topupInfoSchema = z
   .record(
@@ -73,7 +69,7 @@ async function createOrder(
   userEmail: string,
 ) {
   const pkg = await tx.servicePackage.findFirst({
-    where: { id: input.packageId, isActive: true },
+    where: { id: input.packageId, isActive: true, service: { isActive: true } },
     include: { service: { select: { id: true, name: true, game: true } } },
   });
   if (!pkg) throw new NotFoundError('Package');
@@ -187,310 +183,78 @@ async function createOrder(
 
 // ─── POST / — Create Order ────────────────────────────────────────────────────
 
-router.post(
-  '/',
-  requireAuth,
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const body = createOrderSchema.parse(req.body);
+// Both creation paths use the same price and template validation.
+router.post('/', requireAuth, async (req, res, next): Promise<void> => {
+  try {
+    const body = createOrderSchema.parse(req.body);
+    const transaction = await prisma.$transaction((tx) =>
+      createOrder(tx, body, req.user!.userId, req.user!.email));
+    res.status(201).json({ success: true, data: transaction });
+  } catch (error) { next(error); }
+});
 
-      const effectiveEmail = req.user!.email;
-
-      // Load package with service
-      const pkg = await prisma.servicePackage.findFirst({
-        where: { id: body.packageId, isActive: true },
-        include: {
-          service: { select: { id: true, name: true, game: true } },
-        },
-      });
-
-      if (!pkg) throw new NotFoundError('Package');
-
-      // Check status — purchasable
-      const status = await prisma.productStatus.findUnique({
-        where: { id: pkg.statusId },
-        select: { purchasable: true, name: true },
-      });
-
-      if (!status?.purchasable) {
-        throw new AppError(
-          `This package is currently ${status?.name ?? 'unavailable'} and cannot be purchased`,
-          400
-        );
-      }
-
-      // Fetch template name if present
-      let templateName = '';
-      if (pkg.templateId) {
-        const tpl = await prisma.topupTemplate.findUnique({
-          where: { id: pkg.templateId },
-          select: { name: true, fields: true },
-        });
-        templateName = tpl?.name ?? '';
-
-        const fields = Array.isArray(tpl?.fields) ? tpl.fields as Array<Record<string, unknown>> : [];
-        const allowedKeys = new Set(fields.map((field) => String(field.key || "")));
-        for (const field of fields) {
-          const key = String(field.key || "");
-          const value = body.topupInfo[key];
-          if (field.required && (value === undefined || String(value).trim() === "")) {
-            throw new AppError(`Field ${String(field.label || key)} is required`, 400);
-          }
-          if (value !== undefined && field.pattern) {
-            let matches = false;
-            try {
-              matches = new RegExp(String(field.pattern)).test(String(value));
-            } catch {
-              throw new AppError(`Invalid validation pattern for ${String(field.label || key)}`, 500);
-            }
-            if (!matches) {
-              throw new AppError(`Invalid value for ${String(field.label || key)}`, 400);
-            }
-          }
-          if (value !== undefined && field.type === "email" && !z.string().email().safeParse(String(value)).success) {
-            throw new AppError(`Field ${String(field.label || key)} must be a valid email`, 400);
-          }
-          if (value !== undefined && field.type === "select" && Array.isArray(field.options)) {
-            const options = field.options.map((option) => {
-              if (option && typeof option === "object" && "value" in option) {
-                return String(option.value);
-              }
-              return String(option);
-            });
-            if (!options.includes(String(value))) {
-              throw new AppError(`Invalid option for ${String(field.label || key)}`, 400);
-            }
-          }
+router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
+  try {
+    const body = checkoutSchema.parse(req.body);
+    const rawKey = z.string().min(16).max(128).parse(req.header('Idempotency-Key'));
+    const userId = req.user!.userId;
+    // Namespace keys by owner; legacy unscoped cached responses are never returned.
+    const idempotencyKey = createHash('sha256').update(`${userId}:${rawKey}`).digest('hex');
+    const payloadHash = createHash('sha256').update(JSON.stringify({
+      items: body.items,
+      topupInfo: Object.fromEntries(Object.entries(body.topupInfo).sort(([a], [b]) => a.localeCompare(b))),
+    })).digest('hex');
+    const response = await prisma.$transaction(async (tx) => {
+      // The database lock works across API processes and is released on rollback.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${idempotencyKey}))`;
+      const previous = await tx.checkoutRequest.findUnique({ where: { idempotencyKey } });
+      if (previous) {
+        if (previous.userId !== userId || previous.payloadHash !== payloadHash) {
+          throw new AppError('Checkout key was already used for another request', 409);
         }
-        for (const key of Object.keys(body.topupInfo)) {
-          if (allowedKeys.size > 0 && !allowedKeys.has(key)) {
-            throw new AppError(`Unknown top-up field: ${key}`, 400);
-          }
-        }
+        return previous.response;
       }
-
-      // Build topupLabels (human-readable field names -> field labels)
-      const labelMap = new Map<string, string>();
-      if (pkg.templateId) {
-        const tpl = await prisma.topupTemplate.findUnique({
-          where: { id: pkg.templateId },
-          select: { fields: true },
-        });
-        const fields = Array.isArray(tpl?.fields) ? tpl.fields as Array<Record<string, unknown>> : [];
-        for (const field of fields) {
-          if (field.key && field.label) {
-            labelMap.set(String(field.key), String(field.label));
-          }
-        }
+      if (!env.SEPAY_BANK_CODE || !env.SEPAY_ACCOUNT_NUMBER || !env.SEPAY_ACCOUNT_NAME) {
+        throw new AppError('Payment is not configured. Please contact support.', 503);
       }
-      const fallbackFieldLabels: Record<string, string> = {
-        uid: 'UID',
-        server: 'Server',
-        charactername: 'Tên nhân vật',
-        character: 'Tên nhân vật',
-        riotid: 'Riot ID',
-        tagline: 'Tagline',
-        region: 'Khu vực',
-        zoneid: 'Zone ID',
-        playerid: 'Player ID',
-        roleid: 'Role ID',
-        account: 'Tài khoản',
-        email: 'Email liên hệ',
-        phone: 'Số điện thoại',
-        note: 'Ghi chú',
-      };
-
-      const topupLabels: Record<string, string> = {};
-      for (const key of Object.keys(body.topupInfo)) {
-        topupLabels[key] = labelMap.get(key) || fallbackFieldLabels[key.toLowerCase()] || key;
-      }
-
-      const amount = new Prisma.Decimal(pkg.price).mul(body.quantity);
-
-      // Generate unique order code with retry
-      let code = generateOrderCode();
-      let attempts = 0;
-      while (attempts < 5) {
-        const exists = await prisma.transaction.findUnique({
-          where: { code },
-          select: { id: true },
-        });
-        if (!exists) break;
-        code = generateOrderCode();
-        attempts++;
-      }
-
-      const transaction = await prisma.transaction.create({
-        data: {
-          code,
-          userId: req.user!.userId,
-          userEmail: effectiveEmail,
-          serviceId: pkg.service?.id ?? null,
-          packageId: pkg.id,
-          packageName: pkg.name,
-          gameName: pkg.service?.game ?? '',
-          amount,
-          quantity: body.quantity,
-          status: 'PENDING',
-          topupInfo: body.topupInfo,
-          topupLabels,
-          templateName,
-        },
-        select: {
-          id: true,
-          code: true,
-          userEmail: true,
-          packageName: true,
-          gameName: true,
-          amount: true,
-          quantity: true,
-          status: true,
-          topupInfo: true,
-          topupLabels: true,
-          templateName: true,
-          createdAt: true,
-          updatedAt: true,
-          service: { select: { id: true, name: true, iconText: true, tone: true } },
-          package: { select: { id: true, name: true, price: true } },
-        },
-      });
-
-      res.status(201).json({ success: true, data: transaction });
-    } catch (err) {
-      next(err);
-    }
-  }
-);
-
-// ─── POST /checkout — Atomic multi-package checkout ─────────────────────────
-
-router.post(
-  '/checkout',
-  requireAuth,
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const body = checkoutSchema.parse(req.body);
-      const idempotencyKey = req.header('Idempotency-Key');
-      if (!idempotencyKey || idempotencyKey.length < 16 || idempotencyKey.length > 128) {
-        throw new AppError('A valid Idempotency-Key header is required', 400);
-      }
-      const previous = await prisma.checkoutRequest.findUnique({
-        where: { idempotencyKey },
-        select: { response: true },
-      });
-      if (previous?.response) {
-        res.status(201).json({ success: true, data: previous.response });
-        return;
-      }
-      const effectiveEmail = req.user!.email;
       const packageIds = [...new Set(body.items.map((item) => item.packageId))];
-      const checkoutPackages = await prisma.servicePackage.findMany({
-        where: { id: { in: packageIds }, isActive: true },
-        select: { id: true, templateId: true, service: { select: { game: true } } },
+      const packages = await tx.servicePackage.findMany({
+        where: { id: { in: packageIds }, isActive: true, service: { isActive: true } },
+        select: { id: true, templateId: true, serviceId: true },
       });
-      if (
-        checkoutPackages.length !== packageIds.length ||
-        new Set(checkoutPackages.map((item) => item.templateId)).size > 1 ||
-        new Set(checkoutPackages.map((item) => item.service.game)).size > 1
-      ) {
-        throw new AppError(
-          'Cart items must belong to the same game and top-up template',
-          400,
-        );
+      if (packages.length !== packageIds.length ||
+          new Set(packages.map((item) => item.templateId)).size > 1 ||
+          new Set(packages.map((item) => item.serviceId)).size > 1) {
+        throw new AppError('Cart items must belong to the same active game and top-up template', 400);
       }
-
-      const transactions = await prisma.$transaction(async (tx) =>
-        Promise.all(
-          body.items.map((item) =>
-            createOrder(
-              tx,
-              { ...item, topupInfo: body.topupInfo },
-              req.user!.userId,
-              effectiveEmail,
-            ),
-          ),
-        ),
-      );
-
-      if (
-        !env.SEPAY_BANK_CODE ||
-        !env.SEPAY_ACCOUNT_NUMBER ||
-        !env.SEPAY_ACCOUNT_NAME
-      ) {
-        throw new AppError(
-          'SePay bank account is not configured',
-          500,
-          false,
-        );
+      const transactions = [];
+      for (const item of body.items) {
+        transactions.push(await createOrder(tx, { ...item, topupInfo: body.topupInfo }, userId, req.user!.email));
       }
-
-      const paymentOrderCode = `DUKE${Date.now().toString(36).toUpperCase()}`;
-      const totalAmount = transactions.reduce(
-        (total, transaction) => total + Number(transaction.amount),
-        0,
-      );
+      const paymentOrderCode = generateOrderCode();
+      const amount = transactions.reduce((total, item) => total.add(item.amount), new Prisma.Decimal(0)).toNumber();
       const qrCode = `https://qr.sepay.vn/img?${new URLSearchParams({
-        acc: env.SEPAY_ACCOUNT_NUMBER,
-        bank: env.SEPAY_BANK_CODE,
-        amount: String(totalAmount),
-        des: paymentOrderCode,
-      }).toString()}`;
-
-      const updatedTransactions = await prisma.$transaction(async (tx) => {
-        await tx.transaction.updateMany({
-          where: { id: { in: transactions.map((transaction) => transaction.id) } },
-          data: {
-            paymentStatus: 'PENDING',
-            paymentOrderCode: String(paymentOrderCode),
-            paymentLinkId: null,
-            checkoutUrl: qrCode,
-            qrCode,
-          },
-        });
-        return Promise.all(
-          transactions.map((transaction) =>
-            tx.transaction.findUniqueOrThrow({
-              where: { id: transaction.id },
-              select: transactionSelect,
-            }),
-          ),
-        );
+        acc: env.SEPAY_ACCOUNT_NUMBER, bank: env.SEPAY_BANK_CODE,
+        amount: String(amount), des: paymentOrderCode,
+      })}`;
+      const paymentFields = { paymentStatus: 'PENDING' as const, paymentOrderCode, checkoutUrl: qrCode, qrCode };
+      await tx.transaction.updateMany({
+        where: { id: { in: transactions.map((item) => item.id) } }, data: paymentFields,
       });
-
-      const responseData = {
-        transactions: updatedTransactions,
+      const data = JSON.parse(JSON.stringify({
+        transactions: transactions.map((item) => ({ ...item, ...paymentFields })),
         payment: {
-          orderCode: String(paymentOrderCode),
-          amount: totalAmount,
-          checkoutUrl: qrCode,
-          qrCode,
-          bankCode: env.SEPAY_BANK_CODE,
-          accountNumber: env.SEPAY_ACCOUNT_NUMBER,
-          accountName: env.SEPAY_ACCOUNT_NAME,
-          transferContent: paymentOrderCode,
+          orderCode: paymentOrderCode, amount, checkoutUrl: qrCode, qrCode,
+          bankCode: env.SEPAY_BANK_CODE, accountNumber: env.SEPAY_ACCOUNT_NUMBER,
+          accountName: env.SEPAY_ACCOUNT_NAME, transferContent: paymentOrderCode,
         },
-      };
-      await prisma.checkoutRequest.upsert({
-        where: { idempotencyKey },
-        create: {
-          idempotencyKey,
-          paymentOrderCode,
-          response: responseData,
-        },
-        update: { paymentOrderCode, response: responseData },
-      });
-
-      res.status(201).json({
-        success: true,
-        data: responseData,
-      });
-    } catch (err) {
-      next(err);
-    }
-  },
-);
-
-// ─── GET /mine — My Orders ────────────────────────────────────────────────────
+      })) as Prisma.InputJsonObject;
+      await tx.checkoutRequest.create({ data: { idempotencyKey, userId, payloadHash, paymentOrderCode, response: data } });
+      return data;
+    }, { timeout: 15000 });
+    res.status(201).json({ success: true, data: response });
+  } catch (error) { next(error); }
+});
 
 router.get(
   '/mine',

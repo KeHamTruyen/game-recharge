@@ -340,8 +340,8 @@ export function AdminPage({
   onUpdateContact: (info: ContactInfo) => void
   users: ManagedUser[]
   transactions: Transaction[]
-  onUpdateUser: (id: number, updates: Partial<ManagedUser>) => void
-  onUpdateTransaction: (id: number, status: TransactionStatus) => void
+  onUpdateUser: (id: string | number, updates: Partial<ManagedUser>) => void
+  onUpdateTransaction: (id: string | number, status: TransactionStatus) => void
   onUpdateProfile: (name: string) => Promise<void>
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
   adminName: string
@@ -381,7 +381,7 @@ export function AdminPage({
   const [image, setImage] = useState("")
   const [imageX, setImageX] = useState(50)
   const [imageY, setImageY] = useState(50)
-  const [editingProductId, setEditingProductId] = useState<number | null>(null)
+  const [editingProductId, setEditingProductId] = useState<string | number | null>(null)
   const [productStatusId, setProductStatusId] = useState("available")
   const [productTemplateId, setProductTemplateId] = useState(
     topupTemplates[0]?.id || "",
@@ -989,6 +989,7 @@ export function AdminPage({
             <TopupTemplateManager
               templates={topupTemplates}
               products={products}
+              services={services || []}
               games={games}
               onAdd={onAddTopupTemplate}
               onUpdate={onUpdateTopupTemplate}
@@ -1496,7 +1497,7 @@ export function TopupTemplateManager({
 }) {
   const [draft, setDraft] = useState<TopupTemplate | null>(null)
   const [error, setError] = useState("")
-  const fieldTypes: { value: TopupFieldType label: string }[] = [
+  const fieldTypes: { value: TopupFieldType; label: string }[] = [
     { value: "text", label: "Văn bản" },
     { value: "number", label: "Chỉ nhập số" },
     { value: "email", label: "Email" },
@@ -1912,7 +1913,7 @@ export function ProductStatusManager({
   const [icon, setIcon] = useState<IconName>("check")
   const [color, setColor] = useState<ProductStatus["color"]>("green")
   const [purchasable, setPurchasable] = useState(true)
-  const iconOptions: { value: IconName label: string }[] = [
+  const iconOptions: { value: IconName; label: string }[] = [
     { value: "check", label: "Dấu kiểm" },
     { value: "clock", label: "Đồng hồ" },
     { value: "close", label: "Dấu đóng" },
@@ -2508,7 +2509,7 @@ export function AdminTransactions({
   onViewAnalytics,
 }: {
   transactions: Transaction[]
-  onUpdate: (id: number, status: TransactionStatus) => void
+  onUpdate: (id: string | number, status: TransactionStatus) => void
   onViewAnalytics?: () => void
 }) {
   const [search, setSearch] = useState("")
@@ -2596,7 +2597,7 @@ export function AdminTransactions({
             </span>
             <strong>{formatPrice(item.amount)}</strong>
             <select
-              className={`transaction-status status-${item.status.replaceAll(" ", "-").toLowerCase()}`}
+              className={`transaction-status status-${String(item.status).replace(/\s+/g, "-").toLowerCase()}`}
               value={item.status}
               onChange={(event) =>
                 onUpdate(item.id, event.target.value as TransactionStatus)
@@ -2747,7 +2748,7 @@ export function AdminUsers({
   onUpdate,
 }: {
   users: ManagedUser[]
-  onUpdate: (id: number, updates: Partial<ManagedUser>) => void
+  onUpdate: (id: string | number, updates: Partial<ManagedUser>) => void
 }) {
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
@@ -2930,14 +2931,17 @@ export function ContactAdminEditor({
     key: K,
     value: ContactInfo[K],
   ) => onChange({ ...info, [key]: value })
-  const updateChannel = (id: number, updates: Partial<ContactChannel>) =>
+  const updateChannel = (
+    id: string | number,
+    updates: Partial<ContactChannel>,
+  ) =>
     updateInfo(
       "channels",
       info.channels.map((channel) =>
         channel.id === id ? { ...channel, ...updates } : channel,
       ),
     )
-  const uploadChannelImage = (id: number, file?: File) => {
+  const uploadChannelImage = (id: string | number, file?: File) => {
     if (!file) return
     const reader = new FileReader()
     reader.onload = () =>

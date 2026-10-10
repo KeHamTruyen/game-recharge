@@ -222,7 +222,7 @@ export const api = {
         templates: templatesResult.data.map(mapTemplate),
         statuses: statusesResult.data.map((status) => ({
           ...status,
-          icon: "check",
+          icon: "check" as const,
           color: (status.color || "green") as ProductStatus["color"],
         })),
         tags: tagsResult.data.map((tag) => tag.name),

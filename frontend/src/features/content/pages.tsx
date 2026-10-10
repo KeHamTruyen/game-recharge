@@ -406,7 +406,7 @@ export function TransactionHistory({
             </span>
             <strong>{formatPrice(transaction.amount)}</strong>
             <em
-              className={`status-${transaction.status.replaceAll(" ", "-").toLowerCase()}`}
+              className={`status-${String(transaction.status).replace(/\s+/g, "-").toLowerCase()}`}
             >
               {transaction.status}
             </em>

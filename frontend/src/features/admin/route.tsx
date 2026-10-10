@@ -33,7 +33,7 @@ export function AdminRoute() {
         onLogout={() => store.logout()}
       />
       <AdminPage
-        adminName={store.user.name}
+        adminName={store.user.name || "Admin"}
         adminEmail={store.user.email}
         products={store.products}
         services={store.services}
@@ -256,8 +256,8 @@ export function AdminRoute() {
           await api.admin.updateSetting("contactInfo", info as unknown as Record<string, unknown>)
           store.setContactInfo(info)
         }}
-        users={store.users}
-        transactions={store.transactions}
+        users={store.users || []}
+        transactions={store.transactions || []}
         onUpdateUser={async (id, updates) => {
           const { api } = await import("@/services/api")
           const updated = await api.admin.updateUser(id, updates)

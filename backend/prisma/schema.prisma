@@ -197,6 +197,8 @@ model Transaction {
 model CheckoutRequest {
   id              String   @id @default(cuid())
   idempotencyKey  String   @unique
+  userId          String?
+  payloadHash     String?
   paymentOrderCode String?
   response        Json?
   createdAt       DateTime @default(now())
@@ -229,4 +231,26 @@ model Setting {
   updatedAt DateTime @updatedAt
 
   @@map("settings")
+}
+
+model WikiEntry {
+  key       String   @id
+  kind      String
+  authorId  String?
+  data      Json
+  deleted   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([kind, createdAt])
+  @@map("wiki_entries")
+}
+
+model WikiVote {
+  entryKey String
+  userId   String
+  value    String
+
+  @@id([entryKey, userId])
+  @@map("wiki_votes")
 }

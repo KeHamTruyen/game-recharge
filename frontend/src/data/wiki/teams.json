@@ -1,0 +1,563 @@
+[
+  {
+    "id": 1,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Reference team · Đội Hình Chuẩn Meta",
+    "description": "Đội hình cân bằng bậc nhất Meta: Minespine phá khiên diện rộng, Grizbo dồn sát thương vật lý tối đa, Bouldus tạo lá chắn hộ thân và Witchin nạp năng lượng liên tục.",
+    "aniimo_ids": [
+      8397,
+      8387,
+      8365,
+      8289
+    ],
+    "build_data": [
+      {
+        "s1_name": "Seismic Wave",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1028500_Skill_10800200_Icon.png",
+        "s2_name": "Meteors - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1028500_Skill_10800210_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1028100_Skill_16600000_Icon.png"
+      },
+      {
+        "s1_name": "Critical Hit",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1050300_Skill_10800440_Icon.png",
+        "s2_name": "Rock Smash - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1050300_Skill_10800430_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1050300_Skill_10800000_Icon.png"
+      },
+      {
+        "s1_name": "Rock Tackle",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1045300_Skill_10800260_Icon.png",
+        "s2_name": "Boulder Blast - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1045400_Skill_10800522_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1045100_Skill_10800000_Icon.png"
+      },
+      {
+        "s1_name": "Euphoric Sonic Blast",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1020300_Skill_10600532_Icon.png",
+        "s2_name": "Annihilation Bomb - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1020300_Skill_11200230_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1020300_Skill_14500000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 2,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Starter team · Đội Hình Tân Thủ",
+    "description": "Đội hình khởi đầu hoàn hảo: Dễ dàng thu phục ở map đầu, cân bằng công thủ và hồi phục máu ổn định cho người mới.",
+    "aniimo_ids": [
+      8293,
+      8436,
+      8223,
+      8303
+    ],
+    "build_data": [
+      {
+        "s1_name": "ATK - Đánh Thường",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016100_Skill_16600000_Icon.png",
+        "s2_name": "Verdant Beam",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016100_Skill_10600520_Icon.png",
+        "s3_name": "Leaf Slash",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016100_Skill_10600060_Icon.png"
+      },
+      {
+        "s1_name": "Moon Impact",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1037100_Skill_11300080_Icon.png",
+        "s2_name": "Selene's Judgment - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1037100_Skill_11300091_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1036300_Skill_11300000_Icon.png"
+      },
+      {
+        "s1_name": "ATK - Đánh Thường",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018100_Skill_14400000_Icon.png",
+        "s2_name": "Leaf Tornado",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018100_Skill_10600600_Icon.png",
+        "s3_name": "Tornado Wind Orb",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018100_Skill_10900400_Icon.png"
+      },
+      {
+        "s1_name": "ATK - Đánh Thường",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1023100_Skill_14400000_Icon.png",
+        "s2_name": "Wind of Rejuvenation",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1023100_Skill_10900221_Icon.png",
+        "s3_name": "Healing Dance",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1023100_Skill_10600500_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 3,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Grass squad · Đội Hình Hệ Mộc / Cây",
+    "description": "Khắc chế cứng các hệ Thủy & Thổ, khống chế trói chân và gia tăng sát thương hệ Mộc vượt trội.",
+    "aniimo_ids": [
+      8295,
+      8315,
+      8317,
+      8289
+    ],
+    "build_data": [
+      {
+        "s1_name": "Charged Strike",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016200_Skill_10800051_Icon.png",
+        "s2_name": "Quake Impact - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016200_Skill_10800070_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016200_Skill_16600000_Icon.png"
+      },
+      {
+        "s1_name": "Thorny Rain",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1032300_Skill_10600400_Icon.png",
+        "s2_name": "Elegant Waltz - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1032300_Skill_10600410_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1032300_Skill_10600000_Icon.png"
+      },
+      {
+        "s1_name": "Thorny Blessing",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1032400_Skill_10600560_Icon.png",
+        "s2_name": "Rose Garden - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1032400_Skill_10600590_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1032400_Skill_14200000_Icon.png"
+      },
+      {
+        "s1_name": "Euphoric Sonic Blast",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1020300_Skill_10600532_Icon.png",
+        "s2_name": "Annihilation Bomb - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1020300_Skill_11200230_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1020300_Skill_14500000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 4,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Fire squad · Đội Hình Hệ Hỏa / Lửa",
+    "description": "Sức mạnh bộc phá thiêu đốt, hủy diệt hệ Băng và Cây trong nháy mắt.",
+    "aniimo_ids": [
+      7314,
+      7312,
+      7308,
+      8301
+    ],
+    "build_data": [
+      {
+        "s1_name": "Unbroken Flameruff Spirit",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1005500_Skill_11200290_Icon.png",
+        "s2_name": "Wolfpack Onslaught - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1005500_Skill_11200410_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1005500_Skill_16800000_Icon.png"
+      },
+      {
+        "s1_name": "Burn Breaker",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1005300_Skill_10500102_Icon.png",
+        "s2_name": "Falling Star - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1005300_Skill_10500120_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1005300_Skill_10500000_Icon.png"
+      },
+      {
+        "s1_name": "ATK - Đánh Thường",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1005100_Skill_10500000_Icon.png",
+        "s2_name": "Fire Kick",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1005100_Skill_10500080_Icon.png",
+        "s3_name": "Pebble Kick",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1005100_Skill_10800280_Icon.png"
+      },
+      {
+        "s1_name": "Phantom Barrage",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1033300_Skill_10500410_Icon.png",
+        "s2_name": "Phantom Flame Cannon - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1033300_Skill_10500400_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1033300_Skill_14100000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 5,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Electric squad · Đội Hình Hệ Lôi / Sét",
+    "description": "Tê liệt đối thủ, sốc điện diện rộng và tăng tốc độ hồi chiêu cực nhanh.",
+    "aniimo_ids": [
+      8345,
+      8315,
+      8321,
+      8413
+    ],
+    "build_data": [
+      {
+        "s1_name": "Electrified Impact",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1022200_Skill_10400190_Icon.png",
+        "s2_name": "Lightning Flash - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1022200_Skill_10400220_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1022200_Skill_10400000_Icon.png"
+      },
+      {
+        "s1_name": "Thorny Rain",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1032300_Skill_10600400_Icon.png",
+        "s2_name": "Elegant Waltz - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1032300_Skill_10600410_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1032300_Skill_10600000_Icon.png"
+      },
+      {
+        "s1_name": "Thunder Sweep",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1047400_Skill_10400380_Icon.png",
+        "s2_name": "Lightning Storm - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1047400_Skill_10400410_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1047400_Skill_10400000_Icon.png"
+      },
+      {
+        "s1_name": "Charged Geyser",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1012200_Skill_10400470_Icon.png",
+        "s2_name": "Electric Dance Frenzy - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1012200_Skill_10400071_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1012200_Skill_13000000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 6,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Rock squad · Đội Hình Hệ Thổ / Đất",
+    "description": "Giáp sắt bất khả xâm phạm, phản sát thương và khống chế quái vật hạng nặng.",
+    "aniimo_ids": [
+      8295,
+      8387,
+      8365,
+      8305
+    ],
+    "build_data": [
+      {
+        "s1_name": "Charged Strike",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016200_Skill_10800051_Icon.png",
+        "s2_name": "Quake Impact - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016200_Skill_10800070_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016200_Skill_16600000_Icon.png"
+      },
+      {
+        "s1_name": "Critical Hit",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1050300_Skill_10800440_Icon.png",
+        "s2_name": "Rock Smash - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1050300_Skill_10800430_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1050300_Skill_10800000_Icon.png"
+      },
+      {
+        "s1_name": "Rock Tackle",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1045300_Skill_10800260_Icon.png",
+        "s2_name": "Boulder Blast - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1045400_Skill_10800522_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1045100_Skill_10800000_Icon.png"
+      },
+      {
+        "s1_name": "Wind of Rejuvenation",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1023200_Skill_10900221_Icon.png",
+        "s2_name": "Help! Gracewing! - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1023200_Skill_10900430_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1023200_Skill_14400000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 7,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Wind squad · Đội Hình Hệ Phong / Gió",
+    "description": "Cơ động lả lướt, né tránh sát thương và bão lốc dọn dẹp chiến trường.",
+    "aniimo_ids": [
+      8381,
+      8230,
+      8228,
+      8305
+    ],
+    "build_data": [
+      {
+        "s1_name": "Wind Counter",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1002300_Skill_10900020_Icon.png",
+        "s2_name": "Skyfall - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1002300_Skill_10700020_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1002300_Skill_16700000_Icon.png"
+      },
+      {
+        "s1_name": "Wind Bomb Rush",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018500_Skill_10900390_Icon.png",
+        "s2_name": "Avian Harmony Ensemble - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018500_Skill_10900280_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018500_Skill_14400000_Icon.png"
+      },
+      {
+        "s1_name": "Waltz",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018400_Skill_10900230_Icon.png",
+        "s2_name": "Zephyr's Breath - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018400_Skill_10900290_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018400_Skill_14400000_Icon.png"
+      },
+      {
+        "s1_name": "Wind of Rejuvenation",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1023200_Skill_10900221_Icon.png",
+        "s2_name": "Help! Gracewing! - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1023200_Skill_10900430_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1023200_Skill_14400000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 8,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Water squad · Đội Hình Hệ Thủy / Nước",
+    "description": "Dập tắt hệ Hỏa, hồi máu dồi dào và liên tục làm chậm nhịp tấn công của kẻ địch.",
+    "aniimo_ids": [
+      8353,
+      8230,
+      8351,
+      8276
+    ],
+    "build_data": [
+      {
+        "s1_name": "Hydro Roll",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1017400_Skill_10300083_Icon.png",
+        "s2_name": "Home Run - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1017400_Skill_10300160_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1017100_Skill_16200000_Icon.png"
+      },
+      {
+        "s1_name": "Wind Bomb Rush",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018500_Skill_10900390_Icon.png",
+        "s2_name": "Avian Harmony Ensemble - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018500_Skill_10900280_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1018500_Skill_14400000_Icon.png"
+      },
+      {
+        "s1_name": "Surf",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1017300_Skill_10300180_Icon.png",
+        "s2_name": "Wrath of the Sea - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1017300_Skill_10300190_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1017100_Skill_16200000_Icon.png"
+      },
+      {
+        "s1_name": "Healing Water",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1004300_Skill_10300040_Icon.png",
+        "s2_name": "Spring of Life - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1004300_Skill_10300050_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1004200_Skill_13900000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 9,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Holy squad · Đội Hình Hệ Quang / Ánh Sáng",
+    "description": "Thanh tẩy toàn bộ hiệu ứng xấu, khuếch đại sát thương thần thánh và hồi phục liên tục.",
+    "aniimo_ids": [
+      8436,
+      8438,
+      8407,
+      8276
+    ],
+    "build_data": [
+      {
+        "s1_name": "Moon Impact",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1037100_Skill_11300080_Icon.png",
+        "s2_name": "Selene's Judgment - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1037100_Skill_11300091_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1036300_Skill_11300000_Icon.png"
+      },
+      {
+        "s1_name": "Light Bombardment",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1036300_Skill_11300040_Icon.png",
+        "s2_name": "Helios' Judgment - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1036300_Skill_11300051_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1036300_Skill_11300000_Icon.png"
+      },
+      {
+        "s1_name": "Spotlight Moment",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1014300_Skill_10400140_Icon.png",
+        "s2_name": "Self-Destruction - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1014300_Skill_10400150_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1014100_Skill_14000000_Icon.png"
+      },
+      {
+        "s1_name": "Healing Water",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1004300_Skill_10300040_Icon.png",
+        "s2_name": "Spring of Life - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1004300_Skill_10300050_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1004200_Skill_13900000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 10,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Dark squad · Đội Hình Hệ Ám / Bóng Tối",
+    "description": "Rút máu theo thời gian, nguyền rủa làm suy yếu chỉ số của toàn bộ đối thủ.",
+    "aniimo_ids": [
+      8375,
+      8387,
+      8284,
+      8289
+    ],
+    "build_data": [
+      {
+        "s1_name": "Bouncy Sling",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1002700_Skill_11200202_Icon.png",
+        "s2_name": "Heavy Slam - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1002700_Skill_11200220_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1002100_Skill_16800000_Icon.png"
+      },
+      {
+        "s1_name": "Critical Hit",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1050300_Skill_10800440_Icon.png",
+        "s2_name": "Rock Smash - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1050300_Skill_10800430_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1050300_Skill_10800000_Icon.png"
+      },
+      {
+        "s1_name": "Nimbi Attack",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1026300_Skill_11200360_Icon.png",
+        "s2_name": "Dream Blast - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1026300_Skill_11200370_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1026300_Skill_14500000_Icon.png"
+      },
+      {
+        "s1_name": "Euphoric Sonic Blast",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1020300_Skill_10600532_Icon.png",
+        "s2_name": "Annihilation Bomb - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1020300_Skill_11200230_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1020300_Skill_14500000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  },
+  {
+    "id": 11,
+    "user_id": "admin",
+    "nickname": "DUKE1305 (Aniipedia Meta)",
+    "title": "Ice squad · Đội Hình Hệ Băng",
+    "description": "Đóng băng vĩnh cửu, khóa chặt hành động của boss và dồn sát thương bạo kích lên mục tiêu bị đông cứng.",
+    "aniimo_ids": [
+      8297,
+      8373,
+      8341,
+      8276
+    ],
+    "build_data": [
+      {
+        "s1_name": "Icy Gravel Dance",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016300_Skill_10200120_Icon.png",
+        "s2_name": "Freezing Claws - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016300_Skill_10200150_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1016300_Skill_16100000_Icon.png"
+      },
+      {
+        "s1_name": "Shadow Cut",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1002600_Skill_11200140_Icon.png",
+        "s2_name": "Ironclad Armament - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1002600_Skill_11200160_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1002100_Skill_16800000_Icon.png"
+      },
+      {
+        "s1_name": "Frost Tail Strike",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1013300_Skill_10200100_Icon.png",
+        "s2_name": "Ice Tornado - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1013300_Skill_10200090_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1013300_Skill_10200000_Icon.png"
+      },
+      {
+        "s1_name": "Healing Water",
+        "s1_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1004300_Skill_10300040_Icon.png",
+        "s2_name": "Spring of Life - Ultimate",
+        "s2_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1004300_Skill_10300050_Icon.png",
+        "s3_name": "ATK - Đánh Thường",
+        "s3_icon": "https://worldx-website-cdn.aniimo.com/official-website/worldx/wiki_stage/init/1004200_Skill_13900000_Icon.png"
+      }
+    ],
+    "avg_stars": 5,
+    "total_ratings": 99,
+    "time_ago": "Cập nhật Meta v1.0",
+    "isCommunity": false
+  }
+]

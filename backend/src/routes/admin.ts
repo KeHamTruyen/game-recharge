@@ -643,6 +643,7 @@ router.patch(
         .parse(req.body);
 
       const transaction = await prisma.$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT id FROM transactions WHERE id = ${id} FOR UPDATE`;
         const previous = await tx.transaction.findUnique({
           where: { id },
           select: { status: true, userId: true, amount: true, quantity: true },

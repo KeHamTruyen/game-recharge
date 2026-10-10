@@ -203,7 +203,7 @@ router.get(
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
 
       const pkg = await prisma.servicePackage.findFirst({
-        where: { id, isActive: true },
+        where: { id, isActive: true, service: { isActive: true } },
         select: {
           ...packageSelect,
           service: {

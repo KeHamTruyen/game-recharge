@@ -1,0 +1,142 @@
+[
+  {
+    "rank": "SS",
+    "label": "God Tier / Meta Tối Thượng",
+    "color": "#EF4444",
+    "names": [
+      "Thornblade",
+      "Irisalis",
+      "Grizbo",
+      "Scorchhowl",
+      "Waleetle",
+      "Pawney",
+      "Ignitis",
+      "Cornet",
+      "Minespine"
+    ]
+  },
+  {
+    "rank": "S",
+    "label": "Top Tier / Rất Mạnh",
+    "color": "#F59E0B",
+    "names": [
+      "Irisal",
+      "Lunara",
+      "Helion",
+      "Infergon",
+      "Sherro",
+      "Pomawk",
+      "Inferlupa",
+      "Helgon",
+      "Shrubclaw",
+      "Glynsera",
+      "Fulmintis",
+      "Geoclaw"
+    ]
+  },
+  {
+    "rank": "A",
+    "label": "Great Tier / Khá Mạnh & Ổn Định",
+    "color": "#10B981",
+    "names": [
+      "Rookey",
+      "Stellarys",
+      "Panpanta",
+      "Squashel",
+      "Magmarex",
+      "Dazmand",
+      "Piopiota",
+      "Witchin",
+      "Blazen",
+      "Tuckin",
+      "Tromber",
+      "Bouldus",
+      "Gracewing",
+      "Bailite",
+      "Flamerion",
+      "Besauce",
+      "Fenmane"
+    ]
+  },
+  {
+    "rank": "B",
+    "label": "Good Tier / Tốt Ở Từng Vị Trí",
+    "color": "#3B82F6",
+    "names": [
+      "Baleetle",
+      "Tubster",
+      "Flameruff",
+      "Dreaple",
+      "Luminelle",
+      "Budsquire",
+      "Fenrier",
+      "Popota",
+      "Wisptis",
+      "Melloblum",
+      "Chirpi",
+      "Lavazar",
+      "Helmwhelp",
+      "Celestis",
+      "Emberpup",
+      "Pomegg",
+      "Budclaw",
+      "Turbo",
+      "Geodeback",
+      "Bonesky",
+      "Fragrancier",
+      "Eklue"
+    ]
+  },
+  {
+    "rank": "C",
+    "label": "Situational / Cân Nhắc Sử Dụng",
+    "color": "#8B5CF6",
+    "names": [
+      "Glacy",
+      "Susuta",
+      "Sheldon",
+      "Hummin",
+      "Sparki",
+      "Iris",
+      "Jawling",
+      "Squarrel",
+      "Cubbo",
+      "Veilfloat",
+      "Bolty",
+      "Pebbling",
+      "Leafy",
+      "Erlath",
+      "Eko",
+      "Shelly",
+      "Somniwing",
+      "Sparkelf"
+    ]
+  },
+  {
+    "rank": "D",
+    "label": "Niche / Dùng Đầu Game",
+    "color": "#64748B",
+    "names": [
+      "Nimbi",
+      "Pranky",
+      "Dewy",
+      "Fentuft",
+      "Cozite",
+      "Bulbly",
+      "Fahloo",
+      "Helmut",
+      "Skippy",
+      "Flutternym",
+      "Bubbeep",
+      "Glameep",
+      "Cheekie",
+      "Coraliz",
+      "Gachapus",
+      "Malangel",
+      "Malevsera",
+      "Popapus",
+      "Reefish",
+      "Wavwal"
+    ]
+  }
+]

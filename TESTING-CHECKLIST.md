@@ -1,4 +1,4 @@
-# Checklist kiểm thử NEXA TOPUP
+# Checklist kiểm thử DUKE1305 (Game Recharge & Wiki)
 
 Tài liệu này dùng để giao cho người kiểm thử hệ thống trước khi demo hoặc bàn giao khách hàng.
 

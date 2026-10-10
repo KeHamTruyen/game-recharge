@@ -290,6 +290,16 @@ describe('Orders & Checkout Logic (Atomic & Idempotent)', () => {
       where: { paymentOrderCode },
     });
     assert.strictEqual(txCount2, 1);
+
+    // Replay with DIFFERENT payload should return 409 Conflict
+    const resDifferentPayload = await customerClient.post('/api/orders/checkout', {
+      ...payload,
+      topupInfo: { uid: '999888777', server: 'europe' },
+    }, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    });
+    assert.strictEqual(resDifferentPayload.status, 409);
+    assert.strictEqual(resDifferentPayload.body.error, 'Checkout key was already used for another request');
   });
 
   it('CHECKOUT-002: Multi-package atomic checkout for same game', async () => {

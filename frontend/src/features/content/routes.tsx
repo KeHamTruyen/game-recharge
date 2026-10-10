@@ -24,7 +24,7 @@ export function AccountRoute() {
   return (
     <AccountPage
       email={store.user.email}
-      transactions={store.transactions.filter(
+      transactions={(store.transactions || []).filter(
         (item) => !item.email || item.email.toLowerCase() === store.user?.email.toLowerCase(),
       )}
       onLogout={() => {

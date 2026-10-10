@@ -18,6 +18,7 @@ import catalogRouter from './routes/catalog.js';
 import ordersRouter from './routes/orders.js';
 import adminRouter from './routes/admin.js';
 import paymentsRouter from './routes/payments.js';
+import wikiRouter from './routes/wiki.js';
 
 // ─── App Setup ────────────────────────────────────────────────────────────────
 
@@ -139,7 +140,8 @@ app.use('/api/auth', apiLimiter, authRouter);
 app.use('/api/catalog', apiLimiter, catalogRouter);
 
 // Orders — custom order limiter
-app.use('/api/orders', orderLimiter, ordersRouter);
+app.use('/api/orders', (req, res, next) => req.method === 'POST' ? orderLimiter(req, res, next) : apiLimiter(req, res, next), ordersRouter);
+app.use('/api/wiki', apiLimiter, wikiRouter);
 
 // Admin — generous limit for back-office operations
 app.use('/api/admin', adminLimiter, adminRouter);

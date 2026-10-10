@@ -139,6 +139,21 @@ async function main() {
   });
   console.log(`✅ Admin user seeded (${adminEmail})`);
 
+  // ─── Test Customer User ───────────────────────────────────────────────────
+  const customerPasswordHash = await bcrypt.hash('123456', 12);
+  await prisma.user.upsert({
+    where: { email: 'customer@test.com' },
+    update: { passwordHash: customerPasswordHash, status: 'ACTIVE' },
+    create: {
+      email: 'customer@test.com',
+      name: 'Test Customer',
+      passwordHash: customerPasswordHash,
+      role: 'CUSTOMER',
+      status: 'ACTIVE',
+    },
+  });
+  console.log('✅ Customer user seeded (customer@test.com)');
+
   // ─── Services & Packages ──────────────────────────────────────────────────
 
   // Genshin Impact

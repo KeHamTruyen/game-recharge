@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
+@import "./features/wiki/wiki.css";
 
 :root {
   color-scheme: dark;
@@ -23,6 +24,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .header-inner { width: min(100% - 56px, 1680px); height: 76px; margin: auto; display: flex; align-items: center; gap: 44px; }
 .brand { border: 0; background: none; display: flex; align-items: center; gap: 11px; color: inherit; font-size: 17px; font-weight: 800; letter-spacing: -.6px; text-decoration: none; cursor: pointer; }
 .brand > span:last-child span { color: #29d9ff; }
+.brand-avatar-img { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(41, 217, 255, .4); box-shadow: 0 0 16px rgba(41, 217, 255, .22); }
 .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 11px; color: #061018; background: linear-gradient(135deg, #30e7ff, #8f7bff); box-shadow: 0 0 24px rgba(43, 219, 255, .22); }
 .brand-mark.large { width: 46px; height: 46px; margin: 0 auto 20px; border-radius: 14px; }
 .desktop-nav { align-self: stretch; display: flex; align-items: center; gap: 30px; }
@@ -938,6 +940,10 @@ h1, h2, h3, p { margin-top: 0; }
 @media (max-width: 920px) {
   .page-width, .header-inner { width: min(100% - 32px, 1680px); }
   .desktop-nav { display: none; }
+  .mobile-nav { position: fixed; z-index: 39; inset: auto 0 0; min-height: 67px; height: calc(67px + env(safe-area-inset-bottom)); padding: 7px 10px calc(7px + env(safe-area-inset-bottom)); border-top: 1px solid #20283a; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(9, 13, 22, .96); backdrop-filter: blur(15px); }
+  .mobile-nav a, .account-nav-button { border: 0; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #687387; background: transparent; font: inherit; font-size: 8px; text-decoration: none; cursor: pointer; }
+  .mobile-nav a.active, .account-nav-button.signed-in { color: #3bdbf8; background: rgba(47, 218, 255, .07); }
+  .app-shell { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
   .hero { grid-template-columns: 1fr; }
   .hero-copy { max-width: none; text-align: center; }
   .hero .eyebrow { margin-inline: auto; }
@@ -960,9 +966,6 @@ h1, h2, h3, p { margin-top: 0; }
   .page-width, .header-inner { width: min(100% - 24px, 1680px); }
   .header-inner { height: 64px; }
   .login-button { width: 39px; padding: 0 !important; justify-content: center; font-size: 0 !important; }
-  .mobile-nav { position: fixed; z-index: 39; inset: auto 0 0; min-height: 67px; height: calc(67px + env(safe-area-inset-bottom)); padding: 7px 10px calc(7px + env(safe-area-inset-bottom)); border-top: 1px solid #20283a; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(9, 13, 22, .96); backdrop-filter: blur(15px); }
-  .mobile-nav a, .account-nav-button { border: 0; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #687387; background: transparent; font: inherit; font-size: 8px; text-decoration: none; cursor: pointer; }
-  .mobile-nav a.active, .account-nav-button.signed-in { color: #3bdbf8; background: rgba(47, 218, 255, .07); }
   .hero { min-height: auto; padding-block: 53px 25px; }
   .hero h1 { font-size: 43px; letter-spacing: -2.6px; }
   .hero-copy > p { font-size: 13px; }

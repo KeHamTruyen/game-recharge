@@ -1,0 +1,4052 @@
+[
+  {
+    "id": "item:640003",
+    "name": "Mở Khóa Ô Phụ Kiện Aniimo",
+    "desc": "Nhờ quá trình nghiên cứu tận tụy, Aniimo này giờ đây có thể trang bị thêm nhiều phụ kiện hơn",
+    "category": "Accessory Slot Unlock",
+    "quality": "Epic",
+    "icon": "assets/item-log/ff03519132695b8c4c3a.webp",
+    "sub": "Accessory Slot Unlock - Epic"
+  },
+  {
+    "id": "item:5200005",
+    "name": "Trứng Umbrabow Người Khổng Lực Ngủ Quên",
+    "desc": "Một quả trứng khổng lồ tỏa ánh hào quang vàng óng được phát hiện trong các tàn tích cổ đại. Nó đang chìm trong giấc ngủ đông sâu thẳm. Bạn cần tinh hoa năng lượng darkler để hồi sinh và ấp nó một lần nữa",
+    "category": "Ancient Egg",
+    "quality": "Prismatic",
+    "icon": "assets/item-log/2210516666a7f670e8d4.webp",
+    "sub": "Ancient Egg - Prismatic"
+  },
+  {
+    "id": "item:101220",
+    "name": "Besauce",
+    "desc": "Một Aniimo yêu âm nhạc từng bị lạc vào dòng chảy hắc ám của những dị tượng thời gian. Đánh bại các Pathfinder ở Breezy Plains để thu thập mảnh vỡ Besauce và đổi lấy nó",
+    "category": "Aniimo",
+    "quality": "Legendary",
+    "icon": "assets/item-log/47c5f1b657f43496c233.webp",
+    "sub": "Aniimo - Legendary"
+  },
+  {
+    "id": "item:101221",
+    "name": "Mảnh - Besauce",
+    "desc": "Những mảnh vỡ Besauce được phong ấn bên trong các mảnh thời gian. Nhận được bằng cách đánh bại các Pathfinder ở Breezy Plains. Cứ thu thập đủ 40 mảnh, bạn có thể đổi lấy Besauce tại Cửa Hàng ở bất kỳ tiền đồn Pathfinder nào",
+    "category": "Aniimo",
+    "quality": "Legendary",
+    "icon": "assets/item-log/174d545d8122bf01cd6b.webp",
+    "sub": "Aniimo - Legendary"
+  },
+  {
+    "id": "item:7011",
+    "name": "Irisalis",
+    "desc": "Theo truyền thuyết, khi Irisalis múa, những đóa hoa nở rộ theo từng bước chân, tô điểm cho mặt đất bằng một tấm choàng hoa rực rỡ, đầy màu sắc",
+    "category": "Aniimo",
+    "quality": "Prismatic",
+    "icon": "assets/item-log/d330cfa633b8f8a9cdae.webp",
+    "sub": "Aniimo - Prismatic"
+  },
+  {
+    "id": "item:101224",
+    "name": "Sherro - Prismana",
+    "desc": "Dưới sự dẫn dắt của Prismana, quyết tâm gìn giữ công lý khoác lên lớp giáp vỏ của Sherro một sắc vàng óng ánh",
+    "category": "Aniimo",
+    "quality": "Prismatic",
+    "icon": "assets/item-log/d8e310b3a272fb0d13dd.webp",
+    "sub": "Aniimo - Prismatic"
+  },
+  {
+    "id": "item:101222",
+    "name": "Thornblade",
+    "desc": "Những thanh kiếm làm từ thân cây có gai chỉ được rút ra khi đến lúc bảo vệ bầy đàn trước kẻ thù",
+    "category": "Aniimo",
+    "quality": "Epic",
+    "icon": "assets/item-log/86f04bbfeac33bebcf78.webp",
+    "sub": "Aniimo - Epic"
+  },
+  {
+    "id": "item:913108",
+    "name": "Cỏ Azur",
+    "desc": "Những cụm hoa màu xanh đậm mọc thành khối cầu hoàn hảo. Phân rã để nhận Credits",
+    "category": "Aniimo Food",
+    "quality": "Normal",
+    "icon": "assets/item-log/4d37bb7f8638e2a2991f.webp",
+    "sub": "Aniimo Food - Normal"
+  },
+  {
+    "id": "item:913111",
+    "name": "Mũ Xanh",
+    "desc": "Tỏa ra ánh sáng xanh lam huyền bí, với phần mũ lấp lánh ánh nước. Phân rã để nhận Credits",
+    "category": "Aniimo Food",
+    "quality": "Normal",
+    "icon": "assets/item-log/567be817b219208947f5.webp",
+    "sub": "Aniimo Food - Normal"
+  },
+  {
+    "id": "item:913121",
+    "name": "Cúc Nắng Đặc Biệt",
+    "desc": "Văn bản giữ chỗ cho mô tả cốt truyện thế giới",
+    "category": "Aniimo Food",
+    "quality": "Rare",
+    "icon": "assets/item-log/33abd28c22a7489e70e4.webp",
+    "sub": "Aniimo Food - Rare"
+  },
+  {
+    "id": "item:913113",
+    "name": "Starine Lớn",
+    "desc": "Món ăn yêu thích của Celestises. Có thể phân rã để lấy Credits",
+    "category": "Aniimo Food",
+    "quality": "Normal",
+    "icon": "assets/item-log/a576b27f010a7ce26e9f.webp",
+    "sub": "Aniimo Food - Normal"
+  },
+  {
+    "id": "item:913107",
+    "name": "Cúc Mặt Trăng",
+    "desc": "Những cánh hoa màu trắng dường như chứa đựng ánh sáng bên trong, tựa như những vì sao nhỏ rải rác trên bề mặt. Phân rã để nhận Credits",
+    "category": "Aniimo Food",
+    "quality": "Normal",
+    "icon": "assets/item-log/9246ed0d8db514c09b7a.webp",
+    "sub": "Aniimo Food - Normal"
+  },
+  {
+    "id": "item:913110",
+    "name": "Orange Cap",
+    "desc": "Nấm cam dường như đã hấp thụ tinh hoa của mặt trời, với phần mũ nấm nhẵn bóng và tinh xảo như hổ phách. Tháo rời để nhận Credits",
+    "category": "Aniimo Food",
+    "quality": "Normal",
+    "icon": "assets/item-log/6e92d3ebdbfecce5c57a.webp",
+    "sub": "Aniimo Food - Normal"
+  },
+  {
+    "id": "item:913109",
+    "name": "Red Cap",
+    "desc": "Loại nấm đỏ mọc tinh tế với phần mũ nấm rực rỡ như ngọn lửa đang bùng cháy. Tháo rời để nhận Credits",
+    "category": "Aniimo Food",
+    "quality": "Normal",
+    "icon": "assets/item-log/1fe1e79694a5748b864f.webp",
+    "sub": "Aniimo Food - Normal"
+  },
+  {
+    "id": "item:913112",
+    "name": "Starine",
+    "desc": "Món ăn yêu thích của các Celestises. Có thể tháo rời để đổi lấy Credits",
+    "category": "Aniimo Food",
+    "quality": "Normal",
+    "icon": "assets/item-log/a576b27f010a7ce26e9f.webp",
+    "sub": "Aniimo Food - Normal"
+  },
+  {
+    "id": "item:110001",
+    "name": "Aniipod",
+    "desc": "Thiết bị dùng để bắt, trang bị và huấn luyện aniimo. Các nhà nghiên cứu tại Polaris Institute đã phát triển nó bằng cách sử dụng Lumintech sau khi lấy cảm hứng từ tàn tích của Nền văn minh Idyll cổ đại",
+    "category": "Aniipod",
+    "quality": "Rare",
+    "icon": "assets/item-log/19fb6b9aa233fff53b1e.webp",
+    "sub": "Aniipod - Rare · Standard device"
+  },
+  {
+    "id": "item:110000",
+    "name": "Aniipod for Teaching",
+    "desc": "Thiết bị dùng để bắt, trang bị và huấn luyện aniimo. Các nhà nghiên cứu tại Polaris Institute đã phát triển nó bằng cách sử dụng Lumintech sau khi lấy cảm hứng từ tàn tích của Nền văn minh Idyll cổ đại",
+    "category": "Aniipod",
+    "quality": "Rare",
+    "icon": "assets/item-log/19fb6b9aa233fff53b1e.webp",
+    "sub": "Aniipod - Rare · Standard device"
+  },
+  {
+    "id": "item:110004",
+    "name": "Aniipod Hyper",
+    "desc": "Một chiếc Aniipod được chế tạo từ vật liệu mới giúp tăng tốc độ ném bằng cách giảm sức cản không khí và mở rộng tầm ném",
+    "category": "Aniipod",
+    "quality": "Epic",
+    "icon": "assets/item-log/a70a075343236ed9e5ef.webp",
+    "sub": "Aniipod - Epic · Standard device"
+  },
+  {
+    "id": "item:110007",
+    "name": "Aniipod Mega",
+    "desc": "Sản phẩm nâng cấp thứ hai trong dòng Aniipod, được thiết kế để giúp các Nhà thám hiểm bắt Aniimo dễ dàng hơn nữa",
+    "category": "Aniipod",
+    "quality": "Epic",
+    "icon": "assets/item-log/c25cb20b0c025f2e49f5.webp",
+    "sub": "Aniipod - Epic · Standard device"
+  },
+  {
+    "id": "item:110002",
+    "name": "Aniipod Pro",
+    "desc": "Sản phẩm nâng cấp đầu tiên trong dòng Aniipod, được thiết kế để giúp các Nhà thám hiểm bắt Aniimo dễ dàng hơn",
+    "category": "Aniipod",
+    "quality": "Epic",
+    "icon": "assets/item-log/a9d4e0bd3d8245579f30.webp",
+    "sub": "Aniipod - Epic · Standard device"
+  },
+  {
+    "id": "item:110005",
+    "name": "Aniipod Trace",
+    "desc": "Một thiết bị bắt aniimo được trang bị hệ thống khóa mắt đại bàng, tự động theo dõi aniimo gần đó sau khi được ném",
+    "category": "Aniipod",
+    "quality": "Epic",
+    "icon": "assets/item-log/4cef68a3a5f92daed119.webp",
+    "sub": "Aniipod - Epic · Standard device"
+  },
+  {
+    "id": "item:110003",
+    "name": "Aniipod Ultra",
+    "desc": "Aniipod do Polaris Institute phát triển với hiệu suất tuyệt vời trên mọi phương diện. Nó đại diện cho tinh thần của một nhà vô địch",
+    "category": "Aniipod",
+    "quality": "Legendary",
+    "icon": "assets/item-log/23751c6f1dfd1127840c.webp",
+    "sub": "Aniipod - Legendary · Standard device"
+  },
+  {
+    "id": "item:110907",
+    "name": "Nicole’s Aniipod",
+    "desc": "Công nghệ gấp không gian được tích hợp bên trong cho phép nó chứa một không gian sinh thái rộng lớn để aniimo sinh sống",
+    "category": "Aniipod",
+    "quality": "Epic",
+    "icon": "assets/item-log/19fb6b9aa233fff53b1e.webp",
+    "sub": "Aniipod - Epic"
+  },
+  {
+    "id": "item:110006",
+    "name": "Sparkling Cube",
+    "desc": "Phiên bản nâng cấp của Aniipod Ultra, được tạo ra bởi một thiên tài. Một số Nhà thám hiểm tin rằng thiết kế của nó vượtra ngoài toán học và mang tính siêu hình",
+    "category": "Aniipod",
+    "quality": "Prismatic",
+    "icon": "assets/item-log/90c08d699138027c81b9.webp",
+    "sub": "Aniipod - Prismatic · Standard device"
+  },
+  {
+    "id": "item:111002",
+    "name": "Tumbler",
+    "desc": "Một sản phẩm đặc biệt thuộc dòng Aniipod, lấy cảm hứng từ hình ảnh Nimbi lăn lộn trên những sườn đồi cỏ xanh",
+    "category": "Aniipod",
+    "quality": "Epic",
+    "icon": "assets/item-log/7e278e70bde2b9b6af00.webp",
+    "sub": "Aniipod - Epic"
+  },
+  {
+    "id": "item:710013",
+    "name": "A New Journey",
+    "desc": "Đã lên đồ đầy đủ, sẵn sàng cho một hành trình hoàn toàn mới phía trước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/a174276f64cac915f3f4.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 4"
+  },
+  {
+    "id": "item:710069",
+    "name": "A New Journey",
+    "desc": "Đã lên đồ đầy đủ, sẵn sàng cho một hành trình hoàn toàn mới phía trước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/4ef1ffe55be99f46e280.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 4"
+  },
+  {
+    "id": "item:720013",
+    "name": "A New Journey",
+    "desc": "Đã lên đồ đầy đủ, sẵn sàng cho một hành trình hoàn toàn mới phía trước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/0931c0a0f440cdbab29d.webp",
+    "sub": "Appearance - Rare · Appearance variant 3 of 4"
+  },
+  {
+    "id": "item:720069",
+    "name": "A New Journey",
+    "desc": "Đã lên đồ đầy đủ, sẵn sàng cho một hành trình hoàn toàn mới phía trước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/a1cbb45cf7597d425536.webp",
+    "sub": "Appearance - Rare · Appearance variant 4 of 4"
+  },
+  {
+    "id": "item:713029",
+    "name": "Ace Sleuth",
+    "desc": "Không bao giờ bỏ sót dù chỉ một manh mối",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/9146c2f78bd848d0aaf7.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:725034",
+    "name": "Against the Beat",
+    "desc": "Con đường của nhạc rock không bao giờ quay đầu lại",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/b8f47133056fe66d38e1.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:715026",
+    "name": "Airy Casual Shoes",
+    "desc": "Giày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c5c86569e698ce482200.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:713026",
+    "name": "Airy Gloves",
+    "desc": "Găng tay",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/8ed01e9832faf74bdd93.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:711026",
+    "name": "Airy Protective Suit",
+    "desc": "Áo",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/faf3ce2060d03ced1a85.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:714026",
+    "name": "Airy Tech Socks",
+    "desc": "Tất",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/6530c97bdd0412820c04.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:712026",
+    "name": "Airy Utility Skirt",
+    "desc": "Quần",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/93469e98a0f705b7a567.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171047",
+    "name": "Ally",
+    "desc": "Dùng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171026",
+    "name": "Angel",
+    "desc": "Dùng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1100400",
+    "name": "Aurora Flow",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/14c43870c7a328778368.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:811075",
+    "name": "Awoo Ears",
+    "desc": "Đôi tai đáng yêu dựng đứng, tràn đầy sức sống",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/bba069389ca898dc4fc1.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:104330",
+    "name": "Bailite Avatar",
+    "desc": "Dành cho những người đam mê Bailite",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/a36e9214398e5e00d61a.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:104513",
+    "name": "Baleetle Avatar",
+    "desc": "Dành cho những người đam mê Baleetle",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/8a4ccd0b8c52063de177.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:700019",
+    "name": "Baseball Cap",
+    "desc": "Trở thành một chàng trai ngầu!",
+    "category": "Appearance",
+    "quality": "Normal",
+    "icon": "assets/item-log/455d5502125eca383c55.webp",
+    "sub": "Appearance - Normal"
+  },
+  {
+    "id": "item:811077",
+    "name": "Bat-Ear Eavesdropper",
+    "desc": "Lắng nghe thật kỹ, và bắt trọn những âm vang nhỏ nhất trong từng tiếng vọng tinh tế",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/6d84aa84878ab5c97260.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:710029",
+    "name": "Batlock Holmes",
+    "desc": "Ta sẽ đặt cược danh tiếng thám tử lừng danh của mình vào đây. Sự thật sẽ được đưa ra ánh sáng",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/1cd17416712a002f4367.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171036",
+    "name": "Berserker",
+    "desc": "Dùng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:101223",
+    "name": "Besauce Avatar",
+    "desc": "Dành cho những người đam mê Besauce",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/532d48396021b0c28287.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:822008",
+    "name": "Big Pink Eyes",
+    "desc": "Một lớp màng nhẹ nhàng bảo vệ đôi mắt của bạn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/2a97707fa0f3fe907c26.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:700001",
+    "name": "Kính râm đen",
+    "desc": "Kính râm đen thời trang và sành điệu",
+    "category": "Appearance",
+    "quality": "Normal",
+    "icon": "assets/item-log/b9aa70443295c46b7b45.webp",
+    "sub": "Appearance - Normal"
+  },
+  {
+    "id": "item:822007",
+    "name": "Kính râm gọng đen",
+    "desc": "Gọng đen mang lại vẻ sắc sảo ngầu lòi, che đi ánh sáng đồng thời toát lên thần thái lịch lãm",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/596ae4151f712ea450c3.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:721022",
+    "name": "Kiếm Hoa",
+    "desc": "Những đường nét sắc sảo định hình một vóc dáng hiên ngang, tràn đầy sự tự tin và nhiệt huyết",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/92c44dd015e9ea98d409.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:811030",
+    "name": "Quỷ Kiếm",
+    "desc": "Một chiếc mặt nạ quỷ tràn ngập vẻ uy hiếp, táo bạo và đầy áp đảo",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/6fd8d5952b3f46ef3413.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:725022",
+    "name": "Vết Kiếm",
+    "desc": "Khoảnh khắc bạn bước lên phía trước, chiến thắng đã được định đoạt",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/e01f7f54f42797419f26.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1202200",
+    "name": "Hào Quang Kiếm",
+    "desc": "Những lọn tóc bồng bềnh lách tách tia chớp rực rỡ",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/3e710e35081c280ed9dc.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:102223",
+    "name": "Ảnh Đại Diện Blazen",
+    "desc": "Dành cho những người đam mê Blazen",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/b280c9f0939a7e376d5b.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:821026",
+    "name": "Mũ Cao Bồi Lực Lưỡng",
+    "desc": "Thắp lên tinh thần cao bồi bên trong bạn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/34e49940fa5fe4a27e29.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:821001",
+    "name": "Kẹp Tóc Nở Hoa",
+    "desc": "Trang trí đầu của bạn với một bông hoa đáng yêu!",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/2b5d3852405b2aaa4820.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:913105",
+    "name": "Trang phục Bloomville",
+    "desc": "Trang phục phong cách Bloomville đặc biệt. Chất liệu vải lanh mang lại cảm giác dễ chịu, và mũ đội đầu mang lại hương thơm tươi mát",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/3ca94152c95fdc53c683.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171030",
+    "name": "Hoa Nở",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:811059",
+    "name": "Bờm Tóc Xanh",
+    "desc": "Một chiếc bờm tóc màu xanh lam với những đốm sao lấp lánh",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/dc7e028ccf1cec4fac25.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:836001",
+    "name": "Má hồng 1",
+    "desc": "Má hồng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/0683855c903785624c23.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:836002",
+    "name": "Má hồng 2",
+    "desc": "Má hồng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/61a7e874a8abfadc105c.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:836003",
+    "name": "Má hồng 3",
+    "desc": "Má hồng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/804513cab7c8e3bf3562.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:836004",
+    "name": "Má hồng 4",
+    "desc": "Má hồng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e4e551c3254267bf28c4.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:836005",
+    "name": "Má hồng 5",
+    "desc": "Má hồng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/da94950ea1d7840cece8.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:836006",
+    "name": "Má hồng 6",
+    "desc": "Má hồng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/f2d51be4f27ee02a0f6a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:836007",
+    "name": "Má hồng 7",
+    "desc": "Má hồng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/a305f773892d865099b6.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:836008",
+    "name": "Má hồng 8",
+    "desc": "Má hồng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/31d5f7f3b19a184b23d8.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171012",
+    "name": "Boltslinger",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:102213",
+    "name": "Ảnh đại diện Bolty",
+    "desc": "Dành cho những người đam mê Bolty",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/6bc6a3aaece5c3718274.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:101313",
+    "name": "Ảnh đại diện Bonesky",
+    "desc": "Dành cho những người đam mê Bonesky",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/1bd65c3bd1aa9651e712.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:104540",
+    "name": "Ảnh đại diện Bouldus",
+    "desc": "Dành cho những người đam mê Bouldus",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/04f4150e5acddbda273b.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1101800",
+    "name": "Mái Tóc Bồng Bềnh",
+    "desc": "Bồng bềnh, gọn gàng và đầy năng động",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/67d2dce9613b257e543f.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:160015",
+    "name": "Cú Chào",
+    "desc": "Mở khóa Cử chỉ Tương tác - Cú Chào",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/df72009d709f8afe6d58.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1100142",
+    "name": "Tóc Tết",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/4b81ef1f6bcefcf59489.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171051",
+    "name": "Nhà Khám Phá Gió",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171052",
+    "name": "Lính Gác Gió",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171050",
+    "name": "Kẻ Lang Thang Gió",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:811038",
+    "name": "Mũ Trứng Vàng Tươi",
+    "desc": "Đôi khi bị nhầm là Trứng Aniimo thật, gây ra những phen tranh giành hỗn loạn",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/5f0ca0bf0ac65fd385cd.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:700011",
+    "name": "Trang Phục Tình Bạn Phong Cách Rái Cá",
+    "desc": "Bạn bè mặc đồ đôi, gắn kết dài lâu",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/7d8e4ac349ad79e5e736.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:700012",
+    "name": "Áo Khoác Bộ Tình Bạn Phong Cách Celestis",
+    "desc": "Bạn bè mặc đồ đôi, gắn kết dài lâu",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/cc66764a8a033d3e27b5.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:101613",
+    "name": "Ảnh Đại Diện Budclaw",
+    "desc": "Dành cho những người đam mê Budclaw",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/b5ee50fafb3798dba7a5.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:103213",
+    "name": "Ảnh Đại Diện Budsquire",
+    "desc": "Dành cho những người đam mê Budsquire",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/9f2c09ea418231059369.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:101413",
+    "name": "Ảnh Đại Diện Bulbly",
+    "desc": "Dành cho những người đam mê Bulbly",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/64e5fb202b709267447d.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:826004",
+    "name": "Bé Thỏ Ngọt Ngào",
+    "desc": "Mềm mại, ngọt ngào và cực kỳ mềm xốp khiến trái tim bạn phải tan chảy",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/d46df81b97d20943c9de.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1100100",
+    "name": "Tràn Trề Năng Lượng",
+    "desc": "Đầy ắp năng lượng tuổi trẻ",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/29ca3b69c760d039b84f.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:1100111",
+    "name": "Tràn Trề Năng Lượng",
+    "desc": "Đầy ắp năng lượng tuổi trẻ",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9b2714ec9f3fc1e36739.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:826002",
+    "name": "Nơ Bướm",
+    "desc": "Biểu hiện của sự thanh lịch tự nhiên",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/cc6fc6ce71dbe4947418.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:801006",
+    "name": "Dáng Đứng Thư Giãn",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d732a7f550f29ce2117c.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100113",
+    "name": "Ảnh Đại Diện Celestis",
+    "desc": "Dành cho những người đam mê Celestis",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/32ee728de0e1e63d5e81.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:700014",
+    "name": "Trang Phục Cổ Vũ Giải Đấu Thách Thức (Nam)",
+    "desc": "Lên đồ thật phong cách để cổ vũ cho nhà vô địch yêu thích của bạn!",
+    "category": "Appearance",
+    "quality": "Normal",
+    "icon": "assets/item-log/46950f0951254b4ca77f.webp",
+    "sub": "Appearance - Normal"
+  },
+  {
+    "id": "item:700013",
+    "name": "Trang Phục Cổ Vũ Giải Đấu Thách Thức - Nữ",
+    "desc": "Lên đồ thật phong cách để cổ vũ cho nhà vô địch yêu thích của bạn!",
+    "category": "Appearance",
+    "quality": "Normal",
+    "icon": "assets/item-log/2cf546f50c7c52096b7f.webp",
+    "sub": "Appearance - Normal"
+  },
+  {
+    "id": "item:700015",
+    "name": "Trang Phục Cổ Vũ Giải Đấu Vô Địch Phiên Bản Aniimo",
+    "desc": "Lên đồ thật phong cách để cổ vũ cho nhà vô địch yêu thích của bạn!",
+    "category": "Appearance",
+    "quality": "Normal",
+    "icon": "assets/item-log/439cc7153b58480693c7.webp",
+    "sub": "Appearance - Normal"
+  },
+  {
+    "id": "item:104610",
+    "name": "Ảnh Đại Diện Cheekie",
+    "desc": "Dành cho những người đam mê Cheekie",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/1c128ec9200d9da666f6.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160005",
+    "name": "Cổ Vũ",
+    "desc": "Mở khóa Cử chỉ Tương tác - Cổ vũ",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/5c60f635983a37804281.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:801010",
+    "name": "Cổ Vũ",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/83c4fb76348deb91d65c.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160026",
+    "name": "Chúc Mừng",
+    "desc": "Tiêu hao Twin-Star Special để thực hiện hiệu ứng biểu cảm Chúc Mừng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/85f113961aa2a24b90b7.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1103012",
+    "name": "Bông Xốp Vui Vẻ",
+    "desc": "Được tạo kiểu tỉ mỉ mang lại cảm giác nhẹ nhàng, tinh tế và bồng bềnh như búp bê vải",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/530afec4d02d38a2479a.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:811040",
+    "name": "Mũ Trứng Nâu Hạt Dẻ",
+    "desc": "Thỉnh thoảng bị nhầm lẫn với Trứng Aniimo thật, gây ra một phen tranh giành",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/c0b2850a58a53de79475.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:101813",
+    "name": "Avatar Chirpi",
+    "desc": "Dành cho những người đam mê Chirpi",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/dadfc1f693df5bc8064b.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:813007",
+    "name": "Khuyên Tai Ánh Sáng - Trái",
+    "desc": "Tỏa sáng với thứ ánh sáng mộng mơ",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/1ce67a8ed9c2188ff5d3.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:813008",
+    "name": "Khuyên Tai Ánh Sáng - Phải",
+    "desc": "Tỏa sáng với thứ ánh sáng mộng mơ",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/1ce67a8ed9c2188ff5d3.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1102900",
+    "name": "Suy Lập Tài Tình",
+    "desc": "Một tia cảm hứng lóe lên, và câu trả lời đã gần trong tầm với",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/693333f376226167474e.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:725026",
+    "name": "Giày Suối Mây",
+    "desc": "Đế giày mềm mại như mây, linh hoạt giúp mỗi bước đi nhẹ nhàng và uyển chuyển",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/d724b8dd985bdd74be4e.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:723034",
+    "name": "Độc Tấu Mặt Trận Lạnh",
+    "desc": "Tấu lên một giai điệu đủ lớn để xua tan cái lạnh",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/6ffedea72804aa8373fa.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:722025",
+    "name": "Phong cách học đường",
+    "desc": "Co giãn, thoải mái và dễ mặc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/8bcb22dfc2e92876d2a6.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:711012",
+    "name": "Mây Ngũ Sắc",
+    "desc": "Giống như những đám mây tím mềm mại được nhuộm màu bởi ánh hoàng hôn",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/5900c78328a759435da5.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171053",
+    "name": "Họa Sư",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160019",
+    "name": "Bối rối",
+    "desc": "Mở khóa Biểu cảm - Bối rối",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/acb0627c7cd71c5d0275.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:700006",
+    "name": "Khăn quàng sành điệu",
+    "desc": "Một chiếc khăn quàng cổ kinh điển cao cấp mang lại cho Aniimo của bạn vẻ thanh lịch lạnh lùng",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/4f6ee7ac1eccbee4fbba.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:822005",
+    "name": "Kính ngầu",
+    "desc": "Khám phá vô hạn khả năng thị giác",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9bb61a57da51027ea86d.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:821031",
+    "name": "Mũ San hô",
+    "desc": "Đôi khi bạn chỉ muốn trốn đi như một chú Reefish",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9e42068241c350de968f.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:103830",
+    "name": "Ảnh đại diện Coraliz",
+    "desc": "Dành cho những người yêu mến Coraliz",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/85a61c629a4b1a29260a.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:101853",
+    "name": "Ảnh đại diện Cornet",
+    "desc": "Dành cho những người yêu mến Cornet",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/f107ff85f6990f684bcb.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:104310",
+    "name": "Ảnh đại diện Cozite",
+    "desc": "Dành cho những người yêu mến Cozite",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/f03ff55473033f0b91b0.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160022",
+    "name": "Khóc",
+    "desc": "Mở khóa Biểu cảm - Khóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9f0c9625497583e28795.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:826017",
+    "name": "Găng tay Pha lê - Trái",
+    "desc": "Đôi găng tay pha lê có cú đấm uy lực",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/2540ce92f4c32f577f46.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:826018",
+    "name": "Găng tay Pha lê - Phải",
+    "desc": "Đôi găng tay pha lê có cú đấm uy lực",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/96c03d528095e0c513db.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:816017",
+    "name": "Găng tay Pha lê",
+    "desc": "Đôi găng tay pha lê có cú đấm uy lực",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/2540ce92f4c32f577f46.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:816018",
+    "name": "Găng tay Pha lê",
+    "desc": "Đôi găng tay pha lê có cú đấm uy lực",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/96c03d528095e0c513db.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:105010",
+    "name": "Ảnh đại diện Cubbo",
+    "desc": "Dành cho những người cuồng Cubbo",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d3c1c2a414d5ccd5005f.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:711011",
+    "name": "Sự Đáng Yêu Vô Hạn",
+    "desc": "Tràn ngập sự đáng yêu khó cưỡng, chắc chắn sẽ thu hút mọi ánh nhìn",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/ecfdf2e99f4cfa5a9ee1.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160003",
+    "name": "Khiêu vũ",
+    "desc": "Mở khóa Cử chỉ Tương tác - Khiêu vũ",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e06e10a1cabcfabe006d.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:801007",
+    "name": "Khiêu vũ 1",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/8fcb7cb92e30d4eca070.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:801008",
+    "name": "Khiêu vũ 2",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/46484180b23a9c04694f.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:722023",
+    "name": "Bóng Đêm Tịch Mịch",
+    "desc": "Hòa mình vào màn đêm tĩnh lặng",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/5a6b479aed8cfd222fc8.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:723023",
+    "name": "Cánh Đêm Xé Gió",
+    "desc": "Luôn sẵn sàng xé toạc sự tĩnh mịch của màn đêm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/f071c821aa43c2f230e6.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:724001",
+    "name": "Hơi Lạnh Bình Minh",
+    "desc": "Trời vẫn còn se lạnh, hãy mặc những món đồ này vào",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/92d3198a7c29ac605dae.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:811008",
+    "name": "Cánh Bình Minh",
+    "desc": "Được chạm đến bởi hoàng hôn, với những chiếc lông vũ khẽ lướt qua",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/841ab4cede14590b8536.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171006",
+    "name": "Kẻ Mộng Mơ Giữa Ban Ngày",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:104740",
+    "name": "Ảnh đại diện Dazmand",
+    "desc": "Dành cho những người cuồng Dazmand",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/42cbad73045f2874c409.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171020",
+    "name": "Ca Sĩ Biển Sâu",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160016",
+    "name": "Chán Nản",
+    "desc": "Mở khóa Cử chỉ Tương tác - Chán Nản",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e39f49e057601e8b6803.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:711029",
+    "name": "Thám Tử Phong Độ",
+    "desc": "Một thám tử lừng danh luôn phải có diện mạo tương xứng",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/1cd17416712a002f4367.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:103513",
+    "name": "Ảnh Đại Diện Dewy",
+    "desc": "Dành cho những người đam mê Dewy",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/20a8289dfe43862cb4fc.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:826037",
+    "name": "Bản Rhapsodi Hỗn Mang",
+    "desc": "Mọi người hãy quẩy lên nào! Hãy để sự cuồng nhiệt bùng nổ!",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/4823c194c49e8acb82e5.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1201800",
+    "name": "Phong Cách Độc Đáo",
+    "desc": "Sôi động và phá cách, thực sự có một không hai",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/0a832ce81153e67853a9.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:711014",
+    "name": "Ánh Sáng Ngủ Quên, Lời Thì Thầm",
+    "desc": "Theo mỗi nhịp đưa nhẹ nhàng, những gợn sóng ánh sáng mờ ảo trôi dạt theo",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/c3b8cd1b54e1c121a554.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171028",
+    "name": "Hiệp Sĩ Rồng",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1200211",
+    "name": "Tóc Dẹt Cơ Bản 1",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1200212",
+    "name": "Tóc Dẹt Cơ Bản 2",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1200213",
+    "name": "Tóc Dẹt Cơ Bản 3",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1200221",
+    "name": "Tóc Mái Dợn 1",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1200222",
+    "name": "Tóc Mái Dợn 2",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1200223",
+    "name": "Tóc Mái Dợn 3",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1200231",
+    "name": "Búi Tóc Dợn 1",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:1200232",
+    "name": "Búi Tóc Dợn 2",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:822009",
+    "name": "Bong Bóng Mơ Mộng",
+    "desc": "Mỗi bóng nước đều mang theo những giấc mơ đong đầy màu sắc của Cubbo",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/68650ea3fc2e33196e88.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171056",
+    "name": "Kiến Trúc Sư Giấc Mơ",
+    "desc": "Dùng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:102630",
+    "name": "Ảnh Đại Diện Dreaple",
+    "desc": "Dành cho những người yêu mến Dreaple",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/a95e640897f9c10ed2ea.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171005",
+    "name": "Kẻ Phiêu Du",
+    "desc": "Dùng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1101412",
+    "name": "Ánh Sáng Phiêu Bồng",
+    "desc": "Một thứ ánh sáng dịu nhẹ từ từ lan tỏa, nhẹ nhàng tuôn trào ra phía ngoài",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/2d0a3d119254d6807a37.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:825014",
+    "name": "Vịt Con Lên Đường",
+    "desc": "Lên đường cho một chuyến phiêu lưu ngẫu hứng",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/034f60d0aa43f6ff0706.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:839001",
+    "name": "Đồng Tử Động 1",
+    "desc": "Họa tiết mống mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/5549c74b76ba9e748754.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:839002",
+    "name": "Đồng Tử Động 2",
+    "desc": "Họa tiết mống mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1bf6667d9f8134761954.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:839003",
+    "name": "Đồng Tử Động 3",
+    "desc": "Họa tiết mống mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/eac321965dc039f23dbc.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:839004",
+    "name": "Đồng Tử Động Lực 4",
+    "desc": "Họa tiết mống mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/4c9392cc031362d87cf5.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:839005",
+    "name": "Đồng Tử Động Lực 5",
+    "desc": "Họa tiết mống mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/aa15e78b783e9e355c6b.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:825005",
+    "name": "Pháo Âm Thanh Động Lực",
+    "desc": "Sóng âm cuồn cuộn và nhịp tim rộn ràng!",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/524194d399f6b7ae6513.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:714020",
+    "name": "Nhịp Điệu Thư Thái",
+    "desc": "Sự thoải mái là quan trọng nhất",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1a44683457044fb24e6b.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:724020",
+    "name": "Nhịp Điệu Thư Thái",
+    "desc": "Sự thoải mái là quan trọng nhất",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/6fac6040e3011f420672.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:171043",
+    "name": "Aces Trứng",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171044",
+    "name": "Hoàng Đế Trứng",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171042",
+    "name": "Chú Trứng Non",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:104430",
+    "name": "Ảnh Đại Diện Eklue",
+    "desc": "Dành cho những người đam mê Eklue",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/b49c6279332a4486cca8.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:104410",
+    "name": "Ảnh Đại Diện Eko",
+    "desc": "Dành cho những người đam mê Eko",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/e8f5612a6bd6e10cec81.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:104440",
+    "name": "Ảnh Đại Diện Ekrim",
+    "desc": "Dành cho những người đam mê Ekrim",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/63ea72425856e3a40d44.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171011",
+    "name": "Gây Sét",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:821032",
+    "name": "Electro Soul",
+    "desc": "Càng nổi loạn càng tuyệt. Không bao giờ là quá mức cả.",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c6f45aca0fde319bdd22.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:110511",
+    "name": "Emberpup",
+    "desc": "Dành cho những người đam mê Emberpup",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/69e14981ad0350f77f76.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100513",
+    "name": "Emberpup Avatar",
+    "desc": "Dành cho những người đam mê Emberpup",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/31502c83e8a21df1c4a6.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:825006",
+    "name": "Emberpup Backpack",
+    "desc": "Mang Emberpup trên lưng và bước chân vào cuộc phiêu lưu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/34053b5d6ec341b75423.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:104830",
+    "name": "Erlath Avatar",
+    "desc": "Dành cho những người đam mê Erlath",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/0f26c08f5efdb5db1726.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171035",
+    "name": "Everdancer",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:835001",
+    "name": "Eye Makeup 1",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/903ea7a0364a57e113de.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835010",
+    "name": "Eye Makeup 10",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/b9fa4e68da53e841e51b.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835011",
+    "name": "Eye Makeup 11",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/ddef5a528c38377c62a2.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835012",
+    "name": "Eye Makeup 12",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/cfa5343f99c63dc91ea8.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835013",
+    "name": "Eye Makeup 13",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1b434dc9f55dfaa2ad4f.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835014",
+    "name": "Eye Makeup 14",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/a57bd32884950860c9de.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835015",
+    "name": "Trang điểm mắt 15",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/018111376da0ef671be0.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835016",
+    "name": "Trang điểm mắt 16",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/7ce0e0eda0ba0f1d2a29.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835017",
+    "name": "Trang điểm mắt 17",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e4908843d1813c954c88.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835018",
+    "name": "Trang điểm mắt 18",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/8dc377b2f4b2eb027c29.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835019",
+    "name": "Trang điểm mắt 19",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/bf48cf383ef659d77cda.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835002",
+    "name": "Trang điểm mắt 2",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/7aa7b95218eaafe62203.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835020",
+    "name": "Trang điểm mắt 20",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/7456c2303282d8dd961f.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835021",
+    "name": "Trang điểm mắt 21",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/acddf9561c56ef233736.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835022",
+    "name": "Trang điểm mắt 22",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/6d1cf762bbd90c32f35b.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835023",
+    "name": "Trang điểm mắt 23",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/5ba28f623cfa0505da55.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835024",
+    "name": "Trang điểm mắt 24",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/932eb27a160f14814015.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835025",
+    "name": "Trang điểm mắt 25",
+    "desc": "Trang điểm mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/34dc76d4e791bb036fe1.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835026",
+    "name": "Trang Điểm Mắt 26",
+    "desc": "Trang Điểm Mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/abea79de666781dd00ee.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835003",
+    "name": "Trang Điểm Mắt 3",
+    "desc": "Trang Điểm Mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/23f320d47f1203fb0976.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835004",
+    "name": "Trang Điểm Mắt 4",
+    "desc": "Trang Điểm Mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/f4f8efe8edf8bd693501.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835005",
+    "name": "Trang Điểm Mắt 5",
+    "desc": "Trang Điểm Mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1fbcb01ede7cebe417fb.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835006",
+    "name": "Trang Điểm Mắt 6",
+    "desc": "Trang Điểm Mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/0cd97004559324680f76.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835007",
+    "name": "Trang Điểm Mắt 7",
+    "desc": "Trang Điểm Mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/0ce9ee0c0f6e1845208b.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835008",
+    "name": "Trang Điểm Mắt 8",
+    "desc": "Trang Điểm Mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e1ab247fffb69ed6deca.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:835009",
+    "name": "Trang Điểm Mắt 9",
+    "desc": "Trang Điểm Mắt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/232547e11b33620bd92d.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:833002",
+    "name": "Lông Mày 1",
+    "desc": "Lông Mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/f5b3d7730f55a82b001c.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:843002",
+    "name": "Lông Mày 1",
+    "desc": "Lông Mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1c7296daac1a83172ac0.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:843011",
+    "name": "Lông Mày 10",
+    "desc": "Lông Mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/33eff96067a7124e263a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:833003",
+    "name": "Lông Mày 2",
+    "desc": "Lông Mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/5b6baa8db24729e54126.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:843003",
+    "name": "Lông mày 2",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/a164cb3c40f7acf3837b.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:833004",
+    "name": "Lông mày 3",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/d300053cfbb1660c4f65.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:843004",
+    "name": "Lông mày 3",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e61a686d7a619630ac51.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:833005",
+    "name": "Lông mày 4",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/27e0b77355c47f8a7c1a.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:843005",
+    "name": "Lông mày 4",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e69e547783816d4f61e5.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:833006",
+    "name": "Lông mày 5",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/ec9fe9381600b26e8308.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:843006",
+    "name": "Lông mày 5",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c43ca455d78f5ac57b49.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:833007",
+    "name": "Lông mày 6",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1fb9f43c7272f0bf428b.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:843007",
+    "name": "Lông mày 6",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/8ac6381ef20d3b5e3466.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:833008",
+    "name": "Lông mày 7",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/a399ad01fcba4dcd5dde.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:843008",
+    "name": "Lông mày 7",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c264877631cf29cd430c.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:833009",
+    "name": "Lông mày 8",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e943b4b190cdc6c0389c.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:843009",
+    "name": "Lông mày 8",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/2e69d5e89f377e3e4c55.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:833010",
+    "name": "Lông mày 9",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/963b3084cbb39a356eda.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:843010",
+    "name": "Lông mày 9",
+    "desc": "Lông mày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/cd534be7531205cfbb3f.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:832002",
+    "name": "Lông mi 1",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/cfe8266e5e0e2e1ae5b0.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:842001",
+    "name": "Lông mi 1",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c7f8b01250ad32ced1eb.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:832003",
+    "name": "Lông mi 2",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/75c50e05c6322279cb50.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:842002",
+    "name": "Lông mi 2",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c23076b1d6d324852e12.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:832004",
+    "name": "Lông mi 3",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/a97d5244dcbeddd6839d.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:842003",
+    "name": "Lông mi 3",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/a2b28b37ee125aab9668.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:832005",
+    "name": "Lông mi 4",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c78a08d06bc3a83bb2d9.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:842004",
+    "name": "Lông mi 4",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1780ce44096b5600224b.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:842005",
+    "name": "Lông mi 5",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/0e0132b87d9b04cbb57f.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:842006",
+    "name": "Lông mi 6",
+    "desc": "Lông mi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/da4a5e57e51671742874.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:160012",
+    "name": "Chống cằm",
+    "desc": "Mở khóa Cử chỉ Tương tác - Chống cằm với bạn bè ở Cấp độ Độ hảo cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/ceaadbae6b5640fbd6d8.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:831001",
+    "name": "Hình xăm mặt 1",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/7540da75f9c27c705e81.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831010",
+    "name": "Hình xăm mặt 10",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9ff3d008df50cfe7a033.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831011",
+    "name": "Hình xăm mặt 11",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/34b2c09d5d5f411a8060.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831012",
+    "name": "Hình xăm mặt 12",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/2c3041ab3a560f56eae7.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831013",
+    "name": "Hình xăm mặt 13",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/da9d6f7666d413b33729.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831014",
+    "name": "Hình xăm mặt 14",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/5abb27758f6e0b9c9f43.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831015",
+    "name": "Hình xăm mặt 15",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/874808fa20cb00dfe38c.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831016",
+    "name": "Hình xăm mặt 16",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/93a7ad99093cb0314c15.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831017",
+    "name": "Hình xăm mặt 17",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c4278453a2dd2a6f1579.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831018",
+    "name": "Hình xăm mặt 18",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/a13c0d2f9b62387fcd20.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831019",
+    "name": "Hình xăm mặt 19",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/ba9a4d67a9e3742c1dc0.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831002",
+    "name": "Hình xăm mặt 2",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1c2da9e5d1bd50ac7b33.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831020",
+    "name": "Hình xăm mặt 20",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c2fb57d6fa44928d63e4.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831021",
+    "name": "Hình xăm mặt 21",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/c18d403addd9b5363780.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831022",
+    "name": "Hình xăm mặt 22",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9b37212cd9c106f95fcd.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831023",
+    "name": "Hình xăm mặt 23",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/5daacb1c695f39e4696f.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831024",
+    "name": "Hình xăm mặt 24",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9176fb4f3dff7e1831ef.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831025",
+    "name": "Hình xăm mặt 25",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/2bf7bb6e50580fc449f2.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831003",
+    "name": "Hình xăm mặt 3",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/783b2382346eaa3ddad6.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831004",
+    "name": "Hình xăm mặt 4",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/39ee6b34266b43eefa61.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831005",
+    "name": "Hình xăm mặt 5",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/89cb2aacb7a2d2901f15.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831006",
+    "name": "Hình xăm mặt 6",
+    "desc": "Họa tiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/aa6a2364a2ee5088a6f7.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831007",
+    "name": "Hình xăm mặt 7",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/56a0beea6dda1bcd3a56.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831008",
+    "name": "Hình xăm mặt 8",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/19fbde80f1012ff411c8.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:831009",
+    "name": "Hình xăm mặt 9",
+    "desc": "Hoa văn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/8bcbb154db512f51be4c.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:104810",
+    "name": "Ảnh đại diện Fahloo",
+    "desc": "Dành cho những người đam mê Fahloo",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/f33016f0e3f63f42bc18.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:715008",
+    "name": "Ký sự Cánh hoa rơi",
+    "desc": "Dấu vết cánh hoa rơi đánh dấu con đường bạn bước đi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/6b54ab7b79a6e2b36d60.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171031",
+    "name": "Kẻ Viễn Xứ",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:4040032",
+    "name": "Chuyên gia Nông nghiệp",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:700008",
+    "name": "Trang phục Cha con (Phiên bản Bố)",
+    "desc": "Gia đình mặc chung đồ, tình cảm keo sơn",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/e91afdeb2f03e726b9a9.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:710010",
+    "name": "Bloomville Lông Vũ",
+    "desc": "Khoác lên mình trang phục phong cách Bloomville và tận hưởng nét quyến rũ độc đáo của nơi đây",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/ac40e030ce31cdd3b0a6.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:720010",
+    "name": "Bloomville Lông Vũ",
+    "desc": "Khoác lên mình trang phục phong cách Bloomville và tận hưởng nét quyến rũ độc đáo của nơi đây",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/fdd01a252be239089996.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:721010",
+    "name": "Gió Lông Vũ",
+    "desc": "Chi tiết lông vũ ở eo bay phấp phới trong gió, khiến bạn cảm thấy nhẹ nhàng hơn đôi chút",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/3ca94152c95fdc53c683.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:713010",
+    "name": "Bình Minh Lông Vũ",
+    "desc": "Hãy để làn gió ban mai đưa bạn lướt qua phong cảnh phía trước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/50cddc4bfd6d0f60c131.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:723010",
+    "name": "Bình Minh Vũ Trụ",
+    "desc": "Hãy để cơn gió ban mai đưa bạn lướt qua những khung cảnh phía trước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/f46c8fb6a05ea47fd269.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:711010",
+    "name": "Lời Thì Thầm Mùa Xuân Vũ Trụ",
+    "desc": "Các chi tiết lông vũ bên eo đung đưa trong gió, khiến bạn cảm thấy nhẹ nhàng hơn đôi chút",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/d36a6709e96b25db20a3.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:715010",
+    "name": "Bước Nhảy Lông Vũ",
+    "desc": "Dạo bước qua biển hoa và bước vào bức tranh sống động của Bloomville",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/aae5da67b59c27802ee6.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:725010",
+    "name": "Bước Nhảy Lông Vũ",
+    "desc": "Dạo bước qua biển hoa và bước vào bức tranh sống động của Bloomville",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/171a041e70a488141f5d.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:102930",
+    "name": "Ảnh Đại Diện Fenmane",
+    "desc": "Dành cho những người đam mê Fenmane",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/6c0db27f0cbbfb0e9cb3.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:101323",
+    "name": "Ảnh Đại Diện Fenrier",
+    "desc": "Dành cho những người đam mê Fenrier",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/7b1a1098a792399d147f.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:102910",
+    "name": "Ảnh Đại Diện Fentuft",
+    "desc": "Dành cho những người đam mê Fentuft",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/0816a88cddf9f965bcee.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:710030",
+    "name": "Giấc Mơ Fentuft",
+    "desc": "Mềm mại và bồng bềnh như kẹo bông, thuần khiết và nên thơ",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/3883a884c09a3651d950.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:714030",
+    "name": "Độ Bồng Bềnh Fentuft",
+    "desc": "Mềm mại và êm ái, tựa như đang chìm vào một đống bông xốp",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/07b7db8e65274db53a22.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:715030",
+    "name": "Giày Fentuft",
+    "desc": "Nâng bước nhẹ nhàng, mềm mại và bồng bềnh như kẹo bông",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/5f7b1858b5e2cf60bc10.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160013",
+    "name": "Bắn Tim",
+    "desc": "Mở khóa Cử Chỉ Tương Tác - Bắn Tim với bạn bè khi đạt Cấp Độ Thân Thiết",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/ddd99700cb1a79d57b04.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160009",
+    "name": "Lần Gặp Đầu Tiên",
+    "desc": "Mở khóa Cử Chỉ Tương Tác - Lần Gặp Đầu Tiên với bạn bè khi đạt Cấp Độ Thân Thiết",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/af7727e9bb318f1a5a37.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:812010",
+    "name": "Kính Hỏa Nhãn",
+    "desc": "Lướt qua gió đêm và đọc vị những tàn tích của bóng tối",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/2c64fc88122afeb08003.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:103333",
+    "name": "Ảnh đại diện Flamerion",
+    "desc": "Dành cho những người đam mê Flamerion",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d521281e3fec841c0188.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:110512",
+    "name": "Bộ lông Flameruff",
+    "desc": "Dành cho những người đam mê Flameruff",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/bf0735f17409aab7ba99.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100523",
+    "name": "Ảnh đại diện Flameruff",
+    "desc": "Dành cho những người đam mê Flameruff",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/00921ae634b7bed280a7.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:816013",
+    "name": "Đuôi Xù Hỏa Lang",
+    "desc": "Một chiếc đuôi lửa xù lông vung vẩy theo từng bước chân",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/61ae86bb487d325672b4.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:824006",
+    "name": "Vòng Cổ Lông Cừu Hoa",
+    "desc": "Mềm mại khi chạm vào, tựa như cái ôm của mùa xuân",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/69115d5908d48c5c923a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171025",
+    "name": "Bông Xù",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:711030",
+    "name": "Áo Lông Mây Bồng Bềnh",
+    "desc": "Được bao bọc trong lớp mây lông cừu mỏng và ấm áp",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/3883a884c09a3651d950.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:811058",
+    "name": "Nón Lông Cừu Mông Mênh",
+    "desc": "Mềm mại, xù bông và ấm áp",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/87b5e00edcfdb79908a6.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:826029",
+    "name": "Kem Ốc Quế Xù",
+    "desc": "Một đạo cụ phổ biến trong cuộc thi bắt chước Sugarfish",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/691bb95cfc1b0888310a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:826006",
+    "name": "Đuôi Rái Cá Xù",
+    "desc": "Chạm vào vô cùng dễ chịu, cảm giác chân thực đến bất ngờ",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/fecafb6c1f63a5128e3f.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:102313",
+    "name": "Ảnh đại diện Flutternym",
+    "desc": "Dành cho những người đam mê Flutternym",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/91ffb0b96854982adc41.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171016",
+    "name": "Tín Đồ Ẩm Thực",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:110520",
+    "name": "Avatar Sưu Tầm Hình Thái",
+    "desc": "Dành cho những nhà sưu tầm hình thái tận tụy",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/801408c5c1d2c4015bc8.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:110521",
+    "name": "Khung Avatar Sưu Tầm Hình Thái",
+    "desc": "Dành cho những nhà sưu tầm hình thái tận tụy",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/988afa38ff7cb1e7e33a.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:722034",
+    "name": "Vọng Âm Tan Vỡ",
+    "desc": "Chìm trong méo mó. Rung chuyển đến bờ vực tan vỡ",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/dbf51a50279b1c8f94c0.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:103523",
+    "name": "Avatar Hương Thơm",
+    "desc": "Dành cho những người đam mê hương thơm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/234d0f25e2fcfa7ea024.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171014",
+    "name": "Vũ Sư Hương Thơm",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1200600",
+    "name": "Gọn Gàng Tươi Mới",
+    "desc": "Đơn giản, trực diện và tự nhiên",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/48f973c5b8cb7db46335.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171022",
+    "name": "Bạn Của Sóng Biển",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:825004",
+    "name": "Đao Băng Giá",
+    "desc": "Băng giá tụ hội, cái lạnh cắt da cắt thịt",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/eba6a9366ed9cc7bd9f8.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:811037",
+    "name": "Mũ Trứng Trắng Băng",
+    "desc": "Đôi khi bị nhầm lẫn với Trứng Aniimo thật, gây ra một phen tranh giành",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/4893f9a18fc6c406d91d.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:721034",
+    "name": "Bạo Loạn Băng Giá",
+    "desc": "Ngọn lửa của một rocker thừa sức thuần hóa chút giá lạnh này",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/c72b6f13fc289a5e11eb.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:720034",
+    "name": "Frostburst Punk",
+    "desc": "Đừng bỏ lỡ nhịp điệu nào. Phá vỡ sự im lặng và để tâm hồn rock của bạn gầm vang",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/c72b6f13fc289a5e11eb.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:816038",
+    "name": "Frosttone Guitar",
+    "desc": "Những giai điệu băng giá ngân vang theo từng nhịp dây đàn, rồi bùng nổ thành một đợt sóng âm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/533447ab9dda1daf65c3.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:713021",
+    "name": "Frostwolf Edge",
+    "desc": "Một bàn tay tái nhợt lướt qua cơn gió lạnh, nắm bắt lấy một sợi giá buốt",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/7706dd3d3440964c036d.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:710021",
+    "name": "Frostwolf Spirit",
+    "desc": "Ánh sáng lạnh lẽo chiếu rọi lên một chú sói cô độc đang rình mồi, thân hình lạnh lùng và trong trẻo như lớp sương giá đầu mùa",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/a80e79fa4f3497980f4b.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:816026",
+    "name": "Frostwolf Tail",
+    "desc": "Chiếc đuôi băng giá buông hờ bên hông, mang theo chút hơi thở mùa đông",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/a4539116aeaf9cb1dbe8.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100330",
+    "name": "Fulmintis Avatar",
+    "desc": "Dành cho những người đam mê Fulmintis",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/170d8db47d9cff584258.webp",
+    "sub": "Appearance - Epic · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:110514",
+    "name": "Fulmintis Avatar",
+    "desc": "Dành cho những người đam mê Fulmintis",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/a39d4fd18a16d52ba707.webp",
+    "sub": "Appearance - Epic · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:110517",
+    "name": "Fulmintis Avatar Frame",
+    "desc": "Dành cho những người đam mê Fulmintis",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/5a27b6aa50999a2e5cf7.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:720033",
+    "name": "Gale Lightning",
+    "desc": "Bộ trang phục",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/682a98768b351bfab65c.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1203300",
+    "name": "Gale Wave",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/96d0f7a178e0abbdefe9.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171001",
+    "name": "Gale-Chasing",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:101633",
+    "name": "Geoclaw Avatar",
+    "desc": "Dành cho những người đam mê Geoclaw",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/34031485b76b28866dd3.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:102843",
+    "name": "Geodeback Avatar",
+    "desc": "Dành cho những người hâm mộ Geodeback",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/45390cf9682e8d6ce807.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1201900",
+    "name": "Giấc Mơ Ánh Vàng",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/aa44936eda797d360457.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1201911",
+    "name": "Nền Giấc Mơ Ánh Vàng",
+    "desc": "Kiểu tóc",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/aa44936eda797d360457.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:711008",
+    "name": "Lãng Mạn Thiếu Nữ",
+    "desc": "Bong bóng màu hồng ẩn giấu trong trái tim mọi thiếu nữ",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/945af33484f284eeda29.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:100433",
+    "name": "Ảnh Đại Diện Glacy",
+    "desc": "Dành cho những người đam mê Glacy",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/a4299498f6af21936f5b.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:713014",
+    "name": "Gợn Sóng Lấp Lánh",
+    "desc": "Một cái chạm nhẹ đầu ngón tay khiến những gợn sóng lan tỏa ra xa",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/6f6127423b5263bb9cb6.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:700002",
+    "name": "Kẹo Nơ Lấp Lánh",
+    "desc": "Nơ lấp lánh. Ghim lên cổ áo để luôn bảnh bao cả ngày",
+    "category": "Appearance",
+    "quality": "Uncommon",
+    "icon": "assets/item-log/e7099083e736adb35be0.webp",
+    "sub": "Appearance - Uncommon"
+  },
+  {
+    "id": "item:826025",
+    "name": "Bông Hoa U Sầu",
+    "desc": "Hỡi bông hoa ơi, sao lại ủ rũ thế?",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/03234ddf17c8e05a52b3.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:101333",
+    "name": "Ảnh Đại Diện Glynsera",
+    "desc": "Dành cho những người đam mê Glynsera",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/777cfd8d8a4d6758a40b.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:700022",
+    "name": "Xúc Xắc Vàng",
+    "desc": "Xúc xắc may mắn màu vàng",
+    "category": "Appearance",
+    "quality": "Uncommon",
+    "icon": "assets/item-log/440b23593e8936af42c9.webp",
+    "sub": "Appearance - Uncommon"
+  },
+  {
+    "id": "item:700026",
+    "name": "Búa Vàng",
+    "desc": "Búa màu vàng",
+    "category": "Appearance",
+    "quality": "Uncommon",
+    "icon": "assets/item-log/b08df72be2afdd478c60.webp",
+    "sub": "Appearance - Uncommon"
+  },
+  {
+    "id": "item:700030",
+    "name": "Trống Khiên Vàng",
+    "desc": "Trống khiên màu vàng",
+    "category": "Appearance",
+    "quality": "Uncommon",
+    "icon": "assets/item-log/09633df29b4ce637f05d.webp",
+    "sub": "Appearance - Uncommon"
+  },
+  {
+    "id": "item:700024",
+    "name": "Ván Trượt Vàng",
+    "desc": "Ván trượt màu vàng",
+    "category": "Appearance",
+    "quality": "Uncommon",
+    "icon": "assets/item-log/6dcade7790e6fef02925.webp",
+    "sub": "Appearance - Uncommon"
+  },
+  {
+    "id": "item:700028",
+    "name": "Nỏ Vàng",
+    "desc": "Chiếc nỏ màu vàng",
+    "category": "Appearance",
+    "quality": "Uncommon",
+    "icon": "assets/item-log/c3bf7f6406ead906f1f3.webp",
+    "sub": "Appearance - Uncommon"
+  },
+  {
+    "id": "item:171013",
+    "name": "Duyên Dáng",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1100800",
+    "name": "Vẻ Đẹp Thanh Nhã",
+    "desc": "Tinh tế và mang một nét tinh hoa",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/78e977910ad7d03b2248.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:102323",
+    "name": "Ảnh đại diện Gracewing",
+    "desc": "Dành cho những người yêu mến Gracewing",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/178fc9373af9b62df71b.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:105030",
+    "name": "Ảnh đại diện Grizbo",
+    "desc": "Dành cho những người yêu mến Grizbo",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/eef3d635067284a34a40.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:825002",
+    "name": "Tù và Tiếng Gọi Hải Âu",
+    "desc": "Để giai điệu vút bay lên tận trời cao",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/2081a1d8b9fb74ee99f8.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:824011",
+    "name": "Cú Giáng Búa",
+    "desc": "Tránh ra nào, nhường đường đây!",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/77e5eb2de64ed7914171.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171029",
+    "name": "Hạnh Phúc",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160002",
+    "name": "Xoa Đầu",
+    "desc": "Mở khóa Cử chỉ Tương tác - Xoa Đầu",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/537ff0e9748c4ffd0b2c.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171024",
+    "name": "Trái Tim",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160020",
+    "name": "Tan Nát Cõi Lòng",
+    "desc": "Mở khóa Biểu cảm - Tan Nát Cõi Lòng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/6ae536eb9454b41c2aef.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:100233",
+    "name": "Ảnh đại diện Helgon",
+    "desc": "Dành cho những người yêu mến Helgon",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/f3716947fcd409de83f1.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160004",
+    "name": "Xin chào",
+    "desc": "Mở khóa Cử chỉ tương tác - Chào hỏi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/498225fa65be56e189dc.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:801009",
+    "name": "Xin chào",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/498225fa65be56e189dc.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100213",
+    "name": "Ảnh đại diện Helmut",
+    "desc": "Dành cho những người đam mê Helmut",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/f7f674a0629285a44a53.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100223",
+    "name": "Ảnh đại diện Helmwhelp",
+    "desc": "Dành cho những người đam mê Helmwhelp",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/9514958326c202640b25.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:160025",
+    "name": "Cứu tôi",
+    "desc": "Mở khóa Biểu cảm - Cứu tôi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/72994230b7f126a9712c.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:110516",
+    "name": "Ảnh đại diện Mô phỏng Trận chiến Hảo quang",
+    "desc": "Dành cho người hâm mộ Mô phỏng Trận chiến Hảo quang",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/9052d9d2e9dcee32eb48.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:110519",
+    "name": "Khung ảnh đại diện Mô phỏng Trận chiến Hảo quang",
+    "desc": "Dành cho người hâm mộ Mô phỏng Trận chiến Hảo quang",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/e7d83c2156bb47665e3e.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:110515",
+    "name": "Ảnh đại diện Ngôi nhà",
+    "desc": "Dành cho những ai yêu quý Ngôi nhà của mình",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/8c007eca4aaeb85f5aba.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:110518",
+    "name": "Khung ảnh đại diện Ngôi nhà",
+    "desc": "Dành cho những ai yêu quý Ngôi nhà của mình",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/185315a362f59c0a36c6.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:713049",
+    "name": "Găng tay Nữ gia đình",
+    "desc": "Găng tay",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:811055",
+    "name": "Phụ kiện tóc Nữ gia đình",
+    "desc": "Phụ kiện của bạn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:715049",
+    "name": "Giày Nữ gia đình",
+    "desc": "Giày",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:714049",
+    "name": "Tất Home Girl",
+    "desc": "Tất chân",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:711049",
+    "name": "Áo Home Girl",
+    "desc": "Áo",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:710049",
+    "name": "Bộ Home",
+    "desc": "Bộ trang phục",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1694a928384e9166594a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171054",
+    "name": "Người Muôn Nơi",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:801005",
+    "name": "Biểu Cảm Sừng Hươu",
+    "desc": "Động tác",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/630efe501c988092fedb.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171008",
+    "name": "Người Thổi Tù Và",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:850002",
+    "name": "Ngôi Sao Có Sừng",
+    "desc": "Nhãn dán",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/f14c0b6e7848aca470e1.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:851010",
+    "name": "Ngôi Sao Có Sừng - Kinh Ngạc",
+    "desc": "Nhãn dán",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/f14c0b6e7848aca470e1.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:851013",
+    "name": "Ngôi Sao Có Sừng - Tức Giận",
+    "desc": "Nhãn dán",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/b055cf2343c1f3036ea3.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:851016",
+    "name": "Ngôi Sao Có Sừng - Ngầu",
+    "desc": "Nhãn dán",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/7eda53c35aef304a70b3.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:851018",
+    "name": "Ngôi Sao Có Sừng - Khóc",
+    "desc": "Nhãn dán",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/080c67dc0b1c59be9272.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:851017",
+    "name": "Ngôi Sao Có Sừng - Yêu Thích",
+    "desc": "Nhãn dán",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/6e557ed28cb0e51a9c61.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:851015",
+    "name": "Ngôi Sao Sừng - Đồng Ý",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/a984524fdcaf4af54c68.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:851014",
+    "name": "Ngôi Sao Sừng - Sốc",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/78be165cd9a1a61a1e90.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:851011",
+    "name": "Ngôi Sao Sừng - Cạn lời",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/5dd1ae77b3b856186dea.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:851012",
+    "name": "Ngôi Sao Sừng - Ngạc nhiên",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/fb0b086d640b29644307.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1200100",
+    "name": "Cuộc Phiêu Lưu Nhiệt Huyết",
+    "desc": "Tự tin, hào nhoáng và tràn đầy năng lượng anh hùng đầy kịch tính",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/aea2de815d460159d725.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:1200111",
+    "name": "Cuộc Phiêu Lưu Nhiệt Huyết",
+    "desc": "Tự tin, hào nhoáng và tràn đầy năng lượng anh hùng đầy kịch tính",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/149a49d6ee2cc69b6f10.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:816028",
+    "name": "Đồng Hồ Cát Thời Gian",
+    "desc": "Một chiếc đồng hồ cát mạ vàng với lớp cát mịn chảy nhẹ nhàng bên trong, được chế tác vô cùng tỉ mỉ và tinh xảo",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/af71db76947dafe1d32b.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:102013",
+    "name": "Ảnh đại diện Hummin",
+    "desc": "Dành cho những người đam mê Hummin",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/6138504179124cf412df.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:171015",
+    "name": "Đói Bụng",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:824009",
+    "name": "Chúc Bạn Sớm Phát Tài",
+    "desc": "Đeo chiếc dây chuyền vàng bản lớn và thu hút mọi ánh nhìn ngay lập tức",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/203a5122c272c968a82e.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:715021",
+    "name": "Băng Giá Lược Sương Icewolf",
+    "desc": "Bước đi trên tuyết với dáng vẻ kiêu hãnh và sắc lạnh tựa sương giá",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d8b0e9ac934c030cf2e1.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100323",
+    "name": "Ảnh đại diện Ignitis",
+    "desc": "Dành cho những người đam mê Ignitis",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/406bcdaf577fe435e968.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:811039",
+    "name": "Nón Trứng Chàm",
+    "desc": "Thỉnh thoảng bị nhầm lẫn với một Quả Trứng Aniimo thật, gây ra những phen tranh giành hỗn loạn.",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/985f29befe9c20860bd9.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100253",
+    "name": "Ảnh đại diện Infergon",
+    "desc": "Dành cho những người hâm mộ Infergon nhiệt thành",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/6ec61922c518c39c336e.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100550",
+    "name": "Ảnh đại diện Inferlupa",
+    "desc": "Dành cho những người hâm mộ Inferlupa nhiệt thành",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/20cb4898c671682f220d.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:1202500",
+    "name": "Phong cách Viện",
+    "desc": "Một kiểu tóc rất được ưa chuộng tại Viện",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/4ba59c1681a78c8aa20b.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:711025",
+    "name": "Cổ điển Viện",
+    "desc": "Thanh lịch, có gu và được tất cả mọi người yêu mến",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1dba7bf46af1860d5aad.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:721025",
+    "name": "Cổ điển Viện",
+    "desc": "Thanh lịch, có gu và được tất cả mọi người yêu mến",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/d59f1508e274471ead97.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:713025",
+    "name": "Tiêu chuẩn Viện",
+    "desc": "Đơn giản, thiết thực và bền bỉ theo thời gian",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/371b50b3e827ba166b5c.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:723025",
+    "name": "Tiêu chuẩn Viện",
+    "desc": "Đơn giản, thiết thực và bền bỉ theo thời gian",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/937f9792762f7691ccf6.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:715025",
+    "name": "Bước hành Viện",
+    "desc": "Sẵn sàng cho mọi hoạt động của Viện",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/5043d1e3fc5b0bdec30b.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:725025",
+    "name": "Bước hành Viện",
+    "desc": "Sẵn sàng cho mọi hoạt động của Viện",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/88ead40a5817cb2ecbb1.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:710025",
+    "name": "Đồng phục Viện",
+    "desc": "Một bộ đồng phục của Polaris Institute",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1dba7bf46af1860d5aad.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:720025",
+    "name": "Đồng phục Viện",
+    "desc": "Một bộ đồng phục của Polaris Institute",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/d59f1508e274471ead97.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:102113",
+    "name": "Ảnh đại diện Iris",
+    "desc": "Dành cho những người đam mê Iris",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/80813d9a2024e195b2f3.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:102123",
+    "name": "Ảnh đại diện Irisal",
+    "desc": "Dành cho những người đam mê Irisal",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/1a94677169d9086984c0.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:816044",
+    "name": "Vòng tay Irisalis",
+    "desc": "Hương thơm vương vấn theo từng cử chỉ",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/f2708175d0e9746d492c.webp",
+    "sub": "Appearance - Epic · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:816045",
+    "name": "Vòng tay Irisalis",
+    "desc": "Hương thơm vương vấn theo từng cử chỉ",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/bce710ca859b82dc99e0.webp",
+    "sub": "Appearance - Epic · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:102130",
+    "name": "Ảnh đại diện Irisalis",
+    "desc": "Dành cho những người đam mê Irisalis",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/a4f15ef86cba9ba6c89f.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:811053",
+    "name": "Khúc ca Irisal",
+    "desc": "Những đóa diên vĩ nở rộ uốn lượn nhẹ nhàng quanh mái tóc, tôn lên vẻ đẹp tự nhiên không tì vết",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/42a038914cf76703ce0c.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100243",
+    "name": "Ảnh đại diện Jawling",
+    "desc": "Dành cho những người đam mê Jawling",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/88b457021f97c7e5ba76.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:826015",
+    "name": "Búp bê Jawling",
+    "desc": "Một con búp bê nhỏ nhắn và tinh xảo hình Jawling",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/5c62f935171da0daa8f2.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:712013",
+    "name": "Hành trình ký sự",
+    "desc": "Trân trọng từng khoảnh khắc của chuyến hành trình và từ từ tận hưởng nó",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/0c09e07bceabc2f9d0dd.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 4"
+  },
+  {
+    "id": "item:712069",
+    "name": "Hành trình ký sự",
+    "desc": "Trân trọng từng khoảnh khắc của chuyến hành trình và từ từ tận hưởng nó",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/6b0f8f93984dd301b7ea.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 4"
+  },
+  {
+    "id": "item:722013",
+    "name": "Hành trình ký sự",
+    "desc": "Trân trọng từng khoảnh khắc của chuyến hành trình và từ từ tận hưởng nó",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/cf86c6397b1554cb65cb.webp",
+    "sub": "Appearance - Rare · Appearance variant 3 of 4"
+  },
+  {
+    "id": "item:722069",
+    "name": "Hành trình ký sự",
+    "desc": "Trân trọng từng khoảnh khắc của chuyến hành trình và từ từ tận hưởng nó",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9842b9ca0c10a1953801.webp",
+    "sub": "Appearance - Rare · Appearance variant 4 of 4"
+  },
+  {
+    "id": "item:713013",
+    "name": "Journey Delights",
+    "desc": "Niềm vui nhỏ bé ngay trong tầm tay bạn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/2f5fe909e8b90f8297f4.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 4"
+  },
+  {
+    "id": "item:713069",
+    "name": "Journey Delights",
+    "desc": "Niềm vui nhỏ bé ngay trong tầm tay bạn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9370fdee84fd7965869b.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 4"
+  },
+  {
+    "id": "item:723013",
+    "name": "Journey Delights",
+    "desc": "Niềm vui nhỏ bé ngay trong tầm tay bạn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e9d2afa910636b8eadff.webp",
+    "sub": "Appearance - Rare · Appearance variant 3 of 4"
+  },
+  {
+    "id": "item:723069",
+    "name": "Journey Delights",
+    "desc": "Niềm vui nhỏ bé ngay trong tầm tay bạn",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/00dafd99586449b49140.webp",
+    "sub": "Appearance - Rare · Appearance variant 4 of 4"
+  },
+  {
+    "id": "item:715013",
+    "name": "Journey Footprints",
+    "desc": "Từng bước một, hành trình mang đến những cảnh quan và câu chuyện mới",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/35586f48b4459c631937.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 4"
+  },
+  {
+    "id": "item:715069",
+    "name": "Journey Footprints",
+    "desc": "Từng bước một, hành trình mang đến những cảnh quan và câu chuyện mới",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/6e6bbb139bfee28dfcdc.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 4"
+  },
+  {
+    "id": "item:725013",
+    "name": "Journey Footprints",
+    "desc": "Từng bước một, hành trình mang đến những cảnh quan và câu chuyện mới",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/7690d968818b48e7357b.webp",
+    "sub": "Appearance - Rare · Appearance variant 3 of 4"
+  },
+  {
+    "id": "item:725069",
+    "name": "Journey Footprints",
+    "desc": "Từng bước một, hành trình mang đến những cảnh quan và câu chuyện mới",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/d2f4bf582cbc379f4c7a.webp",
+    "sub": "Appearance - Rare · Appearance variant 4 of 4"
+  },
+  {
+    "id": "item:711013",
+    "name": "Journey Impressions",
+    "desc": "Một hành trình tuyệt vời xứng đáng để bạn dành trọn sự chú ý",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/b7c6a2fa0b13b5ac76b2.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 4"
+  },
+  {
+    "id": "item:711069",
+    "name": "Journey Impressions",
+    "desc": "Một hành trình tuyệt vời xứng đáng để bạn dành trọn sự chú ý",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/20fd1c4f28e32f7b2c0c.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 4"
+  },
+  {
+    "id": "item:721013",
+    "name": "Journey Impressions",
+    "desc": "Một hành trình tuyệt vời xứng đáng để bạn dành trọn sự chú ý",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/14afcbb164b0958287c6.webp",
+    "sub": "Appearance - Rare · Appearance variant 3 of 4"
+  },
+  {
+    "id": "item:721069",
+    "name": "Journey Impressions",
+    "desc": "Một hành trình tuyệt vời xứng đáng để bạn dành trọn sự chú ý",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/822c28f167ecde7f86d5.webp",
+    "sub": "Appearance - Rare · Appearance variant 4 of 4"
+  },
+  {
+    "id": "item:714013",
+    "name": "Dấu Ấn Hành Trình",
+    "desc": "Gạt bỏ mọi mệt mỏi và tiếp tục tiến bước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/fb41432ba0c383cf0da9.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 4"
+  },
+  {
+    "id": "item:714069",
+    "name": "Dấu Ấn Hành Trình",
+    "desc": "Gạt bỏ mọi mệt mỏi và tiếp tục tiến bước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1ac390fa5f7cdffbfb53.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 4"
+  },
+  {
+    "id": "item:724013",
+    "name": "Dấu Ấn Hành Trình",
+    "desc": "Gạt bỏ mọi mệt mỏi và tiếp tục tiến bước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e48059e68313a4deb8b9.webp",
+    "sub": "Appearance - Rare · Appearance variant 3 of 4"
+  },
+  {
+    "id": "item:724069",
+    "name": "Dấu Ấn Hành Trình",
+    "desc": "Gạt bỏ mọi mệt mỏi và tiếp tục tiến bước",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/8774f62b1fe24ffdfc9f.webp",
+    "sub": "Appearance - Rare · Appearance variant 4 of 4"
+  },
+  {
+    "id": "item:816024",
+    "name": "Kỷ Vật Thư Thãn",
+    "desc": "Mang theo những bảo vật nhỏ yêu thích đến bất cứ đâu bạn đến",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/e127aceb221bd92f125a.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:160018",
+    "name": "Cười",
+    "desc": "Mở khóa Động tác - Cười",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1fa8aa3e11a63e3f4330.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:102820",
+    "name": "Ảnh Đại Diện Lavazar",
+    "desc": "Dành cho những người đam mê Lavazar",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/1061c6ae247c571573d4.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:100453",
+    "name": "Ảnh Đại Diện Leafy",
+    "desc": "Dành cho những người đam mê Leafy",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/436181dac57da32c7915.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:826012",
+    "name": "Chân Vịt Trái",
+    "desc": "Nhấc chân trái lên và vẫy vùng nào",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/358a2895117773310de7.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:801004",
+    "name": "Nhún Vai Trái",
+    "desc": "Động tác",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/4c2e063bd7f3d94191fc.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:826035",
+    "name": "Ngón Cái Trái",
+    "desc": "Một ngón cái giơ lên bên trái!",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/d5057cbd5287cb3b1278.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:711020",
+    "name": "Ngày Thường Thư Thái",
+    "desc": "Vươn vai chào đón một ngày mới tuyệt vời",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/1a98ab46c6353c9d56cd.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:721020",
+    "name": "Ngày Thường Thảnh Thơi",
+    "desc": "Vươn vai chào đón một ngày mới tuyệt vời",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/4497663fc73d8ad3bd66.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:713020",
+    "name": "Khám Phá Thảnh Thơi",
+    "desc": "Vươn đôi tay và tận hưởng sự thư thái của khoảnh khắc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/785460ddaf04d72cd5ab.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:723020",
+    "name": "Khám Phá Thảnh Thơi",
+    "desc": "Vươn đôi tay và tận hưởng sự thư thái của khoảnh khắc",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/82ca58afebc9f20aaa5a.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:712020",
+    "name": "Khoảnh Khắc Thảnh Thơi",
+    "desc": "Duỗi chân và rũ bỏ mọi sự gò bó nhỏ nhoi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/8d4be3ffe4be6b8fe4af.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:722020",
+    "name": "Khoảnh Khắc Thảnh Thơi",
+    "desc": "Duỗi chân và rũ bỏ mọi sự gò bó nhỏ nhoi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/373885cfae40d7a73c44.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:715020",
+    "name": "Nhịp Điệu Thảnh Thơi",
+    "desc": "Sống chậm lại và để tâm trí được tĩnh lặng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/56c66f9132ea3423547f.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:725020",
+    "name": "Nhịp Điệu Thảnh Thơi",
+    "desc": "Sống chậm lại và để tâm trí được tĩnh lặng",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/ac307040f82de3080cc7.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:1102000",
+    "name": "Câu Chuyện Thảnh Thơi",
+    "desc": "Vô tư lự và tự do tự tại",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/55293d217c5cfe58f9d0.webp",
+    "sub": "Appearance - Rare · Appearance variant 1 of 2"
+  },
+  {
+    "id": "item:1202000",
+    "name": "Câu Chuyện Thảnh Thơi",
+    "desc": "Vô tư lự và tự do tự tại",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/764a41ac9b6b1523e1b6.webp",
+    "sub": "Appearance - Rare · Appearance variant 2 of 2"
+  },
+  {
+    "id": "item:720020",
+    "name": "Thời Gian Thảnh Thơi",
+    "desc": "Tận hưởng trọn vẹn những phút giây thảnh thơi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/9ee3f6430ebdb2941141.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:160017",
+    "name": "Nằm Dài",
+    "desc": "Mở khóa Cử chỉ Tương tác - Nằm Dài",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/062ec42442751d92b397.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:171055",
+    "name": "Bậc Thầy Lối Sống",
+    "desc": "Sử dụng để mở khóa danh hiệu",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d689bc920ec61b237438.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:812012",
+    "name": "Kính Sấm Sét",
+    "desc": "Phụ kiện của bạn",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/e10f0a079498da892cb8.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:821015",
+    "name": "Kiểu Tóc Sấm Sét",
+    "desc": "Mái tóc vàng óng ả, chói lọi như ánh chớp",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/9a3701ed161d572e7e0f.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:725033",
+    "name": "Giày Lưới Sấm Sét",
+    "desc": "Giày",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/d39f88e806c47fc4797b.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:724033",
+    "name": "Tất Co Giãn Sấm Sét",
+    "desc": "Tất",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/fad06d09536090bfa3c2.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:722033",
+    "name": "Quần Công Nghệ Sấm Sét",
+    "desc": "Quần",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/9d8dfa3ae515cfc492f3.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:721033",
+    "name": "Áo Sấm Sét",
+    "desc": "Áo",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/682a98768b351bfab65c.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:801011",
+    "name": "Thích",
+    "desc": "Biểu cảm",
+    "category": "Appearance",
+    "quality": "Epic",
+    "icon": "assets/item-log/89288307a100427b45a5.webp",
+    "sub": "Appearance - Epic"
+  },
+  {
+    "id": "item:837001",
+    "name": "Kiểu Trang Điểm Môi 1",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/caf73b9aaee41ac8e296.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837010",
+    "name": "Kiểu Trang Điểm Môi 10",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/f129cba89228faa57d02.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837011",
+    "name": "Kiểu Trang Điểm Môi 11",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/7f73cf4512b5da724766.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837002",
+    "name": "Kiểu Trang Điểm Môi 2",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/bdc1106ae36d2f0a2d50.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837003",
+    "name": "Kiểu Trang Điểm Môi 3",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/6f5b45f605d0fc9a100c.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837004",
+    "name": "Trang điểm môi 4",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/d86be95c05a820cdea94.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837005",
+    "name": "Trang điểm môi 5",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/dca5ab27a46f2945dfc4.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837006",
+    "name": "Trang điểm môi 6",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/ea587e72fb033d24a41b.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837007",
+    "name": "Trang điểm môi 7",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/36f85ee9caadc244fed6.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837008",
+    "name": "Trang điểm môi 8",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/cd1f579bc0e6326596dd.webp",
+    "sub": "Appearance - Rare"
+  },
+  {
+    "id": "item:837009",
+    "name": "Trang điểm môi 9",
+    "desc": "Trang điểm môi",
+    "category": "Appearance",
+    "quality": "Rare",
+    "icon": "assets/item-log/26818b9a0bbb2ea00054.webp",
+    "sub": "Appearance - Rare"
+  }
+]

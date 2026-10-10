@@ -70,6 +70,90 @@ export const router = createBrowserRouter([
                 .AccountRoute,
             }),
           },
+          {
+            path: "wiki/giftcode",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).GiftcodePage,
+            }),
+          },
+          {
+            path: "wiki/list",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).AniimoListPage,
+            }),
+          },
+          {
+            path: "wiki/so-sanh",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).StatsComparisonPage,
+            }),
+          },
+          {
+            path: "wiki/stats",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).StatsComparisonPage,
+            }),
+          },
+          {
+            path: "wiki/tier-list",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).TierListPage,
+            }),
+          },
+          {
+            path: "wiki/map",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).WorldMapPage,
+            }),
+          },
+          {
+            path: "wiki/build",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).TeamBuilderPage,
+            }),
+          },
+          {
+            path: "wiki/team",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).RecommendedTeamsPage,
+            }),
+          },
+          {
+            path: "wiki/teams",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).RecommendedTeamsPage,
+            }),
+          },
+          {
+            path: "wiki/thu-vien",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).LibraryPage,
+            }),
+          },
+          {
+            path: "wiki/huong-dan",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).WikiGuidePage,
+            }),
+          },
+          {
+            path: "wiki/khac-he",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).TeamBuilderPage,
+            }),
+          },
+          {
+            path: "wiki/elements",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).TeamBuilderPage,
+            }),
+          },
+          {
+            path: "wiki/damage-matrix",
+            lazy: async () => ({
+              Component: (await import("@/features/wiki")).TeamBuilderPage,
+            }),
+          },
         ],
       },
       {

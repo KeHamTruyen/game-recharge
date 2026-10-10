@@ -28,7 +28,7 @@ export interface CatalogService {
     tag?: string
     page?: number
     limit?: number
-  }): Promise<{ items: Product[] total: number }>
+  }): Promise<{ items: Product[]; total: number }>
   createProduct(product: Omit<Product, "id">): Promise<Product>
   updateProduct(id: string | number, updates: Partial<Product>): Promise<Product>
   deleteProduct(id: string | number): Promise<void>
@@ -42,7 +42,7 @@ export interface OrderService {
     quantity: number
     topupInfo: Record<string, string>
   }): Promise<Transaction>
-  listMyOrders(query?: { page?: number limit?: number }): Promise<{
+  listMyOrders(query?: { page?: number; limit?: number }): Promise<{
     items: Transaction[]
     total: number
   }>
@@ -51,12 +51,12 @@ export interface OrderService {
     status?: TransactionStatus
     page?: number
     limit?: number
-  }): Promise<{ items: Transaction[] total: number }>
+  }): Promise<{ items: Transaction[]; total: number }>
   updateOrderStatus(id: string | number, status: TransactionStatus): Promise<Transaction>
 }
 
 export interface AdminService {
-  listUsers(query?: { search?: string page?: number limit?: number }): Promise<{
+  listUsers(query?: { search?: string; page?: number; limit?: number }): Promise<{
     items: ManagedUser[]
     total: number
   }>

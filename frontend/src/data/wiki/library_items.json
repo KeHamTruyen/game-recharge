@@ -1,0 +1,362 @@
+[
+  {
+    "name": "[Mk III] Động cơ Bùng nổ",
+    "sub": "[Holo] Thiết Bị Giả Lập",
+    "rarity": "uncommon",
+    "icon": "https://koiseki.com/assets/item-log/c561e28cb99a5872526c.webp"
+  },
+  {
+    "name": "[Mk III] Giáp Tay Năng Lượng",
+    "sub": "[Holo] Thiết Bị Giả Lập",
+    "rarity": "uncommon",
+    "icon": "https://koiseki.com/assets/item-log/d3e26eaffa4bc22a4939.webp"
+  },
+  {
+    "name": "[Mk III] Giáp Vòng Lửa",
+    "sub": "[Holo] Thiết Bị Giả Lập",
+    "rarity": "uncommon",
+    "icon": "https://koiseki.com/assets/item-log/14f41b7f07e891a40f93.webp"
+  },
+  {
+    "name": "[Mk III] Ma trận Sửa chữa",
+    "sub": "[Holo] Thiết Bị Giả Lập",
+    "rarity": "uncommon",
+    "icon": "https://koiseki.com/assets/item-log/688243401dda166dbba4.webp"
+  },
+  {
+    "name": "[Mk III] Mặt Nạ Nhiệt Huyết",
+    "sub": "[Holo] Thiết Bị Giả Lập",
+    "rarity": "uncommon",
+    "icon": "https://koiseki.com/assets/item-log/13b1dc6baf97fd1eed4d.webp"
+  },
+  {
+    "name": "[Mk III] Rào Chắn Phản Xạ",
+    "sub": "[Holo] Thiết Bị Giả Lập",
+    "rarity": "uncommon",
+    "icon": "https://koiseki.com/assets/item-log/b4479ae1696dc21b056e.webp"
+  },
+  {
+    "name": "[Mk III] Xúc Xắc Tiên Tri",
+    "sub": "[Holo] Thiết Bị Giả Lập",
+    "rarity": "uncommon",
+    "icon": "https://koiseki.com/assets/item-log/f1e49c719db083a0ddb8.webp"
+  },
+  {
+    "name": "A New Journey",
+    "sub": "Ngoại Trang",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/a174276f64cac915f3f4.webp"
+  },
+  {
+    "name": "A New Journey",
+    "sub": "Ngoại Trang",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/4ef1ffe55be99f46e280.webp"
+  },
+  {
+    "name": "A New Journey",
+    "sub": "Ngoại Trang",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/0931c0a0f440cdbab29d.webp"
+  },
+  {
+    "name": "A New Journey",
+    "sub": "Ngoại Trang",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/a1cbb45cf7597d425536.webp"
+  },
+  {
+    "name": "Ace Sleuth",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/9146c2f78bd848d0aaf7.webp"
+  },
+  {
+    "name": "Aces Trứng",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/d689bc920ec61b237438.webp"
+  },
+  {
+    "name": "Adjustable Chair",
+    "sub": "Nội Thất",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/f604bb20622363e4dc55.webp"
+  },
+  {
+    "name": "Adjustable Chair",
+    "sub": "Nội Thất",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/b499263f0fb0821ff8ec.webp"
+  },
+  {
+    "name": "Advanced Companion Handbook",
+    "sub": "Kinh Nghiệm Exp",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/805faa1de23c755d394e.webp"
+  },
+  {
+    "name": "Against the Beat",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/b8f47133056fe66d38e1.webp"
+  },
+  {
+    "name": "Agave",
+    "sub": "Vật Liệu Gia Viên",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/a3d68d1365333dce2c05.webp"
+  },
+  {
+    "name": "Airy Casual Shoes",
+    "sub": "Ngoại Trang",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/c5c86569e698ce482200.webp"
+  },
+  {
+    "name": "Airy Gloves",
+    "sub": "Ngoại Trang",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/8ed01e9832faf74bdd93.webp"
+  },
+  {
+    "name": "Airy Protective Suit",
+    "sub": "Ngoại Trang",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/faf3ce2060d03ced1a85.webp"
+  },
+  {
+    "name": "Airy Tech Socks",
+    "sub": "Ngoại Trang",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/6530c97bdd0412820c04.webp"
+  },
+  {
+    "name": "Airy Utility Skirt",
+    "sub": "Ngoại Trang",
+    "rarity": "rare",
+    "icon": "https://koiseki.com/assets/item-log/93469e98a0f705b7a567.webp"
+  },
+  {
+    "name": "All-Purpose Grill Table",
+    "sub": "Nội Thất",
+    "rarity": "legendary",
+    "icon": "https://koiseki.com/assets/item-log/b17fe1837018d62da81a.webp"
+  },
+  {
+    "name": "Ally",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/d689bc920ec61b237438.webp"
+  },
+  {
+    "name": "Alpha Bolty Egg",
+    "sub": "Trứng Ấp",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/53da6f9f7dfdcc69e8f6.webp"
+  },
+  {
+    "name": "Ammolite",
+    "sub": "[Egg Heist] Vật Phẩm Loot",
+    "rarity": "legendary",
+    "icon": "https://koiseki.com/assets/item-log/463f23e49a9ab24b6283.webp"
+  },
+  {
+    "name": "Angel",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/d689bc920ec61b237438.webp"
+  },
+  {
+    "name": "Ảnh chụp quê nhà",
+    "sub": "Vật Phẩm Nhiệm Vụ",
+    "rarity": "common",
+    "icon": "https://koiseki.com/assets/item-log/d50bc270fa4d6f241f31.webp"
+  },
+  {
+    "name": "Ảnh đại diện Aniimo Prismana",
+    "sub": "Ngoại Trang",
+    "rarity": "legendary",
+    "icon": "https://koiseki.com/assets/item-log/426a7d8c3c68bc3b0411.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Blazen",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/b280c9f0939a7e376d5b.webp"
+  },
+  {
+    "name": "Ảnh đại diện Bolty",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/6bc6a3aaece5c3718274.webp"
+  },
+  {
+    "name": "Ảnh đại diện Bonesky",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/1bd65c3bd1aa9651e712.webp"
+  },
+  {
+    "name": "Ảnh đại diện Bouldus",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/04f4150e5acddbda273b.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Budclaw",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/b5ee50fafb3798dba7a5.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Budsquire",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/9f2c09ea418231059369.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Bulbly",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/64e5fb202b709267447d.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Celestis",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/32ee728de0e1e63d5e81.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Cheekie",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/1c128ec9200d9da666f6.webp"
+  },
+  {
+    "name": "Ảnh đại diện Coraliz",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/85a61c629a4b1a29260a.webp"
+  },
+  {
+    "name": "Ảnh đại diện Cornet",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/f107ff85f6990f684bcb.webp"
+  },
+  {
+    "name": "Ảnh đại diện Cozite",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/f03ff55473033f0b91b0.webp"
+  },
+  {
+    "name": "Ảnh đại diện Cubbo",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/d3c1c2a414d5ccd5005f.webp"
+  },
+  {
+    "name": "Ảnh đại diện Dazmand",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/42cbad73045f2874c409.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Dewy",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/20a8289dfe43862cb4fc.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Dreaple",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/a95e640897f9c10ed2ea.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Eklue",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/b49c6279332a4486cca8.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Eko",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/e8f5612a6bd6e10cec81.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Ekrim",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/63ea72425856e3a40d44.webp"
+  },
+  {
+    "name": "Ảnh đại diện Fahloo",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/f33016f0e3f63f42bc18.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Fenmane",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/6c0db27f0cbbfb0e9cb3.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Fenrier",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/7b1a1098a792399d147f.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Fentuft",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/0816a88cddf9f965bcee.webp"
+  },
+  {
+    "name": "Ảnh đại diện Flamerion",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/d521281e3fec841c0188.webp"
+  },
+  {
+    "name": "Ảnh đại diện Flameruff",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/00921ae634b7bed280a7.webp"
+  },
+  {
+    "name": "Ảnh đại diện Flutternym",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/91ffb0b96854982adc41.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Gai Nhọn",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/64156649e7760f195f8a.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Glacy",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/a4299498f6af21936f5b.webp"
+  },
+  {
+    "name": "Ảnh Đại Diện Glynsera",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/777cfd8d8a4d6758a40b.webp"
+  },
+  {
+    "name": "Ảnh đại diện Gracewing",
+    "sub": "Ngoại Trang",
+    "rarity": "epic",
+    "icon": "https://koiseki.com/assets/item-log/178fc9373af9b62df71b.webp"
+  }
+]

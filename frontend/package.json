@@ -6,14 +6,15 @@
   "scripts": {
     "dev": "vite",
     "dev:backend": "npm --prefix backend run dev",
-    "build": "vite build",
+    "build": "npm run typecheck && vite build",
     "build:backend": "npm --prefix backend run build",
     "build:all": "npm run build && npm run build:backend",
     "db:generate": "npm --prefix backend run db:generate",
     "db:migrate": "npm --prefix backend run db:migrate",
     "db:seed": "npm --prefix backend run db:seed",
     "preview": "vite preview",
-    "format": "oxfmt"
+    "format": "oxfmt",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "react": "^19.0.0",

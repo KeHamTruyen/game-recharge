@@ -295,6 +295,7 @@ export function TopupInformationPage({
   pkg: ServicePackage
   service: Service
   cart: CartItem[]
+  productStatuses?: ProductStatus[]
   template?: TopupTemplate
   quantity: number
   isLoggedIn?: boolean
@@ -637,7 +638,7 @@ export function CheckoutPage({
               {service.image ? (
                 <img
                   src={service.image}
-                  alt={`Gói nạp ${product.name}`}
+                  alt={`Gói nạp ${item.pkg.name}`}
                   style={{ objectPosition: service.imagePosition || "50% 50%" }}
                 />
               ) : (
@@ -821,7 +822,7 @@ export function LegacyTopupInformationPage({
             {product.image ? (
               <img
                 src={product.image}
-                alt={`Nạp game ${service.name}`}
+                alt={`Nạp game ${product.name}`}
                 style={{ objectPosition: product.imagePosition || "50% 50%" }}
               />
             ) : (

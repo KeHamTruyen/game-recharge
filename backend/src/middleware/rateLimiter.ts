@@ -91,3 +91,9 @@ export const paymentWebhookLimiter = rateLimit({
     Boolean(process.env.NODE_TEST_CONTEXT) ||
     process.argv.includes('--test'),
 });
+
+export const wikiWriteLimiter = rateLimit({
+  windowMs: 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
+  message: { success: false, error: 'Too many wiki updates. Please wait a minute.' },
+  skip: () => process.env.NODE_ENV === 'test',
+});
