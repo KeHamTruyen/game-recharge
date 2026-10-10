@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router"
 import { Icon, Toast } from "@/components/ui"
 import { platformLogos } from "@/data/mock-data"
@@ -14,6 +14,18 @@ const navigation = [
   { to: "/lien-he", label: "Liên hệ", icon: "headset" as const },
 ]
 
+const wikiLinks = [
+  { to: "/wiki/build", icon: "🛠️", label: "Build Đội hình", desc: "Xếp team & khắc chế 9 hệ" },
+  { to: "/wiki/teams", icon: "👥", label: "Đội hình đề xuất", desc: "Meta team từ cộng đồng" },
+  { to: "/wiki/list", icon: "📖", label: "Danh sách Aniimo", desc: "Tra cứu chỉ số, kỹ năng" },
+  { to: "/wiki/tier-list", icon: "🏆", label: "Bảng Tier List", desc: "Xếp hạng sức mạnh meta" },
+  { to: "/wiki/map", icon: "🗺️", label: "Bản đồ tương tác", desc: "Vị trí quái, rương, phụ bản" },
+  { to: "/wiki/giftcode", icon: "🎁", label: "Giftcode mới nhất", desc: "Mã quà tặng & phần thưởng" },
+  { to: "/wiki/so-sanh", icon: "⚖️", label: "So sánh chỉ số", desc: "Đối chiếu sức mạnh 2 Aniimo" },
+  { to: "/wiki/thu-vien", icon: "📚", label: "Thư viện tra cứu", desc: "Vật phẩm, trang bị, nguyên liệu" },
+  { to: "/wiki/huong-dan", icon: "🧭", label: "Cẩm nang tân thủ", desc: "Kinh nghiệm & mẹo chơi toàn diện" },
+]
+
 export type PublicLayoutContext = {
   openLogin: () => void
 }
@@ -23,8 +35,13 @@ export function PublicLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [loginOpen, setLoginOpen] = useState(false)
+  const [mobileMenu, setMobileMenu] = useState<"wiki" | "topup" | "boosting" | null>(null)
   const hour = new Date().getHours()
   const isSupportOnline = hour >= 9 && hour < 22
+
+  useEffect(() => {
+    setMobileMenu(null)
+  }, [location.pathname])
 
   const handleLogin = async (email: string, password: string, name?: string) => {
     const user = await store.login(email, password, name, "storefront")
@@ -317,37 +334,313 @@ export function PublicLayout() {
       <main>
         <Outlet context={{ openLogin: () => setLoginOpen(true) }} />
       </main>
+      {mobileMenu && (
+        <>
+          <div
+            className="mobile-flyout-backdrop"
+            onClick={() => setMobileMenu(null)}
+            aria-hidden="true"
+          />
+          <div
+            className="mobile-flyout-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label={
+              mobileMenu === "wiki"
+                ? "Menu Wiki Aniimo"
+                : mobileMenu === "topup"
+                  ? "Menu Nạp game"
+                  : "Menu Cày thuê"
+            }
+          >
+            <div className="mobile-flyout-handle" />
+            <div className="mobile-flyout-head">
+              <div className="mobile-flyout-title">
+                <span className="mobile-flyout-icon">
+                  {mobileMenu === "wiki" ? "📖" : mobileMenu === "topup" ? "🎮" : "⚔️"}
+                </span>
+                <div>
+                  <strong>
+                    {mobileMenu === "wiki"
+                      ? "Cẩm nang Wiki Aniimo"
+                      : mobileMenu === "topup"
+                        ? "Chọn game nạp"
+                        : "Dịch vụ cày thuê"}
+                  </strong>
+                  <small>
+                    {mobileMenu === "wiki"
+                      ? "Dữ liệu, công cụ & hướng dẫn"
+                      : mobileMenu === "topup"
+                        ? "Xem các gói nạp tương ứng"
+                        : "Cày tay 100% · Cam kết bảo mật"}
+                  </small>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="mobile-flyout-close"
+                onClick={() => setMobileMenu(null)}
+                aria-label="Đóng menu"
+              >
+                <Icon name="close" size={16} />
+              </button>
+            </div>
+
+            <div className="mobile-flyout-content">
+              {mobileMenu === "wiki" && (
+                <div className="mobile-flyout-grid wiki-grid">
+                  {wikiLinks.map((link) => {
+                    const isActive = location.pathname === link.to
+                    return (
+                      <NavLink
+                        key={link.to}
+                        to={link.to}
+                        className={`mobile-flyout-item ${isActive ? "active" : ""}`}
+                        onClick={() => setMobileMenu(null)}
+                      >
+                        <span className="flyout-item-icon">{link.icon}</span>
+                        <div className="flyout-item-text">
+                          <strong>{link.label}</strong>
+                          <small>{link.desc}</small>
+                        </div>
+                        {isActive && <span className="flyout-item-active-dot" />}
+                      </NavLink>
+                    )
+                  })}
+                </div>
+              )}
+
+              {mobileMenu === "topup" && (
+                <div className="mobile-flyout-grid services-grid">
+                  <NavLink
+                    to="/nap-game"
+                    className={`mobile-flyout-item ${location.pathname === "/nap-game" ? "active" : ""}`}
+                    onClick={() => setMobileMenu(null)}
+                  >
+                    <span className="flyout-item-icon">
+                      <Icon name="grid" size={17} />
+                    </span>
+                    <div className="flyout-item-text">
+                      <strong>Tất cả game</strong>
+                      <small>Hiển thị toàn bộ gói nạp</small>
+                    </div>
+                    {location.pathname === "/nap-game" && (
+                      <span className="flyout-item-active-dot" />
+                    )}
+                  </NavLink>
+                  {topupServices.map((svc) => {
+                    const pkgCount = store.servicePackages.filter(
+                      (pkg) => pkg.serviceId === svc.id && pkg.isActive !== false,
+                    ).length
+                    const isActive = location.pathname === `/nap-game/${svc.id}`
+                    return (
+                      <NavLink
+                        key={svc.id}
+                        to={`/nap-game/${svc.id}`}
+                        className={`mobile-flyout-item ${isActive ? "active" : ""}`}
+                        onClick={() => setMobileMenu(null)}
+                      >
+                        <span className="flyout-item-icon service-icon">
+                          {svc.image ? (
+                            <img
+                              src={svc.image}
+                              alt=""
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                borderRadius: "7px",
+                                objectFit: "cover",
+                                objectPosition: svc.imagePosition || "50% 50%",
+                              }}
+                            />
+                          ) : (
+                            <Icon name="game" size={17} />
+                          )}
+                        </span>
+                        <div className="flyout-item-text">
+                          <strong>{svc.name}</strong>
+                          <small>{pkgCount} gói nạp</small>
+                        </div>
+                        {isActive && <span className="flyout-item-active-dot" />}
+                      </NavLink>
+                    )
+                  })}
+                </div>
+              )}
+
+              {mobileMenu === "boosting" && (
+                <div className="mobile-flyout-grid services-grid">
+                  <NavLink
+                    to="/cay-thue"
+                    className={`mobile-flyout-item ${location.pathname === "/cay-thue" ? "active" : ""}`}
+                    onClick={() => setMobileMenu(null)}
+                  >
+                    <span className="flyout-item-icon">
+                      <Icon name="sword" size={17} />
+                    </span>
+                    <div className="flyout-item-text">
+                      <strong>Tất cả dịch vụ</strong>
+                      <small>Danh sách game cày thuê</small>
+                    </div>
+                    {location.pathname === "/cay-thue" && (
+                      <span className="flyout-item-active-dot" />
+                    )}
+                  </NavLink>
+                  {boostingServices.map((svc) => {
+                    const pkgCount = store.servicePackages.filter(
+                      (pkg) => pkg.serviceId === svc.id && pkg.isActive !== false,
+                    ).length
+                    const isActive = location.pathname === `/cay-thue/${svc.id}`
+                    return (
+                      <NavLink
+                        key={svc.id}
+                        to={`/cay-thue/${svc.id}`}
+                        className={`mobile-flyout-item ${isActive ? "active" : ""}`}
+                        onClick={() => setMobileMenu(null)}
+                      >
+                        <span className="flyout-item-icon service-icon">
+                          {svc.image ? (
+                            <img
+                              src={svc.image}
+                              alt=""
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                borderRadius: "7px",
+                                objectFit: "cover",
+                                objectPosition: svc.imagePosition || "50% 50%",
+                              }}
+                            />
+                          ) : (
+                            <Icon name="sword" size={17} />
+                          )}
+                        </span>
+                        <div className="flyout-item-text">
+                          <strong>{svc.name}</strong>
+                          <small>{pkgCount} gói dịch vụ</small>
+                        </div>
+                        {isActive && <span className="flyout-item-active-dot" />}
+                      </NavLink>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
       <nav className="mobile-nav" aria-label="Điều hướng di động">
         {navigation.map((item) => {
           const isWiki = item.to === "/wiki"
-          const targetUrl = isWiki ? "/wiki/build" : item.to
+          const isNapGame = item.to === "/nap-game"
+          const isCayThue = item.to === "/cay-thue"
+
           const isCurrentActive = isWiki
             ? location.pathname.startsWith("/wiki")
-            : item.to === "/cay-thue"
+            : isCayThue
               ? location.pathname.startsWith("/cay-thue")
-              : item.to === "/nap-game"
+              : isNapGame
                 ? location.pathname.startsWith("/nap-game")
                 : location.pathname === item.to
+
+          const isMenuOpen =
+            (isWiki && mobileMenu === "wiki") ||
+            (isNapGame && mobileMenu === "topup") ||
+            (isCayThue && mobileMenu === "boosting")
+
+          if (isWiki) {
+            return (
+              <button
+                key={item.to}
+                type="button"
+                className={`mobile-nav-btn ${isCurrentActive ? "active" : ""} ${isMenuOpen ? "open" : ""}`}
+                onClick={() =>
+                  setMobileMenu((prev) => (prev === "wiki" ? null : "wiki"))
+                }
+              >
+                <Icon name={item.icon} size={18} />
+                <span>
+                  Wiki <small className="flyout-caret">{isMenuOpen ? "▾" : "▴"}</small>
+                </span>
+              </button>
+            )
+          }
+
+          if (isNapGame) {
+            return (
+              <button
+                key={item.to}
+                type="button"
+                className={`mobile-nav-btn ${isCurrentActive ? "active" : ""} ${isMenuOpen ? "open" : ""}`}
+                onClick={() => {
+                  if (location.pathname.startsWith("/nap-game")) {
+                    setMobileMenu((prev) => (prev === "topup" ? null : "topup"))
+                  } else {
+                    setMobileMenu(null)
+                    navigate("/nap-game")
+                  }
+                }}
+              >
+                <Icon name={item.icon} size={18} />
+                <span>
+                  Nạp game
+                  {isCurrentActive && (
+                    <small className="flyout-caret">{isMenuOpen ? "▾" : "▴"}</small>
+                  )}
+                </span>
+              </button>
+            )
+          }
+
+          if (isCayThue) {
+            return (
+              <button
+                key={item.to}
+                type="button"
+                className={`mobile-nav-btn ${isCurrentActive ? "active" : ""} ${isMenuOpen ? "open" : ""}`}
+                onClick={() => {
+                  if (location.pathname.startsWith("/cay-thue")) {
+                    setMobileMenu((prev) => (prev === "boosting" ? null : "boosting"))
+                  } else {
+                    setMobileMenu(null)
+                    navigate("/cay-thue")
+                  }
+                }}
+              >
+                <Icon name={item.icon} size={18} />
+                <span>
+                  Cày thuê
+                  {isCurrentActive && (
+                    <small className="flyout-caret">{isMenuOpen ? "▾" : "▴"}</small>
+                  )}
+                </span>
+              </button>
+            )
+          }
 
           return (
             <NavLink
               key={item.to}
-              to={targetUrl}
+              to={item.to}
               className={isCurrentActive ? "active" : ""}
+              onClick={() => setMobileMenu(null)}
             >
               <Icon name={item.icon} size={18} />
-              <span>{isWiki ? "Wiki" : item.label}</span>
+              <span>{item.label}</span>
             </NavLink>
           )
         })}
         <button
           type="button"
           className={store.user ? "account-nav-button signed-in" : "account-nav-button"}
-          onClick={() =>
-            store.user
-              ? navigate(store.user.role === "admin" ? "/admin" : "/tai-khoan")
-              : setLoginOpen(true)
-          }
+          onClick={() => {
+            setMobileMenu(null)
+            if (store.user) {
+              navigate(store.user.role === "admin" ? "/admin" : "/tai-khoan")
+            } else {
+              setLoginOpen(true)
+            }
+          }}
         >
           <Icon name="user" size={18} />
           <span>

@@ -35,6 +35,7 @@ export function AdminRoute() {
         }}
       />
       <AdminPage
+        onStore={() => navigate("/nap-game")}
         adminName={store.user.name || "Admin"}
         adminEmail={store.user.email}
         products={store.products}

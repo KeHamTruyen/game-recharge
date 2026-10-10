@@ -46,8 +46,8 @@ export function AdminHeader({
             <strong>Quản trị viên</strong>
             <small>{email}</small>
           </span>
-          <button className="secondary-button" onClick={onStore}>
-            <Icon name="home" size={16} /> Về cửa hàng
+          <button className="secondary-button admin-store-btn" onClick={onStore}>
+            <Icon name="home" size={16} /> <span>Về cửa hàng</span>
           </button>
           <button className="admin-logout" onClick={onLogout}>
             Đăng xuất
@@ -317,6 +317,7 @@ export function AdminPage({
   onChangePassword,
   adminName,
   adminEmail,
+  onStore,
 }: {
   products: Product[]
   services: Service[]
@@ -352,6 +353,7 @@ export function AdminPage({
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
   adminName: string
   adminEmail: string
+  onStore?: () => void
 }) {
   const [tab, setTab] =
     useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki">(
@@ -671,6 +673,21 @@ export function AdminPage({
           <button className={tab === "wiki" ? "active" : ""} onClick={() => selectTab("wiki")}>
             <Icon name="book" size={18} /> Wiki Aniimo
           </button>
+          {onStore && (
+            <>
+              <div className="admin-nav-divider" />
+              <button
+                type="button"
+                className="admin-nav-store"
+                onClick={() => {
+                  setSidebarOpen(false)
+                  onStore()
+                }}
+              >
+                <Icon name="home" size={18} /> Về cửa hàng
+              </button>
+            </>
+          )}
         </aside>
         <div className="admin-content">
           {tab === "products" ? (
