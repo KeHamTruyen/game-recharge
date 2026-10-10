@@ -77,7 +77,7 @@ const MAP_AREAS = [
     shortName: "Whisperwake",
     totalPoints: 146,
     width: 2048,
-    height: 3072,
+    height: 2752,
     tileFolder: "whisperwake-isles",
     tilesX: 2,
     tilesY: 3,
@@ -520,6 +520,8 @@ export default function WorldMapPage() {
     const step = 1024
     for (let r = 0; r < selectedArea.width; r += step) {
       for (let i = 0; i < selectedArea.height; i += step) {
+        const tileW = Math.min(step, selectedArea.width - r)
+        const tileH = Math.min(step, selectedArea.height - i)
         list.push({
           x: r,
           y: i,
@@ -527,8 +529,8 @@ export default function WorldMapPage() {
           fallbackSrc: `https://koiseki.com/assets/maps/render_tiles/${selectedArea.tileFolder}/${r}_${i}.webp`,
           left: (r / selectedArea.width) * 100,
           top: (i / selectedArea.height) * 100,
-          width: (step / selectedArea.width) * 100,
-          height: (step / selectedArea.height) * 100,
+          width: (tileW / selectedArea.width) * 100,
+          height: (tileH / selectedArea.height) * 100,
         })
       }
     }

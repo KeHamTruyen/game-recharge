@@ -2877,7 +2877,8 @@
 
 .game-map-tile-img {
   position: absolute;
-  object-fit: cover;
+  object-fit: fill;
+  display: block;
   pointer-events: none;
 }
 
