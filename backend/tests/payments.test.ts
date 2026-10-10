@@ -179,6 +179,40 @@ describe('Payment Status & SePay Webhook Processing', () => {
     assert.strictEqual(txAfter?.paidAt?.getTime(), paidAtBefore?.getTime());
   });
 
+  it('POST /api/payments/webhook rejects malformed payload with 400', async () => {
+    const res = await webhookClient.post(
+      '/api/payments/webhook',
+      {
+        transferType: 'in',
+        transferAmount: -50000, // Invalid negative amount
+        transactionDate: 'invalid-date-string-not-iso',
+        content: `Chuyen khoan don hang ${paymentOrderCode}`,
+      },
+      { headers: { authorization: `Apikey ${env.SEPAY_API_KEY}` } }
+    );
+    assert.strictEqual(res.status, 400);
+    assert.strictEqual(res.body.success, false);
+  });
+
+  it('POST /api/payments/webhook concurrent duplicate requests execute cleanly without race condition', async () => {
+    const concurrentRef = `CONCUR_REF_${Date.now()}`;
+    const payload = {
+      transferType: 'in',
+      transferAmount,
+      content: `Chuyen khoan don hang ${paymentOrderCode} thanh cong`,
+      referenceCode: concurrentRef,
+      transactionDate: new Date().toISOString(),
+    };
+    const responses = await Promise.all(
+      Array.from({ length: 4 }, () =>
+        webhookClient.post('/api/payments/webhook', payload, {
+          headers: { authorization: `Apikey ${env.SEPAY_API_KEY}` },
+        })
+      )
+    );
+    assert.ok(responses.every((res) => res.status === 200));
+  });
+
   it('GET /api/payments/status/:orderCode verifies ownership and access control', async () => {
     // Unauthenticated -> 401
     const unauthClient = await createTestClient();

@@ -52,17 +52,25 @@ function validateEnv() {
     process.exit(1);
   }
 
-  if (
-    parsed.data.NODE_ENV === 'production' &&
-    (parsed.data.JWT_SECRET.length < 64 ||
+  if (parsed.data.NODE_ENV === 'production') {
+    if (
+      parsed.data.JWT_SECRET.length < 64 ||
       parsed.data.CORS_ORIGIN.split(',').some((origin) =>
         origin.trim().startsWith('http://localhost')
-      ))
-  ) {
-    console.error(
-      '❌ Production requires a JWT_SECRET of at least 64 characters and non-localhost CORS_ORIGIN values'
-    );
-    process.exit(1);
+      )
+    ) {
+      console.error(
+        '❌ Production requires a JWT_SECRET of at least 64 characters and non-localhost CORS_ORIGIN values'
+      );
+      process.exit(1);
+    }
+
+    if (!parsed.data.DATA_ENCRYPTION_KEY || parsed.data.DATA_ENCRYPTION_KEY.length < 32) {
+      console.error(
+        '❌ Production requires a dedicated DATA_ENCRYPTION_KEY of at least 32 characters'
+      );
+      process.exit(1);
+    }
   }
 
   return parsed.data;

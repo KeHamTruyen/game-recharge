@@ -214,8 +214,8 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
       topupInfo: Object.fromEntries(Object.entries(body.topupInfo).sort(([a], [b]) => a.localeCompare(b))),
     })).digest('hex');
     const response = await prisma.$transaction(async (tx) => {
-      // The database lock works across API processes and is released on rollback.
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${idempotencyKey}))`;
+      // 64-bit advisory lock using the first 16 hex chars (64 bits) of SHA-256 key prevents theoretical 32-bit collisions
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(('x' || substr(${idempotencyKey}, 1, 16))::bit(64)::bigint)`;
       const previous = await tx.checkoutRequest.findUnique({ where: { idempotencyKey } });
       if (previous) {
         if (previous.userId !== userId || previous.payloadHash !== payloadHash) {

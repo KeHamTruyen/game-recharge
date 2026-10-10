@@ -1,10 +1,35 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import crypto from 'node:crypto';
+import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
+
+const sePayWebhookSchema = z
+  .object({
+    id: z.coerce.number().optional(),
+    gateway: z.string().max(100).optional(),
+    transactionDate: z
+      .string()
+      .max(100)
+      .optional()
+      .refine((val) => !val || !isNaN(Date.parse(val)), {
+        message: 'Invalid transaction date format',
+      }),
+    accountNumber: z.string().max(50).optional(),
+    subAccount: z.string().max(50).nullable().optional(),
+    transferType: z.enum(['in', 'out']).optional().default('in'),
+    transferAmount: z.coerce.number().nonnegative().optional(),
+    accumulated: z.coerce.number().optional(),
+    code: z.string().max(100).nullable().optional(),
+    content: z.string().max(500).optional().default(''),
+    referenceCode: z.string().max(100).nullable().optional(),
+    description: z.string().max(500).nullable().optional(),
+  })
+  .passthrough();
 
 router.get(
   '/status/:orderCode',
@@ -46,14 +71,17 @@ router.post(
         return;
       }
 
-      const payload = req.body as {
-        id?: number;
-        transferType?: string;
-        transferAmount?: number;
-        content?: string;
-        referenceCode?: string;
-        transactionDate?: string;
-      };
+      const parseResult = sePayWebhookSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        res.status(400).json({
+          success: false,
+          error: 'Invalid webhook payload structure',
+          details: parseResult.error.flatten(),
+        });
+        return;
+      }
+
+      const payload = parseResult.data;
       if (payload.transferType !== 'in' || !payload.transferAmount || !payload.content) {
         res.status(200).json({ success: true });
         return;
@@ -79,6 +107,12 @@ router.post(
       }
 
       await prisma.$transaction(async (tx) => {
+        // Concurrency lock per referenceCode or orderCode prevents simultaneous race conditions
+        const lockKey = payload.referenceCode
+          ? `sepay:ref:${payload.referenceCode}`
+          : `sepay:order:${orderCode}`;
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+
         if (payload.referenceCode) {
           const duplicate = await tx.transaction.findFirst({
             where: { bankTransactionId: payload.referenceCode },
@@ -86,6 +120,12 @@ router.post(
           });
           if (duplicate) return;
         }
+
+        const paidAt =
+          payload.transactionDate && !isNaN(Date.parse(payload.transactionDate))
+            ? new Date(payload.transactionDate)
+            : new Date();
+
         await tx.transaction.updateMany({
           where: {
             paymentOrderCode: orderCode,
@@ -94,11 +134,9 @@ router.post(
           data: {
             paymentStatus: 'PAID',
             status: 'PROCESSING',
-            paidAt: payload.transactionDate
-              ? new Date(payload.transactionDate)
-              : new Date(),
-            paymentMetadata: payload,
-            bankTransactionId: payload.referenceCode,
+            paidAt,
+            paymentMetadata: payload as Prisma.InputJsonValue,
+            bankTransactionId: payload.referenceCode || null,
           },
         });
       });

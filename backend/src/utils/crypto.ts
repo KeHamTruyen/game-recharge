@@ -3,13 +3,15 @@ import { env } from '../config/env.js';
 
 const ALGORITHM = 'aes-256-gcm';
 
-// Primary key derived from dedicated DATA_ENCRYPTION_KEY or COOKIE_SECRET / JWT_SECRET
+// Primary key derived from dedicated DATA_ENCRYPTION_KEY (mandatory in production)
 const primarySecretSource =
   env.DATA_ENCRYPTION_KEY ||
-  process.env.DATA_ENCRYPTION_KEY ||
-  env.COOKIE_SECRET ||
-  env.JWT_SECRET ||
-  'duke1305_fallback_key_salt_32bytes';
+  (() => {
+    if (env.NODE_ENV === 'production') {
+      throw new Error('FATAL: DATA_ENCRYPTION_KEY must be configured in production');
+    }
+    return env.COOKIE_SECRET || env.JWT_SECRET || 'duke1305_fallback_key_salt_32bytes';
+  })();
 
 const PRIMARY_KEY = createHash('sha256').update(primarySecretSource).digest();
 
@@ -24,13 +26,17 @@ const previousConfigKeys = (
   .filter(Boolean)
   .map((k) => createHash('sha256').update(k).digest());
 
-// Fallback keys in case JWT_SECRET, COOKIE_SECRET or PREVIOUS_ENCRYPTION_KEYS was previously used
+// Fallback keys in case rotation occurred
 const FALLBACK_KEYS: Buffer[] = [
   PRIMARY_KEY,
   ...previousConfigKeys,
-  createHash('sha256').update(env.JWT_SECRET || 'duke1305_fallback_key_salt_32bytes').digest(),
-  createHash('sha256').update(env.COOKIE_SECRET || 'duke1305_fallback_key_salt_32bytes').digest(),
-  createHash('sha256').update('duke1305_fallback_key_salt_32bytes').digest(),
+  ...(env.NODE_ENV === 'production'
+    ? []
+    : [
+        createHash('sha256').update(env.JWT_SECRET || 'duke1305_fallback_key_salt_32bytes').digest(),
+        createHash('sha256').update(env.COOKIE_SECRET || 'duke1305_fallback_key_salt_32bytes').digest(),
+        createHash('sha256').update('duke1305_fallback_key_salt_32bytes').digest(),
+      ]),
 ];
 
 /**

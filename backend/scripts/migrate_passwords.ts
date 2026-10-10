@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { prisma } from '../src/index.js';
+import { prisma } from '../src/lib/prisma.js';
 import { isSensitiveFieldKey, encryptSensitive } from '../src/utils/crypto.js';
 
 /**
@@ -60,3 +60,4 @@ migrateLegacyPasswords().catch((err) => {
   console.error('❌ Migration failed:', err);
   process.exit(1);
 });
+
