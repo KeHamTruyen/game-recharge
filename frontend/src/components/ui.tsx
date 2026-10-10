@@ -10,6 +10,13 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
         <path d="M9 9V6a3 3 0 0 1 6 0v3" />
       </>
     ),
+    book: (
+      <>
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+        <path d="M6 6h10" />
+        <path d="M6 10h10" />
+      </>
+    ),
     bridge: (
       <>
         <path d="M4 19h16M6 19v-5a6 6 0 0 1 12 0v5M6 11h12M9 8V5m6 3V5" />
@@ -99,6 +106,14 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
       <>
         <path d="m12 3 1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4L12 3Z" />
         <path d="m19 15 .7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7L19 15Z" />
+      </>
+    ),
+    sword: (
+      <>
+        <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
+        <line x1="13" y1="19" x2="19" y2="13" />
+        <line x1="16" y1="16" x2="20" y2="20" />
+        <line x1="19" y1="21" x2="21" y2="19" />
       </>
     ),
     trash: (

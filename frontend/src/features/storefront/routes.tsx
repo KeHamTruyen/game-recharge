@@ -19,9 +19,11 @@ export function StorefrontRoute() {
   const navigate = useNavigate()
   const [search, setSearch] = useState("")
 
+  const topupServices = store.services.filter((s) => s.category !== "boosting")
+
   return (
     <TopupPage
-      services={store.services}
+      services={topupServices}
       search={search}
       onSearch={setSearch}
       onSelectService={(service: Service) => {
@@ -31,6 +33,108 @@ export function StorefrontRoute() {
         store.setCheckoutInfo({})
         store.setCart([])
         navigate(`/nap-game/${service.id}`)
+      }}
+    />
+  )
+}
+
+// ─── Trang chủ: Cày thuê ─────────────────────────────────────────────────────
+
+export function BoostingRoute() {
+  const store = useAppStore()
+  const navigate = useNavigate()
+  const [search, setSearch] = useState("")
+
+  const boostingServices = store.services.filter((s) => s.category === "boosting")
+
+  return (
+    <TopupPage
+      services={boostingServices}
+      search={search}
+      onSearch={setSearch}
+      mode="boosting"
+      onSelectService={(service: Service) => {
+        store.setSelectedService(service)
+        store.setSelectedPackage(null)
+        store.setSelectedQuantity(1)
+        store.setCheckoutInfo({})
+        store.setCart([])
+        navigate(`/cay-thue/${service.id}`)
+      }}
+    />
+  )
+}
+
+// ─── Chi tiết cày thuê ───────────────────────────────────────────────────────
+
+export function BoostingDetailRoute() {
+  const store = useAppStore()
+  const navigate = useNavigate()
+  const { serviceId } = useParams()
+
+  const service =
+    store.selectedService ||
+    store.services.find(
+      (item) => String(item.id) === serviceId && item.category === "boosting",
+    ) ||
+    store.services.find((item) => String(item.id) === serviceId)
+
+  if (!service) {
+    if (!store.apiReady)
+      return <div className="page-width empty-state">Đang tải dịch vụ cày thuê...</div>
+    return <Navigate to="/cay-thue" replace />
+  }
+
+  const packages = store.servicePackages.filter(
+    (p) => String(p.serviceId) === String(service.id),
+  )
+
+  return (
+    <ServiceDetailPage
+      service={service}
+      packages={packages}
+      productStatuses={store.productStatuses}
+      onBack={() => navigate("/cay-thue")}
+      onAddToCart={(pkg: ServicePackage) => {
+        const firstItem = store.cart[0]
+        if (
+          firstItem &&
+          (String(firstItem.pkg.serviceId) !== String(pkg.serviceId) ||
+            firstItem.pkg.templateId !== pkg.templateId)
+        ) {
+          store.setNotice(
+            "Bạn chỉ có thể mua các gói cùng game và cùng mẫu thông tin trong một lần.",
+          )
+          return
+        }
+        store.setCart((current) => {
+          const isSelected = current.some(
+            (item) => String(item.pkg.id) === String(pkg.id),
+          )
+          if (isSelected) {
+            return current.filter(
+              (item) => String(item.pkg.id) !== String(pkg.id),
+            )
+          }
+          return [...current, { pkg, quantity: 1 }]
+        })
+        store.setSelectedService(service)
+      }}
+      cartCount={store.cart.reduce((total, item) => total + item.quantity, 0)}
+      cartTotal={store.cart.reduce(
+        (total, item) => total + item.pkg.price * item.quantity,
+        0,
+      )}
+      selectedPackageIds={
+        new Set(store.cart.map((item) => String(item.pkg.id)))
+      }
+      onOpenCart={() => {
+        const first = store.cart[0]
+        if (first) {
+          store.setSelectedPackage(first.pkg)
+          store.setSelectedQuantity(first.quantity)
+          navigate("/nap-game/thong-tin")
+        }
       }}
     />
   )

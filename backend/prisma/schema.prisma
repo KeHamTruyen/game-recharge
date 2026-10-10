@@ -81,6 +81,7 @@ model Service {
   id          String           @id @default(cuid())
   name        String
   game        String
+  category    String           @default("topup")
   description String           @default("")
   iconText    String           @default("")
   tone        String           @default("blue")
@@ -93,6 +94,7 @@ model Service {
   packages    ServicePackage[]
   transactions Transaction[]
 
+  @@index([category])
   @@index([isActive])
   @@index([sortOrder])
   @@map("services")

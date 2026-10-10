@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Outlet } from "react-router"
 import { refreshWiki } from "./wikiStore"
+import { WikiSubnav } from "./WikiSubnav"
 
 export default function WikiLayout() {
   const [ready, setReady] = useState(false)
@@ -49,7 +50,12 @@ export default function WikiLayout() {
         </p>
       )}
       {ready ? (
-        <Outlet />
+        <div className="wiki-layout-wrapper">
+          <div className="page-width">
+            <WikiSubnav />
+          </div>
+          <Outlet />
+        </div>
       ) : (
         !error && (
           <p className="page-width" role="status">

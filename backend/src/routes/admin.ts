@@ -32,6 +32,7 @@ router.use(requireAuth, requireRole('ADMIN'), auditAdminRequest);
 const serviceSchema = z.object({
   name: z.string().min(1).max(100).trim(),
   game: z.string().min(1).max(100).trim(),
+  category: z.string().max(30).trim().default('topup'),
   description: z.string().max(500).trim().default(''),
   iconText: z.string().max(10).trim().default(''),
   tone: z.string().max(30).trim().default('blue'),

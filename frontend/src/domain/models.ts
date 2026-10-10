@@ -1,4 +1,4 @@
-export type IconName = "bag" | "bridge" | "chat" | "check" | "chevron" | "clock" | "close" | "edit" | "eye" | "eye-off" | "game" | "grid" | "headset" | "home" | "mail" | "plus" | "search" | "shield" | "spark" | "trash" | "user"
+export type IconName = "bag" | "book" | "bridge" | "chat" | "check" | "chevron" | "clock" | "close" | "edit" | "eye" | "eye-off" | "game" | "grid" | "headset" | "home" | "mail" | "plus" | "search" | "shield" | "spark" | "sword" | "trash" | "user"
 
 export type User = { id?: string; email: string; name?: string; role: "customer" | "admin" }
 
@@ -34,6 +34,7 @@ export type Service = {
   id: string | number
   name: string
   game?: string
+  category?: "topup" | "boosting" | string
   description: string
   iconText: string
   tone: string

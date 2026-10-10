@@ -117,6 +117,34 @@ async function main() {
         },
       ],
     },
+    {
+      id: 'boosting-account',
+      name: 'Thông tin tài khoản cày thuê',
+      game: 'Tất cả game',
+      description: 'Nhập thông tin tài khoản để đội ngũ tiến hành cày thuê an toàn.',
+      warning: 'Tài khoản được bảo mật tuyệt đối. Cam kết không dùng phần mềm thứ ba và không tiêu hao tài nguyên ngoài thỏa thuận.',
+      fields: [
+        { key: 'account', label: 'Tài khoản / Email đăng nhập', type: 'text', placeholder: 'Nhập username hoặc email', required: true, hint: 'Tài khoản dùng để đăng nhập vào game' },
+        { key: 'password', label: 'Mật khẩu', type: 'text', placeholder: 'Nhập mật khẩu game', required: true, hint: 'Thông tin được mã hóa an toàn' },
+        {
+          key: 'server',
+          label: 'Server / Khu vực',
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'asia', label: 'Asia' },
+            { value: 'vietnam', label: 'Việt Nam' },
+            { value: 'america', label: 'America' },
+            { value: 'europe', label: 'Europe' },
+            { value: 'tw_hk_mo', label: 'TW/HK/MO' },
+            { value: 'other', label: 'Khác' },
+          ],
+        },
+        { key: 'characterName', label: 'Tên nhân vật / In-game UID', type: 'text', placeholder: 'Ví dụ: Traveler#1234', required: true, hint: 'Để đối chiếu chính xác tài khoản' },
+        { key: 'twoFactorContact', label: 'Số Zalo / Phương thức gửi OTP (nếu có 2FA)', type: 'text', placeholder: 'Ví dụ: 0912345678 (Zalo) hoặc Đã tắt 2FA', required: true, hint: 'Booster sẽ nhắn nhận mã khi bắt đầu cày' },
+        { key: 'note', label: 'Ghi chú & Khung giờ cày', type: 'textarea', placeholder: 'Ví dụ: Chỉ cày từ 00h-07h sáng, không dùng Nguyên thạch...', required: false, hint: 'Yêu cầu riêng của bạn' },
+      ],
+    },
   ];
 
   for (const t of templates) {
@@ -504,6 +532,175 @@ async function main() {
     }
   }
   console.log('✅ Aniimo seeded');
+
+  // ─── Boosting Services & Packages ──────────────────────────────────────────
+  const boostingServicesData = [
+    {
+      id: 'svc-boost-genshin',
+      name: 'Genshin Impact',
+      game: 'Genshin Impact',
+      category: 'boosting',
+      description: 'Cày thuê Genshin Impact: La Hoàn Thâm Cảnh 36*, Map 100%, Thần Đồng, Farm Boss & Đột phá nhân vật.',
+      iconText: 'GI',
+      tone: 'blue',
+      sortOrder: 101,
+      packages: [
+        { name: 'Clear La Hoàn Thâm Cảnh Tầng 12 (36 Sao)', description: 'Clear full 36 sao La Hoàn mùa hiện tại.', price: 80000, oldPrice: 100000, tags: ['Leo Rank', 'Hot'], note: '36 Sao full' },
+        { name: 'Thám Hiểm & Mở Rương 100% Vùng Mới', description: 'Dọn sạch 100% bản đồ khu vực chỉ định, full Thần Đồng.', price: 250000, oldPrice: 300000, tags: ['Khám phá Map'], note: 'Kèm Thần Đồng' },
+        { name: 'Gói Daily + Xả Nhựa Trọn Gói 30 Ngày', description: 'Ủy thác hàng ngày, xả nhựa cô đặc liên tục 30 ngày.', price: 150000, oldPrice: 180000, tags: ['Trọn gói', 'Tiết kiệm'], note: 'Trọn gói' },
+        { name: 'Chuỗi Nhiệm Vụ Ma Thần Trọn Gói', description: 'Hoàn thành toàn bộ nhiệm vụ cốt truyện chính tuyến mới.', price: 120000, oldPrice: 150000, tags: ['Nhiệm vụ'], note: 'Cốt truyện' },
+        { name: 'Farm Đột Phá Nhân Vật Lv 90 + Thiên Phú 9/9/9', description: 'Farm toàn bộ boss thế giới và sách thiên phú đủ nâng 1 nhân vật.', price: 180000, oldPrice: 220000, tags: ['Farm Đồ'], note: 'Full đồ' },
+      ],
+    },
+    {
+      id: 'svc-boost-hsr',
+      name: 'Honkai: Star Rail',
+      game: 'Honkai: Star Rail',
+      category: 'boosting',
+      description: 'Cày thuê Honkai Star Rail: MOC 12*, Hư Cấu Kể Chuyện, Tận Diệt Vũ Trụ Mô Phỏng, Farm Di Vật.',
+      iconText: 'HSR',
+      tone: 'violet',
+      sortOrder: 102,
+      packages: [
+        { name: 'Clear Sảnh Đường Lãng Quên (MOC 12 Sao)', description: 'Vượt qua toàn bộ tầng 10 - 12 Sảnh Đường Lãng Quên.', price: 70000, oldPrice: 90000, tags: ['Khiêu chiến', 'Hot'], note: 'Full 12 Sao' },
+        { name: 'Hư Cấu Kể Chuyện & Ảo Ảnh Tận Cùng Full Sao', description: 'Hoàn thành tối đa điểm số Hư Cấu Kể Chuyện mùa mới.', price: 80000, oldPrice: 100000, tags: ['Khiêu chiến'], note: 'Cực nhanh' },
+        { name: 'Dọn Rương & Khám Phá Toàn Bộ Map 100%', description: 'Thu thập toàn bộ rương báu và câu đố trên toàn bản đồ.', price: 200000, oldPrice: 250000, tags: ['Khám phá Map'], note: 'Full rương' },
+        { name: 'Gói Daily + Năng Lượng Khai Phá 30 Ngày', description: 'Điểm danh, nhiệm vụ thường nhật và xả năng lượng 30 ngày.', price: 140000, oldPrice: 160000, tags: ['Trọn gói'], note: 'Tiết kiệm' },
+      ],
+    },
+    {
+      id: 'svc-boost-zzz',
+      name: 'Zenless Zone Zero',
+      game: 'Zenless Zone Zero',
+      category: 'boosting',
+      description: 'Cày thuê ZZZ: Phòng thủ Shiyu Defense S-Rank, Lỗ Hổng Không Gian Hollow Zero, Ủy thác đặc biệt.',
+      iconText: 'ZZZ',
+      tone: 'amber',
+      sortOrder: 103,
+      packages: [
+        { name: 'Clear Shiyu Defense S-Rank Toàn Bộ Vòng', description: 'Đạt hạng S toàn bộ các tầng Phòng Thủ Shiyu trong chu kỳ.', price: 80000, oldPrice: 100000, tags: ['Khiêu chiến', 'Hot'], note: 'S-Rank' },
+        { name: 'Cày Lỗ Hổng Không Gian Hollow Zero Max Cấp', description: 'Cày tối đa điểm tuần Hollow Zero và nhận trọn phần thưởng.', price: 100000, oldPrice: 120000, tags: ['Khám phá'], note: 'Max điểm' },
+      ],
+    },
+    {
+      id: 'svc-boost-wuwa',
+      name: 'Wuthering Waves',
+      game: 'Wuthering Waves',
+      category: 'boosting',
+      description: 'Cày thuê Wuthering Waves: Tháp Nghịch Cảnh, Rương Map 100%, Sonance Casket, Farm Echo Cost 3 & 4.',
+      iconText: 'WW',
+      tone: 'cyan',
+      sortOrder: 104,
+      packages: [
+        { name: 'Clear Tháp Nghịch Cảnh (Tower of Adversity) 30 Sao', description: 'Đạt tối đa 30 huy hiệu Tháp Nghịch Cảnh Hazard Zone.', price: 90000, oldPrice: 120000, tags: ['Khiêu chiến', 'Hot'], note: 'Full 30 Sao' },
+        { name: 'Khám Phá Bản Đồ 100% & Thu Thập Sonance Casket', description: '100% thám hiểm toàn bộ khu vực Hoàng Long, full Sonance Casket.', price: 220000, oldPrice: 260000, tags: ['Khám phá Map'], note: '100% Map' },
+        { name: 'Farm 5 Echo Cost 3 & 4 Chuẩn Dòng Chính', description: 'Săn boss và quái đạt 5 Echo đúng bộ nguyên tố và dòng chính.', price: 150000, oldPrice: 180000, tags: ['Farm Đồ'], note: 'Chuẩn dòng' },
+      ],
+    },
+    {
+      id: 'svc-boost-valorant',
+      name: 'Valorant',
+      game: 'Valorant',
+      category: 'boosting',
+      description: 'Kéo Rank Valorant Duo / Solo, Cày Battle Pass, hoàn thành nhiệm vụ đặc vụ thần tốc.',
+      iconText: 'VAL',
+      tone: 'red',
+      sortOrder: 105,
+      packages: [
+        { name: 'Kéo Rank Đồng -> Vàng (Duo / Solo)', description: 'Leo bậc xếp hạng thi đấu từ Hạng Đồng lên Hạng Vàng.', price: 120000, oldPrice: 150000, tags: ['Leo Rank'], note: 'Winrate cao' },
+        { name: 'Kéo Rank Vàng -> Bạch Kim', description: 'Kéo rank từ Vàng lên Bạch Kim, booster bắn tay 100%.', price: 180000, oldPrice: 220000, tags: ['Leo Rank', 'Hot'], note: 'Bảo đảm KDA' },
+        { name: 'Kéo Rank Bạch Kim -> Kim Cương', description: 'Bứt phá lên Kim Cương chuyên nghiệp hoàn thành dưới 24h.', price: 280000, oldPrice: 350000, tags: ['Leo Rank'], note: 'Pro Player' },
+      ],
+    },
+    {
+      id: 'svc-boost-aniimo',
+      name: 'Aniimo',
+      game: 'Aniimo',
+      category: 'boosting',
+      description: 'Cày cấp Aniimo, farm mảnh tiến hóa, săn boss thế giới và mở khóa kỹ năng tối thượng.',
+      iconText: 'ANI',
+      tone: 'emerald',
+      image: '/uploads/animo.jpg',
+      sortOrder: 106,
+      packages: [
+        { name: 'Cày Cấp Aniimo Lv 1 -> 50 & Mở Khóa Skill', description: 'Luyện cấp tối đa cho 1 Aniimo, mở khóa toàn bộ kỹ năng.', price: 90000, oldPrice: 110000, tags: ['Cày cấp', 'Hot'], note: 'Max cấp' },
+        { name: 'Farm Nguyên Liệu Tiến Hóa Aniimo Trọn Gói', description: 'Săn boss dã ngoại thu thập đầy đủ đá tiến hóa bậc 3.', price: 120000, oldPrice: 150000, tags: ['Farm Đồ'], note: 'Đủ đá EV' },
+      ],
+    },
+    {
+      id: 'svc-boost-lqmb',
+      name: 'Liên Quân Mobile',
+      game: 'Liên Quân Mobile',
+      category: 'boosting',
+      description: 'Kéo rank Liên Quân Mobile Solo / Duo từ Kim Cương đến Cao Thủ, Chiến Tướng uy tín số 1.',
+      iconText: 'LQ',
+      tone: 'amber',
+      sortOrder: 107,
+      packages: [
+        { name: 'Kéo Rank Kim Cương -> Tinh Anh (1 Bậc)', description: 'Leo rank tốc độ cao, booster Top Tướng cày tay 100%.', price: 70000, oldPrice: 90000, tags: ['Leo Rank'], note: 'Thần tốc' },
+        { name: 'Kéo Rank Tinh Anh -> Cao Thủ', description: 'Cày lên Cao Thủ đạt khung danh hiệu, cam kết win 90%+.', price: 140000, oldPrice: 180000, tags: ['Leo Rank', 'Hot'], note: 'Win 90%+' },
+        { name: 'Kéo Cao Thủ -> Chiến Tướng (+10 Sao)', description: 'Kéo liên tiếp 10 sao Cao Thủ tiến tới Chiến Tướng.', price: 180000, oldPrice: 220000, tags: ['Leo Rank'], note: 'Top BXH' },
+      ],
+    },
+  ];
+
+  for (const bSvc of boostingServicesData) {
+    const createdSvc = await prisma.service.upsert({
+      where: { id: bSvc.id },
+      update: {
+        name: bSvc.name,
+        game: bSvc.game,
+        category: bSvc.category,
+        description: bSvc.description,
+        iconText: bSvc.iconText,
+        tone: bSvc.tone,
+        image: bSvc.image,
+        sortOrder: bSvc.sortOrder,
+      },
+      create: {
+        id: bSvc.id,
+        name: bSvc.name,
+        game: bSvc.game,
+        category: bSvc.category,
+        description: bSvc.description,
+        iconText: bSvc.iconText,
+        tone: bSvc.tone,
+        image: bSvc.image,
+        sortOrder: bSvc.sortOrder,
+        isActive: true,
+      },
+    });
+
+    for (let i = 0; i < bSvc.packages.length; i++) {
+      const pkg = bSvc.packages[i]!;
+      await prisma.servicePackage.upsert({
+        where: { id: `pkg-${bSvc.id}-${i + 1}` },
+        update: {
+          name: pkg.name,
+          description: pkg.description,
+          price: pkg.price,
+          oldPrice: pkg.oldPrice,
+          note: pkg.note,
+          tags: pkg.tags,
+        },
+        create: {
+          id: `pkg-${bSvc.id}-${i + 1}`,
+          serviceId: createdSvc.id,
+          name: pkg.name,
+          description: pkg.description,
+          price: pkg.price,
+          oldPrice: pkg.oldPrice,
+          note: pkg.note,
+          tags: pkg.tags,
+          statusId: 'available',
+          templateId: 'boosting-account',
+          sortOrder: i + 1,
+          isActive: true,
+        },
+      });
+    }
+  }
+  console.log('✅ Boosting services seeded');
 
   // ─── Default Settings ─────────────────────────────────────────────────────
   await prisma.setting.upsert({

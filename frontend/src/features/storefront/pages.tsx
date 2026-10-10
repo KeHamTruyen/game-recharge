@@ -11,17 +11,22 @@ import type { PaymentDetails } from "@/services/api"
 
 // ─── Trang chủ: Danh sách dịch vụ ───────────────────────────────────────────
 
+// ─── Trang chủ: Danh sách dịch vụ ───────────────────────────────────────────
+
 export function TopupPage({
   services,
   search,
   onSearch,
   onSelectService,
+  mode = "topup",
 }: {
   services: Service[]
   search: string
   onSearch: (value: string) => void
   onSelectService: (service: Service) => void
+  mode?: "topup" | "boosting"
 }) {
+  const isBoosting = mode === "boosting"
   const filtered = services
     .filter((s) => s.isActive)
     .filter((s) =>
@@ -35,29 +40,43 @@ export function TopupPage({
       <section className="hero page-width">
         <div className="hero-copy">
           <span className="eyebrow">
-            <Icon name="shield" size={15} /> Thanh toán an toàn &amp; tự động
+            <Icon name="shield" size={15} />{" "}
+            {isBoosting
+              ? "Dịch vụ cày thuê Pro · Bảo mật 100%"
+              : "Thanh toán an toàn & tự động"}
           </span>
           <h1>
-            Nạp game nhanh.
-            <br />
-            <span>Chơi không gián đoạn.</span>
+            {isBoosting ? (
+              <>
+                Cày thuê thần tốc.
+                <br />
+                <span>An tâm gửi gắm.</span>
+              </>
+            ) : (
+              <>
+                Nạp game nhanh.
+                <br />
+                <span>Chơi không gián đoạn.</span>
+              </>
+            )}
           </h1>
           <p>
-            Nạp game chính hãng với mức giá tốt nhất. Giao dịch tự động, minh
-            bạch và bảo mật 24/7.
+            {isBoosting
+              ? "Đội ngũ Game thủ trình độ cao, cày tay 100%, bảo mật tài khoản tuyệt đối. Hoàn thành đúng hẹn, cập nhật tiến độ liên tục và bồi hoàn nếu xảy ra sự cố."
+              : "Nạp game chính hãng với mức giá tốt nhất. Giao dịch tự động, minh bạch và bảo mật 24/7."}
           </p>
           <div className="hero-stats">
             <div>
-              <strong>50K+</strong>
-              <span>Khách hàng</span>
+              <strong>{isBoosting ? "15K+" : "50K+"}</strong>
+              <span>{isBoosting ? "Đơn hoàn thành" : "Khách hàng"}</span>
             </div>
             <div>
-              <strong>99.8%</strong>
-              <span>Giao dịch thành công</span>
+              <strong>{isBoosting ? "99.9%" : "99.8%"}</strong>
+              <span>{isBoosting ? "Đánh giá 5 sao" : "Giao dịch thành công"}</span>
             </div>
             <div>
-              <strong>&lt; 2 phút</strong>
-              <span>Thời gian xử lý</span>
+              <strong>{isBoosting ? "< 12h" : "< 2 phút"}</strong>
+              <span>{isBoosting ? "Tốc độ bàn giao" : "Thời gian xử lý"}</span>
             </div>
           </div>
         </div>
@@ -65,15 +84,17 @@ export function TopupPage({
           <div className="orb orb-one" />
           <div className="orb orb-two" />
           <div className="console-card card-back">
-            <span>VAL</span>
+            <span>{isBoosting ? "PRO" : "VAL"}</span>
           </div>
           <div className="console-card card-main">
-            <span className="mini-label">GIAO DỊCH HOÀN TẤT</span>
+            <span className="mini-label">
+              {isBoosting ? "GIAO DỊCH AN TOÀN" : "GIAO DỊCH HOÀN TẤT"}
+            </span>
             <div className="success-ring">
-              <Icon name="check" size={28} />
+              <Icon name={isBoosting ? "sword" : "check"} size={28} />
             </div>
-            <strong>+6,480</strong>
-            <span>Genesis Crystal</span>
+            <strong>{isBoosting ? "+36 Sao" : "+6,480"}</strong>
+            <span>{isBoosting ? "La Hoàn / Full Map 100%" : "Genesis Crystal"}</span>
           </div>
           <div className="floating-pill">
             <Icon name="shield" size={16} /> Bảo mật tuyệt đối
@@ -84,8 +105,10 @@ export function TopupPage({
       <section className="catalog page-width">
         <div className="catalog-heading">
           <div>
-            <span className="section-kicker">CỬA HÀNG</span>
-            <h2>Chọn dịch vụ nạp game</h2>
+            <span className="section-kicker">
+              {isBoosting ? "CÀY THUÊ PRO" : "CỬA HÀNG"}
+            </span>
+            <h2>{isBoosting ? "Chọn game cày thuê" : "Chọn dịch vụ nạp game"}</h2>
           </div>
           <div className="support-hours">
             <span className="pulse" />
@@ -101,7 +124,7 @@ export function TopupPage({
             <input
               value={search}
               onChange={(event) => onSearch(event.target.value)}
-              placeholder="Tìm dịch vụ..."
+              placeholder={isBoosting ? "Tìm game cày thuê..." : "Tìm dịch vụ..."}
             />
           </label>
         </div>
@@ -120,7 +143,7 @@ export function TopupPage({
         ) : (
           <div className="empty-state">
             <Icon name="search" size={30} />
-            <h3>Không tìm thấy dịch vụ</h3>
+            <h3>{isBoosting ? "Không tìm thấy game cày thuê" : "Không tìm thấy dịch vụ"}</h3>
             <p>Thử từ khóa khác.</p>
           </div>
         )}
@@ -158,6 +181,7 @@ export function ServiceDetailPage({
   const filtered = packages
     .filter((p) => filter === "Tất cả" || p.tags.includes(filter))
     .sort((a, b) => a.sortOrder - b.sortOrder)
+  const isBoosting = service.category === "boosting"
 
   return (
     <section className="service-detail-page page-width">
@@ -167,15 +191,24 @@ export function ServiceDetailPage({
       <div className="service-detail-header">
         <div className={`service-detail-icon tone-${service.tone}`}>
           {service.image ? (
-            <img src={service.image} alt={`Nạp game ${service.name}`} style={{ objectPosition: service.imagePosition || "50% 50%" }} />
+            <img src={service.image} alt={service.name} style={{ objectPosition: service.imagePosition || "50% 50%" }} />
           ) : (
             <span>{service.iconText}</span>
           )}
         </div>
         <div>
-          <span className="section-kicker">DỊCH VỤ NẠP GAME</span>
+          <span className="section-kicker">
+            {isBoosting ? "DỊCH VỤ CÀY THUÊ PRO" : "DỊCH VỤ NẠP GAME"}
+          </span>
           <h1>{service.name}</h1>
           <p>{service.description}</p>
+          {isBoosting && (
+            <div className="boosting-badges">
+              <span><Icon name="shield" size={13} /> Cày tay 100% không hack</span>
+              <span><Icon name="check" size={13} /> Bảo mật đồ đạc tuyệt đối</span>
+              <span><Icon name="clock" size={13} /> Bàn giao đúng tiến độ</span>
+            </div>
+          )}
         </div>
       </div>
 
