@@ -1425,16 +1425,20 @@ h1, h2, h3, p { margin-top: 0; }
    Brand Subheader Card (Khung giới thiệu dưới thanh Navi - Ảnh 3)
    ========================================================================== */
 .brand-subheader-wrap {
-  margin-top: 20px;
-  margin-bottom: 8px;
+  margin-top: 18px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
 }
 
 .brand-subheader-card {
   width: 100%;
+  max-width: 820px;
+  margin-inline: auto;
   display: flex;
   align-items: center;
-  gap: 22px;
-  padding: 16px 22px;
+  gap: 18px;
+  padding: 14px 20px;
   background: linear-gradient(135deg, rgba(16, 24, 40, 0.95) 0%, rgba(10, 15, 28, 0.96) 100%);
   border: 1px solid rgba(56, 219, 248, 0.22);
   border-radius: 18px;
@@ -1454,19 +1458,18 @@ h1, h2, h3, p { margin-top: 0; }
   background: linear-gradient(90deg, transparent, rgba(56, 219, 248, 0.6), rgba(234, 179, 8, 0.6), transparent);
 }
 
-/* Badge mascot bên trái giống ảnh 3 */
 .brand-badge-box {
   flex: none;
-  width: 105px;
-  height: 112px;
+  width: 95px;
+  height: 102px;
   background: linear-gradient(145deg, #fef08a 0%, #facc15 45%, #eab308 100%);
-  border-radius: 15px;
-  padding: 6px 6px 8px;
+  border-radius: 14px;
+  padding: 5px 5px 7px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 8px 24px rgba(234, 179, 8, 0.28), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 20px rgba(234, 179, 8, 0.28), inset 0 1px 2px rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(254, 240, 138, 0.8);
 }
 
@@ -1479,14 +1482,14 @@ h1, h2, h3, p { margin-top: 0; }
 }
 
 .badge-crown {
-  font-size: 13px;
+  font-size: 11px;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
 }
 
 .badge-name {
   font-family: inherit;
   font-weight: 900;
-  font-size: 11.5px;
+  font-size: 10.5px;
   letter-spacing: -0.3px;
   color: #78350f;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -1494,12 +1497,12 @@ h1, h2, h3, p { margin-top: 0; }
 }
 
 .brand-badge-avatar-wrap {
-  width: 92px;
-  height: 80px;
-  border-radius: 10px;
+  width: 82px;
+  height: 72px;
+  border-radius: 9px;
   overflow: hidden;
   background: #000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
   border: 2px solid #fff;
 }
 
@@ -1511,19 +1514,18 @@ h1, h2, h3, p { margin-top: 0; }
   display: block;
 }
 
-/* Nội dung & nút bên phải */
 .brand-subheader-body {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .brand-subheader-text {
   margin: 0;
-  font-size: 14.5px;
-  line-height: 1.6;
+  font-size: 13.5px;
+  line-height: 1.55;
   color: #e2e8f0;
   font-weight: 400;
 }
@@ -1537,19 +1539,19 @@ h1, h2, h3, p { margin-top: 0; }
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .brand-pill-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 18px;
+  gap: 7px;
+  padding: 7px 16px;
   border-radius: 999px;
   background: rgba(18, 27, 46, 0.9);
   border: 1px solid rgba(56, 219, 248, 0.22);
   color: #e2e8f0;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -1579,30 +1581,29 @@ h1, h2, h3, p { margin-top: 0; }
 }
 
 .pill-icon {
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
 /* ==========================================================================
-   Game Banner Coverflow Slider (Khung lướt dịch vụ - Ảnh 2)
+   Game Banner Coverflow Slider (Lấy ảnh game làm khung + hiệu ứng chuyển đổi)
    ========================================================================== */
-.game-slider-section {
-  padding-block: 28px 42px;
+.game-coverflow-section {
+  padding-block: 22px 38px;
   overflow: hidden;
   box-sizing: border-box;
 }
 
-.slider-stage-container {
+.coverflow-stage {
   position: relative;
+  width: 100%;
+  min-height: 380px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 340px;
-  margin-inline: auto;
-  perspective: 1200px;
+  perspective: 1400px;
 }
 
-/* Nút mũi tên lướt < và > */
-.slider-arrow-btn {
+.coverflow-nav-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -1610,269 +1611,235 @@ h1, h2, h3, p { margin-top: 0; }
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(12, 18, 30, 0.88);
+  background: rgba(10, 15, 26, 0.85);
   border: 1px solid rgba(56, 219, 248, 0.35);
   color: #38dbf8;
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   backdrop-filter: blur(8px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
-.slider-arrow-btn:hover {
+.coverflow-nav-arrow:hover {
   background: rgba(56, 219, 248, 0.2);
   border-color: #38dbf8;
   color: #ffffff;
-  transform: translateY(-50%) scale(1.08);
-  box-shadow: 0 0 20px rgba(56, 219, 248, 0.4);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 0 20px rgba(56, 219, 248, 0.45);
 }
 
-.slider-arrow-left {
-  left: 6px;
+.coverflow-nav-arrow.arrow-left {
+  left: 12px;
 }
 
-.slider-arrow-left svg {
+.coverflow-nav-arrow.arrow-left svg {
   transform: rotate(180deg);
 }
 
-.slider-arrow-right {
-  right: 6px;
+.coverflow-nav-arrow.arrow-right {
+  right: 12px;
 }
 
-.slider-arrow-right svg {
+.coverflow-nav-arrow.arrow-right svg {
   transform: rotate(0deg);
 }
 
-/* Thẻ lướt thu nhỏ hai bên (Peek Cards) */
-.slider-card-peek {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-  width: 220px;
-  height: 300px;
-  border-radius: 20px;
-  overflow: hidden;
-  cursor: pointer;
-  opacity: 0.38;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  background: #0d1424;
-}
-
-.slider-card-peek:hover {
-  opacity: 0.65;
-  transform: translateY(-50%) scale(1.03);
-}
-
-.peek-left {
-  left: calc(50% - 460px);
-  transform: translateY(-50%) scale(0.88) rotateY(12deg);
-}
-
-.peek-right {
-  right: calc(50% - 460px);
-  transform: translateY(-50%) scale(0.88) rotateY(-12deg);
-}
-
-.peek-content {
-  width: 100%;
-  height: 100%;
+.coverflow-track {
   position: relative;
-  background: #090e1a;
-}
-
-.peek-poster {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.peek-poster-fallback {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  font-size: 36px;
-  font-weight: 800;
-  color: #94a3b8;
-  background: radial-gradient(circle, rgba(56, 219, 248, 0.15) 0%, #0b1120 70%);
-}
-
-.peek-overlay {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 16px 12px;
-  background: linear-gradient(180deg, transparent 0%, rgba(5, 8, 16, 0.95) 100%);
+  max-width: 820px;
+  height: 360px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
 }
 
-.peek-overlay strong {
-  color: #f1f5f9;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Thẻ CHÍNH Ở GIỮA (Active Card - Thiết kế như ảnh 2) */
-.slider-card-active {
-  position: relative;
-  z-index: 15;
-  width: min(100%, 780px);
-  min-height: 340px;
+/* Các khung bài slot với hiệu ứng chuyển đổi mượt mà 3D Coverflow */
+.coverflow-slot {
+  position: absolute;
+  width: 100%;
+  max-width: 760px;
+  height: 350px;
   border-radius: 22px;
-  background: linear-gradient(135deg, #101726 0%, #0a0f1d 60%, #070a14 100%);
-  border: 1.5px solid rgba(234, 179, 8, 0.38);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(234, 179, 8, 0.12);
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.6s ease,
+              filter 0.6s ease,
+              box-shadow 0.6s ease;
+  will-change: transform, opacity;
   box-sizing: border-box;
 }
 
-.slider-card-active:hover {
-  transform: translateY(-3px);
-  border-color: rgba(250, 204, 21, 0.65);
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.85), 0 0 45px rgba(234, 179, 8, 0.2);
+/* Khung ở GIỮA (Active) */
+.coverflow-slot.slot-active {
+  transform: translateX(0%) scale(1) translateZ(0);
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(56, 219, 248, 0.25);
+  border: 1.5px solid rgba(56, 219, 248, 0.45);
+  cursor: pointer;
 }
 
-.active-card-glow {
+.coverflow-slot.slot-active:hover {
+  transform: translateX(0%) scale(1.015);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.9), 0 0 45px rgba(56, 219, 248, 0.35);
+  border-color: rgba(56, 219, 248, 0.7);
+}
+
+/* Khung BÊN TRÁI (Prev) */
+.coverflow-slot.slot-prev {
+  transform: translateX(-54%) scale(0.82) rotateY(16deg);
+  opacity: 0.45;
+  filter: brightness(0.65) blur(0.5px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.coverflow-slot.slot-prev:hover {
+  opacity: 0.7;
+  filter: brightness(0.85);
+  transform: translateX(-52%) scale(0.85) rotateY(12deg);
+}
+
+/* Khung BÊN PHẢI (Next) */
+.coverflow-slot.slot-next {
+  transform: translateX(54%) scale(0.82) rotateY(-16deg);
+  opacity: 0.45;
+  filter: brightness(0.65) blur(0.5px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.coverflow-slot.slot-next:hover {
+  opacity: 0.7;
+  filter: brightness(0.85);
+  transform: translateX(52%) scale(0.85) rotateY(-12deg);
+}
+
+/* Các khung ẩn xa hơn */
+.coverflow-slot.slot-hidden-left {
+  transform: translateX(-110%) scale(0.65);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.coverflow-slot.slot-hidden-right {
+  transform: translateX(110%) scale(0.65);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Khung ảnh nền game full-bleed */
+.coverflow-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #090e1a;
+  overflow: hidden;
+}
+
+.coverflow-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.coverflow-slot.slot-active:hover .coverflow-bg-image {
+  transform: scale(1.04);
+}
+
+.coverflow-card-gradient {
   position: absolute;
   inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 10, 20, 0.15) 0%,
+    rgba(6, 10, 20, 0.35) 45%,
+    rgba(6, 10, 20, 0.92) 100%
+  );
   pointer-events: none;
-  z-index: 1;
 }
 
-.active-card-grid {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: 1.3fr 0.9fr;
-  align-items: center;
-  min-height: 340px;
-  padding: 28px 32px;
-  gap: 20px;
-}
-
-/* Cột thông tin dịch vụ */
-.active-card-info {
+/* Nội dung tinh giản chỉ giữ lại TÊN GAME */
+.coverflow-card-content {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 24px 28px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 0;
+  gap: 10px;
+  z-index: 5;
 }
 
-.active-card-brand-row {
+.coverflow-meta-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
 }
 
-.active-brand-badge {
+.coverflow-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: #facc15;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.brand-dot {
-  color: #facc15;
-  font-size: 12px;
-  animation: pulse 2s infinite ease-in-out;
-}
-
-.active-service-tag {
-  padding: 3px 10px;
+  gap: 5px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(234, 179, 8, 0.15);
-  border: 1px solid rgba(234, 179, 8, 0.4);
-  color: #fef08a;
+  background: rgba(12, 18, 30, 0.85);
+  border: 1px solid rgba(56, 219, 248, 0.3);
+  color: #38dbf8;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
+  backdrop-filter: blur(8px);
 }
 
-.active-card-title {
-  margin: 0;
-  font-size: clamp(23px, 2.7vw, 30px);
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  line-height: 1.18;
-  color: #facc15;
-  background: linear-gradient(90deg, #fef08a 0%, #facc15 50%, #f59e0b 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 20px rgba(234, 179, 8, 0.25);
-}
-
-.active-card-subtext {
-  margin: 0;
-  display: flex;
+.coverflow-price-badge {
+  display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 11.5px;
+  background: rgba(10, 15, 26, 0.7);
+  padding: 3px 9px;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
 }
 
-.os-badge {
-  color: #38dbf8;
-  font-weight: 600;
-}
-
-.divider-dot {
-  color: #475569;
-}
-
-.subtext-note {
-  color: #cbd5e1;
-}
-
-.active-card-benefits {
-  margin: 4px 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.active-card-benefits li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #cbd5e1;
-  font-size: 12.5px;
-}
-
-.benefit-icon {
+.coverflow-price-badge strong {
+  color: #facc15;
   font-size: 13px;
-  flex: none;
+  font-weight: 700;
 }
 
-.active-card-action-row {
-  margin-top: 8px;
+.coverflow-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: 16px;
-  flex-wrap: wrap;
 }
 
-.active-cta-btn {
-  height: 44px;
-  padding: 0 24px;
+.coverflow-game-name {
+  margin: 0;
+  font-size: clamp(26px, 3.2vw, 36px);
+  font-weight: 900;
+  letter-spacing: -0.6px;
+  color: #ffffff;
+  text-transform: uppercase;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 35px rgba(56, 219, 248, 0.4);
+  line-height: 1.1;
+}
+
+.coverflow-cta-btn {
+  flex: none;
+  height: 42px;
+  padding: 0 22px;
   border-radius: 12px;
   background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
   border: 1px solid #fef08a;
@@ -1884,182 +1851,19 @@ h1, h2, h3, p { margin-top: 0; }
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(234, 179, 8, 0.35);
+  box-shadow: 0 6px 20px rgba(234, 179, 8, 0.4);
   transition: all 0.2s ease;
 }
 
-.active-cta-btn:hover {
+.coverflow-cta-btn:hover {
   background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(234, 179, 8, 0.45);
+  box-shadow: 0 10px 25px rgba(234, 179, 8, 0.55);
   color: #451a03;
 }
 
-.active-price-hint {
-  color: #94a3b8;
-  font-size: 12px;
-}
-
-.active-price-hint strong {
-  color: #38dbf8;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-/* Cột minh họa 3D bên phải */
-.active-card-visual {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
-
-.visual-art-stage {
-  position: relative;
-  width: 100%;
-  height: 220px;
-  display: grid;
-  place-items: center;
-}
-
-.visual-game-artwork {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 2px solid rgba(56, 219, 248, 0.35);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 30px rgba(56, 219, 248, 0.2);
-}
-
-.visual-poster {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.visual-3d-composition {
-  position: relative;
-  width: 220px;
-  height: 200px;
-  display: grid;
-  place-items: center;
-}
-
-.phone-device-mockup {
-  position: relative;
-  width: 130px;
-  height: 180px;
-  border-radius: 22px;
-  background: linear-gradient(145deg, #1e293b, #0f172a);
-  border: 2px solid rgba(56, 219, 248, 0.3);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 219, 248, 0.15);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 6px;
-  transform: perspective(600px) rotateY(-8deg) rotateX(4deg);
-}
-
-.phone-notch {
-  width: 38px;
-  height: 4px;
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 99px;
-  margin-bottom: 8px;
-}
-
-.phone-screen {
-  flex: 1;
-  width: 100%;
-  border-radius: 14px;
-  background: radial-gradient(circle at 50% 30%, rgba(56, 219, 248, 0.2) 0%, #090e1a 80%);
-  border: 1px solid rgba(56, 219, 248, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-}
-
-.phone-card-preview {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.phone-pill {
-  font-size: 8px;
-  font-weight: 700;
-  color: #38dbf8;
-  padding: 2px 7px;
-  border-radius: 99px;
-  background: rgba(56, 219, 248, 0.1);
-  border: 1px solid rgba(56, 219, 248, 0.25);
-}
-
-.phone-lightning-icon {
-  font-size: 32px;
-  filter: drop-shadow(0 0 14px #facc15);
-  animation: bounce 2s infinite;
-}
-
-.phone-price-tag {
-  font-size: 10px;
-  color: #facc15;
-  font-weight: 800;
-}
-
-.floating-coin {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.5));
-  animation: floatAnim 3s infinite ease-in-out;
-}
-
-.coin-1 {
-  top: 15px;
-  right: 10px;
-  animation-delay: 0s;
-}
-
-.coin-2 {
-  bottom: 25px;
-  left: 5px;
-  animation-delay: 1.2s;
-}
-
-.coin-3 {
-  bottom: 10px;
-  right: 15px;
-  animation-delay: 0.6s;
-}
-
-@keyframes floatAnim {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(4deg); }
-}
-
-.active-card-platforms {
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #94a3b8;
-  font-size: 11px;
-  font-weight: 600;
-}
-
 /* Hàng chấm chỉ số tròn dưới đáy */
-.slider-dots-row {
+.coverflow-dots-row {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2067,7 +1871,7 @@ h1, h2, h3, p { margin-top: 0; }
   margin-top: 18px;
 }
 
-.slider-dot-btn {
+.coverflow-dot-btn {
   width: 9px;
   height: 9px;
   border-radius: 99px;
@@ -2078,28 +1882,17 @@ h1, h2, h3, p { margin-top: 0; }
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.slider-dot-btn:hover {
-  background: rgba(234, 179, 8, 0.6);
+.coverflow-dot-btn:hover {
+  background: rgba(56, 219, 248, 0.6);
 }
 
-.slider-dot-btn.active {
+.coverflow-dot-btn.active {
   width: 26px;
-  background: #facc15;
-  box-shadow: 0 0 12px rgba(234, 179, 8, 0.65);
+  background: #38dbf8;
+  box-shadow: 0 0 12px rgba(56, 219, 248, 0.65);
 }
 
-/* ==========================================================================
-   Responsive Mobile Cho BrandSubheader & GameBannerSlider
-   ========================================================================== */
-@media (max-width: 900px) {
-  .slider-card-peek {
-    display: none;
-  }
-  .peek-left, .peek-right {
-    display: none;
-  }
-}
-
+/* Responsive Mobile */
 @media (max-width: 768px) {
   .brand-subheader-wrap {
     margin-top: 12px;
@@ -2109,7 +1902,7 @@ h1, h2, h3, p { margin-top: 0; }
     flex-direction: column;
     align-items: stretch;
     padding: 14px 12px;
-    gap: 14px;
+    gap: 12px;
     border-radius: 16px;
   }
   .brand-badge-box {
@@ -2134,50 +1927,56 @@ h1, h2, h3, p { margin-top: 0; }
     font-size: 13px;
   }
   .brand-subheader-text {
-    font-size: 13px;
+    font-size: 12.5px;
   }
   .brand-action-pills {
     gap: 8px;
   }
   .brand-pill-btn {
-    padding: 7px 13px;
-    font-size: 11.5px;
+    padding: 7px 12px;
+    font-size: 11px;
     flex: 1 1 calc(50% - 8px);
     justify-content: center;
   }
 
   /* Slider on Mobile */
-  .game-slider-section {
-    padding-block: 16px 24px;
+  .game-coverflow-section {
+    padding-block: 14px 22px;
   }
-  .slider-stage-container {
+  .coverflow-stage {
     min-height: auto;
   }
-  .slider-card-active {
+  .coverflow-track {
+    height: 240px;
+  }
+  .coverflow-slot {
     width: 100%;
-    min-height: auto;
+    max-width: 100%;
+    height: 230px;
     border-radius: 18px;
   }
-  .active-card-grid {
-    grid-template-columns: 1fr;
-    padding: 18px 14px;
-    min-height: auto;
-    gap: 16px;
-  }
-  .active-card-visual {
+  .coverflow-slot.slot-prev,
+  .coverflow-slot.slot-next {
     display: none;
   }
-  .active-card-title {
-    font-size: 20px;
+  .coverflow-card-content {
+    padding: 14px 14px;
+    gap: 6px;
   }
-  .active-card-benefits li {
+  .coverflow-title-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .coverflow-game-name {
+    font-size: 19px;
+  }
+  .coverflow-cta-btn {
+    height: 36px;
+    padding: 0 14px;
     font-size: 11.5px;
   }
-  .active-cta-btn {
-    width: 100%;
-    justify-content: center;
-  }
-  .slider-arrow-btn {
+  .coverflow-nav-arrow {
     display: none;
   }
 }
