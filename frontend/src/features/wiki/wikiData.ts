@@ -436,3 +436,22 @@ export function resetTierListToDefault(): void {
   localStorage.removeItem(TIER_STORAGE_KEY)
   window.dispatchEvent(new CustomEvent("wiki-data-changed"))
 }
+
+export async function syncAniipediaTierList(): Promise<{
+  tiers: TierDefinition[]
+  syncedAt: string
+  total: number
+}> {
+  const res = await writeWiki("/sync-aniipedia", "POST", {})
+  const resultData = (res as any)?.data
+  if (resultData && Array.isArray(resultData.tiers)) {
+    localStorage.setItem(TIER_STORAGE_KEY, JSON.stringify(resultData.tiers))
+    window.dispatchEvent(new CustomEvent("wiki-data-changed"))
+    return {
+      tiers: resultData.tiers,
+      syncedAt: resultData.syncedAt || new Date().toISOString(),
+      total: resultData.total || resultData.tiers.reduce((s: number, t: any) => s + (t.names?.length || 0), 0),
+    }
+  }
+  throw new Error("Không thể đồng bộ dữ liệu từ Aniipedia")
+}

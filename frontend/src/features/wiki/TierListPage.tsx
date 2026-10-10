@@ -5,6 +5,7 @@ import {
   getEffectiveTierList,
   saveTierList,
   resetTierListToDefault,
+  syncAniipediaTierList,
   type TierDefinition,
 } from "./wikiData"
 import { AniimoDetailModal } from "./AniimoDetailModal"
@@ -20,7 +21,16 @@ export default function TierListPage() {
   const [workingTiers, setWorkingTiers] = useState<TierDefinition[]>(getEffectiveTierList())
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
   const [saveToast, setSaveToast] = useState<string | null>(null)
+
+  // Drag and Drop state
+  const [draggedMonster, setDraggedMonster] = useState<{
+    title: string
+    sourceRank: string | null
+  } | null>(null)
+  const [dragOverTier, setDragOverTier] = useState<string | null>(null)
+  const [dragOverBankDropzone, setDragOverBankDropzone] = useState(false)
 
   const [selectedMonster, setSelectedMonster] = useState<AniimoMonster | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -130,6 +140,9 @@ export default function TierListPage() {
   const handleCancelEditing = () => {
     setWorkingTiers(tiers)
     setIsEditing(false)
+    setDraggedMonster(null)
+    setDragOverTier(null)
+    setDragOverBankDropzone(false)
   }
 
   const handleAssignTier = (monsterTitle: string, targetRank: string) => {
@@ -193,6 +206,30 @@ export default function TierListPage() {
     }
   }
 
+  const handleSyncAniipedia = async () => {
+    if (
+      !window.confirm(
+        "Hệ thống sẽ kết nối với Aniipedia để tải cấu hình Tier List và danh sách Aniimo mới nhất. Bạn có muốn thực hiện?",
+      )
+    ) {
+      return
+    }
+
+    setIsSyncing(true)
+    try {
+      const res = await syncAniipediaTierList()
+      setTiers(res.tiers)
+      setWorkingTiers(res.tiers)
+      setSaveToast(`Đã tự động cập nhật ${res.total} Aniimo từ Aniipedia thành công!`)
+      setTimeout(() => setSaveToast(null), 4000)
+    } catch (err: any) {
+      console.error("Lỗi đồng bộ Aniipedia:", err)
+      alert("Lỗi khi đồng bộ từ Aniipedia: " + (err?.message || "Lỗi mạng hoặc phân tích dữ liệu"))
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   return (
     <div className="inner-page page-width wiki-page-container">
       <div className="wiki-hero-banner">
@@ -216,16 +253,25 @@ export default function TierListPage() {
           <div className="tier-admin-bar-info">
             <span className="tier-admin-badge">⚡ Chế Độ Chỉnh Sửa Admin</span>
             <span className="tier-admin-bar-desc">
-              Bấm ✕ trên ảnh Aniimo để gỡ bỏ, hoặc chọn bậc [SS, S, A, B, C, D]
-              trong Kho Aniimo bên dưới để chuyển bậc trực tiếp.
+              Kéo thả trực tiếp Aniimo giữa các bậc hoặc từ Kho Aniimo lên; hoặc bấm [SS, S, A, B, C, D] / [✕] để chuyển bậc nhanh.
             </span>
           </div>
           <div className="tier-admin-actions">
             <button
               type="button"
+              className="tier-sync-btn"
+              onClick={handleSyncAniipedia}
+              disabled={isSyncing || isSaving}
+              title="Tự động đồng bộ Tier List chuẩn mới nhất từ Aniipedia"
+            >
+              <span className={isSyncing ? "tier-sync-spin" : ""}>🌐</span>{" "}
+              {isSyncing ? "Đang cập nhật..." : "Đồng Bộ Aniipedia"}
+            </button>
+            <button
+              type="button"
               className="tier-save-btn"
               onClick={handleSave}
-              disabled={isSaving}
+              disabled={isSaving || isSyncing}
             >
               {isSaving ? "Đang lưu..." : "💾 Lưu Thay Đổi"}
             </button>
@@ -233,7 +279,7 @@ export default function TierListPage() {
               type="button"
               className="tier-cancel-btn"
               onClick={handleCancelEditing}
-              disabled={isSaving}
+              disabled={isSaving || isSyncing}
             >
               ✕ Hủy Bỏ
             </button>
@@ -241,7 +287,7 @@ export default function TierListPage() {
               type="button"
               className="tier-reset-btn"
               onClick={handleReset}
-              disabled={isSaving}
+              disabled={isSaving || isSyncing}
               title="Khôi phục dữ liệu Tier List nguyên bản từ hệ thống"
             >
               🔄 Đặt Lại Gốc
@@ -265,13 +311,25 @@ export default function TierListPage() {
             Tổng cộng <strong>{monsters.length}</strong> Aniimo trong cơ sở dữ liệu
           </span>
           {isAdmin && !isEditing && (
-            <button
-              type="button"
-              className="tier-edit-toggle-btn"
-              onClick={handleStartEditing}
-            >
-              <span>✏️</span> Chỉnh Sửa Bậc Xếp Hạng (Admin)
-            </button>
+            <>
+              <button
+                type="button"
+                className="tier-sync-btn"
+                onClick={handleSyncAniipedia}
+                disabled={isSyncing}
+                title="Tự động cập nhật bảng xếp hạng và thú cưng từ Aniipedia"
+              >
+                <span className={isSyncing ? "tier-sync-spin" : ""}>🌐</span>{" "}
+                {isSyncing ? "Đang cập nhật..." : "Cập Nhật Từ Aniipedia"}
+              </button>
+              <button
+                type="button"
+                className="tier-edit-toggle-btn"
+                onClick={handleStartEditing}
+              >
+                <span>✏️</span> Chỉnh Sửa Bậc Xếp Hạng (Admin)
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -279,7 +337,42 @@ export default function TierListPage() {
       {/* Tier Rows Display */}
       <div className="tier-list-container">
         {tierCategories.map((tier) => (
-          <div key={tier.name} className="tier-row-wrapper">
+          <div
+            key={tier.name}
+            className={`tier-row-wrapper ${isEditing ? "is-editing" : ""} ${
+              dragOverTier === tier.name ? "drag-over" : ""
+            }`}
+            onDragOver={(e) => {
+              if (!isEditing) return
+              e.preventDefault()
+              e.dataTransfer.dropEffect = "move"
+              if (dragOverTier !== tier.name) {
+                setDragOverTier(tier.name)
+              }
+            }}
+            onDragLeave={(e) => {
+              if (!isEditing) return
+              if (e.currentTarget.contains(e.relatedTarget as Node)) return
+              setDragOverTier(null)
+            }}
+            onDrop={(e) => {
+              if (!isEditing) return
+              e.preventDefault()
+              setDragOverTier(null)
+              try {
+                const dataStr = e.dataTransfer.getData("text/plain")
+                const parsed = dataStr ? JSON.parse(dataStr) : draggedMonster
+                if (parsed?.title) {
+                  handleAssignTier(parsed.title, tier.name)
+                }
+              } catch {
+                if (draggedMonster?.title) {
+                  handleAssignTier(draggedMonster.title, tier.name)
+                }
+              }
+              setDraggedMonster(null)
+            }}
+          >
             <div
               className="tier-badge-label"
               style={{ backgroundColor: tier.color }}
@@ -297,22 +390,44 @@ export default function TierListPage() {
                 <div
                   style={{
                     padding: "16px",
-                    color: "#64748b",
+                    color: isEditing && dragOverTier === tier.name ? "#38bdf8" : "#64748b",
                     fontSize: "12px",
+                    fontWeight: isEditing ? 600 : 400,
                   }}
                 >
-                  Không có Aniimo nào phù hợp trong bậc này.
+                  {isEditing
+                    ? "👉 Kéo thả Aniimo vào đây để xếp vào bậc này."
+                    : "Không có Aniimo nào phù hợp trong bậc này."}
                 </div>
               ) : (
                 tier.list.map((m) => (
                   <div
                     key={m.id}
-                    className="tier-monster-item"
+                    className={`tier-monster-item ${isEditing ? "is-draggable" : ""}`}
                     style={{ position: "relative" }}
+                    draggable={isEditing}
+                    onDragStart={(e) => {
+                      if (!isEditing) return
+                      e.dataTransfer.setData(
+                        "text/plain",
+                        JSON.stringify({ title: m.title, sourceRank: tier.name }),
+                      )
+                      e.dataTransfer.effectAllowed = "move"
+                      setDraggedMonster({ title: m.title, sourceRank: tier.name })
+                    }}
+                    onDragEnd={() => {
+                      setDraggedMonster(null)
+                      setDragOverTier(null)
+                      setDragOverBankDropzone(false)
+                    }}
                     onClick={() => {
                       if (!isEditing) setSelectedMonster(m)
                     }}
-                    title={`${m.title} (#${m.no}) - Bậc ${tier.name}${isEditing ? " (Bấm ✕ để gỡ khỏi bậc)" : ""}`}
+                    title={
+                      isEditing
+                        ? `Kéo để chuyển bậc, hoặc bấm ✕ để gỡ ${m.title} (#${m.no})`
+                        : `${m.title} (#${m.no}) - Bậc ${tier.name}`
+                    }
                   >
                     {isEditing && (
                       <button
@@ -332,6 +447,7 @@ export default function TierListPage() {
                         src={formatImageUrl(m.taxonomies.elements[0].icon)}
                         alt=""
                         className="tier-monster-elem-badge"
+                        draggable={false}
                       />
                     )}
                     <img
@@ -339,6 +455,7 @@ export default function TierListPage() {
                       alt={m.title}
                       className="tier-monster-avatar"
                       loading="lazy"
+                      draggable={false}
                     />
                     <span className="tier-monster-name">{m.title}</span>
                   </div>
@@ -356,7 +473,7 @@ export default function TierListPage() {
             <div>
               <h3>📦 Kho Thú Cưng Aniimo & Điều Chỉnh Bậc Nhanh</h3>
               <p>
-                Chọn nhanh bậc [SS, S, A, B, C, D] hoặc [✕] để chuyển bậc ngay lập tức cho bất kỳ Aniimo nào.
+                Kéo thả thẻ Aniimo lên hàng bậc trên, hoặc bấm [SS, S, A, B, C, D] / [✕] để chuyển bậc ngay lập tức.
               </p>
             </div>
             <span className="wiki-count-badge">
@@ -394,17 +511,69 @@ export default function TierListPage() {
             </div>
           </div>
 
-          <div className="tier-bank-grid">
+          {/* Drag to Unassign Dropzone */}
+          <div
+            className={`tier-bank-dropzone ${dragOverBankDropzone ? "drag-over" : ""}`}
+            onDragOver={(e) => {
+              e.preventDefault()
+              e.dataTransfer.dropEffect = "move"
+              setDragOverBankDropzone(true)
+            }}
+            onDragLeave={(e) => {
+              if (e.currentTarget.contains(e.relatedTarget as Node)) return
+              setDragOverBankDropzone(false)
+            }}
+            onDrop={(e) => {
+              e.preventDefault()
+              setDragOverBankDropzone(false)
+              try {
+                const dataStr = e.dataTransfer.getData("text/plain")
+                const parsed = dataStr ? JSON.parse(dataStr) : draggedMonster
+                if (parsed?.title) {
+                  handleRemoveFromTier(parsed.title)
+                }
+              } catch {
+                if (draggedMonster?.title) {
+                  handleRemoveFromTier(draggedMonster.title)
+                }
+              }
+              setDraggedMonster(null)
+            }}
+          >
+            <span>🗑️</span> Kéo thả Aniimo vào đây để gỡ khỏi bảng xếp hạng (Unassign)
+          </div>
+
+          <div className="tier-bank-grid" style={{ marginTop: "14px" }}>
             {filteredBankMonsters.map((m) => {
               const currentAssignment = rankByTitleMap.get(m.title.toLowerCase().trim())
               return (
-                <div key={m.id} className="tier-bank-card">
+                <div
+                  key={m.id}
+                  className="tier-bank-card is-draggable"
+                  draggable={true}
+                  onDragStart={(e) => {
+                    const currentRank = currentAssignment?.rank || null
+                    e.dataTransfer.setData(
+                      "text/plain",
+                      JSON.stringify({ title: m.title, sourceRank: currentRank }),
+                    )
+                    e.dataTransfer.effectAllowed = "move"
+                    setDraggedMonster({ title: m.title, sourceRank: currentRank })
+                  }}
+                  onDragEnd={() => {
+                    setDraggedMonster(null)
+                    setDragOverTier(null)
+                    setDragOverBankDropzone(false)
+                  }}
+                  title={`Kéo ${m.title} lên bậc bạn muốn, hoặc bấm phím tắt bên dưới`}
+                >
                   <div className="tier-bank-card-top">
                     <img
                       src={formatImageUrl(m.thumbnail)}
                       alt={m.title}
                       className="tier-bank-card-thumb"
                       loading="lazy"
+                      draggable={false}
                     />
                     <div className="tier-bank-card-info">
                       <span className="tier-bank-card-name" title={m.title}>

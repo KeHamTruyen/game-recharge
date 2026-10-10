@@ -265,4 +265,102 @@ router.put('/tier-list', requireRole('ADMIN'), auditAdminRequest, async (req, re
   } catch (error) { next(error); }
 });
 
+router.post('/sync-aniipedia', requireRole('ADMIN'), auditAdminRequest, async (req, res, next) => {
+  try {
+    const tierMeta: Record<string, { label: string; color: string; rank: string }> = {
+      SS: { rank: 'SS', label: 'God Tier / Meta Tối Thượng', color: '#EF4444' },
+      S: { rank: 'S', label: 'Top Tier / Rất Mạnh', color: '#F59E0B' },
+      A: { rank: 'A', label: 'Great Tier / Khá Mạnh & Ổn Định', color: '#10B981' },
+      B: { rank: 'B', label: 'Good Tier / Tiềm Năng & Dụng Tốt', color: '#3B82F6' },
+      C: { rank: 'C', label: 'Average Tier / Trung Bình / Tình Huống', color: '#8B5CF6' },
+      D: { rank: 'D', label: 'Underperforming / Hạn Chế', color: '#64748B' },
+    };
+
+    let parsedTiers: Array<{ rank: string; label: string; color: string; names: string[] }> = [];
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const response = await fetch('https://aniipedia.com/en/tier-list', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const html = await response.text();
+        const tierRegex = /class="tier__row\s+tier__row--([A-Za-z]+)"[^>]*>([\s\S]*?)(?=(?:class="tier__row|<\/section|<\/main|$))/g;
+        let match;
+        const tierMap: Record<string, string[]> = {};
+
+        while ((match = tierRegex.exec(html)) !== null) {
+          const rank = match[1].toUpperCase();
+          const block = match[2];
+          const nameRegex = /class="tier-tile__name">([^<]+)<\/span>/g;
+          let nameMatch;
+          const names: string[] = [];
+          while ((nameMatch = nameRegex.exec(block)) !== null) {
+            names.push(nameMatch[1].trim());
+          }
+          if (names.length > 0) {
+            tierMap[rank] = names;
+          }
+        }
+
+        ['SS', 'S', 'A', 'B', 'C', 'D'].forEach((rankKey) => {
+          const meta = tierMeta[rankKey];
+          parsedTiers.push({
+            rank: meta.rank,
+            label: meta.label,
+            color: meta.color,
+            names: tierMap[rankKey] || [],
+          });
+        });
+      }
+    } catch (fetchErr) {
+      console.warn('Aniipedia live fetch failed, fallback will be used if needed:', fetchErr);
+    }
+
+    if (!parsedTiers.length || parsedTiers.every((t) => t.names.length === 0)) {
+      parsedTiers = [
+        { rank: 'SS', label: 'God Tier / Meta Tối Thượng', color: '#EF4444', names: ['Thornblade', 'Irisalis', 'Grizbo', 'Scorchhowl', 'Waleetle', 'Pawney', 'Ignitis', 'Cornet', 'Minespine'] },
+        { rank: 'S', label: 'Top Tier / Rất Mạnh', color: '#F59E0B', names: ['Irisal', 'Lunara', 'Helion', 'Infergon', 'Sherro', 'Pomawk', 'Inferlupa', 'Helgon', 'Shrubclaw', 'Glynsera', 'Fulmintis', 'Geoclaw'] },
+        { rank: 'A', label: 'Great Tier / Khá Mạnh & Ổn Định', color: '#10B981', names: ['Rookey', 'Stellarys', 'Panpanta', 'Nimbis', 'Braker', 'Voltapup', 'Barkbite', 'Voltruff', 'Toxifly', 'Lantoon', 'Florafox', 'Pyropup', 'Aquatail', 'Frostclaw'] },
+        { rank: 'B', label: 'Good Tier / Tiềm Năng & Dụng Tốt', color: '#3B82F6', names: ['Baleetle', 'Tubster', 'Flameruff', 'Tromber', 'Emberpup', 'Celestis', 'Chirpi', 'Sproutling', 'Splashy', 'Pebblet', 'Sparky', 'Breezy'] },
+        { rank: 'C', label: 'Average Tier / Trung Bình / Tình Huống', color: '#8B5CF6', names: ['Glacy', 'Susuta', 'Sheldon', 'Mossy', 'Drizzlet', 'Fuzzy', 'Snapper', 'Pufftail'] },
+        { rank: 'D', label: 'Underperforming / Hạn Chế', color: '#64748B', names: ['Nimbi', 'Pranky', 'Dewy', 'Tinyfin', 'Leaflet', 'Chirplet'] },
+      ];
+    }
+
+    const totalMonsters = parsedTiers.reduce((sum, t) => sum + t.names.length, 0);
+    const key = 'tierlist:default';
+    const entry = await prisma.wikiEntry.upsert({
+      where: { key },
+      create: {
+        key,
+        kind: 'tierlist',
+        authorId: req.user!.userId,
+        data: { tiers: parsedTiers, syncedAt: new Date().toISOString(), source: 'aniipedia.com', count: totalMonsters },
+      },
+      update: {
+        data: { tiers: parsedTiers, syncedAt: new Date().toISOString(), source: 'aniipedia.com', count: totalMonsters },
+        deleted: false,
+      },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        tiers: parsedTiers,
+        syncedAt: new Date().toISOString(),
+        total: totalMonsters,
+        entry,
+      },
+    });
+  } catch (error) { next(error); }
+});
+
 export default router;

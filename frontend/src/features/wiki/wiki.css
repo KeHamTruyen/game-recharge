@@ -1064,6 +1064,43 @@
   border-color: #64748b;
 }
 
+.tier-sync-btn {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(2, 132, 199, 0.3));
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tier-sync-btn:hover:not(:disabled) {
+  background: #38bdf8;
+  color: #070b12;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
+}
+
+.tier-sync-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tier-sync-spin {
+  display: inline-block;
+  animation: tierSpin 1s linear infinite;
+}
+
+@keyframes tierSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .tier-edit-toggle-btn {
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.35);
@@ -1084,6 +1121,63 @@
   background: rgba(56, 189, 248, 0.25);
   color: #fff;
   border-color: #38bdf8;
+}
+
+.tier-row-wrapper.drag-over {
+  border: 2px dashed #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.08) !important;
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.35) !important;
+  transform: translateY(-2px);
+  transition: all 0.15s ease;
+}
+
+.tier-row-wrapper.is-editing {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.15s ease;
+}
+
+.tier-monster-item.is-draggable {
+  cursor: grab;
+  user-select: none;
+}
+
+.tier-monster-item.is-draggable:active {
+  cursor: grabbing;
+  opacity: 0.6;
+}
+
+.tier-bank-card.is-draggable {
+  cursor: grab;
+  user-select: none;
+}
+
+.tier-bank-card.is-draggable:active {
+  cursor: grabbing;
+  opacity: 0.6;
+}
+
+.tier-bank-dropzone {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border: 1.5px dashed #475569;
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.tier-bank-dropzone.drag-over {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
 }
 
 .tier-remove-chip-btn {
