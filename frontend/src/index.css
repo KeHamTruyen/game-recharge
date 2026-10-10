@@ -641,6 +641,12 @@ h1, h2, h3, p { margin-top: 0; }
 .tag-manager-edit-form input { flex: 1; min-width: 0; height: 34px; padding: 0 10px; border: 1px solid #2f3b52; border-radius: 7px; outline: 0; background: #080d16; color: #e6ecf5; font-size: 10px; }
 .tag-manager-edit-form input:focus { border-color: #3cdbf8; }
 .game-manager { max-width: 900px; }
+.admin-filter-pill { padding: 6px 13px; border: 1px solid #232d40; border-radius: 99px; font-size: 10.5px; font-weight: 600; color: #8c97aa; background: #090e18; cursor: pointer; transition: all .15s ease; }
+.admin-filter-pill:hover { color: #e2e8f4; border-color: rgba(56, 219, 248, 0.4); }
+.admin-filter-pill.active { color: #38dbf8; background: rgba(56, 219, 248, 0.12); border-color: rgba(56, 219, 248, 0.5); box-shadow: 0 0 12px rgba(56, 219, 248, 0.15); }
+.game-manager-card { transition: border-color .15s ease; }
+.game-manager-card:hover { border-color: #2b3952; }
+.wiki-nav-dropdown .game-dropdown-list > a:last-child { grid-column: 1 / -1; }
 .status-manager { max-width: 940px; }
 .status-create-form { padding: 18px; border: 1px solid #212b3d; border-radius: 11px; display: grid; grid-template-columns: 1.35fr .8fr .8fr auto auto; gap: 10px; align-items: end; background: #0a0f19; }
 .status-create-form > label:not(.status-purchasable) { display: flex; flex-direction: column; gap: 7px; }

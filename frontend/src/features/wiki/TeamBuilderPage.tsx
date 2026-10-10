@@ -1077,17 +1077,6 @@ export default function TeamBuilderPage() {
           bao gồm ma trận khắc hệ, khắc tầm đánh, máy tính tương khắc đối thủ và
           bộ xếp team 4 vị trí toàn diện.
         </p>
-        <div className="build-youtube-action-row">
-          <a
-            href="https://youtu.be/2q5W465z8S0"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="build-youtube-btn"
-          >
-            <span className="btn-yt-icon">▶</span>
-            <span className="btn-yt-text">Xem Clip Hướng Dẫn Build Team ↗</span>
-          </a>
-        </div>
       </div>
 
       {publishSuccess && (

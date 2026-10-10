@@ -301,6 +301,8 @@ export function AdminPage({
   onAddGame,
   onDeleteGame,
   onUpdateGame,
+  onUpdateService,
+  onAddService,
   middlemanInfo,
   onUpdateMiddleman,
   contactInfo,
@@ -334,6 +336,8 @@ export function AdminPage({
   onAddGame: (name: string) => void
   onDeleteGame: (name: string) => void
   onUpdateGame: (name: string, updates: Partial<Service>) => void | Promise<void>
+  onUpdateService?: (serviceId: string | number, updates: Partial<Service>) => void | Promise<void>
+  onAddService?: (serviceData: Omit<Service, "id">) => Promise<Service>
   middlemanInfo: MiddlemanInfo
   onUpdateMiddleman: (info: MiddlemanInfo) => void
   contactInfo: ContactInfo
@@ -368,6 +372,9 @@ export function AdminPage({
   const [newCategory, setNewCategory] = useState("")
   const [editingTag, setEditingTag] = useState<{ oldName: string; name: string } | null>(null)
   const [newGame, setNewGame] = useState("")
+  const [newGameCreateTopup, setNewGameCreateTopup] = useState(true)
+  const [newGameCreateBoosting, setNewGameCreateBoosting] = useState(true)
+  const [gameFilter, setGameFilter] = useState<"all" | "topup" | "boosting" | "hiddenTopup" | "hiddenBoosting">("all")
   const [editingGame, setEditingGame] = useState<string | null>(null)
   const [gameName, setGameName] = useState("")
   const [gameKey, setGameKey] = useState("")
@@ -378,6 +385,8 @@ export function AdminPage({
   const [gameImageX, setGameImageX] = useState(50)
   const [gameImageY, setGameImageY] = useState(50)
   const [gameIsActive, setGameIsActive] = useState(true)
+  const [topupIsActive, setTopupIsActive] = useState(true)
+  const [boostingIsActive, setBoostingIsActive] = useState(true)
   const [image, setImage] = useState("")
   const [imageX, setImageX] = useState(50)
   const [imageY, setImageY] = useState(50)
@@ -1163,108 +1172,478 @@ export function AdminPage({
                 </div>
               </div>
               <form
-                className="category-form"
-                onSubmit={(event) => {
+                className="category-form game-add-form"
+                onSubmit={async (event) => {
                   event.preventDefault()
-                  if (newGame.trim()) {
-                    onAddGame(newGame.trim())
-                    setNewGame("")
-                    if (!game) setGame(newGame.trim())
+                  if (!newGame.trim()) return
+                  const gameTitle = newGame.trim()
+                  if (newGameCreateTopup && onAddService) {
+                    await onAddService({
+                      name: gameTitle,
+                      game: gameTitle,
+                      category: "topup",
+                      description: `Dịch vụ nạp ${gameTitle}`,
+                      iconText: gameTitle.slice(0, 3).toUpperCase(),
+                      tone: "cyan",
+                      sortOrder: services.length,
+                      isActive: true,
+                    })
                   }
+                  if (newGameCreateBoosting && onAddService) {
+                    await onAddService({
+                      name: gameTitle,
+                      game: gameTitle,
+                      category: "boosting",
+                      description: `Dịch vụ cày thuê ${gameTitle}`,
+                      iconText: gameTitle.slice(0, 3).toUpperCase(),
+                      tone: "cyan",
+                      sortOrder: services.length + 1,
+                      isActive: true,
+                    })
+                  }
+                  if (!newGameCreateTopup && !newGameCreateBoosting) {
+                    onAddGame(gameTitle)
+                  }
+                  setNewGame("")
+                  if (!game) setGame(gameTitle)
                 }}
               >
-                <label>
-                  <span>Tên game mới</span>
-                  <input
-                    value={newGame}
-                    onChange={(event) => setNewGame(event.target.value)}
-                    placeholder="Ví dụ: Arknights: Endfield"
-                  />
-                </label>
-                <button className="primary-button">
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", flex: 1 }}>
+                  <label>
+                    <span>Tên game mới</span>
+                    <input
+                      value={newGame}
+                      onChange={(event) => setNewGame(event.target.value)}
+                      placeholder="Ví dụ: Arknights: Endfield"
+                      required
+                    />
+                  </label>
+                  <div style={{ display: "flex", gap: "16px", fontSize: "11px", color: "#a5afbf" }}>
+                    <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={newGameCreateTopup}
+                        onChange={(e) => setNewGameCreateTopup(e.target.checked)}
+                        style={{ accentColor: "#39dbf8" }}
+                      />
+                      <span>Tạo mục Nạp game</span>
+                    </label>
+                    <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={newGameCreateBoosting}
+                        onChange={(e) => setNewGameCreateBoosting(e.target.checked)}
+                        style={{ accentColor: "#39dbf8" }}
+                      />
+                      <span>Tạo mục Cày thuê</span>
+                    </label>
+                  </div>
+                </div>
+                <button className="primary-button" style={{ height: "42px" }}>
                   <Icon name="plus" size={18} /> Thêm game
                 </button>
               </form>
-              <div className="tag-manager game-manager">
-                {games.map((item) => {
-                  const service = services.find(
-                    (entry) => entry.name === item || entry.game === item,
-                  )
-                  const count = products.filter((p) => p.game === item).length
 
-                  return (
-                    <div key={item} className="tag-manager-item">
-                      <div className="tag-manager-info">
-                        <Icon name="game" size={17} />
-                        <div>
-                          <strong>{item}</strong>
-                          <small style={{ color: "#626e82", display: "block" }}>
-                            {count} gói nạp · Tone: {service?.tone || "blue"}
-                            {service && !service.isActive ? " · (Đang ẩn)" : ""}
-                          </small>
+              <div
+                className="game-manager-filter-bar"
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                  margin: "18px 0 12px",
+                }}
+              >
+                <button
+                  type="button"
+                  className={`admin-filter-pill ${gameFilter === "all" ? "active" : ""}`}
+                  onClick={() => setGameFilter("all")}
+                >
+                  Tất cả ({games.length})
+                </button>
+                <button
+                  type="button"
+                  className={`admin-filter-pill ${gameFilter === "topup" ? "active" : ""}`}
+                  onClick={() => setGameFilter("topup")}
+                >
+                  🎮 Có Nạp game (
+                  {services.filter((s) => s.category !== "boosting").length})
+                </button>
+                <button
+                  type="button"
+                  className={`admin-filter-pill ${gameFilter === "boosting" ? "active" : ""}`}
+                  onClick={() => setGameFilter("boosting")}
+                >
+                  ⚔️ Có Cày thuê (
+                  {services.filter((s) => s.category === "boosting").length})
+                </button>
+                <button
+                  type="button"
+                  className={`admin-filter-pill ${gameFilter === "hiddenTopup" ? "active" : ""}`}
+                  onClick={() => setGameFilter("hiddenTopup")}
+                >
+                  🚫 Đang ẩn Nạp (
+                  {
+                    services.filter(
+                      (s) => s.category !== "boosting" && s.isActive === false,
+                    ).length
+                  }
+                  )
+                </button>
+                <button
+                  type="button"
+                  className={`admin-filter-pill ${gameFilter === "hiddenBoosting" ? "active" : ""}`}
+                  onClick={() => setGameFilter("hiddenBoosting")}
+                >
+                  🚫 Đang ẩn Cày thuê (
+                  {
+                    services.filter(
+                      (s) => s.category === "boosting" && s.isActive === false,
+                    ).length
+                  }
+                  )
+                </button>
+              </div>
+
+              <div className="tag-manager game-manager">
+                {games
+                  .filter((item) => {
+                    const topupSvc = services.find(
+                      (s) =>
+                        (s.name === item || s.game === item) &&
+                        s.category !== "boosting",
+                    )
+                    const boostSvc = services.find(
+                      (s) =>
+                        (s.name === item || s.game === item) &&
+                        s.category === "boosting",
+                    )
+                    if (gameFilter === "topup") return !!topupSvc
+                    if (gameFilter === "boosting") return !!boostSvc
+                    if (gameFilter === "hiddenTopup")
+                      return topupSvc && topupSvc.isActive === false
+                    if (gameFilter === "hiddenBoosting")
+                      return boostSvc && boostSvc.isActive === false
+                    return true
+                  })
+                  .map((item) => {
+                    const topupService = services.find(
+                      (entry) =>
+                        (entry.name === item || entry.game === item) &&
+                        entry.category !== "boosting",
+                    )
+                    const boostingService = services.find(
+                      (entry) =>
+                        (entry.name === item || entry.game === item) &&
+                        entry.category === "boosting",
+                    )
+                    const mainService = topupService || boostingService
+                    const topupPkgCount =
+                      topupService?.packageCount ??
+                      products.filter((p) => p.game === item).length
+                    const boostingPkgCount =
+                      boostingService?.packageCount ?? 0
+
+                    return (
+                      <div key={item} className="tag-manager-item game-manager-card">
+                        <div className="tag-manager-info">
+                          <Icon name="game" size={18} />
+                          <div>
+                            <strong>{item}</strong>
+                            <div
+                              className="game-service-status-row"
+                              style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: "6px",
+                                marginTop: "5px",
+                              }}
+                            >
+                              {topupService ? (
+                                <span
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    fontSize: "9px",
+                                    fontWeight: 600,
+                                    padding: "2px 7px",
+                                    borderRadius: "5px",
+                                    background:
+                                      topupService.isActive !== false
+                                        ? "rgba(74, 224, 168, 0.12)"
+                                        : "rgba(239, 117, 135, 0.12)",
+                                    color:
+                                      topupService.isActive !== false
+                                        ? "#4ae0a8"
+                                        : "#ef7587",
+                                    border: `1px solid ${
+                                      topupService.isActive !== false
+                                        ? "rgba(74, 224, 168, 0.25)"
+                                        : "rgba(239, 117, 135, 0.25)"
+                                    }`,
+                                  }}
+                                >
+                                  🎮 Nạp:{" "}
+                                  {topupService.isActive !== false ? "Hiện" : "Ẩn"}{" "}
+                                  ({topupPkgCount} gói)
+                                </span>
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: "9px",
+                                    padding: "2px 7px",
+                                    borderRadius: "5px",
+                                    background: "rgba(100, 116, 139, 0.1)",
+                                    color: "#78859b",
+                                    border:
+                                      "1px dashed rgba(100, 116, 139, 0.25)",
+                                  }}
+                                >
+                                  🎮 Nạp: Chưa tạo
+                                </span>
+                              )}
+                              {boostingService ? (
+                                <span
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    fontSize: "9px",
+                                    fontWeight: 600,
+                                    padding: "2px 7px",
+                                    borderRadius: "5px",
+                                    background:
+                                      boostingService.isActive !== false
+                                        ? "rgba(56, 219, 248, 0.12)"
+                                        : "rgba(239, 117, 135, 0.12)",
+                                    color:
+                                      boostingService.isActive !== false
+                                        ? "#38dbf8"
+                                        : "#ef7587",
+                                    border: `1px solid ${
+                                      boostingService.isActive !== false
+                                        ? "rgba(56, 219, 248, 0.25)"
+                                        : "rgba(239, 117, 135, 0.25)"
+                                    }`,
+                                  }}
+                                >
+                                  ⚔️ Cày:{" "}
+                                  {boostingService.isActive !== false
+                                    ? "Hiện"
+                                    : "Ẩn"}{" "}
+                                  ({boostingPkgCount} gói)
+                                </span>
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: "9px",
+                                    padding: "2px 7px",
+                                    borderRadius: "5px",
+                                    background: "rgba(100, 116, 139, 0.1)",
+                                    color: "#78859b",
+                                    border:
+                                      "1px dashed rgba(100, 116, 139, 0.25)",
+                                  }}
+                                >
+                                  ⚔️ Cày: Chưa tạo
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="tag-manager-actions">
+                          {/* Nút Ẩn/Hiện riêng cho Nạp game */}
+                          {topupService && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onUpdateService) {
+                                  void onUpdateService(topupService.id, {
+                                    isActive: !topupService.isActive,
+                                  })
+                                } else {
+                                  onUpdateGame(item, {
+                                    isActive: !topupService.isActive,
+                                  })
+                                }
+                              }}
+                              title={
+                                topupService.isActive !== false
+                                  ? `Nạp game: Đang HIỆN - Bấm để ẨN khỏi trang Nạp game`
+                                  : `Nạp game: Đang ẨN - Bấm để HIỂN THỊ trên trang Nạp game`
+                              }
+                              style={{
+                                width: "auto",
+                                padding: "0 8px",
+                                height: "28px",
+                                gap: "4px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                fontSize: "10px",
+                                fontWeight: 600,
+                                borderRadius: "6px",
+                                color:
+                                  topupService.isActive !== false
+                                    ? "#4ae0a8"
+                                    : "#ef7587",
+                                background:
+                                  topupService.isActive !== false
+                                    ? "rgba(74, 224, 168, 0.08)"
+                                    : "rgba(239, 117, 135, 0.08)",
+                                border: `1px solid ${
+                                  topupService.isActive !== false
+                                    ? "rgba(74, 224, 168, 0.2)"
+                                    : "rgba(239, 117, 135, 0.2)"
+                                }`,
+                              }}
+                            >
+                              <Icon
+                                name={
+                                  topupService.isActive !== false ? "eye" : "eye-off"
+                                }
+                                size={13}
+                              />
+                              <span>Nạp</span>
+                            </button>
+                          )}
+                          {/* Nút Ẩn/Hiện riêng cho Cày thuê */}
+                          {boostingService ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onUpdateService) {
+                                  void onUpdateService(boostingService.id, {
+                                    isActive: !boostingService.isActive,
+                                  })
+                                }
+                              }}
+                              title={
+                                boostingService.isActive !== false
+                                  ? `Cày thuê: Đang HIỆN - Bấm để ẨN khỏi trang Cày thuê`
+                                  : `Cày thuê: Đang ẨN - Bấm để HIỂN THỊ trên trang Cày thuê`
+                              }
+                              style={{
+                                width: "auto",
+                                padding: "0 8px",
+                                height: "28px",
+                                gap: "4px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                fontSize: "10px",
+                                fontWeight: 600,
+                                borderRadius: "6px",
+                                color:
+                                  boostingService.isActive !== false
+                                    ? "#38dbf8"
+                                    : "#ef7587",
+                                background:
+                                  boostingService.isActive !== false
+                                    ? "rgba(56, 219, 248, 0.08)"
+                                    : "rgba(239, 117, 135, 0.08)",
+                                border: `1px solid ${
+                                  boostingService.isActive !== false
+                                    ? "rgba(56, 219, 248, 0.2)"
+                                    : "rgba(239, 117, 135, 0.2)"
+                                }`,
+                              }}
+                            >
+                              <Icon
+                                name={
+                                  boostingService.isActive !== false
+                                    ? "eye"
+                                    : "eye-off"
+                                }
+                                size={13}
+                              />
+                              <span>Cày</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (onAddService) {
+                                  await onAddService({
+                                    name: item,
+                                    game: item,
+                                    category: "boosting",
+                                    description: `Dịch vụ cày thuê ${item}`,
+                                    iconText: item.slice(0, 3).toUpperCase(),
+                                    tone: "cyan",
+                                    sortOrder: services.length + 1,
+                                    isActive: true,
+                                  })
+                                }
+                              }}
+                              title={`Tạo dịch vụ Cày thuê cho ${item}`}
+                              style={{
+                                width: "auto",
+                                padding: "0 7px",
+                                height: "28px",
+                                fontSize: "10px",
+                                borderRadius: "6px",
+                                color: "#38dbf8",
+                                background: "rgba(56, 219, 248, 0.06)",
+                                border: "1px dashed rgba(56, 219, 248, 0.25)",
+                              }}
+                            >
+                              + Cày
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingGame(item)
+                              setGameName(mainService?.name || item)
+                              setGameKey(mainService?.game || item)
+                              setGameDescription(mainService?.description || "")
+                              setGameTone(mainService?.tone || "blue")
+                              setGameSortOrder(String(mainService?.sortOrder ?? 0))
+                              setGameImage(mainService?.image || "")
+                              const pos = (
+                                mainService?.imagePosition || "50% 50%"
+                              )
+                                .split(" ")
+                                .map(Number)
+                              setGameImageX(!isNaN(pos[0]) ? pos[0] : 50)
+                              setGameImageY(!isNaN(pos[1]) ? pos[1] : 50)
+                              setTopupIsActive(
+                                topupService
+                                  ? topupService.isActive !== false
+                                  : false,
+                              )
+                              setBoostingIsActive(
+                                boostingService
+                                  ? boostingService.isActive !== false
+                                  : false,
+                              )
+                            }}
+                            title={`Chỉnh sửa game "${item}"`}
+                            aria-label={`Sửa ${item}`}
+                          >
+                            <Icon name="edit" size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            className="tag-delete"
+                            onClick={() => {
+                              const confirmMsg = `Bạn có chắc chắn muốn xóa toàn bộ dịch vụ của game "${item}" không?`
+                              if (window.confirm(confirmMsg)) {
+                                onDeleteGame(item)
+                                if (game === item)
+                                  setGame(
+                                    games.find((entry) => entry !== item) || "",
+                                  )
+                              }
+                            }}
+                            title={`Xóa game "${item}"`}
+                            aria-label={`Xóa ${item}`}
+                          >
+                            <Icon name="trash" size={15} />
+                          </button>
                         </div>
                       </div>
-                      <div className="tag-manager-actions">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!service) return
-                            const nextActive = service.isActive === false ? true : false
-                            onUpdateGame(item, { isActive: nextActive })
-                          }}
-                          aria-label={service?.isActive === false ? "Hiện game này" : "Ẩn game này"}
-                          title={service?.isActive === false ? "Game đang ẩn - Bấm để hiển thị trên website" : "Game đang hiện - Bấm để ẩn khỏi website"}
-                          style={{
-                            color: service?.isActive === false ? "#ef7587" : "#4ae0a8",
-                          }}
-                        >
-                          <Icon name={service?.isActive === false ? "eye-off" : "eye"} size={15} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingGame(item)
-                            setGameName(service?.name || item)
-                            setGameKey(service?.game || item)
-                            setGameDescription(service?.description || "")
-                            setGameTone(service?.tone || "blue")
-                            setGameSortOrder(String(service?.sortOrder ?? 0))
-                            setGameImage(service?.image || "")
-                            const pos = (service?.imagePosition || "50% 50%")
-                              .split(" ")
-                              .map(Number)
-                            setGameImageX(!isNaN(pos[0]) ? pos[0] : 50)
-                            setGameImageY(!isNaN(pos[1]) ? pos[1] : 50)
-                            setGameIsActive(service?.isActive ?? true)
-                          }}
-                          title={`Chỉnh sửa game "${item}"`}
-                          aria-label={`Sửa ${item}`}
-                        >
-                          <Icon name="edit" size={15} />
-                        </button>
-                        <button
-                          type="button"
-                          className="tag-delete"
-                          onClick={() => {
-                            const confirmMsg =
-                              count > 0
-                                ? `Game "${item}" đang có ${count} sản phẩm/gói nạp.\n\nNếu xóa, các gói nạp này cũng sẽ bị xóa khỏi hệ thống.\n\nBạn có chắc chắn muốn xóa game này không?`
-                                : `Bạn có chắc chắn muốn xóa game "${item}" không?`
-                            if (window.confirm(confirmMsg)) {
-                              onDeleteGame(item)
-                              if (game === item)
-                                setGame(games.find((entry) => entry !== item) || "")
-                            }
-                          }}
-                          title={`Xóa game "${item}"`}
-                          aria-label={`Xóa ${item}`}
-                        >
-                          <Icon name="trash" size={15} />
-                        </button>
-                      </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
               </div>
 
               {editingGame !== null && (
@@ -1293,7 +1672,20 @@ export function AdminPage({
                       onSubmit={async (e) => {
                         e.preventDefault()
                         if (!gameName.trim()) return
-                        await onUpdateGame(editingGame, {
+
+                        const topupSvc = services.find(
+                          (entry) =>
+                            (entry.name === editingGame ||
+                              entry.game === editingGame) &&
+                            entry.category !== "boosting",
+                        )
+                        const boostSvc = services.find(
+                          (entry) =>
+                            (entry.name === editingGame ||
+                              entry.game === editingGame) &&
+                            entry.category === "boosting",
+                        )
+                        const commonUpdates = {
                           name: gameName.trim(),
                           game: gameKey.trim() || gameName.trim(),
                           description: gameDescription.trim(),
@@ -1301,8 +1693,36 @@ export function AdminPage({
                           sortOrder: Number(gameSortOrder) || 0,
                           image: gameImage.trim() || undefined,
                           imagePosition: `${gameImageX}% ${gameImageY}%`,
-                          isActive: gameIsActive,
-                        })
+                        }
+
+                        if (topupSvc && onUpdateService) {
+                          await onUpdateService(topupSvc.id, {
+                            ...commonUpdates,
+                            isActive: topupIsActive,
+                          })
+                        } else if (!topupSvc && topupIsActive && onAddService) {
+                          await onAddService({
+                            ...commonUpdates,
+                            category: "topup",
+                            iconText: gameName.trim().slice(0, 3).toUpperCase(),
+                            isActive: true,
+                          })
+                        }
+
+                        if (boostSvc && onUpdateService) {
+                          await onUpdateService(boostSvc.id, {
+                            ...commonUpdates,
+                            isActive: boostingIsActive,
+                          })
+                        } else if (!boostSvc && boostingIsActive && onAddService) {
+                          await onAddService({
+                            ...commonUpdates,
+                            category: "boosting",
+                            iconText: gameName.trim().slice(0, 3).toUpperCase(),
+                            isActive: true,
+                          })
+                        }
+
                         setEditingGame(null)
                       }}
                     >
@@ -1360,7 +1780,7 @@ export function AdminPage({
                           <input
                             value={gameDescription}
                             onChange={(e) => setGameDescription(e.target.value)}
-                            placeholder="Mô tả tóm tắt dịch vụ nạp cho game..."
+                            placeholder="Mô tả tóm tắt dịch vụ cho game..."
                           />
                         </label>
 
@@ -1401,15 +1821,133 @@ export function AdminPage({
                           </div>
                         )}
 
-                        <label className="modal-availability" style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
-                          <input
-                            type="checkbox"
-                            checked={gameIsActive}
-                            onChange={(e) => setGameIsActive(e.target.checked)}
-                            style={{ width: "auto", accentColor: "#39dbf8" }}
-                          />
-                          <span>Bật hiển thị game này trên website</span>
-                        </label>
+                        <div
+                          style={{
+                            padding: "14px",
+                            border: "1px solid #232d40",
+                            borderRadius: "10px",
+                            background: "rgba(10, 16, 28, 0.6)",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "10px",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              color: "#38dbf8",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.5px",
+                            }}
+                          >
+                            Trạng thái hiển thị theo từng dịch vụ:
+                          </span>
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: "10px",
+                            }}
+                          >
+                            <label
+                              style={{
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "9px",
+                                padding: "10px 12px",
+                                borderRadius: "8px",
+                                background: topupIsActive
+                                  ? "rgba(74, 224, 168, 0.08)"
+                                  : "rgba(239, 117, 135, 0.06)",
+                                border: `1px solid ${
+                                  topupIsActive
+                                    ? "rgba(74, 224, 168, 0.25)"
+                                    : "rgba(239, 117, 135, 0.2)"
+                                }`,
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={topupIsActive}
+                                onChange={(e) => setTopupIsActive(e.target.checked)}
+                                style={{ width: "auto", accentColor: "#4ae0a8" }}
+                              />
+                              <div>
+                                <strong
+                                  style={{
+                                    fontSize: "12px",
+                                    display: "block",
+                                    color: "#e3e9f4",
+                                  }}
+                                >
+                                  🎮 Mục Nạp game
+                                </strong>
+                                <small
+                                  style={{
+                                    fontSize: "10px",
+                                    color: topupIsActive ? "#4ae0a8" : "#ef7587",
+                                  }}
+                                >
+                                  {topupIsActive
+                                    ? "Đang hiện trên web"
+                                    : "Đang ẩn khỏi web"}
+                                </small>
+                              </div>
+                            </label>
+                            <label
+                              style={{
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "9px",
+                                padding: "10px 12px",
+                                borderRadius: "8px",
+                                background: boostingIsActive
+                                  ? "rgba(56, 219, 248, 0.08)"
+                                  : "rgba(239, 117, 135, 0.06)",
+                                border: `1px solid ${
+                                  boostingIsActive
+                                    ? "rgba(56, 219, 248, 0.25)"
+                                    : "rgba(239, 117, 135, 0.2)"
+                                }`,
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={boostingIsActive}
+                                onChange={(e) =>
+                                  setBoostingIsActive(e.target.checked)
+                                }
+                                style={{ width: "auto", accentColor: "#38dbf8" }}
+                              />
+                              <div>
+                                <strong
+                                  style={{
+                                    fontSize: "12px",
+                                    display: "block",
+                                    color: "#e3e9f4",
+                                  }}
+                                >
+                                  ⚔️ Mục Cày thuê
+                                </strong>
+                                <small
+                                  style={{
+                                    fontSize: "10px",
+                                    color: boostingIsActive
+                                      ? "#38dbf8"
+                                      : "#ef7587",
+                                  }}
+                                >
+                                  {boostingIsActive
+                                    ? "Đang hiện trên web"
+                                    : "Đang ẩn khỏi web"}
+                                </small>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
 
                         <div
                           className="product-modal-actions"

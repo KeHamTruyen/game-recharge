@@ -202,48 +202,92 @@ export function AdminRoute() {
         }}
         onAddGame={async (name) => {
           if (store.services.some((item) => item.name === name || item.game === name)) return
-          const service = await api.admin.createService({
+          const topupService = await api.admin.createService({
             name,
             game: name,
-            description: "",
+            category: "topup",
+            description: `Dịch vụ nạp ${name}`,
             iconText: name.slice(0, 3).toUpperCase(),
             tone: "cyan",
             sortOrder: store.services.length,
             isActive: true,
           })
-          store.setServices((current) => [...current, service])
+          store.setServices((current) => [...current, topupService])
           store.setGames((current) => [...current, name])
         }}
+        onAddService={async (serviceData) => {
+          const created = await api.admin.createService({
+            ...serviceData,
+            game: serviceData.game || serviceData.name,
+          })
+          store.setServices((current) => [...current, created])
+          if (!store.games.includes(created.name)) {
+            store.setGames((current) => [...current, created.name])
+          }
+          store.setNotice(`Đã tạo dịch vụ "${created.name}" (${created.category === "boosting" ? "Cày thuê" : "Nạp game"}) thành công.`)
+          return created
+        }}
         onDeleteGame={async (name) => {
-          const service = store.services.find((item) => item.name === name || item.game === name)
+          const matchingServices = store.services.filter(
+            (item) => item.name === name || item.game === name,
+          )
           try {
-            if (service) {
+            for (const service of matchingServices) {
               await api.admin.deleteService(service.id)
-              store.setServices((current) => current.filter((item) => item.id !== service.id))
-              store.setServicePackages((current) => current.filter((item) => item.serviceId !== service.id))
-              store.setProducts((current) => current.filter((item) => item.game !== name))
             }
+            const matchingIds = new Set(matchingServices.map((s) => s.id))
+            store.setServices((current) =>
+              current.filter((item) => !matchingIds.has(item.id)),
+            )
+            store.setServicePackages((current) =>
+              current.filter((item) => !matchingIds.has(item.serviceId)),
+            )
+            store.setProducts((current) => current.filter((item) => item.game !== name))
             store.setGames((current) => current.filter((item) => item !== name))
-            store.setNotice(`Đã xóa game "${name}" thành công.`)
+            store.setNotice(`Đã xóa toàn bộ dịch vụ của game "${name}" thành công.`)
           } catch (error) {
             store.setNotice(error instanceof Error ? error.message : "Xóa game thất bại.")
           }
         }}
         onUpdateGame={async (name, updates) => {
-          const service = store.services.find((item) => item.name === name || item.game === name)
-          if (!service) return
+          const matchingServices = store.services.filter(
+            (item) => item.name === name || item.game === name,
+          )
+          if (!matchingServices.length) return
           try {
-            const updated = await api.admin.updateService(service.id, updates)
-            store.setServices((current) => current.map((item) => item.id === service.id ? updated : item))
-            store.setGames((current) => current.map((item) => item === name ? (updated.name || item) : item))
-            if (updated.name && updated.name !== name) {
-              store.setProducts((current) =>
-                current.map((item) => item.game === name ? { ...item, game: updated.name } : item)
+            for (const service of matchingServices) {
+              const updated = await api.admin.updateService(service.id, updates)
+              store.setServices((current) =>
+                current.map((item) => (item.id === service.id ? updated : item)),
               )
             }
-            store.setNotice(`Đã cập nhật thông tin game "${updated.name || name}" thành công.`)
+            store.setGames((current) =>
+              current.map((item) => (item === name ? updates.name || item : item)),
+            )
+            if (updates.name && updates.name !== name) {
+              const newGameName = updates.name
+              store.setProducts((current) =>
+                current.map((item) =>
+                  item.game === name ? { ...item, game: newGameName } : item,
+                ),
+              )
+            }
+            store.setNotice(`Đã cập nhật thông tin game "${updates.name || name}" thành công.`)
           } catch (error) {
             store.setNotice(error instanceof Error ? error.message : "Cập nhật game thất bại.")
+          }
+        }}
+        onUpdateService={async (serviceId, updates) => {
+          try {
+            const updated = await api.admin.updateService(serviceId, updates)
+            store.setServices((current) =>
+              current.map((item) => (item.id === serviceId ? updated : item)),
+            )
+            const typeLabel = updated.category === "boosting" ? "Cày thuê" : "Nạp game"
+            const statusLabel = updated.isActive ? "Đang hiện" : "Đang ẩn"
+            store.setNotice(`Đã chuyển trạng thái ${typeLabel} game "${updated.name}" sang: ${statusLabel}.`)
+          } catch (error) {
+            store.setNotice(error instanceof Error ? error.message : "Cập nhật dịch vụ thất bại.")
           }
         }}
         middlemanInfo={store.middlemanInfo}

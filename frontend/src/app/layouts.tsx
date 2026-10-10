@@ -275,6 +275,13 @@ export function PublicLayout() {
                             <small>Vật phẩm, trang bị, nguyên liệu</small>
                           </span>
                         </NavLink>
+                        <NavLink to="/wiki/huong-dan">
+                          <span className="game-dropdown-icon">🧭</span>
+                          <span>
+                            <strong>Cẩm nang tân thủ</strong>
+                            <small>Kinh nghiệm &amp; mẹo chơi toàn diện</small>
+                          </span>
+                        </NavLink>
                       </div>
                     </div>
                   </div>
