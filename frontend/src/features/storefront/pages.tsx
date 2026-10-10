@@ -445,7 +445,9 @@ export function TopupInformationPage({
                       {field.placeholder || "Chọn một giá trị"}
                     </option>
                     {field.options.map((option) => (
-                      <option key={option}>{option}</option>
+                      <option key={typeof option === "string" ? option : option.value} value={typeof option === "string" ? option : option.value}>
+                        {typeof option === "string" ? option : option.label}
+                      </option>
                     ))}
                   </select>
                 ) : field.type === "textarea" ? (
@@ -459,6 +461,7 @@ export function TopupInformationPage({
                 ) : (
                   <input
                     type={field.type}
+                    pattern={field.pattern}
                     value={values[field.key] || ""}
                     onChange={(event) =>
                       setValues({ ...values, [field.key]: event.target.value })
@@ -555,13 +558,13 @@ export function CheckoutPage({
   onNotice: (message: string) => void
   onConfirm: () => boolean | PaymentDetails | void | Promise<boolean | PaymentDetails | void>
 }) {
-  const orderCode = `DUKE${String(pkg.id).padStart(4, "0")}-${Date.now().toString(36).toUpperCase().slice(-4)}`
-  const totalAmount = cart.reduce((total, item) => total + item.pkg.price * item.quantity, 0)
-  const [orderConfirmed, setOrderConfirmed] = useState(false)
+  const totalAmount = payment?.amount ?? cart.reduce((total, item) => total + item.pkg.price * item.quantity, 0)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const copy = (value: string, label: string) => {
-    navigator.clipboard?.writeText(value)
-    onNotice(`Đã sao chép ${label}.`)
+  const copy = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      onNotice(`Đã sao chép ${label}.`)
+    } catch { onNotice("Không thể sao chép. Vui lòng sao chép thủ công.") }
   }
 
   return (
@@ -596,24 +599,23 @@ export function CheckoutPage({
                 <img src={payment.qrCode} alt="QR thanh toán SePay" />
               ) : (
                 <>
-                  <div className="qr-pattern" />
                   <span>QR thanh toán SePay</span>
-                  <small>Bấm xác nhận để tạo mã thanh toán</small>
+                  <small>Bấm Tạo đơn hàng để nhận thông tin thanh toán</small>
                 </>
               )}
             </div>
             <div className="bank-details">
               <div>
                 <small>Ngân hàng</small>
-                <strong>Quét QR VietQR qua SePay</strong>
+                <strong>{payment?.bankCode || "Chưa tạo đơn hàng"}</strong>
               </div>
               <div>
                 <small>Số tài khoản</small>
-                <strong>Quét mã QR bên trái</strong>
+                <strong>{payment?.accountNumber || "—"}</strong>
               </div>
               <div>
                 <small>Chủ tài khoản</small>
-                <strong>DUKE1305</strong>
+                <strong>{payment?.accountName || "—"}</strong>
               </div>
               <div className="copy-field">
                 <span>
@@ -627,10 +629,11 @@ export function CheckoutPage({
               <div className="copy-field highlight">
                 <span>
                   <small>Nội dung chuyển khoản</small>
-                  <strong>{payment?.orderCode || orderCode}</strong>
+                  <strong>{payment?.transferContent || "Chưa tạo đơn hàng"}</strong>
                 </span>
                 <button
-                  onClick={() => copy(payment?.orderCode || orderCode, "nội dung chuyển khoản")}
+                  disabled={!payment}
+                  onClick={() => payment && copy(payment.transferContent, "nội dung chuyển khoản")}
                 >
                   Sao chép
                 </button>
@@ -640,8 +643,8 @@ export function CheckoutPage({
           <div className="payment-warning">
             <Icon name="clock" size={19} />
             <p>
-              Đơn hàng được giữ trong 15 phút. Không đóng trang này sau khi
-              chuyển khoản để hệ thống kiểm tra thanh toán.
+              Chỉ chuyển khoản sau khi thông tin thanh toán được tạo thành công.
+              Giữ trang này mở để theo dõi kết quả xác nhận từ hệ thống.
             </p>
           </div>
           {Object.keys(topupInfo).length > 0 && (
@@ -703,15 +706,15 @@ export function CheckoutPage({
           </div>
           <button
             className="primary-button confirm-payment"
-            disabled={orderConfirmed || isSubmitting}
+            disabled={Boolean(payment) || isSubmitting}
             onClick={async () => {
               setIsSubmitting(true)
-              const result = await onConfirm()
-              setIsSubmitting(false)
-              if (result !== false) setOrderConfirmed(true)
+              try { await onConfirm() }
+              catch (error) { onNotice(error instanceof Error ? error.message : "Không thể tạo đơn hàng.") }
+              finally { setIsSubmitting(false) }
             }}
           >
-            {orderConfirmed ? "Đã ghi nhận thanh toán" : isSubmitting ? "Đang ghi nhận..." : "Tôi đã chuyển khoản"}{" "}
+            {paymentStatus === "PAID" ? "Đã nhận thanh toán" : payment ? "Đang chờ chuyển khoản" : isSubmitting ? "Đang tạo đơn…" : "Tạo đơn hàng"}{" "}
             <Icon name="check" size={17} />
           </button>
         </aside>
@@ -806,7 +809,9 @@ export function LegacyTopupInformationPage({
                       {field.placeholder || "Chọn một giá trị"}
                     </option>
                     {field.options.map((option) => (
-                      <option key={option}>{option}</option>
+                      <option key={typeof option === "string" ? option : option.value} value={typeof option === "string" ? option : option.value}>
+                        {typeof option === "string" ? option : option.label}
+                      </option>
                     ))}
                   </select>
                 ) : field.type === "textarea" ? (
@@ -820,6 +825,7 @@ export function LegacyTopupInformationPage({
                 ) : (
                   <input
                     type={field.type}
+                    pattern={field.pattern}
                     value={values[field.key] || ""}
                     onChange={(event) =>
                       setValues({ ...values, [field.key]: event.target.value })

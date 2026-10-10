@@ -4,6 +4,7 @@ import {
   type ReactNode,
   type SetStateAction,
   useContext,
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -93,6 +94,7 @@ type AppStoreValue = AppSnapshot & {
   notice: string
 
   apiReady: boolean
+  apiError: string
 
   setProducts: Setter<Product[]>
 
@@ -269,16 +271,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const [contactInfo, setContactInfo] = useState(initial.contactInfo)
 
-  const [users, setUsers] = useState(initial.users || initialUsers)
+  const [users, setUsers] = useState<ManagedUser[]>([])
 
-  const [transactions, setTransactions] = useState(
-    initial.transactions || initialTransactions,
-  )
+  const [transactions, setTransactions] = useState<Transaction[]>([])
 
-  const [services, setServices] = useState<Service[]>(initialServices)
+  const [services, setServices] = useState<Service[]>([])
 
   const [servicePackages, setServicePackages] = useState<ServicePackage[]>(
-    initialServicePackages,
+    [],
   )
 
   const [user, setUser] = useState<User | null>(null)
@@ -300,6 +300,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [notice, setNotice] = useState("")
 
   const [apiReady, setApiReady] = useState(false)
+  const [apiError, setApiError] = useState("")
 
   const mergeRemoteContent = (
     remoteMiddleman: MiddlemanInfo,
@@ -503,14 +504,30 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       })
 
       .catch(() => {
-        if (!cancelled)
-          setNotice("Không thể kết nối máy chủ. Đang dùng dữ liệu tạm thời.")
+        if (!cancelled) {
+          setApiError("Không thể tải dữ liệu từ máy chủ. Vui lòng thử lại.")
+          setApiReady(true)
+        }
       })
 
     return () => {
       cancelled = true
     }
   }, [])
+
+  const refreshTransactions = useCallback(async () => {
+        if (!user) return []
+
+        const nextTx =
+          user.role === "admin"
+            ? await api.admin.transactions()
+            : await api.orders.mine()
+
+        setTransactions(nextTx)
+
+        return nextTx
+
+  }, [user])
 
   const value = useMemo<AppStoreValue>(
     () => ({
@@ -537,6 +554,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       checkoutInfo,
       notice,
       apiReady,
+      apiError,
       setProducts,
       setProductStatuses,
 
@@ -660,31 +678,21 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       },
 
       async logout() {
-        try {
-          await api.auth.logout()
-        } catch {
-          // ignore network or offline error to ensure local session is cleared
-        }
+        await api.auth.logout()
 
         setUser(null)
-
+        setUsers([])
         setTransactions([])
+        setCart([])
+        setCheckoutInfo({})
+        setSelectedPackage(null)
+        setSelectedService(null)
       },
 
-      async refreshTransactions() {
-        if (!user) return []
-
-        const nextTx =
-          user.role === "admin"
-            ? await api.admin.transactions()
-            : await api.orders.mine()
-
-        setTransactions(nextTx)
-
-        return nextTx
-      },
+      refreshTransactions,
     }),
     [
+      refreshTransactions,
       products,
       productStatuses,
       topupTemplates,
@@ -708,6 +716,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       checkoutInfo,
       notice,
       apiReady,
+      apiError,
     ],
   )
 

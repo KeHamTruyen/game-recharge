@@ -46,21 +46,25 @@ export type PaymentDetails = {
   amount: number
   checkoutUrl: string
   qrCode: string
+  bankCode: string
+  accountNumber: string
+  accountName: string
+  transferContent: string
 }
 
-function getDefaultApiUrl(): string {
-  if (typeof window !== "undefined" && window.location) {
-    const hostname = window.location.hostname
-    if (hostname && hostname !== "localhost" && hostname !== "127.0.0.1") {
-      return `${window.location.protocol}//${hostname}:3000/api`
-    }
+const client = new HttpClient(import.meta.env.VITE_API_URL || "/api")
+
+// Existing screens paginate locally, so fetch every API page before showing totals.
+async function allPages<T>(path: string): Promise<T[]> {
+  const items: T[] = []
+  for (let page = 1; ; page += 1) {
+    const result = await client.request<ApiEnvelope<{ items: T[]; hasNext: boolean }>>(
+      `${path}${path.includes("?") ? "&" : "?"}limit=100&page=${page}`,
+    )
+    items.push(...result.data.items)
+    if (!result.data.hasNext) return items
   }
-  return "http://localhost:3000/api"
 }
-
-const client = new HttpClient(
-  import.meta.env.VITE_API_URL || getDefaultApiUrl(),
-)
 
 const roleMap = { CUSTOMER: "customer", ADMIN: "admin" } as const
 const statusMap = {
@@ -89,7 +93,7 @@ function mapTransaction(item: ApiTransaction): Transaction {
     amount: Number(item.amount),
     quantity: item.quantity,
     status: mapStatus(item.status),
-    date: new Date(item.createdAt).toLocaleString("vi-VN"),
+    date: item.createdAt,
     topupInfo: Object.fromEntries(
       Object.entries(item.topupInfo || {}).map(([key, value]) => [key, String(value)]),
     ),
@@ -126,10 +130,11 @@ function mapTemplate(item: Record<string, unknown>): TopupTemplate {
         required: Boolean(value.required),
         placeholder: String(value.placeholder || ""),
         helpText: String(value.helpText || value.hint || ""),
+        pattern: value.pattern ? String(value.pattern) : undefined,
         options: Array.isArray(value.options)
           ? value.options.map((option) =>
               typeof option === "object" && option !== null
-                ? String((option as { label?: unknown }).label || "")
+                ? { value: String(option.value ?? option.label ?? ""), label: String(option.label ?? option.value ?? "") }
                 : String(option),
             )
           : [],
@@ -211,14 +216,14 @@ export const api = {
       }))
       const packageResults = await Promise.all(
         services.map((service) =>
-          client.request<ApiEnvelope<{ items: ApiPackage[] }>>(
-            `/catalog/services/${service.id}/packages?limit=100`,
+          allPages<ApiPackage>(
+            `/catalog/services/${service.id}/packages`,
           ),
         ),
       )
       return {
         services,
-        packages: packageResults.flatMap((result) => result.data.items.map(mapPackage)),
+        packages: packageResults.flatMap((result) => result.map(mapPackage)),
         templates: templatesResult.data.map(mapTemplate),
         statuses: statusesResult.data.map((status) => ({
           ...status,
@@ -264,8 +269,7 @@ export const api = {
       }
     },
     async mine() {
-      const result = await client.request<ApiEnvelope<{ items: ApiTransaction[] }>>("/orders/mine?limit=100")
-      return result.data.items.map(mapTransaction)
+      return (await allPages<ApiTransaction>("/orders/mine")).map(mapTransaction)
     },
   },
   payments: {
@@ -301,9 +305,8 @@ export const api = {
       await client.request(`/admin/services/${String(id)}`, { method: "DELETE" })
     },
     async packages(serviceId?: string | number) {
-      const query = serviceId ? `&serviceId=${encodeURIComponent(String(serviceId))}` : ""
-      const result = await client.request<ApiEnvelope<{ items: ApiPackage[] }>>(`/admin/packages?limit=100${query}`)
-      return result.data.items.map(mapPackage)
+      const query = serviceId ? `?serviceId=${encodeURIComponent(String(serviceId))}` : ""
+      return (await allPages<ApiPackage>(`/admin/packages${query}`)).map(mapPackage)
     },
     async createPackage(payload: Omit<ServicePackage, "id">) {
       const result = await client.request<ApiEnvelope<ApiPackage>>("/admin/packages", {
@@ -389,7 +392,7 @@ export const api = {
       return result.data.value
     },
     async users() {
-      const result = await client.request<ApiEnvelope<{ items: Array<{
+      const result = await allPages<{
         id: string
         email: string
         name: string
@@ -397,8 +400,8 @@ export const api = {
         status: "ACTIVE" | "BLOCKED"
         totalSpent: string | number
         createdAt: string
-      }> }>>("/admin/users?limit=100")
-      return result.data.items.map((item) => ({
+      }>("/admin/users")
+      return result.map((item) => ({
         id: item.id,
         email: item.email,
         name: item.name,
@@ -409,8 +412,7 @@ export const api = {
       }))
     },
     async transactions() {
-      const result = await client.request<ApiEnvelope<{ items: ApiTransaction[] }>>("/admin/transactions?limit=100")
-      return result.data.items.map(mapTransaction)
+      return (await allPages<ApiTransaction>("/admin/transactions")).map(mapTransaction)
     },
     async updateUser(id: string | number, updates: Partial<ManagedUser>) {
     const result = await client.request<ApiEnvelope<{

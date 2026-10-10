@@ -369,6 +369,7 @@ export default function TeamBuilderPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   const [publishSuccess, setPublishSuccess] = useState(false)
+  const [publishing, setPublishing] = useState(false)
 
   const [shareCodeCopied, setShareCodeCopied] = useState(false)
 
@@ -857,7 +858,8 @@ export default function TeamBuilderPage() {
 
   // Publish or Update team
 
-  const handlePublishToCommunity = () => {
+  const handlePublishToCommunity = async () => {
+    if (publishing) return
     if (!user) {
       alert("Vui lòng đăng nhập tài khoản để lưu hoặc đóng góp đội hình!")
 
@@ -883,28 +885,6 @@ export default function TeamBuilderPage() {
     }
 
     // --- 1. Cơ Chế Chống Spam (Rate Limit Cooldown: 20 giây giữa các lần đăng mới) ---
-
-    const SPAM_COOLDOWN_MS = 20000
-
-    const lastPublishTime = Number(
-      localStorage.getItem("duke1305_team_publish_last_time") || "0",
-    )
-
-    const now = Date.now()
-
-    if (!editingTeam && now - lastPublishTime < SPAM_COOLDOWN_MS) {
-      const waitSeconds = Math.ceil(
-        (SPAM_COOLDOWN_MS - (now - lastPublishTime)) / 1000,
-      )
-
-      alert(
-        `[Chống Spam]\nBạn vừa đăng đội hình gần đây. Vui lòng chờ ${waitSeconds} giây nữa trước khi đăng đội hình mới tiếp theo!`,
-      )
-
-      return
-    }
-
-    // --- 2. Kiểm Tra Không Cho Đăng Đội Hình Đã Tồn Tại ---
 
     const allTeams = getEffectiveCommunityTeams()
 
@@ -967,25 +947,27 @@ export default function TeamBuilderPage() {
 
       s1_name: s.skills[0]?.name || "",
 
-      s1_icon: s.skills[0]?.icon || "",
+      s1_icon: formatImageUrl(s.skills[0]?.icon),
 
       s2_name: s.skills[1]?.name || "",
 
-      s2_icon: s.skills[1]?.icon || "",
+      s2_icon: formatImageUrl(s.skills[1]?.icon),
 
       s3_name: s.skills[2]?.name || "",
 
-      s3_icon: s.skills[2]?.icon || "",
+      s3_icon: formatImageUrl(s.skills[2]?.icon),
 
       item_name: s.item?.name || "",
 
-      item_icon: s.item?.icon || "",
+      item_icon: formatImageUrl(s.item?.icon),
 
       item_id: s.item?.id || "",
 
       item_quality: s.item?.quality || "",
     }))
 
+    setPublishing(true)
+    try {
     if (editingTeam) {
       // Cập nhật đội hình hiện tại
 
@@ -1004,9 +986,9 @@ export default function TeamBuilderPage() {
         time_ago: "Vừa cập nhật",
       }
 
-      updateCommunityTeam(updatedTeam)
+      const savedTeam = await updateCommunityTeam(updatedTeam)
 
-      setEditingTeam(updatedTeam)
+      setEditingTeam({ ...updatedTeam, ...savedTeam })
 
       setIsEditSaved(true)
 
@@ -1045,17 +1027,16 @@ export default function TeamBuilderPage() {
         isCommunity: true,
       }
 
-      addCommunityTeam(newTeam)
-
-      localStorage.setItem(
-        "duke1305_team_publish_last_time",
-        String(Date.now()),
-      )
+      const savedTeam = await addCommunityTeam(newTeam)
+      setEditingTeam(savedTeam)
 
       setIsEditSaved(false)
 
       setPublishSuccess(true)
     }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Unable to save team.")
+    } finally { setPublishing(false) }
   }
 
   // Active monster in slot
@@ -2628,6 +2609,7 @@ export default function TeamBuilderPage() {
                               type="button"
                               className="publish-btn edit-mode-save-btn"
                               onClick={handlePublishToCommunity}
+                              disabled={publishing}
                             >
                               💾 Lưu Cập Nhật Đội Hình (ID: #{editingTeam.id})
                             </button>
@@ -2644,6 +2626,7 @@ export default function TeamBuilderPage() {
                             type="button"
                             className="publish-btn"
                             onClick={handlePublishToCommunity}
+                              disabled={publishing}
                           >
                             🚀 Đăng Lên Cộng Đồng (Đóng Góp)
                           </button>
@@ -3192,11 +3175,11 @@ export default function TeamBuilderPage() {
                                 `Bạn có chắc chắn muốn xóa đội hình "${team.title}"?`,
                               )
                             ) {
-                              deleteCommunityTeam(team.id)
+                              void deleteCommunityTeam(team.id).then(() => {
+                                if (editingTeam?.id === team.id) handleCancelEdit()
+                              }).catch((error) => alert(error instanceof Error ? error.message : "Unable to delete team."))
 
-                              if (editingTeam?.id === team.id) {
-                                handleCancelEdit()
-                              }
+
                             }
                           }}
                           title="Xóa đội hình này"

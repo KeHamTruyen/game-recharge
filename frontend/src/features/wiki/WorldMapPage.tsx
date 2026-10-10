@@ -426,18 +426,20 @@ export default function WorldMapPage() {
   ])
 
   // Mouse pan handling
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.PointerEvent) => {
+    if (!e.isPrimary || e.button !== 0) return
     if (
       (e.target as HTMLElement).closest(
         ".map-marker-pin, .zone-map-label-tag, button, input, select, .map-interactive-hud",
       )
     )
       return
+    e.currentTarget.setPointerCapture(e.pointerId)
     setIsDragging(true)
     setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y })
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: React.PointerEvent) => {
     if (!isDragging) return
     setPanOffset({
       x: e.clientX - dragStart.x,
@@ -542,12 +544,11 @@ export default function WorldMapPage() {
           type="button"
           className="map-banner-sync-btn"
           onClick={() => {
-            alert(
-              "Dữ liệu bản đồ đã được đồng bộ hóa thành công với máy chủ mới nhất!",
-            )
+            setPanOffset({ x: 0, y: 0 })
+            setZoomLevel(0.85)
           }}
         >
-          🔄 Đồng Bộ Dữ Liệu
+          🔄 Đặt lại góc nhìn
         </button>
       </div>
 
@@ -768,10 +769,12 @@ export default function WorldMapPage() {
         <div
           className={`game-map-viewport ${isDragging ? "is-grabbing" : ""}`}
           ref={mapViewportRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          style={{ touchAction: "none" }}
+          onPointerDown={handleMouseDown}
+          onPointerMove={handleMouseMove}
+          onPointerUp={handleMouseUp}
+          onPointerCancel={handleMouseUp}
+          onLostPointerCapture={handleMouseUp}
         >
           {/* Transform Canvas */}
           <div

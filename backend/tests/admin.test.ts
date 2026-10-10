@@ -211,4 +211,26 @@ describe('Admin Panel Operations & Audit Logging', () => {
     assert.strictEqual(res.body.success, true);
     createdServiceId = '';
   });
+
+  it('Concurrent completion updates count customer spending only once', async () => {
+    const customer = await prisma.user.create({ data: {
+      email: 'concurrent-completion@test.invalid', name: 'Concurrency test',
+      passwordHash: await bcrypt.hash(password, 10),
+    } });
+    const order = await prisma.transaction.create({ data: {
+      code: `CONCURRENT${Date.now()}`, userId: customer.id, userEmail: customer.email,
+      packageName: 'Test package', gameName: 'Test game', amount: 1000, quantity: 1,
+      status: 'PROCESSING', paymentStatus: 'PAID',
+    } });
+    try {
+      const responses = await Promise.all(Array.from({ length: 4 }, () =>
+        adminClient.patch(`/api/admin/transactions/${order.id}/status`, { status: 'COMPLETED' })));
+      assert.ok(responses.every((response) => response.status === 200));
+      const updated = await prisma.user.findUniqueOrThrow({ where: { id: customer.id } });
+      assert.strictEqual(Number(updated.totalSpent), 1000);
+    } finally {
+      await prisma.transaction.delete({ where: { id: order.id } });
+      await prisma.user.delete({ where: { id: customer.id } });
+    }
+  });
 });

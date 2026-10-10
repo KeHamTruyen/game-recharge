@@ -1,0 +1,9 @@
+**/node_modules
+**/dist
+**/.env*
+**/backups
+**/uploads
+**/*.log
+.git
+.cache
+.tmp-*

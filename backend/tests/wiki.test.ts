@@ -263,6 +263,14 @@ describe('Wiki API (Teams, Giftcodes, Aniimos, Voting & RBAC)', () => {
     const resReport = await otherClient.post(`/api/wiki/giftcodes/${createdGiftcodeId}/vote`, { type: 'report' });
     assert.strictEqual(resReport.status, 200);
 
+    const beforeEdit = await prisma.wikiEntry.findUniqueOrThrow({ where: { key: `giftcode:${createdGiftcodeId}` } });
+    const edit = await adminClient.put(`/api/wiki/giftcodes/${createdGiftcodeId}`, { code: 'UPDATEDCODE', reward: 'Updated reward' });
+    assert.strictEqual(edit.status, 200);
+    assert.strictEqual(edit.body.data.authorId, beforeEdit.authorId);
+    assert.strictEqual(edit.body.data.data.upvotes, 1);
+    assert.strictEqual(edit.body.data.data.reports, 1);
+    assert.strictEqual(edit.body.data.data.author, (beforeEdit.data as { author?: string }).author);
+
     // Customer attempts to delete giftcode -> 403
     const resCustDel = await authorClient.delete(`/api/wiki/giftcodes/${createdGiftcodeId}`);
     assert.strictEqual(resCustDel.status, 403);

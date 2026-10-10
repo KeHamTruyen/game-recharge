@@ -19,17 +19,20 @@ export function ContactRoute() {
 export function AccountRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
+  if (!store.apiReady && !store.user) return <p className="page-width" role="status">Đang tải tài khoản…</p>
   if (!store.user) return <Navigate to="/nap-game" replace />
   if (store.user.role === "admin") return <Navigate to="/admin" replace />
   return (
     <AccountPage
       email={store.user.email}
+      displayName={store.user.name}
+      onRefresh={store.refreshTransactions}
       transactions={(store.transactions || []).filter(
         (item) => !item.email || item.email.toLowerCase() === store.user?.email.toLowerCase(),
       )}
       onLogout={() => {
-        store.logout()
-        navigate("/nap-game")
+        void store.logout().then(() => navigate("/nap-game")).catch((error) =>
+          store.setNotice(error instanceof Error ? error.message : "Không thể đăng xuất. Vui lòng thử lại."))
       }}
       onUpdateProfile={async (name) => { await store.updateProfile(name) }}
       onChangePassword={store.changePassword}

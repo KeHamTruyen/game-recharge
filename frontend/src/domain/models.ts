@@ -38,8 +38,8 @@ export type Service = {
   description: string
   iconText: string
   tone: string
-  image?: string
-  imagePosition?: string
+  image?: string | null
+  imagePosition?: string | null
   packageCount?: number
   isActive: boolean
   sortOrder: number
@@ -96,7 +96,8 @@ export type TopupField = {
   required: boolean
   placeholder: string
   helpText: string
-  options: string[]
+  options: (string | { value: string; label: string })[]
+  pattern?: string
 }
 
 export type TopupTemplate = {

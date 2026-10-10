@@ -12,12 +12,20 @@ import type { Service, ServicePackage } from "@/domain/models"
 import { api } from "@/services/api"
 import type { PaymentDetails } from "@/services/api"
 
+function CatalogStatus({ error }: { error: string }) {
+  return <div className="page-width empty-state" role={error ? "alert" : "status"}>
+    {error || "Đang tải dịch vụ…"}
+    {error && <button className="secondary-button" onClick={() => window.location.reload()}>Thử lại</button>}
+  </div>
+}
+
 // ─── Trang chủ: Danh sách dịch vụ ───────────────────────────────────────────
 
 export function StorefrontRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
   const [search, setSearch] = useState("")
+  if (!store.apiReady || store.apiError) return <CatalogStatus error={store.apiError} />
 
   const topupServices = store.services.filter((s) => s.category !== "boosting")
 
@@ -44,6 +52,7 @@ export function BoostingRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
   const [search, setSearch] = useState("")
+  if (!store.apiReady || store.apiError) return <CatalogStatus error={store.apiError} />
 
   const boostingServices = store.services.filter((s) => s.category === "boosting")
 
@@ -71,13 +80,11 @@ export function BoostingDetailRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
   const { serviceId } = useParams()
+  if (!store.apiReady || store.apiError) return <CatalogStatus error={store.apiError} />
 
-  const service =
-    store.selectedService ||
-    store.services.find(
+  const service = store.services.find(
       (item) => String(item.id) === serviceId && item.category === "boosting",
-    ) ||
-    store.services.find((item) => String(item.id) === serviceId)
+    )
 
   if (!service) {
     if (!store.apiReady)
@@ -146,8 +153,9 @@ export function ServiceDetailRoute() {
   const store = useAppStore()
   const navigate = useNavigate()
   const { serviceId } = useParams()
+  if (!store.apiReady || store.apiError) return <CatalogStatus error={store.apiError} />
 
-  const service = store.selectedService || store.services.find((item) => String(item.id) === serviceId)
+  const service = store.services.find((item) => String(item.id) === serviceId && item.category !== "boosting")
   if (!service) {
     if (!store.apiReady) return <div className="page-width empty-state">Đang tải dịch vụ...</div>
     return <Navigate to="/nap-game" replace />
@@ -203,7 +211,7 @@ export function TopupInformationRoute() {
   const navigate = useNavigate()
   const { openLogin } = useOutletContext<PublicLayoutContext>()
 
-  const pkg = store.selectedPackage || store.cart[0]?.pkg
+  const pkg = store.cart[0]?.pkg
   const service = store.selectedService
   if (!pkg || !service || store.cart.length === 0) return <Navigate to="/nap-game" replace />
 
@@ -230,7 +238,7 @@ export function TopupInformationRoute() {
         if (String(store.selectedPackage?.id) === String(id)) store.setSelectedQuantity(nextQuantity)
       }}
       onRemoveFromCart={(id) => store.setCart((current) => current.filter((item) => item.pkg.id !== id))}
-      onBack={() => navigate(`/nap-game/${service.id}`)}
+      onBack={() => navigate(`/${service.category === "boosting" ? "cay-thue" : "nap-game"}/${service.id}`)}
       onContinue={(values) => {
         store.setCheckoutInfo(values)
         if (!store.user) {
@@ -251,27 +259,22 @@ export function CheckoutRoute() {
   const navigate = useNavigate()
   const { openLogin } = useOutletContext<PublicLayoutContext>()
 
-  const pkg = store.selectedPackage || store.cart[0]?.pkg
+  const pkg = store.cart[0]?.pkg
   const service = store.selectedService
-  if (!pkg || !service || store.cart.length === 0) return <Navigate to="/nap-game" replace />
-  if (!store.user) return <Navigate to="/nap-game/thong-tin" replace />
-
-  const template = store.topupTemplates.find(
-    (item) => item.id === pkg.templateId,
-  )
   const [payment, setPayment] = useState<PaymentDetails | null>(null)
   const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "PAID">("PENDING")
   const [checkoutKey] = useState(() => crypto.randomUUID())
+  const { setNotice } = store
 
   useEffect(() => {
-    if (!payment) return
+    if (!payment || paymentStatus === "PAID") return
     let cancelled = false
     const checkStatus = async () => {
       try {
         const result = await api.payments.status(payment.orderCode)
         if (!cancelled && result.paymentStatus === "PAID") {
           setPaymentStatus("PAID")
-          store.setNotice("Đã nhận thanh toán. Đơn hàng đang được xử lý.")
+          setNotice("Đã nhận thanh toán. Đơn hàng đang được xử lý.")
         }
       } catch {
         // The payment page remains usable while a temporary status request fails.
@@ -283,7 +286,11 @@ export function CheckoutRoute() {
       cancelled = true
       window.clearInterval(timer)
     }
-  }, [payment, store])
+  }, [payment, paymentStatus, setNotice])
+
+  if (!pkg || !service) return <Navigate to="/nap-game" replace />
+  if (!store.user) return <Navigate to="/nap-game/thong-tin" replace />
+  const template = store.topupTemplates.find((item) => item.id === pkg.templateId)
 
   return (
     <CheckoutPage

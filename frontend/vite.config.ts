@@ -34,6 +34,10 @@ react(),
       host: process.env.FIGMA_DEV_SERVER_HOST || '0.0.0.0',
       port: parseInt(process.env.PORT || '5173'),
       strictPort: false,
+      proxy: {
+        '/api': 'http://127.0.0.1:3000',
+        '/uploads': 'http://127.0.0.1:3000',
+      },
       watch: {
         ignored: [
           '**/.figma/**',
@@ -100,7 +104,7 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
   const robotsTxt = config.robots?.index === false
     ? 'User-agent: *\nDisallow: /\n'
     : `User-agent: *\nAllow: /\nSitemap: ${siteUrl}/sitemap.xml\n`
-  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${['/nap-game', '/trung-gian', '/lien-he'].map((route) => `  <url><loc>${siteUrl}${route}</loc></url>`).join('\n')}\n</urlset>\n`
+  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${['/nap-game', '/cay-thue', '/trung-gian', '/lien-he', '/wiki/giftcode', '/wiki/list', '/wiki/so-sanh', '/wiki/tier-list', '/wiki/map', '/wiki/build', '/wiki/team', '/wiki/thu-vien', '/wiki/huong-dan'].map((route) => `  <url><loc>${siteUrl}${route}</loc></url>`).join('\n')}\n</urlset>\n`
 
   return {
     name: 'figma-site-configuration',

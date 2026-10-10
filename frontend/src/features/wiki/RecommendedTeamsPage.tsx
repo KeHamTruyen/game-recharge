@@ -17,7 +17,7 @@ import { Link, useNavigate } from "react-router"
 import { Icon } from "@/components/ui"
 
 export default function RecommendedTeamsPage() {
-  const { user } = useAppStore()
+  const { user, setNotice } = useAppStore()
 
   const navigate = useNavigate()
 
@@ -39,20 +39,19 @@ export default function RecommendedTeamsPage() {
     return () => window.removeEventListener("wiki-data-changed", handleUpdate)
   }, [])
 
-  const handleDelete = (teamId: number, title: string) => {
+  const handleDelete = async (teamId: number, title: string) => {
     if (
       confirm(`Bạn có chắc chắn muốn xóa đội hình "${title}" khỏi danh sách?`)
     ) {
-      deleteCommunityTeam(teamId)
+      try { await deleteCommunityTeam(teamId) }
+      catch (error) { setNotice(error instanceof Error ? error.message : "Không thể xóa đội hình.") }
     }
   }
 
   const myTeamsCount = teams.filter(
     (t) =>
       user &&
-      (String(t.user_id) === String(user.id) ||
-        t.nickname.toLowerCase() === (user.name || "").toLowerCase() ||
-        t.nickname.toLowerCase() === (user.email || "").toLowerCase()),
+      user.id && String(t.user_id) === String(user.id),
   ).length
 
   const filteredTeams = teams.filter((team) => {
@@ -60,9 +59,7 @@ export default function RecommendedTeamsPage() {
       if (!user) return false
 
       const isMine =
-        String(team.user_id) === String(user.id) ||
-        team.nickname.toLowerCase() === (user.name || "").toLowerCase() ||
-        team.nickname.toLowerCase() === (user.email || "").toLowerCase()
+        user.id && String(team.user_id) === String(user.id)
 
       if (!isMine) return false
     }

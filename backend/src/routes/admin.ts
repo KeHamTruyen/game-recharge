@@ -795,6 +795,7 @@ router.patch(
           role: true,
           status: true,
           totalSpent: true,
+          createdAt: true,
           updatedAt: true,
         },
       });

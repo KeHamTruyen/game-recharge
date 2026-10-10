@@ -30,7 +30,9 @@ export function AdminRoute() {
       <AdminHeader
         email={store.user.email}
         onStore={() => navigate("/nap-game")}
-        onLogout={() => store.logout()}
+        onLogout={() => {
+          void store.logout().catch((error) => store.setNotice(error instanceof Error ? error.message : "Không thể đăng xuất."))
+        }}
       />
       <AdminPage
         adminName={store.user.name || "Admin"}
@@ -71,13 +73,13 @@ export function AdminRoute() {
           const updated = await api.admin.updatePackage(id, {
             name: updates.name,
             price: updates.price,
-            oldPrice: updates.oldPrice || null,
+            oldPrice: updates.oldPrice,
             note: updates.note,
             tags: updates.tags,
             statusId: updates.statusId,
             templateId: updates.templateId,
-            image: updates.image || null,
-            imagePosition: updates.imagePosition || null,
+            image: updates.image,
+            imagePosition: updates.imagePosition,
             isActive: updates.isActive !== undefined ? updates.isActive : undefined,
           })
           store.setServicePackages((current) => current.map((item) => item.id === id ? updated : item))

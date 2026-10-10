@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react"
+import { FormEvent, useEffect, useMemo, useState, lazy, Suspense } from "react"
 import type {
   ContactChannel,
   ContactInfo,
@@ -280,6 +280,8 @@ export function AdminImagePicker({
   )
 }
 
+const AdminWikiManager = lazy(() => import("./AdminWikiManager").then((module) => ({ default: module.AdminWikiManager })))
+
 export function AdminPage({
   products,
   services,
@@ -352,12 +354,12 @@ export function AdminPage({
   adminEmail: string
 }) {
   const [tab, setTab] =
-    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount" | "analytics">(
+    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki">(
       "products",
     )
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const selectTab = (
-    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount" | "analytics",
+    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki",
   ) => {
     setTab(nextTab)
     setSidebarOpen(false)
@@ -398,12 +400,14 @@ export function AdminPage({
   const [productIsActive, setProductIsActive] = useState(true)
   const [productFormError, setProductFormError] = useState("")
   const [productSaved, setProductSaved] = useState(false)
+  const [savingProduct, setSavingProduct] = useState(false)
   const [addProductOpen, setAddProductOpen] = useState(false)
   const [productSearch, setProductSearch] = useState("")
   const [adminProductPage, setAdminProductPage] = useState(1)
 
-  const submitProduct = (event: FormEvent) => {
+  const submitProduct = async (event: FormEvent) => {
     event.preventDefault()
+    if (savingProduct) return
     setProductSaved(false)
     if (!name.trim()) return setProductFormError("Vui lòng nhập tên sản phẩm.")
     if (!game) return setProductFormError("Vui lòng chọn game.")
@@ -423,12 +427,14 @@ export function AdminPage({
       art: game.slice(0, 3).toUpperCase(),
       tone: "cyan",
       statusId: productStatusId,
-      image: image || undefined,
+      image: image || null,
       imagePosition: `${imageX}% ${imageY}%`,
       isActive: productIsActive,
     }
-    if (editingProductId !== null) onUpdateProduct(editingProductId, payload)
-    else onAddProduct(payload)
+    setSavingProduct(true)
+    try {
+    if (editingProductId !== null) await onUpdateProduct(editingProductId, payload)
+    else await onAddProduct(payload)
     setName("")
     setPrice("")
     setImage("")
@@ -442,6 +448,8 @@ export function AdminPage({
     setProductFormError("")
     setProductSaved(true)
     setAddProductOpen(false)
+    } catch (error) { setProductFormError(error instanceof Error ? error.message : "Unable to save product.") }
+    finally { setSavingProduct(false) }
   }
 
   const toggleTag = (tag: string) =>
@@ -659,6 +667,9 @@ export function AdminPage({
             onClick={() => selectTab("adminAccount")}
           >
             <Icon name="shield" size={18} /> Tài khoản admin
+          </button>
+          <button className={tab === "wiki" ? "active" : ""} onClick={() => selectTab("wiki")}>
+            <Icon name="book" size={18} /> Wiki Aniimo
           </button>
         </aside>
         <div className="admin-content">
@@ -955,7 +966,7 @@ export function AdminPage({
                           >
                             Hủy
                           </button>
-                          <button className="primary-button" type="submit">
+                          <button className="primary-button" type="submit" disabled={savingProduct}>
                             <Icon
                               name={
                                 editingProductId === null ? "plus" : "check"
@@ -1996,6 +2007,8 @@ export function AdminPage({
                 </div>
               )}
             </>
+          ) : tab === "wiki" ? (
+            <Suspense fallback={<p>Loading Wiki...</p>}><AdminWikiManager /></Suspense>
           ) : tab === "middleman" ? (
             <MiddlemanAdminEditor
               info={middlemanInfo}
@@ -2092,7 +2105,7 @@ export function TopupTemplateManager({
       ;[fields[index], fields[nextIndex]] = [fields[nextIndex], fields[index]]
       return { ...current, fields }
     })
-  const save = () => {
+  const save = async () => {
     if (!draft) return
     if (!draft.name.trim() || !draft.game || draft.fields.length === 0)
       return setError("Mẫu cần có tên, game và ít nhất một trường thông tin.")
@@ -2106,11 +2119,13 @@ export function TopupTemplateManager({
         key: field.key.trim().replace(/\s+/g, "_"),
       })),
     }
+    try {
     if (templates.some((item) => item.id === draft.id))
-      onUpdate(draft.id, normalized)
-    else onAdd(normalized)
+      await onUpdate(draft.id, normalized)
+    else await onAdd(normalized)
     setDraft(null)
     setError("")
+    } catch (error) { setError(error instanceof Error ? error.message : "Không thể lưu mẫu thông tin.") }
   }
 
   return (
@@ -2344,13 +2359,14 @@ export function TopupTemplateManager({
                         <label className="wide">
                           <span>Các lựa chọn, ngăn cách bằng dấu phẩy</span>
                           <input
-                            value={field.options.join(", ")}
+                            value={field.options.map((option) => typeof option === "string" ? option : option.label).join(", ")}
                             onChange={(event) =>
                               updateField(field.id, {
                                 options: event.target.value
                                   .split(",")
                                   .map((item) => item.trim())
-                                  .filter(Boolean),
+                                  .filter(Boolean)
+                                  .map((label) => field.options.find((option) => typeof option !== "string" && option.label === label) || label),
                               })
                             }
                           />
@@ -2621,15 +2637,7 @@ export function AdminAnalytics({
     const cutoff = now - daysLimit * 24 * 60 * 60 * 1000
 
     return transactions.filter((t) => {
-      let timestamp = 0
-      if (t.date && t.date.includes("/")) {
-        const [dPart, tPart] = t.date.split(" ")
-        const [d, m, y] = (dPart || "").split("/").map(Number)
-        const [hh, mm] = (tPart || "0:0").split(":").map(Number)
-        timestamp = new Date(y || 2025, (m || 1) - 1, d || 1, hh || 0, mm || 0).getTime()
-      } else if (t.date) {
-        timestamp = new Date(t.date).getTime()
-      }
+      const timestamp = new Date(t.date).getTime()
       return !isNaN(timestamp) && timestamp >= cutoff
     })
   }, [transactions, timeFilter])
@@ -3124,7 +3132,7 @@ export function AdminTransactions({
           <div className="admin-table-row" key={item.id}>
             <span>
               <strong>{item.code}</strong>
-              <small>{item.date}</small>
+              <small>{new Date(item.date).toLocaleString("vi-VN")}</small>
             </span>
             <span>{item.email}</span>
             <span>
@@ -3459,12 +3467,22 @@ export function AdminAccount({
 }
 
 export function ContactAdminEditor({
-  info,
-  onChange,
+  info: initialInfo,
+  onChange: onSave,
 }: {
   info: ContactInfo
-  onChange: (info: ContactInfo) => void
+  onChange: (info: ContactInfo) => void | Promise<void>
 }) {
+  const [info, onChange] = useState(initialInfo)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState("")
+  const save = async () => {
+    if (saving) return
+    setSaving(true)
+    try { await onSave(info); setMessage("Đã lưu thay đổi.") }
+    catch (error) { setMessage(error instanceof Error ? error.message : "Không thể lưu thay đổi.") }
+    finally { setSaving(false) }
+  }
   const updateInfo = <K extends keyof ContactInfo,>(
     key: K,
     value: ContactInfo[K],
@@ -3498,7 +3516,7 @@ export function ContactAdminEditor({
   }
 
   return (
-    <div className="contact-admin">
+    <fieldset className="contact-admin" disabled={saving} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
       <div className="panel-heading">
         <div>
           <h2>Nội dung trang liên hệ</h2>
@@ -3691,17 +3709,29 @@ export function ContactAdminEditor({
           </div>
         ))}
       </div>
-    </div>
+      <button type="button" className="primary-button" onClick={save}>{saving ? "Đang lưu…" : "Lưu thay đổi"}</button>
+      {message && <p role="status">{message}</p>}
+    </fieldset>
   )
 }
 
 export function MiddlemanAdminEditor({
-  info,
-  onChange,
+  info: initialInfo,
+  onChange: onSave,
 }: {
   info: MiddlemanInfo
-  onChange: (info: MiddlemanInfo) => void
+  onChange: (info: MiddlemanInfo) => void | Promise<void>
 }) {
+  const [info, onChange] = useState(initialInfo)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState("")
+  const save = async () => {
+    if (saving) return
+    setSaving(true)
+    try { await onSave(info); setMessage("Đã lưu thay đổi.") }
+    catch (error) { setMessage(error instanceof Error ? error.message : "Không thể lưu thay đổi.") }
+    finally { setSaving(false) }
+  }
   const update = <K extends keyof MiddlemanInfo,>(
     key: K,
     value: MiddlemanInfo[K],
@@ -3715,13 +3745,12 @@ export function MiddlemanAdminEditor({
     )
 
   return (
-    <div className="middleman-admin">
+    <fieldset className="middleman-admin" disabled={saving} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
       <div className="panel-heading">
         <div>
           <h2>Nội dung trang trung gian</h2>
           <p>
-            Mọi thay đổi được cập nhật ngay trên trang Trung gian của người
-            dùng.
+            Bấm Lưu thay đổi để cập nhật nội dung trên trang Trung gian.
           </p>
         </div>
       </div>
@@ -3879,7 +3908,9 @@ export function MiddlemanAdminEditor({
           />
         </label>
       </div>
-    </div>
+      <button type="button" className="primary-button" onClick={save}>{saving ? "Đang lưu…" : "Lưu thay đổi"}</button>
+      {message && <p role="status">{message}</p>}
+    </fieldset>
   )
 }
 
@@ -3899,7 +3930,8 @@ export function AdminLogin({
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       return setError("Vui lòng nhập đúng email quản trị.")
     if (password.length < 6) return setError("Mật khẩu cần có ít nhất 6 ký tự.")
-    onLogin(email, password)
+    void Promise.resolve().then(() => onLogin(email, password)).catch((error) =>
+      setError(error instanceof Error ? error.message : "Không thể đăng nhập."))
   }
 
   return (

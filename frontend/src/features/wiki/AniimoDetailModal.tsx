@@ -29,9 +29,12 @@ export const AniimoDetailModal: React.FC<ModalProps> = ({
   monster,
   onClose,
 }) => {
-  if (!monster) return null
+  return monster ? <AniimoDetailContent key={monster.id} monster={monster} onClose={onClose} /> : null
+}
 
-  const { user } = useAppStore()
+function AniimoDetailContent({ monster, onClose }: { monster: AniimoMonster; onClose: () => void }) {
+  const { user, setNotice } = useAppStore()
+  const [submitting, setSubmitting] = useState(false)
   const tierInfo = tierRankMap[monster.title.toLowerCase().trim()]
   const element = monster.taxonomies.elements?.[0]
   const role = monster.taxonomies.roles?.[0]
@@ -41,15 +44,18 @@ export const AniimoDetailModal: React.FC<ModalProps> = ({
   const [commentText, setCommentText] = useState("")
   const [reviewSent, setReviewSent] = useState(false)
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (submitting) return
     if (!user) {
       alert("Vui lòng đăng nhập tài khoản để chia sẻ mẹo chơi!")
       return
     }
     if (!commentText.trim()) return
 
-    addAniimoReview(monster.id, {
+    setSubmitting(true)
+    try {
+    await addAniimoReview(monster.id, {
       author: user.name || user.email.split("@")[0],
       rating: 5,
       comment: commentText.trim(),
@@ -60,6 +66,8 @@ export const AniimoDetailModal: React.FC<ModalProps> = ({
     setCommentText("")
     setReviewSent(true)
     setTimeout(() => setReviewSent(false), 3000)
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Không thể lưu đánh giá.") }
+    finally { setSubmitting(false) }
   }
 
   return (
@@ -344,7 +352,7 @@ export const AniimoDetailModal: React.FC<ModalProps> = ({
                     onChange={(e) => setCommentText(e.target.value)}
                     required
                   />
-                  <button type="submit" className="review-submit-btn">
+                  <button type="submit" className="review-submit-btn" disabled={submitting}>
                     Gửi Mẹo Chơi
                   </button>
                 </form>

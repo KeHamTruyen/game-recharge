@@ -10,7 +10,8 @@ import { Link } from "react-router"
 import { Icon } from "@/components/ui"
 
 export default function GiftcodePage() {
-  const { user } = useAppStore()
+  const { user, setNotice } = useAppStore()
+  const [submitting, setSubmitting] = useState(false)
   const [codes, setCodes] = useState<GiftcodeItem[]>(getEffectiveGiftcodes())
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [filterQuery, setFilterQuery] = useState("")
@@ -28,24 +29,28 @@ export default function GiftcodePage() {
     return () => window.removeEventListener("wiki-data-changed", handleUpdate)
   }, [])
 
-  const handleCopy = (code: string) => {
-    navigator.clipboard.writeText(code)
+  const handleCopy = async (code: string) => {
+    try {
+    await navigator.clipboard.writeText(code)
     setCopiedCode(code)
     setTimeout(() => {
       setCopiedCode(null)
     }, 2000)
+    } catch { setNotice("Không thể sao chép. Vui lòng sao chép mã thủ công.") }
   }
 
-  const handleVote = (codeId: string, type: "up" | "report") => {
+  const handleVote = async (codeId: string, type: "up" | "report") => {
     if (!user) {
       alert("Vui lòng đăng nhập để bình chọn tình trạng mã quà tặng!")
       return
     }
-    voteGiftcode(codeId, type)
+    try { await voteGiftcode(codeId, type) }
+    catch (error) { setNotice(error instanceof Error ? error.message : "Không thể bình chọn.") }
   }
 
-  const handleSubmitContribution = (e: React.FormEvent) => {
+  const handleSubmitContribution = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (submitting) return
     if (!user) {
       alert("Vui lòng đăng nhập để đóng góp mã giftcode!")
       return
@@ -66,13 +71,17 @@ export default function GiftcodePage() {
       reports: 0,
     }
 
-    addGiftcodeContribution(item)
+    setSubmitting(true)
+    try {
+    await addGiftcodeContribution(item)
     setNewCode("")
     setNewReward("")
     setNewNote("")
     setIsModalOpen(false)
     setContributeSuccess(true)
     setTimeout(() => setContributeSuccess(false), 4000)
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Không thể lưu giftcode.") }
+    finally { setSubmitting(false) }
   }
 
   const filteredCodes = codes.filter((item) => {
@@ -295,6 +304,7 @@ export default function GiftcodePage() {
 
               <button
                 type="submit"
+                disabled={submitting}
                 className="publish-btn"
                 style={{ marginTop: "12px" }}
               >

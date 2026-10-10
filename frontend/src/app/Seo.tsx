@@ -3,6 +3,7 @@ import { useEffect } from "react"
 import { useLocation } from "react-router"
 
 import { useAppStore } from "@/app/AppStore"
+import siteConfiguration from "../../../.figma/make/site.json"
 
 const siteName = "DUKE1305"
 
@@ -109,7 +110,7 @@ export function Seo() {
       },
     }
 
-    const serviceId = location.pathname.match(/^\/nap-game\/([^/]+)$/)?.[1]
+    const serviceId = location.pathname.match(/^\/(?:nap-game|cay-thue)\/([^/]+)$/)?.[1]
 
     const service = serviceId
       ? store.services.find((item) => String(item.id) === serviceId)
@@ -117,12 +118,14 @@ export function Seo() {
 
     const page = service
       ? {
-          title: `Nạp ${service.name} nhanh, an toàn | ${siteName}`,
+          title: `${service.category === "boosting" ? "Cày thuê" : "Nạp"} ${service.name} | ${siteName}`,
 
           description:
             service.description ||
             `Nạp ${service.name} tự động, nhanh chóng và bảo mật tại ${siteName}.`,
         }
+      : location.pathname === "/cay-thue"
+        ? { title: `Dịch vụ cày thuê game | ${siteName}`, description: "Thông tin gói cày thuê, giá dịch vụ và hỗ trợ tại DUKE1305." }
       : wikiPages[location.pathname]
         ? wikiPages[location.pathname]
         : location.pathname === "/trung-gian"
@@ -145,17 +148,19 @@ export function Seo() {
                 }
               : { title: siteName, description: defaultDescription }
 
-    const canonicalUrl = `${window.location.origin}${location.pathname}`
+    const siteUrl = (import.meta.env.VITE_SITE_URL || window.location.origin).replace(/\/+$/, "")
+    const canonicalUrl = `${siteUrl}${location.pathname}`
 
     const isPrivatePage =
-      ["/tai-khoan", "/thanh-toan"].includes(location.pathname) ||
-      location.pathname.startsWith("/admin")
+      ["/tai-khoan", "/thanh-toan", "/nap-game/thong-tin"].includes(location.pathname) ||
+      location.pathname.startsWith("/admin") ||
+      (!service && !wikiPages[location.pathname] && !["/", "/nap-game", "/cay-thue", "/trung-gian", "/lien-he"].includes(location.pathname))
 
     document.title = page.title
 
     setMeta("description", page.description)
 
-    setMeta("robots", isPrivatePage ? "noindex, nofollow" : "index, follow")
+    setMeta("robots", siteConfiguration.robots?.index === false || isPrivatePage ? "noindex, nofollow" : "index, follow")
 
     setMeta("og:title", page.title, true)
 

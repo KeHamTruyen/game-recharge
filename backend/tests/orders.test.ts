@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import crypto from 'node:crypto';
 import bcrypt from 'bcrypt';
 import { createTestClient, TestClient, prisma } from './helpers.js';
+import { env } from '../src/config/env.js';
 
 describe('Orders & Checkout Logic (Atomic & Idempotent)', () => {
   let customerClient: TestClient;
@@ -243,7 +244,7 @@ describe('Orders & Checkout Logic (Atomic & Idempotent)', () => {
       {
         items: [
           { packageId: package1Id, quantity: 1 },
-          { packageService2Id: packageService2Id, quantity: 1 },
+          { packageId: packageService2Id, quantity: 1 },
         ],
         topupInfo: { uid: '800123456', server: 'asia' },
       },
@@ -340,5 +341,47 @@ describe('Orders & Checkout Logic (Atomic & Idempotent)', () => {
     const resOther = await otherClient.get('/api/orders/mine');
     assert.strictEqual(resOther.status, 200);
     assert.strictEqual(resOther.body.data.items.length, 0);
+  });
+
+  it('Concurrent retries create exactly one order and isolate the same key between customers', async () => {
+    const headers = { 'Idempotency-Key': crypto.randomUUID() };
+    const payload = { items: [{ packageId: package1Id, quantity: 1 }], topupInfo: { uid: '800123456', server: 'asia' } };
+    const responses = await Promise.all(Array.from({ length: 4 }, () => customerClient.post('/api/orders/checkout', payload, { headers })));
+    assert.ok(responses.every((res) => res.status === 201));
+    const codes = new Set(responses.map((res) => res.body.data.payment.orderCode));
+    assert.strictEqual(codes.size, 1);
+    assert.strictEqual(await prisma.transaction.count({ where: { paymentOrderCode: [...codes][0] } }), 1);
+    const other = await otherClient.post('/api/orders/checkout', payload, { headers });
+    assert.strictEqual(other.status, 201);
+    assert.notStrictEqual(other.body.data.payment.orderCode, responses[0].body.data.payment.orderCode);
+    assert.ok(other.body.data.transactions.every((tx: { userEmail: string }) => tx.userEmail === otherCustomerEmail));
+  });
+
+  it('Missing payment configuration leaves no orders or cached checkout response', async () => {
+    const count = await prisma.transaction.count();
+    const cached = await prisma.checkoutRequest.count();
+    const original = env.SEPAY_BANK_CODE;
+    try {
+      env.SEPAY_BANK_CODE = '';
+      const res = await customerClient.post('/api/orders/checkout', {
+        items: [{ packageId: package1Id, quantity: 1 }], topupInfo: { uid: '800123456', server: 'asia' },
+      }, { headers: { 'Idempotency-Key': crypto.randomUUID() } });
+      assert.strictEqual(res.status, 503);
+      assert.strictEqual(await prisma.transaction.count(), count);
+      assert.strictEqual(await prisma.checkoutRequest.count(), cached);
+    } finally { env.SEPAY_BANK_CODE = original; }
+  });
+
+  it('Inactive services cannot be ordered through either creation endpoint', async () => {
+    await prisma.service.update({ where: { id: service1Id }, data: { isActive: false } });
+    try {
+      const topupInfo = { uid: '800123456', server: 'asia' };
+      const single = await customerClient.post('/api/orders', { packageId: package1Id, quantity: 1, topupInfo });
+      assert.strictEqual(single.status, 404);
+      const checkout = await customerClient.post('/api/orders/checkout', {
+        items: [{ packageId: package1Id, quantity: 1 }], topupInfo,
+      }, { headers: { 'Idempotency-Key': crypto.randomUUID() } });
+      assert.strictEqual(checkout.status, 400);
+    } finally { await prisma.service.update({ where: { id: service1Id }, data: { isActive: true } }); }
   });
 });

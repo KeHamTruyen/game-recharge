@@ -709,16 +709,11 @@ async function main() {
     create: {
       id: 'middlemanInfo',
       value: {
-        title: 'Middleman Service',
-        description: 'We act as a trusted middleman for all transactions. Your payment is held securely until the order is confirmed complete.',
-        steps: [
-          { step: 1, text: 'Place your order and complete payment.' },
-          { step: 2, text: 'Our team processes your top-up request.' },
-          { step: 3, text: 'Receive your in-game items and confirm.' },
-          { step: 4, text: 'Transaction marked complete.' },
-        ],
-        guaranteeHours: 24,
-        supportEmail: 'support@duke1305.vn',
+        intro: 'Liên hệ để được tư vấn dịch vụ trung gian.',
+        supportHours: '', contactTitle: 'Liên hệ hỗ trợ', contactDescription: '',
+        zaloName: '', zaloPhone: '', zaloUrl: '', fees: [], feeNote: '',
+        accepted: '', rejected: '', warning: '', bank: '', accountNumber: '',
+        accountHolder: '', commitment: '',
       },
     },
   });
@@ -729,13 +724,8 @@ async function main() {
     create: {
       id: 'contactInfo',
       value: {
-        email: 'support@duke1305.vn',
-        facebook: 'https://facebook.com/duke1305',
-        zalo: '0900000000',
-        discord: 'https://discord.gg/duke1305',
-        telegram: 'https://t.me/duke1305',
-        workingHours: '8:00 - 22:00 (GMT+7)',
-        responseTime: 'Within 30 minutes',
+        intro: 'Thông tin liên hệ DUKE1305.', supportHours: '',
+        commitmentTitle: 'Hỗ trợ khách hàng', commitment: '', channels: [],
       },
     },
   });

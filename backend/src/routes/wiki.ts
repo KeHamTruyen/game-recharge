@@ -123,9 +123,14 @@ router.put('/giftcodes/:id', requireRole('ADMIN'), auditAdminRequest, async (req
   try {
     const id = idSchema.parse(req.params.id);
     const body = giftSchema.parse(req.body);
-    const data = { ...body, id, code: body.code.toUpperCase() };
-    const entry = await prisma.wikiEntry.upsert({ where: { key: `giftcode:${id}` },
-      create: { key: `giftcode:${id}`, kind: 'giftcode', data }, update: { data, deleted: false } });
+    const key = `giftcode:${id}`;
+    const entry = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))`;
+      const existing = await tx.wikiEntry.findUnique({ where: { key } });
+      const data = { ...(existing?.data as Prisma.JsonObject || {}), ...body, id, code: body.code.toUpperCase() };
+      return tx.wikiEntry.upsert({ where: { key },
+        create: { key, kind: 'giftcode', data }, update: { data, deleted: false } });
+    });
     res.json({ success: true, data: entry });
   } catch (error) { next(error); }
 });

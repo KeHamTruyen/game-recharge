@@ -14,7 +14,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:backup": "powershell -ExecutionPolicy Bypass -File scripts/backup.ps1",
     "db:restore": "powershell -ExecutionPolicy Bypass -File scripts/restore.ps1",
-    "test": "node --import tsx --test \"tests/**/*.test.ts\""
+    "test": "node scripts/test.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -27,6 +27,7 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^10.0.14",
+    "prisma": "^5.22.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -37,7 +38,6 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.1",
     "@types/nodemailer": "^8.0.2",
-    "prisma": "^5.22.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }

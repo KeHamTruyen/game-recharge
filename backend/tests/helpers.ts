@@ -3,7 +3,11 @@ import { Server } from 'node:http';
 import app from '../src/index.js';
 import { prisma } from '../src/lib/prisma.js';
 
-process.env.NODE_ENV = 'test';
+const testSchema = new URL(process.env.DATABASE_URL!).searchParams.get('schema');
+if (process.env.NODE_ENV !== 'test' || !/^test_[a-f0-9]{32}$/.test(testSchema || '') ||
+    testSchema !== process.env.TEST_SCHEMA) {
+  throw new Error('Run npm test to use an isolated database schema. Direct test execution is disabled.');
+}
 
 export interface TestClient {
   server: Server;

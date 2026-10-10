@@ -9,6 +9,7 @@ import {
 } from "@/features/wiki/wikiData"
 import type { AniimoMonster, GiftcodeItem } from "@/features/wiki/types"
 import { Icon } from "@/components/ui"
+import { refreshWiki } from "@/features/wiki/wikiStore"
 
 export function AdminWikiManager() {
   const [subTab, setSubTab] = useState<"giftcodes" | "aniimos">("giftcodes")
@@ -38,6 +39,7 @@ export function AdminWikiManager() {
     loadData()
     const handler = () => loadData()
     window.addEventListener("wiki-data-changed", handler)
+    void refreshWiki().catch(() => setNotice("Không thể tải dữ liệu Wiki từ máy chủ."))
     return () => window.removeEventListener("wiki-data-changed", handler)
   }, [])
 

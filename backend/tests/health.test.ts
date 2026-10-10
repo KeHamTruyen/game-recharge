@@ -1,9 +1,14 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
 import { createTestClient, TestClient } from './helpers.js';
+import { env } from '../src/config/env.js';
 
 describe('Health and System Endpoints', () => {
   let client: TestClient;
+  it('SMTP_SECURE=false parses as false, not truthy string coercion', () => {
+    assert.strictEqual(process.env.SMTP_SECURE, 'false');
+    assert.strictEqual(env.SMTP_SECURE, false);
+  });
 
   before(async () => {
     client = await createTestClient();

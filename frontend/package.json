@@ -14,7 +14,8 @@
     "db:seed": "npm --prefix ../backend run db:seed",
     "preview": "vite preview",
     "format": "oxfmt",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -22,6 +23,7 @@
     "react-router": "^7.13.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",

@@ -174,6 +174,7 @@ export function ContactPage({ info }: { info: ContactInfo }) {
 
 export function AccountPage({
   email,
+  displayName,
   transactions,
   onLogout,
   onUpdateProfile,
@@ -181,6 +182,7 @@ export function AccountPage({
   onRefresh,
 }: {
   email: string
+  displayName?: string
   transactions: Transaction[]
   onLogout: () => void
   onUpdateProfile: (name: string) => Promise<void>
@@ -189,8 +191,7 @@ export function AccountPage({
 }) {
   const [tab, setTab] = useState<"overview" | "history" | "profile">("overview")
   const [historyPage, setHistoryPage] = useState(1)
-  const [name, setName] = useState(email.split("@")[0])
-  const [phone, setPhone] = useState("")
+  const [name, setName] = useState(displayName || "")
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [profileMessage, setProfileMessage] = useState("")
@@ -199,9 +200,9 @@ export function AccountPage({
   // Tự động làm mới dữ liệu giao dịch khi vào trang tài khoản
   useEffect(() => {
     if (!onRefresh) return
-    onRefresh()
+    void onRefresh().catch(() => {})
     const timer = setInterval(() => {
-      onRefresh()
+      void onRefresh().catch(() => {})
     }, 15000)
     return () => clearInterval(timer)
   }, [onRefresh])
@@ -211,6 +212,8 @@ export function AccountPage({
     setIsRefreshing(true)
     try {
       await onRefresh()
+    } catch (error) {
+      setProfileMessage(error instanceof Error ? error.message : "Không thể tải lịch sử giao dịch.")
     } finally {
       setIsRefreshing(false)
     }
@@ -341,14 +344,6 @@ export function AccountPage({
               <span>Email</span>
               <input value={email} disabled />
             </label>
-            <label>
-              <span>Số điện thoại</span>
-              <input
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                placeholder="Chưa cập nhật"
-              />
-            </label>
             <button className="primary-button">Lưu thông tin</button>
           </form>
           <div className="password-section">
@@ -401,7 +396,7 @@ export function TransactionHistory({
                 {transaction.product} × {transaction.quantity || 1}
               </strong>
               <small>
-                {transaction.code} · {transaction.game} · {transaction.date}
+                {transaction.code} · {transaction.game} · {new Date(transaction.date).toLocaleString("vi-VN")}
               </small>
             </span>
             <strong>{formatPrice(transaction.amount)}</strong>

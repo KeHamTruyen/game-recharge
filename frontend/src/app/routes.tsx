@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, Outlet } from "react-router"
 import { AppStoreProvider } from "@/app/AppStore"
 import { PublicLayout } from "@/app/layouts"
 import { Seo } from "@/app/Seo"
+import NotFoundPage from "@/app/NotFoundPage"
 
 function AppRoot() {
   return (
@@ -94,86 +95,76 @@ export const router = createBrowserRouter([
               {
                 path: "giftcode",
                 lazy: async () => ({
-                  Component: (await import("@/features/wiki")).GiftcodePage,
+                  Component: (await import("@/features/wiki/GiftcodePage")).default,
                 }),
               },
               {
                 path: "list",
                 lazy: async () => ({
-                  Component: (await import("@/features/wiki")).AniimoListPage,
+                  Component: (await import("@/features/wiki/AniimoListPage")).default,
                 }),
               },
               {
                 path: "so-sanh",
                 lazy: async () => ({
-                  Component: (await import("@/features/wiki")).StatsComparisonPage,
+                  Component: (await import("@/features/wiki/StatsComparisonPage")).default,
                 }),
               },
               {
                 path: "stats",
-                lazy: async () => ({
-                  Component: (await import("@/features/wiki")).StatsComparisonPage,
-                }),
+                element: <Navigate to="/wiki/so-sanh" replace />,
               },
               {
                 path: "tier-list",
                 lazy: async () => ({
-                  Component: (await import("@/features/wiki")).TierListPage,
+                  Component: (await import("@/features/wiki/TierListPage")).default,
                 }),
               },
               {
                 path: "map",
                 lazy: async () => ({
-                  Component: (await import("@/features/wiki")).WorldMapPage,
+                  Component: (await import("@/features/wiki/WorldMapPage")).default,
                 }),
               },
               {
                 path: "build",
                 lazy: async () => ({
-                  Component: (await import("@/features/wiki")).TeamBuilderPage,
+                  Component: (await import("@/features/wiki/TeamBuilderPage")).default,
                 }),
               },
               {
                 path: "team",
                 lazy: async () => ({
-                  Component: (await import("@/features/wiki")).RecommendedTeamsPage,
+                  Component: (await import("@/features/wiki/RecommendedTeamsPage")).default,
                 }),
               },
               {
                 path: "teams",
-                lazy: async () => ({
-                  Component: (await import("@/features/wiki")).RecommendedTeamsPage,
-                }),
+                element: <Navigate to="/wiki/team" replace />,
               },
               {
                 path: "thu-vien",
                 lazy: async () => ({
-                  Component: (await import("@/features/wiki")).LibraryPage,
+                  Component: (await import("@/features/wiki/LibraryPage")).default,
                 }),
               },
               {
                 path: "huong-dan",
                 lazy: async () => ({
-                  Component: (await import("@/features/wiki")).WikiGuidePage,
+                  Component: (await import("@/features/wiki/WikiGuidePage")).default,
                 }),
               },
               {
                 path: "khac-he",
-                lazy: async () => ({
-                  Component: (await import("@/features/wiki")).TeamBuilderPage,
-                }),
+                element: <Navigate to="/wiki/build" replace />,
               },
               {
                 path: "elements",
-                lazy: async () => ({
-                  Component: (await import("@/features/wiki")).TeamBuilderPage,
-                }),
+                element: <Navigate to="/wiki/build" replace />,
               },
               {
                 path: "damage-matrix",
-                lazy: async () => ({
-                  Component: (await import("@/features/wiki")).TeamBuilderPage,
-                }),
+                element: <Navigate to="/wiki/build" replace />,
               },
             ],
           },
@@ -185,7 +176,7 @@ export const router = createBrowserRouter([
           Component: (await import("@/features/admin/route")).AdminRoute,
         }),
       },
-      { path: "*", element: <Navigate to="/nap-game" replace /> },
+      { path: "*", Component: NotFoundPage },
     ],
   },
 ])
