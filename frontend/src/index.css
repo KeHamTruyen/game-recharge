@@ -1981,3 +1981,326 @@ h1, h2, h3, p { margin-top: 0; }
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   SITE FOOTER (SUPPORT CARD, COMMUNITY PILLS & MASCOT TOP)
+   ══════════════════════════════════════════════════════════════════════════════ */
+.site-custom-footer {
+  margin-top: 4.5rem;
+  padding-bottom: 2.5rem;
+  position: relative;
+  z-index: 20;
+}
+
+@media (max-width: 768px) {
+  .site-custom-footer {
+    margin-top: 3rem;
+    padding-bottom: 5.5rem; /* space for mobile nav bar */
+  }
+}
+
+.site-footer-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Donation / Support Card ─── */
+.footer-donation-card {
+  position: relative;
+  border-radius: 20px;
+  background: rgba(13, 17, 23, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  box-shadow: 0 0 35px rgba(56, 189, 248, 0.08), 0 12px 36px rgba(0, 0, 0, 0.45);
+  padding: 24px 28px;
+  margin-bottom: 2.5rem;
+  overflow: hidden;
+}
+
+.footer-donation-glow-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.7), rgba(168, 85, 247, 0.8), rgba(244, 63, 94, 0.7));
+  opacity: 0.9;
+}
+
+.footer-donation-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.footer-donation-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.footer-sparkle-icon {
+  color: #facc15;
+  font-size: 19px;
+  text-shadow: 0 0 12px rgba(250, 204, 21, 0.7);
+  display: inline-block;
+  animation: pulseSparkle 2.2s ease-in-out infinite;
+}
+
+@keyframes pulseSparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.25) rotate(15deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 8px #facc15);
+  }
+}
+
+.footer-donation-title {
+  color: #f8fafc;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.footer-donation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.footer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 22px;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.footer-btn-youtube {
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.footer-btn-youtube:hover {
+  border-color: #ef4444;
+  background: #181f2f;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+  transform: translateY(-2px);
+  color: #ffffff;
+}
+
+.footer-btn-donate {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  color: #0b0f19;
+  font-weight: 700;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.28);
+}
+
+.footer-btn-donate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.48);
+  filter: brightness(1.08);
+  color: #000000;
+}
+
+.footer-btn-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-btn-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.donate-svg {
+  fill: #0b0f19;
+}
+
+/* ─── Community Section ─── */
+.footer-community-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.footer-community-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-chat-icon {
+  font-size: 18px;
+}
+
+.footer-community-title {
+  color: #f1f5f9;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.footer-community-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  max-width: 960px;
+}
+
+.community-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.community-pill-btn:hover {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.6);
+  color: #38bdf8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.18);
+}
+
+.community-pill-icon {
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.community-pill-arrow {
+  font-size: 12px;
+  color: #94a3b8;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.community-pill-btn:hover .community-pill-arrow {
+  color: #38bdf8;
+  transform: translate(2px, -2px);
+}
+
+/* ─── Bottom Bar ─── */
+.footer-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  min-height: 48px;
+}
+
+.footer-mascot-top-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 2;
+}
+
+.footer-mascot-top-btn:hover {
+  transform: translateY(-5px);
+}
+
+.mascot-cat-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.mascot-cat-svg {
+  width: 36px;
+  height: 32px;
+  filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.35));
+}
+
+.mascot-top-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #38bdf8;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+}
+
+.footer-copyright-text {
+  color: #94a3b8;
+  font-size: 13px;
+  text-align: center;
+  margin: 0;
+  flex: 1;
+}
+
+.footer-bottom-spacer {
+  width: 40px; /* balance mascot on left */
+}
+
+@media (max-width: 640px) {
+  .footer-donation-card {
+    padding: 20px 16px;
+  }
+  .footer-donation-title {
+    font-size: 14px;
+  }
+  .footer-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .footer-bottom-bar {
+    flex-direction: column-reverse;
+    gap: 14px;
+    align-items: center;
+  }
+  .footer-bottom-spacer {
+    display: none;
+  }
+}
+
+

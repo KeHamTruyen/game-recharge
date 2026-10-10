@@ -6,6 +6,7 @@ import { LoginModal } from "@/features/auth/LoginModal"
 import { useAppStore } from "@/app/AppStore"
 import { api } from "@/services/api"
 import BrandSubheader from "@/components/BrandSubheader"
+import { SiteFooter } from "@/components/SiteFooter"
 
 const navigation = [
   { to: "/nap-game", label: "Nạp game", icon: "game" as const },
@@ -340,6 +341,7 @@ export function PublicLayout() {
       <main>
         <Outlet context={{ openLogin: () => setLoginOpen(true) }} />
       </main>
+      {!location.pathname.startsWith("/wiki/map") && <SiteFooter />}
       {mobileMenu && (
         <>
           <div

@@ -746,6 +746,31 @@ async function main() {
     },
   });
 
+  await prisma.setting.upsert({
+    where: { id: 'footerConfig' },
+    update: {},
+    create: {
+      id: 'footerConfig',
+      value: {
+        showDonationBox: true,
+        donationTitle: 'Nếu cảm thấy nội dung hay và hữu ích thì bạn có thể ủng hộ DUKE1305 bằng cách:',
+        youtubeBtnText: 'Đăng Ký Kênh',
+        youtubeUrl: 'https://youtube.com/@duke1305',
+        donateBtnText: 'Donate Cho DUKE1305',
+        donateUrl: 'https://me.momo.vn/duke1305',
+        communityTitle: 'Tổng Hợp Tất Cả Nhóm Zalo Cộng Đồng',
+        communityGroups: [
+          { id: '1', name: 'Zalo Nhóm Aniimo 1', url: 'https://zalo.me/g/aniimo1' },
+          { id: '2', name: 'Zalo Nhóm Aniimo 2', url: 'https://zalo.me/g/aniimo2' },
+          { id: '3', name: 'Zalo Nghịch Thủy Hàn', url: 'https://zalo.me/g/nghichthuyhan' },
+          { id: '4', name: 'Zalo Tinh Thể Atlan', url: 'https://zalo.me/g/atlan' },
+          { id: '5', name: 'Zalo Draconia Saga', url: 'https://zalo.me/g/draconia' },
+        ],
+        copyrightText: '©2026 Bản Quyền Thiết Kế Thuộc Về DUKE1305.',
+      },
+    },
+  });
+
   console.log('✅ Settings seeded');
 
   // ─── Catalog Tags ────────────────────────────────────────────────────────

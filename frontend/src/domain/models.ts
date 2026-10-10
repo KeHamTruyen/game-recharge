@@ -156,3 +156,21 @@ export type ContactInfo = {
   commitment: string
   channels: ContactChannel[]
 }
+
+export type FooterCommunityGroup = {
+  id: string
+  name: string
+  url: string
+}
+
+export type FooterConfig = {
+  showDonationBox: boolean
+  donationTitle: string
+  youtubeBtnText: string
+  youtubeUrl: string
+  donateBtnText: string
+  donateUrl: string
+  communityTitle: string
+  communityGroups: FooterCommunityGroup[]
+  copyrightText: string
+}

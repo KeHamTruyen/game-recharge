@@ -302,6 +302,12 @@ export function AdminRoute() {
           await api.admin.updateSetting("contactInfo", info as unknown as Record<string, unknown>)
           store.setContactInfo(info)
         }}
+        footerConfig={store.footerConfig}
+        onUpdateFooter={async (config) => {
+          await api.admin.updateSetting("footerConfig", config as unknown as Record<string, unknown>)
+          store.setFooterConfig(config)
+          store.setNotice("Đã lưu cấu hình chân trang thành công.")
+        }}
         users={store.users || []}
         transactions={store.transactions || []}
         onUpdateUser={async (id, updates) => {

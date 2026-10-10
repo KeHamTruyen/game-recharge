@@ -5,7 +5,7 @@ import { NotFoundError } from '../middleware/errorHandler.js';
 import { getPagination, buildPaginatedResult, getPaginationSkipTake } from '../utils/pagination.js';
 
 const router = Router();
-const publicSettings = ['middlemanInfo', 'contactInfo', 'siteConfig'] as const;
+const publicSettings = ['middlemanInfo', 'contactInfo', 'siteConfig', 'footerConfig'] as const;
 
 // ─── Shared Selects ───────────────────────────────────────────────────────────
 

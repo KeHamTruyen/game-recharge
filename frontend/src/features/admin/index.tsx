@@ -3,6 +3,8 @@ import type {
   ContactChannel,
   ContactInfo,
   ContactPlatform,
+  FooterCommunityGroup,
+  FooterConfig,
   IconName,
   ManagedUser,
   MiddlemanInfo,
@@ -15,7 +17,7 @@ import type {
   Transaction,
   TransactionStatus,
 } from "@/domain/models"
-import { platformLogos } from "@/data/mock-data"
+import { initialFooterConfig, platformLogos } from "@/data/mock-data"
 import { Icon, Pagination, ProductCard, ServiceCard, formatPrice } from "@/components/ui"
 import { api } from "@/services/api"
 
@@ -310,6 +312,8 @@ export function AdminPage({
   onUpdateMiddleman,
   contactInfo,
   onUpdateContact,
+  footerConfig,
+  onUpdateFooter,
   users,
   transactions,
   onUpdateUser,
@@ -346,6 +350,8 @@ export function AdminPage({
   onUpdateMiddleman: (info: MiddlemanInfo) => void
   contactInfo: ContactInfo
   onUpdateContact: (info: ContactInfo) => void
+  footerConfig?: FooterConfig
+  onUpdateFooter?: (config: FooterConfig) => void | Promise<void>
   users: ManagedUser[]
   transactions: Transaction[]
   onUpdateUser: (id: string | number, updates: Partial<ManagedUser>) => void
@@ -357,12 +363,12 @@ export function AdminPage({
   onStore?: () => void
 }) {
   const [tab, setTab] =
-    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki">(
+    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki">(
       "products",
     )
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const selectTab = (
-    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki",
+    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki",
   ) => {
     setTab(nextTab)
     setSidebarOpen(false)
@@ -664,6 +670,12 @@ export function AdminPage({
             onClick={() => selectTab("contacts")}
           >
             <Icon name="headset" size={18} /> Trang liên hệ
+          </button>
+          <button
+            className={tab === "footer" ? "active" : ""}
+            onClick={() => selectTab("footer")}
+          >
+            <Icon name="chat" size={18} /> Chân trang & Cộng đồng
           </button>
           <button
             className={tab === "adminAccount" ? "active" : ""}
@@ -2038,6 +2050,8 @@ export function AdminPage({
             />
           ) : tab === "contacts" ? (
             <ContactAdminEditor info={contactInfo} onChange={onUpdateContact} />
+          ) : tab === "footer" ? (
+            <FooterAdminEditor config={footerConfig} onChange={onUpdateFooter} />
           ) : (
             <AdminAccount
               initialName={adminName}
@@ -3753,6 +3767,298 @@ export function ContactAdminEditor({
     </fieldset>
   )
 }
+
+export function FooterAdminEditor({
+  config: initialConfig,
+  onChange: onSave,
+}: {
+  config?: FooterConfig
+  onChange?: (config: FooterConfig) => void | Promise<void>
+}) {
+  const [config, setConfig] = useState<FooterConfig>(initialConfig || initialFooterConfig)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState("")
+
+  const save = async () => {
+    if (saving || !onSave) return
+    setSaving(true)
+    try {
+      await onSave(config)
+      setMessage("Đã lưu cấu hình chân trang thành công.")
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Không thể lưu thay đổi.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleResetDefault = () => {
+    if (window.confirm("Khôi phục toàn bộ cấu hình chân trang về mặc định ban đầu?")) {
+      setConfig({ ...initialFooterConfig })
+      setMessage("Đã khôi phục mặc định (nhấn Lưu để cập nhật lên máy chủ).")
+    }
+  }
+
+  const addGroup = () => {
+    const newId = String(Date.now())
+    setConfig((prev) => ({
+      ...prev,
+      communityGroups: [
+        ...(prev.communityGroups || []),
+        { id: newId, name: "Zalo Nhóm Mới", url: "https://zalo.me/g/" },
+      ],
+    }))
+  }
+
+  const updateGroup = (id: string, updates: Partial<FooterCommunityGroup>) => {
+    setConfig((prev) => ({
+      ...prev,
+      communityGroups: (prev.communityGroups || []).map((g) =>
+        g.id === id ? { ...g, ...updates } : g
+      ),
+    }))
+  }
+
+  const removeGroup = (id: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      communityGroups: (prev.communityGroups || []).filter((g) => g.id !== id),
+    }))
+  }
+
+  return (
+    <fieldset className="contact-admin" disabled={saving} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
+      <div className="panel-heading">
+        <div>
+          <h2>Cấu hình Chân trang &amp; Cộng đồng</h2>
+          <p>
+            Tùy chỉnh hộp kêu gọi ủng hộ (YouTube / Donate), danh sách nhóm Zalo cộng đồng và dòng chữ bản quyền.
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={handleResetDefault}
+            title="Khôi phục giá trị mặc định ban đầu"
+          >
+            Khôi phục mặc định
+          </button>
+          <button
+            type="button"
+            className="primary-button"
+            onClick={save}
+            disabled={saving}
+          >
+            {saving ? "Đang lưu…" : "Lưu thay đổi"}
+          </button>
+        </div>
+      </div>
+
+      {message && (
+        <div
+          style={{
+            padding: "10px 16px",
+            marginBottom: "16px",
+            borderRadius: "8px",
+            background: message.includes("lỗi") || message.includes("Không thể") ? "rgba(239, 68, 68, 0.15)" : "rgba(34, 197, 94, 0.15)",
+            border: `1px solid ${message.includes("lỗi") || message.includes("Không thể") ? "rgba(239, 68, 68, 0.4)" : "rgba(34, 197, 94, 0.4)"}`,
+            color: message.includes("lỗi") || message.includes("Không thể") ? "#f87171" : "#4ade80",
+            fontSize: "14px",
+          }}
+        >
+          {message}
+        </div>
+      )}
+
+      {/* ─── 1. Hộp Ủng Hộ (Donation Box) ─── */}
+      <div className="middleman-admin-section">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", flexWrap: "wrap", gap: "10px" }}>
+          <h3 style={{ margin: 0 }}>✦ Hộp kêu gọi ủng hộ (Donate Card)</h3>
+          <label style={{ display: "inline-flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "14px" }}>
+            <input
+              type="checkbox"
+              checked={config.showDonationBox}
+              onChange={(e) => setConfig((prev) => ({ ...prev, showDonationBox: e.target.checked }))}
+            />
+            <span>Hiển thị trên website</span>
+          </label>
+        </div>
+
+        <label className="wide">
+          <span>Tiêu đề kêu gọi ủng hộ</span>
+          <textarea
+            rows={2}
+            value={config.donationTitle}
+            onChange={(e) => setConfig((prev) => ({ ...prev, donationTitle: e.target.value }))}
+            placeholder="Ví dụ: Nếu cảm thấy nội dung hay và hữu ích thì bạn có thể ủng hộ DUKE1305 bằng cách:"
+          />
+        </label>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "16px", marginTop: "10px" }}>
+          <div style={{ background: "rgba(255, 255, 255, 0.02)", padding: "14px", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
+            <h4 style={{ fontSize: "14px", color: "#f87171", margin: "0 0 10px 0", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>📺</span> Nút Kênh YouTube
+            </h4>
+            <label className="wide" style={{ marginBottom: "8px" }}>
+              <span>Tên nút</span>
+              <input
+                value={config.youtubeBtnText}
+                onChange={(e) => setConfig((prev) => ({ ...prev, youtubeBtnText: e.target.value }))}
+                placeholder="Đăng Ký Kênh"
+              />
+            </label>
+            <label className="wide">
+              <span>Đường link kênh YouTube</span>
+              <input
+                value={config.youtubeUrl}
+                onChange={(e) => setConfig((prev) => ({ ...prev, youtubeUrl: e.target.value }))}
+                placeholder="https://youtube.com/@duke1305"
+              />
+            </label>
+          </div>
+
+          <div style={{ background: "rgba(255, 255, 255, 0.02)", padding: "14px", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
+            <h4 style={{ fontSize: "14px", color: "#fbbf24", margin: "0 0 10px 0", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>💎</span> Nút Donate
+            </h4>
+            <label className="wide" style={{ marginBottom: "8px" }}>
+              <span>Tên nút</span>
+              <input
+                value={config.donateBtnText}
+                onChange={(e) => setConfig((prev) => ({ ...prev, donateBtnText: e.target.value }))}
+                placeholder="Donate Cho DUKE1305"
+              />
+            </label>
+            <label className="wide">
+              <span>Đường link Donate / MoMo / STK</span>
+              <input
+                value={config.donateUrl}
+                onChange={(e) => setConfig((prev) => ({ ...prev, donateUrl: e.target.value }))}
+                placeholder="https://me.momo.vn/duke1305"
+              />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── 2. Nhóm Zalo Cộng Đồng ─── */}
+      <div className="middleman-admin-section">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px", flexWrap: "wrap", gap: "10px" }}>
+          <h3 style={{ margin: 0 }}>💬 Nhóm Zalo Cộng Đồng</h3>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={addGroup}
+            style={{ fontSize: "13px", padding: "6px 14px" }}
+          >
+            + Thêm nhóm Zalo
+          </button>
+        </div>
+
+        <label className="wide" style={{ marginBottom: "16px" }}>
+          <span>Tiêu đề phần cộng đồng</span>
+          <input
+            value={config.communityTitle}
+            onChange={(e) => setConfig((prev) => ({ ...prev, communityTitle: e.target.value }))}
+            placeholder="Tổng Hợp Tất Cả Nhóm Zalo Cộng Đồng"
+          />
+        </label>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {(!config.communityGroups || config.communityGroups.length === 0) ? (
+            <p style={{ color: "#94a3b8", fontSize: "13px", fontStyle: "italic", margin: "8px 0" }}>
+              Chưa có nhóm nào. Bấm &quot;+ Thêm nhóm Zalo&quot; để tạo nút viên thuốc (capsule) trên chân trang.
+            </p>
+          ) : (
+            config.communityGroups.map((group, idx) => (
+              <div
+                key={group.id}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1.2fr auto",
+                  gap: "10px",
+                  alignItems: "center",
+                  background: "rgba(255, 255, 255, 0.03)",
+                  padding: "10px 12px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                }}
+              >
+                <div>
+                  <small style={{ color: "#94a3b8", fontSize: "11px", display: "block", marginBottom: "2px" }}>
+                    Tên nhóm #{idx + 1}
+                  </small>
+                  <input
+                    value={group.name}
+                    onChange={(e) => updateGroup(group.id, { name: e.target.value })}
+                    placeholder={`Ví dụ: Zalo Nhóm Aniimo ${idx + 1}`}
+                    style={{ margin: 0, width: "100%" }}
+                  />
+                </div>
+                <div>
+                  <small style={{ color: "#94a3b8", fontSize: "11px", display: "block", marginBottom: "2px" }}>
+                    Đường link Zalo (zalo.me/g/...)
+                  </small>
+                  <input
+                    value={group.url}
+                    onChange={(e) => updateGroup(group.id, { url: e.target.value })}
+                    placeholder="https://zalo.me/g/..."
+                    style={{ margin: 0, width: "100%" }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="danger-btn"
+                  onClick={() => removeGroup(group.id)}
+                  style={{
+                    padding: "8px 12px",
+                    fontSize: "12px",
+                    background: "rgba(239, 68, 68, 0.15)",
+                    border: "1px solid rgba(239, 68, 68, 0.3)",
+                    color: "#f87171",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    marginTop: "16px",
+                  }}
+                  title="Xóa nhóm này"
+                >
+                  Xóa
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* ─── 3. Dòng Bản Quyền (Copyright) ─── */}
+      <div className="middleman-admin-section">
+        <h3>© Bản quyền chân trang</h3>
+        <label className="wide">
+          <span>Dòng chữ bản quyền (Copyright)</span>
+          <input
+            value={config.copyrightText}
+            onChange={(e) => setConfig((prev) => ({ ...prev, copyrightText: e.target.value }))}
+            placeholder="©2026 Bản Quyền Thiết Kế Thuộc Về DUKE1305."
+          />
+        </label>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={save}
+          disabled={saving}
+          style={{ padding: "12px 32px", fontSize: "15px" }}
+        >
+          {saving ? "Đang lưu…" : "Lưu thay đổi cấu hình chân trang"}
+        </button>
+      </div>
+    </fieldset>
+  )
+}
+
 
 export function MiddlemanAdminEditor({
   info: initialInfo,

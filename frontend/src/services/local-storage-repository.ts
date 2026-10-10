@@ -1,5 +1,6 @@
 import type {
   ContactInfo,
+  FooterConfig,
   ManagedUser,
   MiddlemanInfo,
   Product,
@@ -16,6 +17,7 @@ export type AppSnapshot = {
   games: string[]
   middlemanInfo: MiddlemanInfo
   contactInfo: ContactInfo
+  footerConfig?: FooterConfig
   users?: ManagedUser[]
   transactions?: Transaction[]
 }

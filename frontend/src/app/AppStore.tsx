@@ -13,6 +13,7 @@ import {
 import type {
   ContactInfo,
   CartItem,
+  FooterConfig,
   ManagedUser,
   MiddlemanInfo,
   Product,
@@ -26,6 +27,7 @@ import type {
 
 import {
   initialContactInfo,
+  initialFooterConfig,
   initialMiddlemanInfo,
   initialProducts,
   initialProductStatuses,
@@ -64,6 +66,8 @@ const fallbackSnapshot: AppSnapshot = {
   middlemanInfo: initialMiddlemanInfo,
 
   contactInfo: initialContactInfo,
+
+  footerConfig: initialFooterConfig,
 
   users: initialUsers,
 
@@ -109,6 +113,10 @@ type AppStoreValue = AppSnapshot & {
   setMiddlemanInfo: Setter<MiddlemanInfo>
 
   setContactInfo: Setter<ContactInfo>
+
+  footerConfig: FooterConfig
+
+  setFooterConfig: Setter<FooterConfig>
 
   setUsers: Setter<ManagedUser[]>
 
@@ -271,6 +279,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const [contactInfo, setContactInfo] = useState(initial.contactInfo)
 
+  const [footerConfig, setFooterConfig] = useState<FooterConfig>(
+    initial.footerConfig || initialFooterConfig,
+  )
+
   const [users, setUsers] = useState<ManagedUser[]>([])
 
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -369,6 +381,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const mergeRemoteContent = (
     remoteMiddleman: MiddlemanInfo,
     remoteContact: ContactInfo,
+    remoteFooter?: FooterConfig | null,
   ) => {
     if (remoteMiddleman && typeof remoteMiddleman === "object") {
       setMiddlemanInfo((current) =>
@@ -389,6 +402,16 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         }),
       )
     }
+
+    if (remoteFooter && typeof remoteFooter === "object") {
+      setFooterConfig((current) => ({
+        ...current,
+        ...remoteFooter,
+        communityGroups: Array.isArray(remoteFooter.communityGroups)
+          ? remoteFooter.communityGroups
+          : current.communityGroups,
+      }))
+    }
   }
 
   useEffect(() => {
@@ -401,6 +424,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
       middlemanInfo,
       contactInfo,
+      footerConfig,
     })
   }, [
     products,
@@ -410,6 +434,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     games,
     middlemanInfo,
     contactInfo,
+    footerConfig,
     users,
     transactions,
   ])
@@ -479,13 +504,15 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
         setProductStatuses(catalog.statuses)
 
-        const [remoteMiddleman, remoteContact] = await Promise.all([
+        const [remoteMiddleman, remoteContact, remoteFooter] = await Promise.all([
           api.settings.get<MiddlemanInfo>("middlemanInfo"),
 
           api.settings.get<ContactInfo>("contactInfo"),
+
+          api.settings.get<FooterConfig>("footerConfig"),
         ])
 
-        mergeRemoteContent(remoteMiddleman, remoteContact)
+        mergeRemoteContent(remoteMiddleman, remoteContact, remoteFooter)
 
         if (session) {
           const sanitizedSession = {
@@ -627,6 +654,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       setGames,
       setMiddlemanInfo,
       setContactInfo,
+      footerConfig,
+      setFooterConfig,
 
       setUsers,
       setTransactions,
@@ -773,6 +802,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       middlemanInfo,
 
       contactInfo,
+      footerConfig,
       users,
       transactions,
       services,

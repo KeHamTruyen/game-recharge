@@ -952,7 +952,7 @@ router.patch(
 // SETTINGS
 // ══════════════════════════════════════════════════════════════════════════════
 
-const ALLOWED_SETTINGS = ['middlemanInfo', 'contactInfo', 'siteConfig'] as const;
+const ALLOWED_SETTINGS = ['middlemanInfo', 'contactInfo', 'siteConfig', 'footerConfig'] as const;
 type AllowedSetting = (typeof ALLOWED_SETTINGS)[number];
 
 const contactChannelSchema = z.object({
@@ -990,10 +990,27 @@ const middlemanInfoSchema = z.object({
   accountHolder: z.string().max(200),
   commitment: z.string().max(2000),
 });
+const footerCommunityGroupSchema = z.object({
+  id: z.string().max(50),
+  name: z.string().max(100),
+  url: z.string().max(500),
+});
+const footerConfigSchema = z.object({
+  showDonationBox: z.boolean().default(true),
+  donationTitle: z.string().max(300),
+  youtubeBtnText: z.string().max(100),
+  youtubeUrl: z.string().max(500),
+  donateBtnText: z.string().max(100),
+  donateUrl: z.string().max(500),
+  communityTitle: z.string().max(200),
+  communityGroups: z.array(footerCommunityGroupSchema).max(30),
+  copyrightText: z.string().max(300),
+});
 const settingSchemas = {
   middlemanInfo: middlemanInfoSchema,
   contactInfo: contactInfoSchema,
   siteConfig: z.record(z.string(), z.unknown()),
+  footerConfig: footerConfigSchema,
 } as const;
 
 function isAllowedSetting(key: string): key is AllowedSetting {
