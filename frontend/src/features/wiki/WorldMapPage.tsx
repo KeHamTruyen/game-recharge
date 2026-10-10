@@ -323,7 +323,12 @@ export default function WorldMapPage() {
     "surface",
   )
   const [selectedPlanId, setSelectedPlanId] = useState<string>("all")
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState(true)
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth >= 1024
+    }
+    return false
+  })
   const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null)
   const [selectedZone, setSelectedZone] = useState<ZonePolygon | null>(null)
   const [hoveredZone, setHoveredZone] = useState<ZonePolygon | null>(null)
@@ -663,7 +668,13 @@ export default function WorldMapPage() {
 
         {/* Collapsible Floating Left Filter Drawer */}
         {filterDrawerOpen && (
-          <div className="map-floating-filter-drawer">
+          <>
+            <div
+              className="map-drawer-backdrop"
+              onClick={() => setFilterDrawerOpen(false)}
+              aria-label="Đóng bảng lọc điểm ghim"
+            />
+            <div className="map-floating-filter-drawer">
             <div className="filter-drawer-head">
               <h3>🎯 Bộ Lọc Điểm Ghim</h3>
               <div className="filter-quick-toggles">
@@ -763,6 +774,7 @@ export default function WorldMapPage() {
               </div>
             )}
           </div>
+          </>
         )}
 
         {/* Interactive Map Viewport Canvas */}

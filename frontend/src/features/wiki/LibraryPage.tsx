@@ -346,8 +346,9 @@ export default function LibraryPage() {
               disabled={currentPage === 1}
               onClick={() => handlePageChange(currentPage - 1)}
               title="Trang trước"
+              aria-label="Trang trước"
             >
-              ‹ Trước
+              ‹ <span className="btn-label-text">Trước</span>
             </button>
 
             {getPageNumbers().map((p, idx) =>
@@ -375,8 +376,9 @@ export default function LibraryPage() {
               disabled={currentPage === totalPages}
               onClick={() => handlePageChange(currentPage + 1)}
               title="Trang sau"
+              aria-label="Trang sau"
             >
-              Sau ›
+              <span className="btn-label-text">Sau</span> ›
             </button>
             <button
               type="button"

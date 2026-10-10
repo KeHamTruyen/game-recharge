@@ -967,7 +967,7 @@
 /* Recommended Teams Page */
 .teams-feed-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
   gap: 20px;
 }
 
@@ -1787,7 +1787,7 @@
 
 .guides-list-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
   gap: 18px;
 }
 
@@ -2177,6 +2177,10 @@
 }
 
 /* Collapsible Floating Left Filter Drawer */
+.map-drawer-backdrop {
+  display: none;
+}
+
 .map-floating-filter-drawer {
   position: absolute;
   top: 64px;
@@ -6449,4 +6453,242 @@
     font-size: 12px;
   }
 }
+
+/* ==========================================================================
+   Comprehensive Mobile Fixes: Guides, Library, Map, Teams & Builder
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* 1. Cẩm Nang Toàn Tập (Wiki Guides) */
+  .guides-list-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .guide-card {
+    padding: 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .guide-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .guide-card-title {
+    font-size: 15px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .guide-card-summary {
+    font-size: 12px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* 2. Thư Viện Tra Cứu (Library Pagination) */
+  .library-pagination-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .library-pagination-info {
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .library-pagination-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .library-pagination-controls .btn-label-text {
+    display: none;
+  }
+
+  .library-page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 6px;
+    font-size: 12px;
+  }
+
+  .library-pagination-dots {
+    padding: 0 2px;
+    font-size: 11px;
+  }
+
+  /* 3. Bản Đồ Thế Giới (World Map Mobile Bottom Sheet & Controls) */
+  .map-drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 7, 14, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 120;
+  }
+
+  .map-floating-filter-drawer {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 75vh;
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    z-index: 130;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.85);
+    box-sizing: border-box;
+  }
+
+  .map-floating-top-bar {
+    gap: 6px;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+  }
+
+  .map-floating-left-group,
+  .map-floating-right-group {
+    gap: 6px;
+  }
+
+  .map-action-pill,
+  .map-level-toggle-pill,
+  .map-filter-drawer-toggle {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .map-area-pills {
+    max-width: calc(100vw - 120px);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    display: flex;
+    gap: 4px;
+  }
+
+  .map-area-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .map-area-tab-btn {
+    flex-shrink: 0;
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  /* 4. Đội Hình Đề Xuất (Recommended Teams) */
+  .teams-feed-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .team-post-card {
+    padding: 14px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .team-card-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .team-card-actions-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .team-slots-container {
+    gap: 4px;
+    padding: 8px 4px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .team-slot-card {
+    min-width: 0;
+  }
+
+  .team-slot-avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .team-slot-name {
+    font-size: 9.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  /* 5. Tool Build Đội Hình (Team Builder Stats Cards) */
+  .summary-stats-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .summary-stat-box {
+    padding: 8px 4px;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .summary-stat-box small {
+    font-size: 8.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .summary-stat-box strong {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 380px) {
+  .summary-stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .team-slot-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .team-slot-name {
+    font-size: 8.5px;
+  }
+}
+
 

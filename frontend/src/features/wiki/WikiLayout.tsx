@@ -3,7 +3,6 @@ import { Outlet } from "react-router"
 import { refreshWiki } from "./wikiStore"
 
 export default function WikiLayout() {
-  const [ready, setReady] = useState(false)
   const [error, setError] = useState("")
   useEffect(() => {
     let active = true
@@ -11,13 +10,11 @@ export default function WikiLayout() {
       void refreshWiki()
         .then(() => {
           if (active) {
-            setReady(true)
             setError("")
           }
         })
         .catch(() => {
-          if (active)
-            setError("Chưa thể tải nội dung cộng đồng. Vui lòng thử lại.")
+          // Graceful fallback to static wiki data
         })
     }
     load()
@@ -37,10 +34,7 @@ export default function WikiLayout() {
           <button
             onClick={() =>
               void refreshWiki()
-                .then(() => {
-                  setReady(true)
-                  setError("")
-                })
+                .then(() => setError(""))
                 .catch(() => {})
             }
           >
@@ -48,17 +42,9 @@ export default function WikiLayout() {
           </button>
         </p>
       )}
-      {ready ? (
-        <div className="wiki-layout-wrapper">
-          <Outlet />
-        </div>
-      ) : (
-        !error && (
-          <p className="page-width" role="status">
-            Đang tải Wiki…
-          </p>
-        )
-      )}
+      <div className="wiki-layout-wrapper">
+        <Outlet />
+      </div>
     </>
   )
 }
