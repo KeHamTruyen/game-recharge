@@ -6006,23 +6006,91 @@
   }
   .builder-main-panel {
     padding: 16px 12px;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: hidden;
   }
   .builder-panel-head {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    width: 100%;
+  }
+  .builder-head-title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .builder-head-title-row h3 {
+    margin: 0;
+    font-size: 15px;
   }
   .builder-code-actions {
     width: 100%;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 8px;
   }
   .builder-action-btn {
-    flex: 1 1 calc(50% - 8px);
+    width: 100%;
+    min-width: 0;
     text-align: center;
     font-size: 11.5px;
-    padding: 8px 10px;
+    padding: 9px 10px;
+    white-space: normal;
+    word-break: break-word;
+    box-sizing: border-box;
+  }
+  .builder-edit-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+  }
+  .builder-edit-banner-info {
+    width: 100%;
+    min-width: 0;
+  }
+  .edit-banner-title-line {
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .builder-edit-banner-info h4 {
+    word-break: break-word;
+    font-size: 13.5px;
+    min-width: 0;
+  }
+  .builder-edit-subtext {
+    word-break: break-word;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+  .builder-cancel-edit-btn {
+    width: 100%;
+    text-align: center;
+    padding: 9px 12px;
+    font-size: 12px;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+  .publish-edit-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+  .publish-edit-actions-row button {
+    width: 100%;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    box-sizing: border-box;
   }
   .final-roles-container.cols-3,
   .final-roles-container.cols-2 {
@@ -6036,24 +6104,164 @@
   .wiki-page-container {
     padding-block: 16px 110px;
     padding-inline: 10px;
+    max-width: 100vw;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
   .tool-accordion-section {
     margin-bottom: 14px;
     border-radius: 12px;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
   .tool-accordion-header {
     padding: 12px 14px;
+    box-sizing: border-box;
+    width: 100%;
   }
   .tool-accordion-header h3 {
     font-size: 14px;
+    word-break: break-word;
   }
   .acc-title-icon {
     width: 28px;
     height: 28px;
     font-size: 14px;
+    flex-shrink: 0;
+  }
+  .acc-header-left {
+    min-width: 0;
+    gap: 10px;
   }
   .tool-accordion-body {
     padding: 14px 10px;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+  /* Modals on Mobile */
+  .modal-backdrop,
+  .product-modal-backdrop {
+    padding: 10px;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+  .aniimo-modal-container {
+    width: min(920px, calc(100vw - 20px));
+    max-width: calc(100vw - 20px);
+    box-sizing: border-box;
+  }
+  .aniimo-modal-header {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .aniimo-modal-title-group {
+    min-width: 0;
+  }
+  .aniimo-modal-title-group h2 {
+    font-size: 16px;
+    word-break: break-word;
+  }
+  .aniimo-modal-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 14px 10px;
+    box-sizing: border-box;
+  }
+  .aniimo-modal-left {
+    width: 100%;
+    min-width: 0;
+  }
+  .aniimo-modal-right {
+    width: 100%;
+    min-width: 0;
+  }
+  .aniimo-modal-img-wrap {
+    height: 180px;
+  }
+  .manage-teams-modal-box {
+    width: min(720px, calc(100vw - 20px));
+    max-width: calc(100vw - 20px);
+    box-sizing: border-box;
+    padding: 10px;
+  }
+  .manage-modal-toolbar {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .manage-team-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 10px;
+    box-sizing: border-box;
+  }
+  .manage-row-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+  .manage-team-details {
+    width: 100%;
+    min-width: 0;
+  }
+  .manage-team-title-line {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .manage-team-title-line strong {
+    word-break: break-word;
+  }
+  .manage-team-aniimo-thumbs {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .manage-row-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+  .manage-row-actions button,
+  .manage-row-actions a {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+  }
+  .item-modal-box,
+  .admin-edit-modal-box {
+    width: min(520px, calc(100vw - 20px));
+    max-width: calc(100vw - 20px);
+    box-sizing: border-box;
+    padding: 14px 10px;
+  }
+  .item-facts-grid {
+    grid-template-columns: 1fr;
+  }
+  .team-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .team-card-actions-row {
+    width: 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .team-card-actions-row .team-action-pill {
+    flex: 1;
+    text-align: center;
+  }
+  .team-post-title {
+    word-break: break-word;
+  }
+  .team-post-desc {
+    word-break: break-word;
   }
   .matrix-swipe-hint {
     display: block;
