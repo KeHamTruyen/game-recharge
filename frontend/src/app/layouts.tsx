@@ -5,6 +5,7 @@ import { platformLogos } from "@/data/mock-data"
 import { LoginModal } from "@/features/auth/LoginModal"
 import { useAppStore } from "@/app/AppStore"
 import { api } from "@/services/api"
+import BrandSubheader from "@/components/BrandSubheader"
 
 const navigation = [
   { to: "/nap-game", label: "Nạp game", icon: "game" as const },
@@ -331,6 +332,11 @@ export function PublicLayout() {
           </div>
         </div>
       </header>
+      {!location.pathname.startsWith("/thanh-toan") && !location.pathname.startsWith("/admin") && (
+        <div className="brand-subheader-wrap page-width">
+          <BrandSubheader />
+        </div>
+      )}
       <main>
         <Outlet context={{ openLogin: () => setLoginOpen(true) }} />
       </main>

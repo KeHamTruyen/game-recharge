@@ -32,6 +32,7 @@ export function StorefrontRoute() {
   return (
     <TopupPage
       services={topupServices}
+      packages={store.servicePackages}
       search={search}
       onSearch={setSearch}
       onSelectService={(service: Service) => {
@@ -59,6 +60,7 @@ export function BoostingRoute() {
   return (
     <TopupPage
       services={boostingServices}
+      packages={store.servicePackages}
       search={search}
       onSearch={setSearch}
       mode="boosting"

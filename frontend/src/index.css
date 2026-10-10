@@ -1420,3 +1420,765 @@ h1, h2, h3, p { margin-top: 0; }
   flex: none;
   margin-right: 2px;
 }
+
+/* ==========================================================================
+   Brand Subheader Card (Khung giới thiệu dưới thanh Navi - Ảnh 3)
+   ========================================================================== */
+.brand-subheader-wrap {
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+
+.brand-subheader-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 16px 22px;
+  background: linear-gradient(135deg, rgba(16, 24, 40, 0.95) 0%, rgba(10, 15, 28, 0.96) 100%);
+  border: 1px solid rgba(56, 219, 248, 0.22);
+  border-radius: 18px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45), 0 0 20px rgba(56, 219, 248, 0.05);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-subheader-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(56, 219, 248, 0.6), rgba(234, 179, 8, 0.6), transparent);
+}
+
+/* Badge mascot bên trái giống ảnh 3 */
+.brand-badge-box {
+  flex: none;
+  width: 105px;
+  height: 112px;
+  background: linear-gradient(145deg, #fef08a 0%, #facc15 45%, #eab308 100%);
+  border-radius: 15px;
+  padding: 6px 6px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(234, 179, 8, 0.28), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(254, 240, 138, 0.8);
+}
+
+.brand-badge-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+}
+
+.badge-crown {
+  font-size: 13px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+.badge-name {
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 11.5px;
+  letter-spacing: -0.3px;
+  color: #78350f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+}
+
+.brand-badge-avatar-wrap {
+  width: 92px;
+  height: 80px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  border: 2px solid #fff;
+}
+
+.brand-badge-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Nội dung & nút bên phải */
+.brand-subheader-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.brand-subheader-text {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #e2e8f0;
+  font-weight: 400;
+}
+
+.brand-subheader-text strong {
+  color: #38dbf8;
+  font-weight: 700;
+}
+
+.brand-action-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(18, 27, 46, 0.9);
+  border: 1px solid rgba(56, 219, 248, 0.22);
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+.brand-pill-btn:hover {
+  background: rgba(56, 219, 248, 0.15);
+  border-color: rgba(56, 219, 248, 0.6);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(56, 219, 248, 0.2);
+}
+
+.brand-pill-btn.highlight {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(202, 138, 4, 0.22) 100%);
+  border-color: rgba(234, 179, 8, 0.45);
+  color: #fef08a;
+}
+
+.brand-pill-btn.highlight:hover {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.25) 0%, rgba(202, 138, 4, 0.35) 100%);
+  border-color: rgba(250, 204, 21, 0.8);
+  box-shadow: 0 8px 20px rgba(234, 179, 8, 0.25);
+}
+
+.pill-icon {
+  font-size: 14px;
+}
+
+/* ==========================================================================
+   Game Banner Coverflow Slider (Khung lướt dịch vụ - Ảnh 2)
+   ========================================================================== */
+.game-slider-section {
+  padding-block: 28px 42px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.slider-stage-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+  margin-inline: auto;
+  perspective: 1200px;
+}
+
+/* Nút mũi tên lướt < và > */
+.slider-arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 25;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(12, 18, 30, 0.88);
+  border: 1px solid rgba(56, 219, 248, 0.35);
+  color: #38dbf8;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+}
+
+.slider-arrow-btn:hover {
+  background: rgba(56, 219, 248, 0.2);
+  border-color: #38dbf8;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 0 20px rgba(56, 219, 248, 0.4);
+}
+
+.slider-arrow-left {
+  left: 6px;
+}
+
+.slider-arrow-left svg {
+  transform: rotate(180deg);
+}
+
+.slider-arrow-right {
+  right: 6px;
+}
+
+.slider-arrow-right svg {
+  transform: rotate(0deg);
+}
+
+/* Thẻ lướt thu nhỏ hai bên (Peek Cards) */
+.slider-card-peek {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 220px;
+  height: 300px;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.38;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: #0d1424;
+}
+
+.slider-card-peek:hover {
+  opacity: 0.65;
+  transform: translateY(-50%) scale(1.03);
+}
+
+.peek-left {
+  left: calc(50% - 460px);
+  transform: translateY(-50%) scale(0.88) rotateY(12deg);
+}
+
+.peek-right {
+  right: calc(50% - 460px);
+  transform: translateY(-50%) scale(0.88) rotateY(-12deg);
+}
+
+.peek-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #090e1a;
+}
+
+.peek-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.peek-poster-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  font-weight: 800;
+  color: #94a3b8;
+  background: radial-gradient(circle, rgba(56, 219, 248, 0.15) 0%, #0b1120 70%);
+}
+
+.peek-overlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 16px 12px;
+  background: linear-gradient(180deg, transparent 0%, rgba(5, 8, 16, 0.95) 100%);
+  display: flex;
+  align-items: flex-end;
+}
+
+.peek-overlay strong {
+  color: #f1f5f9;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Thẻ CHÍNH Ở GIỮA (Active Card - Thiết kế như ảnh 2) */
+.slider-card-active {
+  position: relative;
+  z-index: 15;
+  width: min(100%, 780px);
+  min-height: 340px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #101726 0%, #0a0f1d 60%, #070a14 100%);
+  border: 1.5px solid rgba(234, 179, 8, 0.38);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(234, 179, 8, 0.12);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.slider-card-active:hover {
+  transform: translateY(-3px);
+  border-color: rgba(250, 204, 21, 0.65);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.85), 0 0 45px rgba(234, 179, 8, 0.2);
+}
+
+.active-card-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.active-card-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  align-items: center;
+  min-height: 340px;
+  padding: 28px 32px;
+  gap: 20px;
+}
+
+/* Cột thông tin dịch vụ */
+.active-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.active-card-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.active-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #facc15;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.brand-dot {
+  color: #facc15;
+  font-size: 12px;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.active-service-tag {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  color: #fef08a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.active-card-title {
+  margin: 0;
+  font-size: clamp(23px, 2.7vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  line-height: 1.18;
+  color: #facc15;
+  background: linear-gradient(90deg, #fef08a 0%, #facc15 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 20px rgba(234, 179, 8, 0.25);
+}
+
+.active-card-subtext {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.os-badge {
+  color: #38dbf8;
+  font-weight: 600;
+}
+
+.divider-dot {
+  color: #475569;
+}
+
+.subtext-note {
+  color: #cbd5e1;
+}
+
+.active-card-benefits {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.active-card-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+  font-size: 12.5px;
+}
+
+.benefit-icon {
+  font-size: 13px;
+  flex: none;
+}
+
+.active-card-action-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.active-cta-btn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+  border: 1px solid #fef08a;
+  color: #78350f;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(234, 179, 8, 0.35);
+  transition: all 0.2s ease;
+}
+
+.active-cta-btn:hover {
+  background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(234, 179, 8, 0.45);
+  color: #451a03;
+}
+
+.active-price-hint {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.active-price-hint strong {
+  color: #38dbf8;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Cột minh họa 3D bên phải */
+.active-card-visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.visual-art-stage {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  display: grid;
+  place-items: center;
+}
+
+.visual-game-artwork {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid rgba(56, 219, 248, 0.35);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 30px rgba(56, 219, 248, 0.2);
+}
+
+.visual-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.visual-3d-composition {
+  position: relative;
+  width: 220px;
+  height: 200px;
+  display: grid;
+  place-items: center;
+}
+
+.phone-device-mockup {
+  position: relative;
+  width: 130px;
+  height: 180px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border: 2px solid rgba(56, 219, 248, 0.3);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 219, 248, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 6px;
+  transform: perspective(600px) rotateY(-8deg) rotateX(4deg);
+}
+
+.phone-notch {
+  width: 38px;
+  height: 4px;
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 99px;
+  margin-bottom: 8px;
+}
+
+.phone-screen {
+  flex: 1;
+  width: 100%;
+  border-radius: 14px;
+  background: radial-gradient(circle at 50% 30%, rgba(56, 219, 248, 0.2) 0%, #090e1a 80%);
+  border: 1px solid rgba(56, 219, 248, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.phone-card-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.phone-pill {
+  font-size: 8px;
+  font-weight: 700;
+  color: #38dbf8;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: rgba(56, 219, 248, 0.1);
+  border: 1px solid rgba(56, 219, 248, 0.25);
+}
+
+.phone-lightning-icon {
+  font-size: 32px;
+  filter: drop-shadow(0 0 14px #facc15);
+  animation: bounce 2s infinite;
+}
+
+.phone-price-tag {
+  font-size: 10px;
+  color: #facc15;
+  font-weight: 800;
+}
+
+.floating-coin {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.5));
+  animation: floatAnim 3s infinite ease-in-out;
+}
+
+.coin-1 {
+  top: 15px;
+  right: 10px;
+  animation-delay: 0s;
+}
+
+.coin-2 {
+  bottom: 25px;
+  left: 5px;
+  animation-delay: 1.2s;
+}
+
+.coin-3 {
+  bottom: 10px;
+  right: 15px;
+  animation-delay: 0.6s;
+}
+
+@keyframes floatAnim {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(4deg); }
+}
+
+.active-card-platforms {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Hàng chấm chỉ số tròn dưới đáy */
+.slider-dots-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.slider-dot-btn {
+  width: 9px;
+  height: 9px;
+  border-radius: 99px;
+  background: rgba(148, 163, 184, 0.3);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slider-dot-btn:hover {
+  background: rgba(234, 179, 8, 0.6);
+}
+
+.slider-dot-btn.active {
+  width: 26px;
+  background: #facc15;
+  box-shadow: 0 0 12px rgba(234, 179, 8, 0.65);
+}
+
+/* ==========================================================================
+   Responsive Mobile Cho BrandSubheader & GameBannerSlider
+   ========================================================================== */
+@media (max-width: 900px) {
+  .slider-card-peek {
+    display: none;
+  }
+  .peek-left, .peek-right {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .brand-subheader-wrap {
+    margin-top: 12px;
+    margin-bottom: 6px;
+  }
+  .brand-subheader-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 12px;
+    gap: 14px;
+    border-radius: 16px;
+  }
+  .brand-badge-box {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 8px 12px;
+  }
+  .brand-badge-header {
+    width: auto;
+    gap: 5px;
+  }
+  .brand-badge-avatar-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+  }
+  .badge-name {
+    font-size: 13px;
+  }
+  .brand-subheader-text {
+    font-size: 13px;
+  }
+  .brand-action-pills {
+    gap: 8px;
+  }
+  .brand-pill-btn {
+    padding: 7px 13px;
+    font-size: 11.5px;
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+  }
+
+  /* Slider on Mobile */
+  .game-slider-section {
+    padding-block: 16px 24px;
+  }
+  .slider-stage-container {
+    min-height: auto;
+  }
+  .slider-card-active {
+    width: 100%;
+    min-height: auto;
+    border-radius: 18px;
+  }
+  .active-card-grid {
+    grid-template-columns: 1fr;
+    padding: 18px 14px;
+    min-height: auto;
+    gap: 16px;
+  }
+  .active-card-visual {
+    display: none;
+  }
+  .active-card-title {
+    font-size: 20px;
+  }
+  .active-card-benefits li {
+    font-size: 11.5px;
+  }
+  .active-cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .slider-arrow-btn {
+    display: none;
+  }
+}
+

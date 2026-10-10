@@ -8,19 +8,20 @@ import {
   formatPrice,
 } from "@/components/ui"
 import type { PaymentDetails } from "@/services/api"
-
-// ─── Trang chủ: Danh sách dịch vụ ───────────────────────────────────────────
+import GameBannerSlider from "@/features/storefront/GameBannerSlider"
 
 // ─── Trang chủ: Danh sách dịch vụ ───────────────────────────────────────────
 
 export function TopupPage({
   services,
+  packages,
   search,
   onSearch,
   onSelectService,
   mode = "topup",
 }: {
   services: Service[]
+  packages?: ServicePackage[]
   search: string
   onSearch: (value: string) => void
   onSelectService: (service: Service) => void
@@ -37,70 +38,13 @@ export function TopupPage({
 
   return (
     <>
-      <section className="hero page-width">
-        <div className="hero-copy">
-          <span className="eyebrow">
-            <Icon name="shield" size={15} />{" "}
-            {isBoosting
-              ? "Dịch vụ cày thuê Pro · Bảo mật 100%"
-              : "Thanh toán an toàn & tự động"}
-          </span>
-          <h1>
-            {isBoosting ? (
-              <>
-                Cày thuê thần tốc.
-                <br />
-                <span>An tâm gửi gắm.</span>
-              </>
-            ) : (
-              <>
-                Nạp game nhanh.
-                <br />
-                <span>Chơi không gián đoạn.</span>
-              </>
-            )}
-          </h1>
-          <p>
-            {isBoosting
-              ? "Đội ngũ Game thủ trình độ cao, cày tay 100%, bảo mật tài khoản tuyệt đối. Hoàn thành đúng hẹn, cập nhật tiến độ liên tục và bồi hoàn nếu xảy ra sự cố."
-              : "Nạp game chính hãng với mức giá tốt nhất. Giao dịch tự động, minh bạch và bảo mật 24/7."}
-          </p>
-          <div className="hero-stats">
-            <div>
-              <strong>{isBoosting ? "15K+" : "50K+"}</strong>
-              <span>{isBoosting ? "Đơn hoàn thành" : "Khách hàng"}</span>
-            </div>
-            <div>
-              <strong>{isBoosting ? "99.9%" : "99.8%"}</strong>
-              <span>{isBoosting ? "Đánh giá 5 sao" : "Giao dịch thành công"}</span>
-            </div>
-            <div>
-              <strong>{isBoosting ? "< 12h" : "< 2 phút"}</strong>
-              <span>{isBoosting ? "Tốc độ bàn giao" : "Thời gian xử lý"}</span>
-            </div>
-          </div>
-        </div>
-        <div className="hero-visual" aria-hidden="true">
-          <div className="orb orb-one" />
-          <div className="orb orb-two" />
-          <div className="console-card card-back">
-            <span>{isBoosting ? "PRO" : "VAL"}</span>
-          </div>
-          <div className="console-card card-main">
-            <span className="mini-label">
-              {isBoosting ? "GIAO DỊCH AN TOÀN" : "GIAO DỊCH HOÀN TẤT"}
-            </span>
-            <div className="success-ring">
-              <Icon name={isBoosting ? "sword" : "check"} size={28} />
-            </div>
-            <strong>{isBoosting ? "+36 Sao" : "+6,480"}</strong>
-            <span>{isBoosting ? "La Hoàn / Full Map 100%" : "Genesis Crystal"}</span>
-          </div>
-          <div className="floating-pill">
-            <Icon name="shield" size={16} /> Bảo mật tuyệt đối
-          </div>
-        </div>
-      </section>
+      {/* Khung lướt banner games thay cho hero cũ - Thiết kế theo ảnh 2 */}
+      <GameBannerSlider
+        services={services}
+        packages={packages}
+        onSelectService={onSelectService}
+        mode={mode}
+      />
 
       <section className="catalog page-width">
         <div className="catalog-heading">
