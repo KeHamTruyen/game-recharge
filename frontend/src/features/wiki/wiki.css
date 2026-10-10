@@ -2016,13 +2016,33 @@
   gap: 12px;
 }
 
-.map-floating-left-group,
-.map-floating-right-group {
+.map-top-left-hud {
   display: flex;
   align-items: center;
   gap: 8px;
   pointer-events: auto;
-  flex-wrap: wrap;
+  max-width: calc(100% - 370px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.map-top-left-hud::-webkit-scrollbar {
+  display: none;
+}
+
+.map-top-right-hud {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.map-level-control-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .map-level-toggle-pill {
@@ -2030,27 +2050,30 @@
   align-items: center;
   gap: 6px;
   background: rgba(9, 16, 28, 0.92);
-  border: 1px solid #23344d;
+  border: 1px solid rgba(56, 189, 248, 0.25);
   color: #f1f5f9;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 7px 13px;
+  border-radius: 10px;
   font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  transition: all 0.15s;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  transition: all 0.18s ease;
+  white-space: nowrap;
 }
 
 .map-level-toggle-pill:hover {
   border-color: #38dbf8;
   color: #38dbf8;
+  transform: translateY(-1px);
 }
 
 .map-level-toggle-pill.is-underground {
   background: rgba(88, 28, 135, 0.95);
   border-color: #c084fc;
   color: #f3e8ff;
-  box-shadow: 0 0 16px rgba(168, 85, 247, 0.7);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.6);
 }
 
 .underground-plan-select {
@@ -2077,83 +2100,103 @@
 
 .map-area-pills {
   display: inline-flex;
+  align-items: center;
   gap: 4px;
-  background: rgba(6, 11, 20, 0.92);
-  border: 1px solid #1a273b;
-  padding: 3px;
-  border-radius: 10px;
-  backdrop-filter: blur(8px);
+  background: rgba(6, 12, 22, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 4px;
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
 .map-area-tab-btn {
   background: none;
-  border: none;
+  border: 1px solid transparent;
   color: #8fa0ba;
-  padding: 5px 10px;
-  border-radius: 7px;
-  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  transition: all 0.15s;
+  gap: 5px;
+  transition: all 0.18s ease;
+  white-space: nowrap;
 }
 
 .map-area-tab-btn:hover {
   color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .map-area-tab-btn.active {
-  background: #111e30;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(56, 219, 248, 0.12));
   color: #38dbf8;
-  border: 1px solid rgba(56, 219, 248, 0.3);
+  border-color: rgba(56, 219, 248, 0.5);
+  box-shadow: 0 0 12px rgba(56, 219, 248, 0.25);
+}
+
+.area-tab-count {
+  font-size: 11px;
+  opacity: 0.8;
+  font-weight: 600;
 }
 
 .map-filter-drawer-toggle {
   background: rgba(9, 16, 28, 0.92);
-  border: 1px solid #23344d;
+  border: 1px solid rgba(56, 189, 248, 0.25);
   color: #cbd5e1;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 7px 13px;
+  border-radius: 10px;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  backdrop-filter: blur(8px);
-  transition: all 0.15s;
+  backdrop-filter: blur(12px);
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
 }
 
 .map-filter-drawer-toggle:hover,
 .map-filter-drawer-toggle.active {
-  background: #102138;
+  background: rgba(14, 165, 233, 0.2);
   border-color: #38dbf8;
   color: #38dbf8;
+  box-shadow: 0 0 14px rgba(56, 219, 248, 0.3);
 }
 
 .filter-count-badge {
-  background: #162438;
+  background: rgba(56, 219, 248, 0.15);
   color: #38dbf8;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid rgba(56, 219, 248, 0.25);
 }
 
 /* Action Pills (Match Image 2 Top-Right Stack) */
 .map-action-pill {
   background: rgba(9, 16, 28, 0.92);
-  border: 1px solid #1f2e46;
+  border: 1px solid rgba(56, 189, 248, 0.25);
   color: #cbd5e1;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 7px 13px;
+  border-radius: 10px;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: all 0.15s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .map-action-pill:hover {
@@ -2163,17 +2206,23 @@
 }
 
 .map-action-pill.is-cyan-active {
-  background: #0284c7;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
   border-color: #38bdf8;
   color: #fff;
-  box-shadow: 0 0 14px rgba(2, 132, 199, 0.6);
+  box-shadow: 0 0 16px rgba(2, 132, 199, 0.6);
 }
 
-.map-action-pill.is-amber-active {
-  background: #d97706;
-  border-color: #fbbf24;
+.map-action-pill-create {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.15));
+  border-color: rgba(168, 85, 247, 0.35);
+  color: #e9d5ff;
+}
+
+.map-action-pill-create:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(168, 85, 247, 0.3));
+  border-color: #c084fc;
   color: #fff;
-  box-shadow: 0 0 14px rgba(217, 119, 6, 0.6);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.4);
 }
 
 /* Collapsible Floating Left Filter Drawer */
@@ -6564,42 +6613,105 @@
   }
 
   .map-floating-top-bar {
-    gap: 6px;
     top: 8px;
     left: 8px;
     right: 8px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .map-floating-left-group,
-  .map-floating-right-group {
+  .map-top-left-hud {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
     gap: 6px;
-  }
-
-  .map-action-pill,
-  .map-level-toggle-pill,
-  .map-filter-drawer-toggle {
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-
-  .map-area-pills {
-    max-width: calc(100vw - 120px);
     overflow-x: auto;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
-    display: flex;
+  }
+
+  .map-top-left-hud::-webkit-scrollbar {
+    display: none;
+  }
+
+  .map-level-control-group {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
     gap: 4px;
   }
 
-  .map-area-pills::-webkit-scrollbar {
-    display: none;
+  .map-area-pills {
+    display: flex;
+    flex-shrink: 0;
+    gap: 3px;
+    padding: 3px;
+    max-width: none;
+    overflow: visible;
   }
 
   .map-area-tab-btn {
     flex-shrink: 0;
-    padding: 4px 8px;
+    padding: 5px 9px;
+    font-size: 11px;
+    white-space: nowrap;
+    border-radius: 7px;
+  }
+
+  .map-top-right-hud {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .map-action-pill,
+  .map-filter-drawer-toggle {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: 6px 4px;
     font-size: 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    box-sizing: border-box;
+    gap: 3px;
+  }
+
+  .map-filter-drawer-toggle .filter-count-badge {
+    padding: 1px 4px;
+    font-size: 9.5px;
+    border-radius: 4px;
+  }
+
+  .map-level-toggle-pill {
+    padding: 5px 8px;
+    font-size: 10.5px;
+    border-radius: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .map-top-sync-banner {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .map-banner-sync-btn {
+    white-space: nowrap;
+    font-size: 10.5px;
+    padding: 4px 8px;
+  }
+
+  .underground-plan-select {
+    padding: 5px 8px;
+    font-size: 10px;
+    border-radius: 8px;
   }
 
   /* 4. Đội Hình Đề Xuất (Recommended Teams) */

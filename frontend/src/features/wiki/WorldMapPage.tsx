@@ -48,6 +48,7 @@ const MAP_AREAS = [
   {
     id: "country-of-time",
     name: "Bình Nguyên Gió Hôn (Country of Time)",
+    shortName: "Bình Nguyên Gió Hôn",
     totalPoints: 2953,
     width: 4256,
     height: 3264,
@@ -60,6 +61,7 @@ const MAP_AREAS = [
   {
     id: "lost-islets",
     name: "Quần Đảo Thất Lạc (Lost Islets)",
+    shortName: "Quần Đảo Thất Lạc",
     totalPoints: 462,
     width: 6144,
     height: 4096,
@@ -72,6 +74,7 @@ const MAP_AREAS = [
   {
     id: "whisperwake-isles",
     name: "Quần Đảo Whisperwake (Whisperwake Isles)",
+    shortName: "Whisperwake",
     totalPoints: 146,
     width: 2048,
     height: 3072,
@@ -84,6 +87,7 @@ const MAP_AREAS = [
   {
     id: "astra",
     name: "Thành Phố Astra & Vùng Phụ Cận",
+    shortName: "Thành Phố Astra",
     totalPoints: 23,
     width: 7680,
     height: 4608,
@@ -560,10 +564,10 @@ export default function WorldMapPage() {
       <div className="game-map-wrapper">
         {/* Top Floating Action Bar */}
         <div className="map-floating-top-bar">
-          <div className="map-floating-left-group">
-            {/* Level Toggle: Ground / Underground */}
+          {/* Left / Upper HUD: Level toggle & Region Switcher */}
+          <div className="map-top-left-hud">
             {selectedArea.hasUnderground ? (
-              <>
+              <div className="map-level-control-group">
                 <button
                   type="button"
                   className={`map-level-toggle-pill ${
@@ -601,10 +605,9 @@ export default function WorldMapPage() {
                     ))}
                   </select>
                 )}
-              </>
+              </div>
             ) : null}
 
-            {/* Area Switcher Pills */}
             <div className="map-area-pills">
               {MAP_AREAS.map((area) => (
                 <button
@@ -618,13 +621,15 @@ export default function WorldMapPage() {
                     handleResetView()
                   }}
                 >
-                  <span>{area.name.split(" (")[0]}</span>
-                  <small>({area.totalPoints.toLocaleString()})</small>
+                  <span className="area-tab-name">{area.shortName || area.name.split(" (")[0]}</span>
+                  <span className="area-tab-count">({area.totalPoints.toLocaleString()})</span>
                 </button>
               ))}
             </div>
+          </div>
 
-            {/* Filter Drawer Toggle */}
+          {/* Right / Lower HUD: Pin Filter, Boundaries & Create Pin */}
+          <div className="map-top-right-hud">
             <button
               type="button"
               className={`map-filter-drawer-toggle ${
@@ -638,10 +643,7 @@ export default function WorldMapPage() {
                 {filteredMarkers.length}/{totalPointsInArea}
               </span>
             </button>
-          </div>
 
-          {/* Right Floating Stack */}
-          <div className="map-floating-right-group">
             <button
               type="button"
               className={`map-action-pill ${showZones ? "is-cyan-active" : ""}`}
@@ -653,7 +655,7 @@ export default function WorldMapPage() {
 
             <button
               type="button"
-              className="map-action-pill"
+              className="map-action-pill map-action-pill-create"
               onClick={() => {
                 alert(
                   "Tính năng Tạo Ghim: Bạn có thể nhấp vào bất kỳ điểm nào trên bản đồ để xem chi tiết hoặc thêm ghi chú cá nhân!",
@@ -1113,16 +1115,6 @@ export default function WorldMapPage() {
             </div>
           )}
 
-          {/* Zero pins active hint */}
-          {filteredMarkers.length === 0 && (
-            <div className="map-no-pins-hint">
-              <span>
-                💡 Tất cả ghim đang tắt để tối ưu tải trang. Bấm chọn các mục từ
-                bảng bên trái hoặc bấm "Bật tất cả" để hiển thị.
-              </span>
-            </div>
-          )}
-
           {/* Bottom Controls HUD */}
           <div className="map-bottom-hud">
             <div className="hud-zoom-controls">
@@ -1153,12 +1145,6 @@ export default function WorldMapPage() {
               <span className="zoom-value-text">
                 {Math.round(zoomLevel * 100)}%
               </span>
-            </div>
-
-            {/* Bottom Left Community Indicator */}
-            <div className="map-bottom-mascot-pill">
-              <span className="mascot-fox">🦊</span>
-              <span>Bản đồ trực tuyến DUKE1305</span>
             </div>
           </div>
         </div>
