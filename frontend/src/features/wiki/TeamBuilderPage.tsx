@@ -2857,28 +2857,6 @@ export default function TeamBuilderPage() {
         )}
       </div>
 
-      {/* ========================================================
-          7. BANNER ỦNG HỘ / DONATE
-          ======================================================== */}
-      <div className="builder-support-banner-card">
-        <div className="support-banner-inner">
-          <span className="spark-icon">✨</span>
-          <p>
-            Nếu cảm thấy nội dung hay và hữu ích thì bạn có thể ủng hộ DUKE1305
-            bằng cách sử dụng dịch vụ <strong>Nạp Game Giá Rẻ</strong>,{" "}
-            <strong>Trung Gian Đổi Mail An Toàn</strong> hoặc liên hệ hỗ trợ khi
-            có nhu cầu nha. Cảm ơn mọi người rất nhiều!
-          </p>
-          <div className="support-action-links">
-            <Link to="/nap-game" className="support-btn nap">
-              Nạp Game Ngay
-            </Link>
-            <Link to="/trung-gian" className="support-btn tg">
-              Dịch Vụ Trung Gian
-            </Link>
-          </div>
-        </div>
-      </div>
 
       {/* Import Code Modal */}
       {importCodeModal && (
