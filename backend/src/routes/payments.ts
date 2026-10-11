@@ -138,7 +138,7 @@ router.post(
             : null;
 
         if (receiptExternalId) {
-          const receipt = await tx.paymentReceipt.createMany({
+          const receipt = await (tx as any).paymentReceipt.createMany({
             data: [{ provider: 'sepay', externalId: receiptExternalId, paymentOrderCode: orderCode }],
             skipDuplicates: true,
           });
