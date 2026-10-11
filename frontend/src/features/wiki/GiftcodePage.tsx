@@ -15,6 +15,7 @@ export default function GiftcodePage() {
   const isAdmin = user?.role === "admin"
 
   const [submitting, setSubmitting] = useState(false)
+  const [modalError, setModalError] = useState("")
   const [codes, setCodes] = useState<GiftcodeItem[]>(getEffectiveGiftcodes())
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [filterQuery, setFilterQuery] = useState("")
@@ -67,6 +68,7 @@ export default function GiftcodePage() {
     setModalCode("")
     setModalReward("")
     setModalNote("")
+    setModalError("")
     setIsModalOpen(true)
   }
 
@@ -75,6 +77,7 @@ export default function GiftcodePage() {
     setModalCode(item.code)
     setModalReward(item.reward)
     setModalNote("")
+    setModalError("")
     setIsModalOpen(true)
   }
 
@@ -95,16 +98,13 @@ export default function GiftcodePage() {
   const handleSubmitModal = async (e: React.FormEvent) => {
     e.preventDefault()
     if (submitting) return
-    if (!user) {
-      alert("Vui lòng đăng nhập tài khoản!")
-      return
-    }
     if (!modalCode.trim() || !modalReward.trim()) {
       alert("Vui lòng nhập đầy đủ mã và phần thưởng!")
       return
     }
 
     setSubmitting(true)
+    setModalError("")
     try {
       if (editingCodeItem && isAdmin) {
         // Admin direct edit
@@ -130,13 +130,13 @@ export default function GiftcodePage() {
         await saveGiftcode(item, true)
         setNotice(`Đã thêm giftcode "${item.code}" thành công!`)
       } else {
-        // Regular user contribution
+        // Community contribution
         const item: GiftcodeItem = {
           id: "gift_" + Date.now(),
           code: modalCode.trim().toUpperCase(),
           reward: modalReward.trim() + (modalNote.trim() ? ` (${modalNote.trim()})` : ""),
           created_at: "Vừa xong",
-          author: user.name || user.email.split("@")[0],
+          author: user ? (user.name || user.email.split("@")[0]) : "Cộng đồng",
           isCommunity: true,
           upvotes: 1,
           reports: 0,
@@ -153,7 +153,9 @@ export default function GiftcodePage() {
       setModalNote("")
       setEditingCodeItem(null)
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Không thể lưu giftcode.")
+      const msg = error instanceof Error ? error.message : "Không thể lưu giftcode."
+      setNotice(msg)
+      setModalError(msg)
     } finally {
       setSubmitting(false)
     }
@@ -190,7 +192,7 @@ export default function GiftcodePage() {
       )}
 
       {/* Filter & Action Toolbar */}
-      <div className="giftcode-toolbar">
+      <div className="giftcode-toolbar giftcode-action-bar">
         <div className="giftcode-search-box">
           <Icon name="search" size={16} />
           <input
@@ -204,13 +206,7 @@ export default function GiftcodePage() {
         <button
           type="button"
           className="create-team-cta-btn"
-          onClick={() => {
-            if (!user) {
-              alert("Vui lòng đăng nhập tài khoản để đóng góp mã giftcode!")
-              return
-            }
-            handleOpenAddModal()
-          }}
+          onClick={handleOpenAddModal}
         >
           <span>{isAdmin ? "➕" : "🎁"}</span>{" "}
           {isAdmin ? "Thêm Mã Giftcode Trực Tiếp" : "Đóng Góp Giftcode Mới"}
@@ -327,6 +323,22 @@ export default function GiftcodePage() {
             </div>
 
             <form onSubmit={handleSubmitModal} className="contribute-form">
+              {modalError && (
+                <div
+                  className="modal-alert-box error"
+                  style={{
+                    background: "rgba(239, 68, 68, 0.15)",
+                    border: "1px solid rgba(239, 68, 68, 0.4)",
+                    color: "#f87171",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    marginBottom: "12px",
+                  }}
+                >
+                  {modalError}
+                </div>
+              )}
               <div className="form-group">
                 <label>Mã Giftcode (Viết hoa, không dấu) *</label>
                 <input

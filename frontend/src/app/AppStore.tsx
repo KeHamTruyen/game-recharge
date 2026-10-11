@@ -136,7 +136,7 @@ type AppStoreValue = AppSnapshot & {
 
   setCart: Setter<CartItem[]>
 
-  setCheckoutInfo: Setter<Record<string, string>>
+  setCheckoutInfo: (values: Record<string, string>) => void
 
   setNotice: Setter<string>
 
@@ -354,33 +354,28 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     } catch {}
   }, [cart])
 
-  const isSensitiveCheckoutKey = (key: string) => /pass|pwd|secret|pin|matkhau/i.test(key)
-
-  const [checkoutInfo, setCheckoutInfo] = useState<Record<string, string>>(() => {
-    try {
-      const saved = sessionStorage.getItem("nexa_checkout_info")
-      if (!saved) return {}
-      const parsed = JSON.parse(saved)
-      return Object.fromEntries(
-        Object.entries(parsed).filter(([k]) => !isSensitiveCheckoutKey(k))
-      ) as Record<string, string>
-    } catch {
-      return {}
-    }
-  })
-
+  // Form data stays in memory: template-defined passwords can have arbitrary keys.
+  const [checkoutInfo, updateCheckoutInfo] = useState<Record<string, string>>({})
   useEffect(() => {
     try {
-      const safeInfo = Object.fromEntries(
-        Object.entries(checkoutInfo).filter(([k]) => !isSensitiveCheckoutKey(k))
-      )
-      if (Object.keys(safeInfo).length > 0) {
-        sessionStorage.setItem("nexa_checkout_info", JSON.stringify(safeInfo))
-      } else {
-        sessionStorage.removeItem("nexa_checkout_info")
+      sessionStorage.removeItem("nexa_checkout_info")
+      const saved = sessionStorage.getItem("nexa_checkout_payment")
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        delete parsed.topupSignature
+        delete parsed.topupHash
+        sessionStorage.setItem("nexa_checkout_payment", JSON.stringify(parsed))
       }
     } catch {}
-  }, [checkoutInfo])
+  }, [])
+
+  const setCheckoutInfo = (values: Record<string, string>) => {
+    const keys = new Set([...Object.keys(checkoutInfo), ...Object.keys(values)])
+    if ([...keys].some((key) => checkoutInfo[key] !== values[key])) {
+      try { sessionStorage.removeItem("nexa_checkout_payment") } catch {}
+    }
+    updateCheckoutInfo(values)
+  }
 
   const [notice, setNotice] = useState("")
 

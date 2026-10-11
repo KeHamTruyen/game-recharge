@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { normalizeUpload } from '../utils/imageUpload.js';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
@@ -341,29 +343,16 @@ router.post(
         })
         .parse(req.body);
 
-      let buffer: Buffer;
-      let ext = 'png';
-
-      if (data.startsWith('data:image/')) {
-        const matches = data.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
-        if (!matches || !matches[2]) {
-          throw new AppError('Invalid image data format', 400);
-        }
-        ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-        buffer = Buffer.from(matches[2], 'base64');
-      } else {
-        buffer = Buffer.from(data, 'base64');
-      }
-
+      const buffer = await normalizeUpload(data);
       const uploadsDir = path.join(process.cwd(), 'uploads');
       if (!fs.existsSync(uploadsDir)) {
         fs.mkdirSync(uploadsDir, { recursive: true });
       }
 
       const cleanBase = filename.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
-      const safeName = `${Date.now()}_${cleanBase}.${ext}`;
+      const safeName = `${randomUUID()}_${cleanBase}.webp`;
       const filePath = path.join(uploadsDir, safeName);
-      fs.writeFileSync(filePath, buffer);
+      await fs.promises.writeFile(filePath, buffer);
 
       // In dev environment, sync with frontend public uploads if folder exists
       try {
@@ -372,7 +361,7 @@ router.post(
           if (!fs.existsSync(frontendPublicUploads)) {
             fs.mkdirSync(frontendPublicUploads, { recursive: true });
           }
-          fs.writeFileSync(path.join(frontendPublicUploads, safeName), buffer);
+          await fs.promises.writeFile(path.join(frontendPublicUploads, safeName), buffer);
         }
       } catch {
         // ignore sync error

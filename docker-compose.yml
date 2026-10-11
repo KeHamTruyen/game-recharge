@@ -34,13 +34,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    environment:
+      migrate:
+        condition: service_completed_successfully
+    environment: &backend_environment
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
       PORT: 3000
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-duke1305_user}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-duke1305_db}?schema=public
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET with at least 64 characters}
       COOKIE_SECRET: ${COOKIE_SECRET:?Set COOKIE_SECRET with at least 32 characters}
-      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-}
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:?Set DATA_ENCRYPTION_KEY with at least 32 characters}
       PREVIOUS_ENCRYPTION_KEYS: ${PREVIOUS_ENCRYPTION_KEYS:-}
       CORS_ORIGIN: ${CORS_ORIGIN:?Set the public HTTPS origin}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
@@ -61,8 +64,21 @@ services:
       - duke_network
 
   # -------------------------------------------------------------
-  # 3. Frontend Web Server (React + Vite + Nginx)
+  # 3. Database Migration Runner (Prisma + Data Migration)
   # -------------------------------------------------------------
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: "no"
+    environment: *backend_environment
+    command: ["sh", "-c", "npx prisma migrate deploy && node dist/scripts/migrate_passwords.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - duke_network
+
   frontend:
     build:
       context: .

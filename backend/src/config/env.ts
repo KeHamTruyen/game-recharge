@@ -12,6 +12,7 @@ const envSchema = z.object({
   JWT_EXPIRY: z.string().default('7d'),
 
   // Server
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(10).default(0),
   PORT: z.coerce.number().int().positive().default(3000),
   NODE_ENV: z
     .enum(['development', 'production', 'test'])

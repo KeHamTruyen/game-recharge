@@ -14,6 +14,7 @@ import {
 import {
   sanitizeTopupInfoForStorage,
   maskTopupInfo,
+  maskCachedTopupInfo,
 } from '../utils/crypto.js';
 
 const router = Router();
@@ -223,9 +224,19 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
         }
         const cached = JSON.parse(JSON.stringify(previous.response)) as Record<string, any>;
         if (cached && Array.isArray(cached.transactions)) {
-          cached.transactions = cached.transactions.map((txItem: any) => ({
-            ...txItem,
-            topupInfo: maskTopupInfo(txItem.topupInfo, false),
+          cached.transactions = await Promise.all(cached.transactions.map(async (txItem: any) => {
+            const packageId = txItem.packageId ?? txItem.package?.id;
+            const pkg = typeof packageId === 'string'
+              ? await tx.servicePackage.findUnique({ where: { id: packageId }, select: { templateId: true } })
+              : null;
+            const template = pkg?.templateId
+              ? await tx.topupTemplate.findUnique({ where: { id: pkg.templateId }, select: { fields: true } })
+              : null;
+            return {
+              ...txItem,
+              topupInfo: maskCachedTopupInfo(txItem.topupInfo,
+                Array.isArray(template?.fields) ? template.fields as Array<Record<string, unknown>> : undefined),
+            };
           }));
         }
         return cached;

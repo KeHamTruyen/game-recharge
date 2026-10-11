@@ -116,7 +116,7 @@ export function errorHandler(
     console.error(JSON.stringify({
       event: 'unhandled_error',
       requestId: _req.requestId,
-      error: err instanceof Error ? err.message : 'unknown_error',
+      error: 'internal_error',
     }));
     res.status(500).json({
       success: false,

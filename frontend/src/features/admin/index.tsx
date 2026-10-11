@@ -123,19 +123,9 @@ export function AdminImagePicker({
         reader.readAsDataURL(file)
       })
 
-      let finalUrl = dataUri
-      try {
-        const { api } = await import("@/services/api")
-        const res = await api.admin.uploadImage({
-          filename: file.name,
-          data: dataUri,
-        })
-        if (res?.url) {
-          finalUrl = res.url
-        }
-      } catch {
-        // Fallback to dataUri if server upload route fails
-      }
+      const { api } = await import("@/services/api")
+      const res = await api.admin.uploadImage({ filename: file.name, data: dataUri })
+      const finalUrl = res.url
 
       onChange(finalUrl)
       setLocalHistory((prev) => {
@@ -149,7 +139,7 @@ export function AdminImagePicker({
         return next
       })
     } catch (err) {
-      console.error("Upload error:", err)
+      window.alert(err instanceof Error ? err.message : "Image upload failed")
     } finally {
       setIsUploading(false)
     }
@@ -185,7 +175,7 @@ export function AdminImagePicker({
           <span>{isUploading ? "Đang tải ảnh lên..." : "Tải ảnh từ máy"}</span>
           <input
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            accept="image/png,image/jpeg,image/webp,image/gif"
             style={{ display: "none" }}
             onChange={(e) => handleUploadFile(e.target.files?.[0])}
             disabled={isUploading}
@@ -3550,12 +3540,21 @@ export function ContactAdminEditor({
         channel.id === id ? { ...channel, ...updates } : channel,
       ),
     )
-  const uploadChannelImage = (id: string | number, file?: File) => {
+  const uploadChannelImage = async (id: string | number, file?: File) => {
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = () =>
-      updateChannel(id, { image: String(reader.result), platform: "custom" })
-    reader.readAsDataURL(file)
+    try {
+      const data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result))
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+      const { api } = await import("@/services/api")
+      const result = await api.admin.uploadImage({ filename: file.name, data })
+      updateChannel(id, { image: result.url, platform: "custom" })
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Image upload failed")
+    }
   }
   const changePlatform = (
     channel: ContactChannel,
@@ -3736,7 +3735,7 @@ export function ContactAdminEditor({
                 <span>Hoặc tải logo lên</span>
                 <input
                   type="file"
-                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
                   onChange={(event) =>
                     uploadChannelImage(channel.id, event.target.files?.[0])
                   }

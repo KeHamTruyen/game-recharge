@@ -80,7 +80,7 @@ test("giftcode failure retains the contribution and never shows success", async 
   await page.locator(".modal-backdrop input").first().fill("TESTCODE")
   await page.locator(".modal-backdrop input").nth(1).fill("100 Gems")
   await page.locator(".modal-backdrop button[type=submit]").click()
-  await expect(page.getByText("Test server unavailable")).toBeVisible()
+  await expect(page.getByText("Test server unavailable").first()).toBeVisible()
   await expect(page.locator(".modal-backdrop input").first()).toHaveValue("TESTCODE")
   await expect(page.getByText("Cảm ơn bạn đã đóng góp!")).toHaveCount(0)
 })
@@ -119,7 +119,7 @@ test("team publication uses the server ID and can update the same saved team", a
 })
 
 test("catalog fetches the next page instead of silently hiding packages after 100", async ({ page }) => {
-  await page.route("**/api/catalog/services/a/packages?**", async (route) => {
+  await page.route(/\/api\/catalog\/services\/a\/packages/, async (route) => {
     const secondPage = new URL(route.request().url()).searchParams.get("page") === "2"
     await route.fulfill({ json: { success: true, data: { items: [{ ...pkg, id: secondPage ? "pkg-101" : "pkg-1", name: secondPage ? "Last Package" : "First Package" }], hasNext: !secondPage } } })
   })
@@ -165,10 +165,62 @@ for (const width of [390, 820]) {
     await page.goto("/nap-game")
     const navigation = page.getByRole("navigation", { name: "Điều hướng di động" })
     await expect(navigation).toBeVisible()
-    await expect(navigation.getByRole("link", { name: "Cày thuê" })).toBeVisible()
-    await navigation.getByRole("link", { name: "Cày thuê" }).click()
+    const cayThueBtn = navigation.locator("button, a").filter({ hasText: "Cày thuê" })
+    await expect(cayThueBtn).toBeVisible()
+    await cayThueBtn.click()
     await expect(page).toHaveURL(/cay-thue$/)
     await expect(page.locator(".service-card").filter({ hasText: "Game Boost" })).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   })
+}
+
+for (const key of ["password", "credential"]) {
+  test(`checkout keeps ${key} out of storage, restores payment and invalidates edits`, async ({ page }) => {
+    await page.route("**/api/catalog/topup-templates", (route) => route.fulfill({ json: { success: true, data: [{
+      id: "tpl", name: "Test", game: "Game Alpha", fields: [
+        { key: "uid", label: "UID", type: "text", required: true },
+        { key, label: "Credential", type: "password", required: true },
+      ],
+    }] } }));
+    let created = 0;
+    await page.route("**/api/orders/checkout", (route) => {
+      created += 1;
+      return route.fulfill({ json: { success: true, data: { transactions: [], payment: {
+        orderCode: "DUMMY_ORDER_1", amount: 10000, bankCode: "TEST", accountNumber: "0000",
+        accountName: "DUMMY", transferContent: "DUMMY_ORDER_1", qrCode: "", checkoutUrl: "",
+      } } } });
+    });
+    await page.route("**/api/payments/status/*", (route) => route.fulfill({ json: {
+      success: true, data: { paymentStatus: "PENDING" },
+    } }));
+    await page.goto("/nap-game/a");
+    await page.locator(".account-nav-button.signed-in").waitFor({ state: "attached" });
+    await page.locator(".package-card").click();
+    await page.locator(".cart-button").click();
+    const submit = async (password: string) => {
+      await page.getByLabel("UID").fill("800123456");
+      await page.getByLabel("Credential").fill(password);
+      await page.locator(".dynamic-topup-form button[type=submit]").click();
+      await page.locator(".confirmation-modal .primary-button").click();
+    };
+    await submit("DummyPass123");
+    await page.locator(".confirm-payment").click();
+    await expect(page.getByText("DUMMY_ORDER_1", { exact: true }).first()).toBeVisible();
+    expect(await page.evaluate(() => JSON.stringify(sessionStorage))).not.toContain("DummyPass123");
+    await page.locator(".checkout-back").click();
+    await submit(" DummyPass123 ");
+    await expect(page.getByText("DUMMY_ORDER_1", { exact: true })).toHaveCount(0);
+    await page.locator(".confirm-payment").click();
+    await expect(page.getByText("DUMMY_ORDER_1", { exact: true }).first()).toBeVisible();
+    await page.evaluate(() => {
+      sessionStorage.setItem("nexa_checkout_info", JSON.stringify({ credential: "DummyPass123" }));
+      const payment = JSON.parse(sessionStorage.getItem("nexa_checkout_payment")!);
+      payment.topupSignature = JSON.stringify({ credential: "DummyPass123" });
+      sessionStorage.setItem("nexa_checkout_payment", JSON.stringify(payment));
+    });
+    await page.reload();
+    await expect(page.getByText("DUMMY_ORDER_1", { exact: true }).first()).toBeVisible();
+    expect(created).toBe(2);
+    expect(await page.evaluate(() => JSON.stringify(sessionStorage))).not.toContain("DummyPass123");
+  });
 }

@@ -166,3 +166,12 @@ export function maskTopupInfo(
 
   return result;
 }
+
+// Missing/deleted templates cannot safely identify arbitrary legacy password keys.
+export function maskCachedTopupInfo(topupInfo: unknown, fields?: Array<Record<string, unknown>>): unknown {
+  if (!topupInfo || typeof topupInfo !== 'object') return topupInfo;
+  if (!Array.isArray(fields)) {
+    return Object.fromEntries(Object.keys(topupInfo).map((key) => [key, '••••••••']));
+  }
+  return maskTopupInfo(topupInfo, false, fields);
+}

@@ -30,7 +30,7 @@ export function requestContext(req: Request, res: Response, next: NextFunction):
 
 function sanitizeBody(body: unknown): Record<string, unknown> | undefined {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return undefined;
-  const sensitive = /password|token|secret|cookie|authorization|api.?key|uid|topupinfo/i;
+  const sensitive = /password|token|secret|cookie|authorization|api.?key|uid|topupinfo|data|image/i;
   return Object.fromEntries(
     Object.entries(body as Record<string, unknown>)
       .filter(([key]) => !sensitive.test(key))
@@ -55,11 +55,11 @@ export function auditAdminRequest(req: Request, res: Response, next: NextFunctio
           query: req.query,
         })),
       },
-    }).catch((error: unknown) => {
+    }).catch(() => {
       console.error(JSON.stringify({
         event: 'audit_log_failure',
         requestId: req.requestId,
-        error: error instanceof Error ? error.message : 'unknown_error',
+        error: 'audit_write_failed',
       }));
     });
   });

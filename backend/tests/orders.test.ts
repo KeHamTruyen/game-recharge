@@ -384,4 +384,40 @@ describe('Orders & Checkout Logic (Atomic & Idempotent)', () => {
       assert.strictEqual(checkout.status, 400);
     } finally { await prisma.service.update({ where: { id: service1Id }, data: { isActive: true } }); }
   });
+  it('Legacy custom passwords are masked on replay and purged by migration', async () => {
+    const { migrateLegacyPasswords } = await import('../src/scripts/migrate_passwords.js');
+    const { decryptSensitive } = await import('../src/utils/crypto.js');
+    const template = await prisma.topupTemplate.findUniqueOrThrow({ where: { id: templateId } });
+    await prisma.topupTemplate.update({ where: { id: templateId }, data: {
+      fields: [...template.fields as any[], { key: 'credential', type: 'password', label: 'Credential' }],
+    } });
+    const headers = { 'Idempotency-Key': crypto.randomUUID() };
+    const payload = { items: [{ packageId: package1Id, quantity: 1 }],
+      topupInfo: { uid: '800123456', server: 'asia', credential: ' legacy custom password ' } };
+    const created = await customerClient.post('/api/orders/checkout', payload, { headers });
+    assert.strictEqual(created.status, 201);
+    const response = created.body.data;
+    response.transactions[0].topupInfo = payload.topupInfo;
+    response.transactions.push({ id: 'deleted-package', topupInfo: { credential: 'orphan-secret' } });
+    const cached = await prisma.checkoutRequest.findFirstOrThrow({ where: { paymentOrderCode: response.payment.orderCode } });
+    await prisma.checkoutRequest.update({ where: { id: cached.id }, data: { response } });
+    await prisma.transaction.update({ where: { id: response.transactions[0].id }, data: { topupInfo: payload.topupInfo } });
+    const replay = await customerClient.post('/api/orders/checkout', payload, { headers });
+    assert.strictEqual(replay.status, 201);
+    assert.notStrictEqual(replay.body.data.transactions[0].topupInfo.credential, payload.topupInfo.credential);
+    assert.strictEqual(replay.body.data.transactions[0].topupInfo.uid, payload.topupInfo.uid);
+    assert.ok(!JSON.stringify(replay.body.data).includes('orphan-secret'));
+    await migrateLegacyPasswords();
+    const tx = await prisma.transaction.findUniqueOrThrow({ where: { id: response.transactions[0].id } });
+    const info = tx.topupInfo as Record<string, string>;
+    assert.ok(info.credential.startsWith('enc:'));
+    assert.strictEqual(decryptSensitive(info.credential), payload.topupInfo.credential);
+    const migrated = await prisma.checkoutRequest.findUniqueOrThrow({ where: { id: cached.id } });
+    assert.ok(!JSON.stringify(migrated.response).includes(payload.topupInfo.credential));
+    assert.ok(!JSON.stringify(migrated.response).includes('orphan-secret'));
+    await migrateLegacyPasswords();
+    const again = await prisma.transaction.findUniqueOrThrow({ where: { id: tx.id } });
+    assert.deepStrictEqual(again.topupInfo, tx.topupInfo);
+  });
+
 });

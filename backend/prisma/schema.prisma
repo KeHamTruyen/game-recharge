@@ -256,3 +256,15 @@ model WikiVote {
   @@id([entryKey, userId])
   @@map("wiki_votes")
 }
+
+// One bank payment can settle multiple Transaction rows.
+model PaymentReceipt {
+  provider         String
+  externalId       String
+  paymentOrderCode String
+  createdAt        DateTime @default(now())
+
+  @@id([provider, externalId])
+  @@index([paymentOrderCode])
+  @@map("payment_receipts")
+}

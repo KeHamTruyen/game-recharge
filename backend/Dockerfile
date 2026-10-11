@@ -1,12 +1,12 @@
 # -------------------------------------------------------------
 # Backend Multi-stage Build cho Node.js API
 # -------------------------------------------------------------
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 
 WORKDIR /app
 
 # Cài đặt công cụ build cần thiết cho bcrypt
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ openssl
 
 # Cài đặt dependencies
 COPY package.json package-lock.json* ./
@@ -21,14 +21,16 @@ COPY src ./src
 RUN npm run build
 
 # Stage chạy Production siêu nhẹ
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Cài đặt thư viện chạy cần thiết
-RUN apk add --no-cache openssl
+# Cài đặt thư viện chạy cần thiết và nhận các bản vá Alpine mới nhất
+RUN apk update \
+    && apk upgrade --no-cache \
+    && apk add --no-cache openssl
 
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
@@ -45,5 +47,4 @@ COPY uploads ./seed_uploads/
 EXPOSE 3000
 
 # Chạy migrate DB, chuyển đổi dữ liệu nhạy cảm cũ, sao chép ảnh mẫu vào uploads volume nếu chưa có, và khởi động ứng dụng
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/scripts/migrate_passwords.js && (cp -n /app/seed_uploads/* /app/uploads/ 2>/dev/null || true) && node dist/index.js"]
-
+CMD ["sh", "-c", "(cp -n /app/seed_uploads/* /app/uploads/ 2>/dev/null || true) && exec node dist/index.js"]

@@ -10,7 +10,7 @@ import cookieParser from 'cookie-parser';
 import path from 'node:path';
 import { apiLimiter, adminLimiter, orderLimiter, paymentStatusLimiter, paymentWebhookLimiter } from './middleware/rateLimiter.js';
 import { requestContext } from './middleware/requestContext.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { AppError, errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { prisma } from './lib/prisma.js';
 
 import authRouter from './routes/auth.js';
@@ -85,12 +85,12 @@ app.use(
       ) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS policy: origin ${origin} is not allowed`));
+        callback(new AppError('Origin is not allowed', 403));
       }
     },
     credentials: true, // Required for cookies
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'X-Request-Id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'X-Request-Id', 'X-CSRF-Protection'],
     exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-Request-Id'],
     maxAge: 86400, // 24h preflight cache
   })
@@ -101,6 +101,16 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser(env.COOKIE_SECRET));
+
+// Custom headers require a successful CORS preflight; HTML forms cannot set this.
+app.use('/api', (req, res, next) => {
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && req.path !== '/payments/webhook' &&
+      req.get('X-CSRF-Protection') !== '1') {
+    res.status(403).json({ success: false, error: 'Missing CSRF protection header' });
+    return;
+  }
+  next();
+});
 
 // ─── Static Files (Uploads) ──────────────────────────────────────────────────
 app.use(
@@ -114,7 +124,7 @@ app.use(
 
 // ─── Trust Proxy ─────────────────────────────────────────────────────────────
 // Required for rate-limiting behind nginx/load balancer
-app.set('trust proxy', 1);
+app.set('trust proxy', env.TRUST_PROXY_HOPS);
 app.use(requestContext);
 
 // ─── Health Check ─────────────────────────────────────────────────────────────

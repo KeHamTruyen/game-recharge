@@ -30,8 +30,24 @@ const registerSchema = z.object({
     .trim(),
   password: z
     .string()
-    .min(6, 'Password must be at least 6 characters')
+    .min(12, 'Password must be at least 12 characters')
     .max(72, 'Password must not exceed 72 characters')
+    .refine(
+      (value) =>
+        !/^(.)\1+$/.test(value) &&
+        ![
+          '123456789012',
+          '1234567890123456',
+          'password1234',
+          'password12345',
+          'password123456',
+          'qwerty123456',
+          'qwertyuiop12',
+          'qwertyuiopas',
+          'admin12345678',
+        ].includes(value.toLowerCase()),
+      'Choose a less common password'
+    )
     .refine((val) => Buffer.byteLength(val, 'utf8') <= 72, {
       message: 'Password must not exceed 72 bytes (UTF-8)',
     }),

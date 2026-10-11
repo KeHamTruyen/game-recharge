@@ -21,6 +21,7 @@ export class HttpClient {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        "X-CSRF-Protection": "1",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...init.headers,
       },

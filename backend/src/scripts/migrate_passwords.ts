@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { prisma } from '../lib/prisma.js';
-import { isSensitiveFieldKey, encryptSensitive, maskTopupInfo } from '../utils/crypto.js';
+import { isSensitiveFieldKey, encryptSensitive, maskCachedTopupInfo } from '../utils/crypto.js';
 
 /**
  * Controlled migration script to encrypt any legacy unencrypted sensitive fields in topupInfo
@@ -69,15 +69,13 @@ export async function migrateLegacyPasswords() {
     if (Array.isArray(resp.transactions)) {
       for (const item of resp.transactions) {
         if (item && item.topupInfo && typeof item.topupInfo === 'object') {
-          const originalTopup = item.topupInfo as Record<string, unknown>;
-          for (const [k, v] of Object.entries(originalTopup)) {
-            if (isSensitiveFieldKey(k) && typeof v === 'string' && v.length > 0 && !v.startsWith('enc:') && v !== '••••••••') {
-              changed = true;
-              break;
-            }
-          }
-          if (changed) {
-            item.topupInfo = maskTopupInfo(item.topupInfo, false);
+          const templateId = packageTemplateMap.get(item.packageId ?? item.package?.id);
+          const fields = templateId ? templateMap.get(templateId) : undefined;
+          const masked = maskCachedTopupInfo(item.topupInfo,
+            Array.isArray(fields) ? fields as Array<Record<string, unknown>> : undefined);
+          if (JSON.stringify(masked) !== JSON.stringify(item.topupInfo)) {
+            item.topupInfo = masked;
+            changed = true;
           }
         }
       }
@@ -93,12 +91,12 @@ export async function migrateLegacyPasswords() {
   }
 
   console.log(`✅ Checkout cache migration complete: Purged plain passwords from ${updatedCheckoutCount} cached checkout request(s).`);
-  await prisma.$disconnect();
 }
 
-if (process.argv[1] && process.argv[1].includes('migrate_passwords')) {
+if (require.main === module) {
   migrateLegacyPasswords().catch((err) => {
     console.error('❌ Migration failed:', err);
-    process.exit(1);
-  });
+    process.exitCode = 1;
+  }).finally(() => prisma.$disconnect());
 }
+

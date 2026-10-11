@@ -10,7 +10,7 @@ const router = Router();
 
 const sePayWebhookSchema = z
   .object({
-    id: z.coerce.number().optional(),
+    id: z.coerce.number().int().positive().optional(),
     gateway: z.string().max(100).optional(),
     transactionDate: z
       .string()
@@ -19,17 +19,17 @@ const sePayWebhookSchema = z
       .refine((val) => !val || !isNaN(Date.parse(val)), {
         message: 'Invalid transaction date format',
       }),
-    accountNumber: z.string().max(50).optional(),
+    accountNumber: z.string().trim().max(50).optional(),
     subAccount: z.string().max(50).nullable().optional(),
     transferType: z.enum(['in', 'out']).optional().default('in'),
-    transferAmount: z.coerce.number().nonnegative().optional(),
+    transferAmount: z.coerce.number().int().positive().safe(),
     accumulated: z.coerce.number().optional(),
     code: z.string().max(100).nullable().optional(),
-    content: z.string().max(500).optional().default(''),
+    content: z.string().max(500),
     referenceCode: z.string().max(100).nullable().optional(),
     description: z.string().max(500).nullable().optional(),
   })
-  .passthrough();
+  .strip();
 
 router.get(
   '/status/:orderCode',
@@ -82,26 +82,20 @@ router.post(
       }
 
       const payload = parseResult.data;
-      if (payload.transferType !== 'in' || !payload.transferAmount || !payload.content) {
+      if (!env.SEPAY_ACCOUNT_NUMBER) {
+        res.status(503).json({ success: false, error: 'Payment account is not configured' });
+        return;
+      }
+      if (
+        payload.transferType !== 'in' ||
+        (payload.accountNumber && payload.accountNumber !== env.SEPAY_ACCOUNT_NUMBER.trim())
+      ) {
         res.status(200).json({ success: true });
         return;
       }
 
       const orderCode = payload.content.match(/(?:DUKE|NEXA)[A-Z0-9]+/i)?.[0]?.toUpperCase();
       if (!orderCode) {
-        res.status(200).json({ success: true });
-        return;
-      }
-
-      const transactions = await prisma.transaction.findMany({
-        where: { paymentOrderCode: orderCode },
-        select: { id: true, amount: true, paymentStatus: true, paymentMetadata: true },
-      });
-      const expectedAmount = transactions.reduce(
-        (total, transaction) => total + Number(transaction.amount),
-        0,
-      );
-      if (expectedAmount !== payload.transferAmount) {
         res.status(200).json({ success: true });
         return;
       }
@@ -119,6 +113,21 @@ router.post(
             select: { id: true },
           });
           if (duplicate) return;
+        }
+
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`sepay:order:${orderCode}`}))`;
+        const transactions = await tx.transaction.findMany({
+          where: { paymentOrderCode: orderCode }, select: { amount: true },
+        });
+        const expectedAmount = transactions.reduce((sum, row) => sum.add(row.amount), new Prisma.Decimal(0));
+        if (!transactions.length || !expectedAmount.equals(payload.transferAmount)) return;
+
+        if (payload.id) {
+          const receipt = await tx.paymentReceipt.createMany({
+            data: [{ provider: 'sepay', externalId: String(payload.id), paymentOrderCode: orderCode }],
+            skipDuplicates: true,
+          });
+          if (!receipt.count) return;
         }
 
         const paidAt =

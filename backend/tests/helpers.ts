@@ -41,6 +41,7 @@ export async function createTestClient(): Promise<TestClient> {
     options: RequestInit & { cookie?: string } = {}
   ) => {
     const headers = new Headers(options.headers || {});
+    if (!headers.has("X-CSRF-Protection")) headers.set("X-CSRF-Protection", "1");
     if (!headers.has('Content-Type') && options.body && typeof options.body === 'string') {
       headers.set('Content-Type', 'application/json');
     }
