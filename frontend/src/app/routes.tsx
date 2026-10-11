@@ -22,6 +22,8 @@ export const router = createBrowserRouter([
         Component: PublicLayout,
         children: [
           { index: true, element: <Navigate to="/nap-game" replace /> },
+          { path: "nap-the", element: <Navigate to="/nap-game" replace /> },
+          { path: "nap-the/:serviceId", element: <Navigate to="/nap-game/:serviceId" replace /> },
           {
             path: "nap-game",
             lazy: async () => ({

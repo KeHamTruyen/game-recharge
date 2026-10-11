@@ -28,9 +28,102 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 11px; color: #061018; background: linear-gradient(135deg, #30e7ff, #8f7bff); box-shadow: 0 0 24px rgba(43, 219, 255, .22); }
 .brand-mark.large { width: 46px; height: 46px; margin: 0 auto 20px; border-radius: 14px; }
 .desktop-nav { align-self: stretch; display: flex; align-items: center; gap: 30px; }
-.desktop-nav > a, .nav-dropdown > a { position: relative; height: 100%; padding: 0 1px; border: 0; background: none; display: flex; align-items: center; gap: 8px; color: #8993a8; font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
-.desktop-nav > a:hover, .desktop-nav > a.active, .nav-dropdown > a:hover, .nav-dropdown > a.active { color: #f5f8ff; }
-.desktop-nav > a.active::after, .nav-dropdown > a.active::after { content: ""; position: absolute; inset: auto 0 0; height: 2px; border-radius: 9px; background: #2dd8ff; box-shadow: 0 -4px 14px #2dd8ff; }
+.desktop-nav > a, .nav-dropdown > a {
+  position: relative;
+  height: 100%;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8993a8;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.25s ease, text-shadow 0.25s ease, transform 0.25s ease;
+}
+
+/* Hiệu ứng sáng lên (neon glow) khi hover hoặc active */
+.desktop-nav > a:hover,
+.desktop-nav > a.active,
+.nav-dropdown > a:hover,
+.nav-dropdown > a.active,
+.nav-dropdown:hover > a {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(45, 216, 255, 0.75), 0 0 22px rgba(45, 216, 255, 0.4);
+}
+
+.desktop-nav > a:hover > svg,
+.nav-dropdown:hover > a > svg {
+  color: #2dd8ff;
+  filter: drop-shadow(0 0 8px rgba(45, 216, 255, 0.85));
+  transform: translateY(-1px);
+  transition: filter 0.25s ease, transform 0.25s ease, color 0.25s ease;
+}
+
+/* Icon nhỏ xinh lấp lánh (✦) ở góc trên bên phải xuất hiện sinh động khi hover */
+.desktop-nav > a::before,
+.nav-dropdown > a::before {
+  content: "✦";
+  position: absolute;
+  top: 18px;
+  right: -6px;
+  font-size: 10px;
+  line-height: 1;
+  color: #2dd8ff;
+  opacity: 0;
+  transform: scale(0.2) translate(-6px, 6px) rotate(-60deg);
+  transition: opacity 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+              transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-shadow: 0 0 8px #2dd8ff, 0 0 16px rgba(45, 216, 255, 0.9);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.desktop-nav > a:hover::before,
+.nav-dropdown:hover > a::before,
+.nav-dropdown:focus-within > a::before {
+  opacity: 1;
+  transform: scale(1) translate(0, 0) rotate(0deg);
+  animation: navSparklePulse 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes navSparklePulse {
+  0% {
+    transform: scale(1) rotate(0deg);
+    text-shadow: 0 0 8px #2dd8ff, 0 0 14px rgba(45, 216, 255, 0.8);
+  }
+  100% {
+    transform: scale(1.3) rotate(22deg);
+    text-shadow: 0 0 12px #9befff, 0 0 24px #2dd8ff;
+  }
+}
+
+/* Vạch sáng neon dưới chân nav item */
+.desktop-nav > a::after, .nav-dropdown > a::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  border-radius: 9px;
+  background: #2dd8ff;
+  box-shadow: 0 -4px 14px #2dd8ff;
+  opacity: 0;
+  transform: scaleX(0.3);
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.desktop-nav > a.active::after, .nav-dropdown > a.active::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.desktop-nav > a:hover::after, .nav-dropdown:hover > a::after {
+  opacity: 0.95;
+  transform: scaleX(1);
+}
 .nav-dropdown { position: relative; height: 100%; display: flex; align-items: center; }
 .nav-dropdown > a > svg:last-child { margin-left: -3px; transform: rotate(90deg); transition: transform .2s ease; }
 .nav-dropdown:hover > a > svg:last-child, .nav-dropdown:focus-within > a > svg:last-child { transform: rotate(-90deg); }

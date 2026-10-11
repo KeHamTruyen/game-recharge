@@ -333,11 +333,23 @@ export function PublicLayout() {
           </div>
         </div>
       </header>
-      {!location.pathname.startsWith("/thanh-toan") && !location.pathname.startsWith("/admin") && (
-        <div className="brand-subheader-wrap page-width">
-          <BrandSubheader />
-        </div>
-      )}
+      {(() => {
+        const normalizedPath = location.pathname.replace(/\/+$/, "") || "/"
+        const isExcludedRoot =
+          normalizedPath === "/nap-game" ||
+          normalizedPath === "/nap-the" ||
+          normalizedPath === "/cay-thue"
+        const showBrandSubheader =
+          !isExcludedRoot &&
+          !normalizedPath.startsWith("/thanh-toan") &&
+          !normalizedPath.startsWith("/admin")
+
+        return showBrandSubheader ? (
+          <div className="brand-subheader-wrap page-width">
+            <BrandSubheader />
+          </div>
+        ) : null
+      })()}
       <main>
         <Outlet context={{ openLogin: () => setLoginOpen(true) }} />
       </main>
