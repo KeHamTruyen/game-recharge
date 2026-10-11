@@ -72,7 +72,7 @@ services:
       dockerfile: Dockerfile
     restart: "no"
     environment: *backend_environment
-    command: ["sh", "-c", "npx prisma migrate deploy && node dist/scripts/migrate_passwords.js"]
+    command: ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node dist/scripts/migrate_passwords.js"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -89,7 +89,8 @@ services:
     container_name: duke1305_frontend
     restart: always
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "${PORT:-80}:80"
     networks:
@@ -105,4 +106,3 @@ networks:
   duke_network:
     name: duke1305_network
     driver: bridge
-

@@ -213,10 +213,10 @@ for (const key of ["password", "credential"]) {
     await page.locator(".confirm-payment").click();
     await expect(page.getByText("DUMMY_ORDER_1", { exact: true }).first()).toBeVisible();
     await page.evaluate(() => {
-      sessionStorage.setItem("nexa_checkout_info", JSON.stringify({ credential: "DummyPass123" }));
-      const payment = JSON.parse(sessionStorage.getItem("nexa_checkout_payment")!);
+      sessionStorage.setItem("duke1305_checkout_info", JSON.stringify({ credential: "DummyPass123" }));
+      const payment = JSON.parse(sessionStorage.getItem("duke1305_checkout_payment")!);
       payment.topupSignature = JSON.stringify({ credential: "DummyPass123" });
-      sessionStorage.setItem("nexa_checkout_payment", JSON.stringify(payment));
+      sessionStorage.setItem("duke1305_checkout_payment", JSON.stringify(payment));
     });
     await page.reload();
     await expect(page.getByText("DUMMY_ORDER_1", { exact: true }).first()).toBeVisible();

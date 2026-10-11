@@ -268,22 +268,22 @@ export function CheckoutRoute() {
 
   const [payment, setPayment] = useState<PaymentDetails | null>(() => {
     try {
-      const saved = sessionStorage.getItem("nexa_checkout_payment")
+      const saved = sessionStorage.getItem("duke1305_checkout_payment")
       if (!saved) return null
       const parsed = JSON.parse(saved)
       const data = parsed.payment || parsed
       if (!data || !data.orderCode) return null
 
       if (store.user && parsed.userEmail && store.user.email !== parsed.userEmail) {
-        sessionStorage.removeItem("nexa_checkout_payment")
+        sessionStorage.removeItem("duke1305_checkout_payment")
         return null
       }
       if (cartSignature && parsed.cartSignature && cartSignature !== parsed.cartSignature) {
-        sessionStorage.removeItem("nexa_checkout_payment")
+        sessionStorage.removeItem("duke1305_checkout_payment")
         return null
       }
       if (cartTotalAmount > 0 && parsed.totalAmount && cartTotalAmount !== parsed.totalAmount) {
-        sessionStorage.removeItem("nexa_checkout_payment")
+        sessionStorage.removeItem("duke1305_checkout_payment")
         return null
       }
       return data
@@ -297,7 +297,7 @@ export function CheckoutRoute() {
 
   useEffect(() => {
     if (payment) {
-      const stored = sessionStorage.getItem("nexa_checkout_payment")
+      const stored = sessionStorage.getItem("duke1305_checkout_payment")
       if (stored) {
         try {
           const parsed = JSON.parse(stored)
@@ -307,7 +307,7 @@ export function CheckoutRoute() {
             (cartTotalAmount > 0 && parsed.totalAmount && cartTotalAmount !== parsed.totalAmount)
           ) {
             setPayment(null)
-            sessionStorage.removeItem("nexa_checkout_payment")
+            sessionStorage.removeItem("duke1305_checkout_payment")
           }
         } catch { setPayment(null) }
       } else {
@@ -324,7 +324,7 @@ export function CheckoutRoute() {
         const result = await api.payments.status(payment.orderCode)
         if (!cancelled && result.paymentStatus === "PAID") {
           setPaymentStatus("PAID")
-          sessionStorage.removeItem("nexa_checkout_payment")
+          sessionStorage.removeItem("duke1305_checkout_payment")
           store.setCart([])
           setNotice("Đã nhận thanh toán. Đơn hàng đang được xử lý.")
         }
@@ -386,7 +386,7 @@ export function CheckoutRoute() {
         )
         setPayment(result.payment)
         try {
-          sessionStorage.setItem("nexa_checkout_payment", JSON.stringify({
+          sessionStorage.setItem("duke1305_checkout_payment", JSON.stringify({
             payment: result.payment,
             userEmail: store.user.email,
             cartSignature,

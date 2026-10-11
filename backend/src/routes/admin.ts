@@ -693,6 +693,7 @@ router.get(
             quantity: true,
             status: true,
             topupInfo: true,
+            topupFields: true,
             topupLabels: true,
             templateName: true,
             createdAt: true,
@@ -706,7 +707,7 @@ router.get(
 
       const maskedList = transactions.map((t) => ({
         ...t,
-        topupInfo: maskTopupInfo(t.topupInfo, false),
+        topupInfo: maskTopupInfo(t.topupInfo, false, t.topupFields),
       }));
 
       res.json({
@@ -735,24 +736,13 @@ router.get(
       });
       if (!transaction) throw new NotFoundError('Transaction');
 
-      let templateFields: Array<Record<string, unknown>> | undefined;
-      if (transaction.package?.templateId) {
-        const tmpl = await prisma.topupTemplate.findUnique({
-          where: { id: transaction.package.templateId },
-          select: { fields: true },
-        });
-        if (tmpl?.fields && Array.isArray(tmpl.fields)) {
-          templateFields = tmpl.fields as Array<Record<string, unknown>>;
-        }
-      }
-
       const canViewPassword = transaction.status === 'PENDING' || transaction.status === 'PROCESSING';
 
       res.json({
         success: true,
         data: {
           ...transaction,
-          topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword, templateFields),
+          topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword, transaction.topupFields),
         },
       });
     } catch (err) {
@@ -805,6 +795,7 @@ router.patch(
           amount: true,
           quantity: true,
           topupInfo: true,
+          topupFields: true,
           topupLabels: true,
           templateName: true,
           createdAt: true,
@@ -812,7 +803,10 @@ router.patch(
         });
       });
 
-      res.json({ success: true, data: transaction });
+      res.json({ success: true, data: {
+        ...transaction,
+        topupInfo: maskTopupInfo(transaction.topupInfo, false, transaction.topupFields),
+      } });
     } catch (err) {
       next(err);
     }

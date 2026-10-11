@@ -13,6 +13,7 @@ import {
 } from '../utils/pagination.js';
 import {
   sanitizeTopupInfoForStorage,
+  isSensitiveFieldKey,
   maskTopupInfo,
   maskCachedTopupInfo,
 } from '../utils/crypto.js';
@@ -50,7 +51,7 @@ const checkoutSchema = z.object({
 
 const transactionSelect = {
   id: true, code: true, userEmail: true, packageName: true, gameName: true,
-  amount: true, quantity: true, status: true, topupInfo: true,
+  amount: true, quantity: true, status: true, topupInfo: true, topupFields: true,
   topupLabels: true, templateName: true, createdAt: true, updatedAt: true,
   service: { select: { id: true, name: true, iconText: true, tone: true } },
   package: { select: { id: true, name: true, price: true } },
@@ -181,6 +182,9 @@ async function createOrder(
       packageId: pkg.id, packageName: pkg.name, gameName: pkg.service?.game ?? '',
       amount: new Prisma.Decimal(pkg.price).mul(input.quantity),
       quantity: input.quantity, status: 'PENDING',
+      topupFields: Object.keys(input.topupInfo).map((key) => ({
+        key, type: isSensitiveFieldKey(key, templateFields) ? 'password' : 'text',
+      })),
       topupInfo: sanitizeTopupInfoForStorage(input.topupInfo, templateFields), topupLabels, templateName,
     },
     select: transactionSelect,
@@ -198,7 +202,7 @@ router.post('/', requireAuth, async (req, res, next): Promise<void> => {
     const isStaffOrAdmin = req.user!.role === 'ADMIN';
     res.status(201).json({
       success: true,
-      data: { ...transaction, topupInfo: maskTopupInfo(transaction.topupInfo, isStaffOrAdmin) },
+      data: { ...transaction, topupInfo: maskTopupInfo(transaction.topupInfo, isStaffOrAdmin, transaction.topupFields) },
     });
   } catch (error) { next(error); }
 });
@@ -224,19 +228,8 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
         }
         const cached = JSON.parse(JSON.stringify(previous.response)) as Record<string, any>;
         if (cached && Array.isArray(cached.transactions)) {
-          cached.transactions = await Promise.all(cached.transactions.map(async (txItem: any) => {
-            const packageId = txItem.packageId ?? txItem.package?.id;
-            const pkg = typeof packageId === 'string'
-              ? await tx.servicePackage.findUnique({ where: { id: packageId }, select: { templateId: true } })
-              : null;
-            const template = pkg?.templateId
-              ? await tx.topupTemplate.findUnique({ where: { id: pkg.templateId }, select: { fields: true } })
-              : null;
-            return {
-              ...txItem,
-              topupInfo: maskCachedTopupInfo(txItem.topupInfo,
-                Array.isArray(template?.fields) ? template.fields as Array<Record<string, unknown>> : undefined),
-            };
+          cached.transactions = cached.transactions.map((item: any) => ({
+            ...item, topupInfo: maskCachedTopupInfo(item.topupInfo, item.topupFields),
           }));
         }
         return cached;
@@ -272,7 +265,7 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
         transactions: transactions.map((item) => ({
           ...item,
           ...paymentFields,
-          topupInfo: maskTopupInfo(item.topupInfo, false),
+          topupInfo: maskTopupInfo(item.topupInfo, false, item.topupFields),
         })),
         payment: {
           orderCode: paymentOrderCode, amount, checkoutUrl: qrCode, qrCode,
@@ -363,6 +356,7 @@ router.get(
           quantity: true,
           status: true,
           topupInfo: true,
+          topupFields: true,
           topupLabels: true,
           templateName: true,
           createdAt: true,
@@ -388,7 +382,7 @@ router.get(
         success: true,
         data: {
           ...transaction,
-          topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword),
+          topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword, transaction.topupFields),
         },
       });
     } catch (err) {

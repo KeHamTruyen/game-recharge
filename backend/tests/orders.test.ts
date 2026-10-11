@@ -402,6 +402,13 @@ describe('Orders & Checkout Logic (Atomic & Idempotent)', () => {
     const cached = await prisma.checkoutRequest.findFirstOrThrow({ where: { paymentOrderCode: response.payment.orderCode } });
     await prisma.checkoutRequest.update({ where: { id: cached.id }, data: { response } });
     await prisma.transaction.update({ where: { id: response.transactions[0].id }, data: { topupInfo: payload.topupInfo } });
+    // Historical privacy must survive changes to the live template and deleted packages.
+    await prisma.topupTemplate.update({ where: { id: templateId }, data: { fields: template.fields! } });
+    await prisma.transaction.update({ where: { id: response.transactions[0].id }, data: { packageId: null } });
+    const detail = await customerClient.get(`/api/orders/${response.transactions[0].code}`);
+    assert.strictEqual(detail.status, 200);
+    assert.notStrictEqual(detail.body.data.topupInfo.credential, payload.topupInfo.credential);
+    assert.strictEqual(detail.body.data.topupInfo.uid, payload.topupInfo.uid);
     const replay = await customerClient.post('/api/orders/checkout', payload, { headers });
     assert.strictEqual(replay.status, 201);
     assert.notStrictEqual(replay.body.data.transactions[0].topupInfo.credential, payload.topupInfo.credential);

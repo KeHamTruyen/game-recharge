@@ -190,7 +190,7 @@ describe('Admin Panel Operations & Audit Logging', () => {
 
   it('PUT /api/admin/settings/:key updates site settings', async () => {
     const res = await adminClient.put('/api/admin/settings/siteConfig', {
-      siteName: 'NEXA TOPUP',
+      siteName: 'DUKE1305',
       maintenanceMode: false,
     });
 
@@ -299,4 +299,3 @@ describe('Admin Panel Operations & Audit Logging', () => {
     }
   });
 });
-

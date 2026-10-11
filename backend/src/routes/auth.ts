@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
 import { z } from 'zod';
+import { Prisma, EmailVerification } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import {
   signToken,
@@ -86,38 +87,36 @@ async function createEmailVerification(data: {
   passwordHash?: string;
 }): Promise<void> {
   const code = createCode();
-  await prisma.emailVerification.deleteMany({ where: { email: data.email, purpose: data.purpose } });
-  await prisma.emailVerification.create({
-    data: {
-      ...data,
-      codeHash: hashCode(code),
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`otp:${data.email}:${data.purpose}`}))`;
+    await tx.emailVerification.deleteMany({ where: { email: data.email, purpose: data.purpose } });
+    await tx.emailVerification.create({
+      data: { ...data, codeHash: hashCode(code), expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
+    });
   });
   await sendVerificationCode(data.email, code, data.purpose);
 }
 
-async function consumeCode(email: string, purpose: string, code: string) {
-  const verification = await prisma.emailVerification.findFirst({
-    where: { email, purpose, consumedAt: null },
-    orderBy: { createdAt: 'desc' },
-  });
-  if (!verification || verification.expiresAt < new Date() || verification.attempts >= 5) {
-    throw new AppError('Mã xác minh không hợp lệ hoặc đã hết hạn.', 400);
-  }
-  const matches = crypto.timingSafeEqual(
-    Buffer.from(verification.codeHash, 'hex'),
-    Buffer.from(hashCode(code), 'hex'),
-  );
-  if (!matches) {
-    await prisma.emailVerification.update({
-      where: { id: verification.id },
-      data: { attempts: { increment: 1 } },
+async function consumeCode<T>(email: string, purpose: string, code: string,
+  apply: (tx: Prisma.TransactionClient, verification: EmailVerification) => Promise<T>): Promise<T> {
+  const result: { value: T } | { error: string } = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`otp:${email}:${purpose}`}))`;
+    const verification = await tx.emailVerification.findFirst({
+      where: { email, purpose, consumedAt: null }, orderBy: { createdAt: 'desc' },
     });
-    throw new AppError('Mã xác minh không đúng.', 400);
-  }
-  await prisma.emailVerification.update({ where: { id: verification.id }, data: { consumedAt: new Date() } });
-  return verification;
+    if (!verification || verification.expiresAt <= new Date() || verification.attempts >= 5) {
+      return { error: 'Verification code is invalid or expired' };
+    }
+    if (!crypto.timingSafeEqual(Buffer.from(verification.codeHash, 'hex'), Buffer.from(hashCode(code), 'hex'))) {
+      await tx.emailVerification.update({ where: { id: verification.id }, data: { attempts: { increment: 1 } } });
+      // Return instead of throwing so failed attempts commit.
+      return { error: 'Incorrect verification code' };
+    }
+    await tx.emailVerification.update({ where: { id: verification.id }, data: { consumedAt: new Date() } });
+    return { value: await apply(tx, verification) };
+  });
+  if ('error' in result) throw new AppError(result.error, 400);
+  return result.value;
 }
 
 // ─── POST /register ───────────────────────────────────────────────────────────
@@ -151,11 +150,12 @@ router.post(
 router.post('/register/verify', authLimiter, async (req, res, next): Promise<void> => {
   try {
     const { email, code } = codeSchema.parse(req.body);
-    const verification = await consumeCode(email, 'register', code);
-    if (!verification.name || !verification.passwordHash) throw new AppError('Yêu cầu đăng ký không hợp lệ.', 400);
-    const user = await prisma.user.create({
-      data: { name: verification.name, email, passwordHash: verification.passwordHash, role: 'CUSTOMER', status: 'ACTIVE' },
-      select: { id: true, email: true, name: true, role: true, status: true },
+    const user = await consumeCode(email, 'register', code, async (tx, verification) => {
+      if (!verification.name || !verification.passwordHash) throw new AppError('Invalid registration request', 400);
+      return tx.user.create({
+        data: { name: verification.name, email, passwordHash: verification.passwordHash, role: 'CUSTOMER', status: 'ACTIVE' },
+        select: { id: true, email: true, name: true, role: true, status: true },
+      });
     });
     setAuthCookie(res, signToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: 0 }));
     res.status(201).json({ success: true, data: { user } });
@@ -174,14 +174,10 @@ router.post('/forgot-password', authLimiter, async (req, res, next): Promise<voi
 router.post('/reset-password', authLimiter, async (req, res, next): Promise<void> => {
   try {
     const { email, code, password } = resetSchema.parse(req.body);
-    await consumeCode(email, 'reset', code);
-    await prisma.user.update({
-      where: { email },
-      data: {
-        passwordHash: await bcrypt.hash(password, 12),
-        tokenVersion: { increment: 1 },
-      },
-    });
+    const passwordHash = await bcrypt.hash(password, 12);
+    await consumeCode(email, 'reset', code, (tx) => tx.user.update({
+      where: { email }, data: { passwordHash, tokenVersion: { increment: 1 } },
+    }));
     res.json({ success: true, data: { message: 'Đặt lại mật khẩu thành công.' } });
   } catch (err) { next(err); }
 });

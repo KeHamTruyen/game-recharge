@@ -130,6 +130,12 @@ export function sanitizeTopupInfoForStorage(
   return result;
 }
 
+// Legacy data has no trustworthy historical field types; unknown fields are private.
+export function isPrivateTopupField(key: string, fields: unknown): boolean {
+  return !Array.isArray(fields) || !fields.some((field) => field?.key === key) ||
+    isSensitiveFieldKey(key, fields);
+}
+
 /**
  * Mask topupInfo before returning to clients:
  * If user is a customer, sensitive fields are masked as '••••••••'.
@@ -138,7 +144,7 @@ export function sanitizeTopupInfoForStorage(
 export function maskTopupInfo(
   topupInfo: unknown,
   isStaffOrAdmin = false,
-  templateFields?: Array<Record<string, unknown>>
+  templateFields?: unknown
 ): unknown {
   if (!topupInfo || typeof topupInfo !== 'object') return topupInfo;
   const entries = Object.entries(topupInfo as Record<string, unknown>);
@@ -146,7 +152,7 @@ export function maskTopupInfo(
 
   for (const [key, value] of entries) {
     const isEncrypted = typeof value === 'string' && value.startsWith('enc:');
-    const isSensitive = isEncrypted || isSensitiveFieldKey(key, templateFields);
+    const isSensitive = isEncrypted || isPrivateTopupField(key, templateFields);
 
     if (isSensitive) {
       if (isStaffOrAdmin) {
@@ -167,11 +173,6 @@ export function maskTopupInfo(
   return result;
 }
 
-// Missing/deleted templates cannot safely identify arbitrary legacy password keys.
-export function maskCachedTopupInfo(topupInfo: unknown, fields?: Array<Record<string, unknown>>): unknown {
-  if (!topupInfo || typeof topupInfo !== 'object') return topupInfo;
-  if (!Array.isArray(fields)) {
-    return Object.fromEntries(Object.keys(topupInfo).map((key) => [key, '••••••••']));
-  }
+export function maskCachedTopupInfo(topupInfo: unknown, fields?: unknown): unknown {
   return maskTopupInfo(topupInfo, false, fields);
 }

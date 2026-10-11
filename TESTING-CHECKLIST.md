@@ -143,7 +143,7 @@ Mong đợi: request bị từ chối và không gửi email.
 ## 8. SePay/VietQR và webhook
 
 - QR dùng đúng bank code, account number, account name, amount và transfer content.
-- Webhook đúng API key, `transferType = in`, đúng amount và đúng mã `NEXA`: chuyển `PAID` và `PROCESSING`.
+- Webhook đúng API key, `transferType = in`, đúng amount và đúng mã `DUKE`: chuyển `PAID` và `PROCESSING`.
 - Không đánh dấu `COMPLETED` chỉ vì đã thanh toán.
 - Sai API key: `401`, không cập nhật đơn, không log key.
 - `transferType = out`: không cập nhật.

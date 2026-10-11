@@ -165,13 +165,6 @@ function sanitizeBrandText(text?: string): string {
 
     .replace(/duke1035/gi, "duke1305")
 
-    .replace(/NEXA\s*TOPUP/gi, "DUKE1305")
-
-    .replace(/NEXATOPUP/gi, "DUKE1305")
-
-    .replace(/NEXA/gi, "DUKE1305")
-
-    .replace(/nexatopup\.vn/gi, "duke1305.vn")
 }
 
 function sanitizeContactInfo(info: ContactInfo): ContactInfo {
@@ -303,7 +296,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const [selectedService, setSelectedService] = useState<Service | null>(() => {
     try {
-      const saved = sessionStorage.getItem("nexa_selected_service")
+      const saved = sessionStorage.getItem("duke1305_selected_service")
       return saved ? JSON.parse(saved) : null
     } catch {
       return null
@@ -312,7 +305,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const [selectedQuantity, setSelectedQuantity] = useState(() => {
     try {
-      const saved = sessionStorage.getItem("nexa_selected_qty")
+      const saved = sessionStorage.getItem("duke1305_selected_qty")
       return saved ? Number(saved) || 1 : 1
     } catch {
       return 1
@@ -321,7 +314,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
-      const saved = sessionStorage.getItem("nexa_cart")
+      const saved = sessionStorage.getItem("duke1305_cart")
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
@@ -331,25 +324,25 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       if (selectedService) {
-        sessionStorage.setItem("nexa_selected_service", JSON.stringify(selectedService))
+        sessionStorage.setItem("duke1305_selected_service", JSON.stringify(selectedService))
       } else {
-        sessionStorage.removeItem("nexa_selected_service")
+        sessionStorage.removeItem("duke1305_selected_service")
       }
     } catch {}
   }, [selectedService])
 
   useEffect(() => {
     try {
-      sessionStorage.setItem("nexa_selected_qty", String(selectedQuantity))
+      sessionStorage.setItem("duke1305_selected_qty", String(selectedQuantity))
     } catch {}
   }, [selectedQuantity])
 
   useEffect(() => {
     try {
       if (cart.length > 0) {
-        sessionStorage.setItem("nexa_cart", JSON.stringify(cart))
+        sessionStorage.setItem("duke1305_cart", JSON.stringify(cart))
       } else {
-        sessionStorage.removeItem("nexa_cart")
+        sessionStorage.removeItem("duke1305_cart")
       }
     } catch {}
   }, [cart])
@@ -358,13 +351,13 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [checkoutInfo, updateCheckoutInfo] = useState<Record<string, string>>({})
   useEffect(() => {
     try {
-      sessionStorage.removeItem("nexa_checkout_info")
-      const saved = sessionStorage.getItem("nexa_checkout_payment")
+      sessionStorage.removeItem("duke1305_checkout_info")
+      const saved = sessionStorage.getItem("duke1305_checkout_payment")
       if (saved) {
         const parsed = JSON.parse(saved)
         delete parsed.topupSignature
         delete parsed.topupHash
-        sessionStorage.setItem("nexa_checkout_payment", JSON.stringify(parsed))
+        sessionStorage.setItem("duke1305_checkout_payment", JSON.stringify(parsed))
       }
     } catch {}
   }, [])
@@ -372,7 +365,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const setCheckoutInfo = (values: Record<string, string>) => {
     const keys = new Set([...Object.keys(checkoutInfo), ...Object.keys(values)])
     if ([...keys].some((key) => checkoutInfo[key] !== values[key])) {
-      try { sessionStorage.removeItem("nexa_checkout_payment") } catch {}
+      try { sessionStorage.removeItem("duke1305_checkout_payment") } catch {}
     }
     updateCheckoutInfo(values)
   }
@@ -778,11 +771,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         await api.auth.logout()
 
         try {
-          sessionStorage.removeItem("nexa_checkout_payment")
-          sessionStorage.removeItem("nexa_checkout_info")
-          sessionStorage.removeItem("nexa_cart")
-          sessionStorage.removeItem("nexa_selected_service")
-          sessionStorage.removeItem("nexa_selected_qty")
+          sessionStorage.removeItem("duke1305_checkout_payment")
+          sessionStorage.removeItem("duke1305_checkout_info")
+          sessionStorage.removeItem("duke1305_cart")
+          sessionStorage.removeItem("duke1305_selected_service")
+          sessionStorage.removeItem("duke1305_selected_qty")
         } catch {}
 
         setUser(null)

@@ -15,8 +15,9 @@ describe('Payment Status & SePay Webhook Processing', () => {
   const adminEmail = 'payment-admin@test.com';
   const password = 'Password123!';
 
-  const paymentOrderCode = `NEXATEST${Date.now()}`;
+  const paymentOrderCode = `DUKETEST${Date.now()}`;
   const transferAmount = 100000;
+  let webhookId = 1000;
   let transactionId: string;
   let customerUserId: string;
 
@@ -84,6 +85,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
   it('POST /api/payments/webhook rejects missing or invalid credentials with 401', async () => {
     // Missing credentials
     const resNoAuth = await webhookClient.post('/api/payments/webhook', {
+      id: ++webhookId,
       transferType: 'in',
       transferAmount,
       content: `Thanh toan don ${paymentOrderCode}`,
@@ -95,6 +97,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const resWrongAuth = await webhookClient.post(
       '/api/payments/webhook',
       {
+        id: ++webhookId,
         transferType: 'in',
         transferAmount,
         content: `Thanh toan don ${paymentOrderCode}`,
@@ -108,6 +111,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const res = await webhookClient.post(
       '/api/payments/webhook',
       {
+        id: ++webhookId,
         accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount,
         content: `Thanh toan don ${paymentOrderCode}`,
@@ -122,6 +126,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const res = await webhookClient.post(
       '/api/payments/webhook',
       {
+        id: ++webhookId,
         transferType: 'out',
         accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount,
@@ -140,6 +145,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const resMissing = await webhookClient.post(
       '/api/payments/webhook',
       {
+        id: ++webhookId,
         transferType: 'in',
         transferAmount,
         content: `Thanh toan don ${paymentOrderCode}`,
@@ -152,6 +158,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const resWrong = await webhookClient.post(
       '/api/payments/webhook',
       {
+        id: ++webhookId,
         transferType: 'in',
         accountNumber: '9999999999_wrong',
         transferAmount,
@@ -170,6 +177,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const res = await webhookClient.post(
       '/api/payments/webhook',
       {
+        id: ++webhookId,
         transferType: 'in',
         accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount: transferAmount / 2, // Only sent half the amount
@@ -188,6 +196,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const res = await webhookClient.post(
       '/api/payments/webhook',
       {
+        id: ++webhookId,
         transferType: 'in',
         accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount,
@@ -213,6 +222,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const res = await webhookClient.post(
       '/api/payments/webhook',
       {
+        id: ++webhookId,
         transferType: 'in',
         accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount,
@@ -232,6 +242,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const res = await webhookClient.post(
       '/api/payments/webhook',
       {
+        id: ++webhookId,
         transferType: 'in',
         accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount: -50000, // Invalid negative amount
@@ -247,6 +258,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
   it('POST /api/payments/webhook concurrent duplicate requests execute cleanly without race condition', async () => {
     const concurrentRef = `CONCUR_REF_${Date.now()}`;
     const payload = {
+      id: ++webhookId,
       transferType: 'in',
       accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
       transferAmount,

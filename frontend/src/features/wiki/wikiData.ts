@@ -60,10 +60,6 @@ export function sanitizeBrandName(text?: string): string {
   if (!text) return ""
 
   return text
-
-    .replace(/nexa\s*admin/gi, "DUKE1305 Admin")
-
-    .replace(/nexa/gi, "DUKE1305")
 }
 
 export function getEffectiveCommunityTeams(): CommunityTeam[] {

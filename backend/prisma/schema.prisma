@@ -180,6 +180,7 @@ model Transaction {
   paymentMetadata Json?
   bankTransactionId String?
   topupInfo    Json              @default("{}")
+  topupFields  Json?
   topupLabels  Json              @default("{}")
   templateName String            @default("")
   createdAt    DateTime          @default(now())

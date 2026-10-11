@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { prisma } from '../lib/prisma.js';
-import { isSensitiveFieldKey, encryptSensitive, maskCachedTopupInfo } from '../utils/crypto.js';
+import { isPrivateTopupField, encryptSensitive, maskCachedTopupInfo } from '../utils/crypto.js';
 
 /**
  * Controlled migration script to encrypt any legacy unencrypted sensitive fields in topupInfo
@@ -9,22 +9,11 @@ import { isSensitiveFieldKey, encryptSensitive, maskCachedTopupInfo } from '../u
 export async function migrateLegacyPasswords() {
   console.log('🔄 Checking for legacy unencrypted sensitive fields in transactions...');
 
-  const templates = await prisma.topupTemplate.findMany();
-  const templateMap = new Map(templates.map((t) => [t.id, t.fields]));
-
-  const packages = await prisma.servicePackage.findMany({ select: { id: true, templateId: true } });
-  const packageTemplateMap = new Map(packages.map((p) => [p.id, p.templateId]));
-
   const transactions = await prisma.transaction.findMany();
   let updatedTxCount = 0;
 
   for (const tx of transactions) {
     if (!tx.topupInfo || typeof tx.topupInfo !== 'object') continue;
-
-    const templateId = tx.packageId ? packageTemplateMap.get(tx.packageId) : null;
-    const fields = templateId && templateMap.has(templateId)
-      ? (templateMap.get(templateId) as Array<Record<string, unknown>>)
-      : undefined;
 
     const original = tx.topupInfo as Record<string, unknown>;
     const updated: Record<string, unknown> = {};
@@ -32,7 +21,7 @@ export async function migrateLegacyPasswords() {
 
     for (const [key, value] of Object.entries(original)) {
       if (
-        isSensitiveFieldKey(key, fields) &&
+        isPrivateTopupField(key, tx.topupFields) &&
         typeof value === 'string' &&
         value.length > 0 &&
         !value.startsWith('enc:')
@@ -69,10 +58,7 @@ export async function migrateLegacyPasswords() {
     if (Array.isArray(resp.transactions)) {
       for (const item of resp.transactions) {
         if (item && item.topupInfo && typeof item.topupInfo === 'object') {
-          const templateId = packageTemplateMap.get(item.packageId ?? item.package?.id);
-          const fields = templateId ? templateMap.get(templateId) : undefined;
-          const masked = maskCachedTopupInfo(item.topupInfo,
-            Array.isArray(fields) ? fields as Array<Record<string, unknown>> : undefined);
+          const masked = maskCachedTopupInfo(item.topupInfo, item.topupFields);
           if (JSON.stringify(masked) !== JSON.stringify(item.topupInfo)) {
             item.topupInfo = masked;
             changed = true;

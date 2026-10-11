@@ -10,7 +10,7 @@ const router = Router();
 
 const sePayWebhookSchema = z
   .object({
-    id: z.coerce.number().int().positive().optional(),
+    id: z.number().int().positive().safe(),
     gateway: z.string().max(100).optional(),
     transactionDate: z
       .string()
@@ -22,7 +22,7 @@ const sePayWebhookSchema = z
     accountNumber: z.string().trim().max(50).optional(),
     subAccount: z.string().max(50).nullable().optional(),
     transferType: z.enum(['in', 'out']),
-    transferAmount: z.coerce.number().int().positive().safe(),
+    transferAmount: z.number().int().positive().safe(),
     accumulated: z.coerce.number().optional(),
     code: z.string().max(100).nullable().optional(),
     content: z.string().max(500),
@@ -100,19 +100,16 @@ router.post(
         return;
       }
 
-      const orderCode = payload.content.match(/(?:DUKE|NEXA)[A-Z0-9]+/i)?.[0]?.toUpperCase();
+      const orderCode = payload.content.match(/DUKE[A-Z0-9]+/i)?.[0]?.toUpperCase();
       if (!orderCode) {
         res.status(200).json({ success: true });
         return;
       }
 
       await prisma.$transaction(async (tx) => {
-        // Concurrency lock per referenceCode, id, or orderCode prevents simultaneous race conditions
         const lockKey = payload.referenceCode
           ? `sepay:ref:${payload.referenceCode}`
-          : payload.id
-            ? `sepay:id:${payload.id}`
-            : `sepay:order:${orderCode}`;
+          : `sepay:id:${payload.id}`;
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
 
         if (payload.referenceCode) {
@@ -130,26 +127,23 @@ router.post(
         const expectedAmount = transactions.reduce((sum, row) => sum.add(row.amount), new Prisma.Decimal(0));
         if (!transactions.length || !expectedAmount.equals(payload.transferAmount)) return;
 
-        // Idempotency: use SePay ID or referenceCode as database unique receipt
-        const receiptExternalId = payload.id
-          ? String(payload.id)
-          : payload.referenceCode
-            ? `ref:${payload.referenceCode}`
-            : null;
-
-        if (receiptExternalId) {
-          const receipt = await (tx as any).paymentReceipt.createMany({
-            data: [{ provider: 'sepay', externalId: receiptExternalId, paymentOrderCode: orderCode }],
-            skipDuplicates: true,
-          });
-          if (!receipt.count) return;
-        }
+        const receipt = await tx.paymentReceipt.createMany({
+          data: [{ provider: 'sepay', externalId: String(payload.id), paymentOrderCode: orderCode }],
+          skipDuplicates: true,
+        });
+        if (!receipt.count) return;
 
         const paidAt =
           payload.transactionDate && !isNaN(Date.parse(payload.transactionDate))
             ? new Date(payload.transactionDate)
             : new Date();
 
+        // Only pending fulfillment may advance; terminal statuses belong to the admin workflow.
+        await tx.transaction.updateMany({
+          where: { paymentOrderCode: orderCode, status: 'PENDING',
+            paymentStatus: { in: ['PENDING', 'UNPAID', 'EXPIRED'] } },
+          data: { status: 'PROCESSING' },
+        });
         await tx.transaction.updateMany({
           where: {
             paymentOrderCode: orderCode,
@@ -157,7 +151,6 @@ router.post(
           },
           data: {
             paymentStatus: 'PAID',
-            status: 'PROCESSING',
             paidAt,
             paymentMetadata: payload as Prisma.InputJsonValue,
             bankTransactionId: payload.referenceCode || null,

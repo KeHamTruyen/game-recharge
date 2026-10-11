@@ -6,7 +6,7 @@ if (-not $env:DATABASE_URL) {
 
 $backupDirectory = Join-Path (Get-Location) "backups"
 New-Item -ItemType Directory -Force -Path $backupDirectory | Out-Null
-$fileName = "nexatopup-$((Get-Date).ToUniversalTime().ToString('yyyyMMdd-HHmmss')).dump"
+$fileName = "duke1305-$((Get-Date).ToUniversalTime().ToString('yyyyMMdd-HHmmss')).dump"
 $outputPath = Join-Path $backupDirectory $fileName
 
 $databaseUrl = & node -e "const u = new URL(process.env.DATABASE_URL); u.searchParams.delete('schema'); process.stdout.write(u.toString());"
