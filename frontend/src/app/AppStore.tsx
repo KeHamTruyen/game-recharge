@@ -354,10 +354,16 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     } catch {}
   }, [cart])
 
+  const isSensitiveCheckoutKey = (key: string) => /pass|pwd|secret|pin|matkhau/i.test(key)
+
   const [checkoutInfo, setCheckoutInfo] = useState<Record<string, string>>(() => {
     try {
       const saved = sessionStorage.getItem("nexa_checkout_info")
-      return saved ? JSON.parse(saved) : {}
+      if (!saved) return {}
+      const parsed = JSON.parse(saved)
+      return Object.fromEntries(
+        Object.entries(parsed).filter(([k]) => !isSensitiveCheckoutKey(k))
+      ) as Record<string, string>
     } catch {
       return {}
     }
@@ -365,8 +371,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      if (Object.keys(checkoutInfo).length > 0) {
-        sessionStorage.setItem("nexa_checkout_info", JSON.stringify(checkoutInfo))
+      const safeInfo = Object.fromEntries(
+        Object.entries(checkoutInfo).filter(([k]) => !isSensitiveCheckoutKey(k))
+      )
+      if (Object.keys(safeInfo).length > 0) {
+        sessionStorage.setItem("nexa_checkout_info", JSON.stringify(safeInfo))
       } else {
         sessionStorage.removeItem("nexa_checkout_info")
       }

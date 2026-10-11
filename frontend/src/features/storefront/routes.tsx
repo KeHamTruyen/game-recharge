@@ -263,15 +263,39 @@ export function CheckoutRoute() {
 
   const pkg = store.cart[0]?.pkg
   const service = store.selectedService
+  const isSensitiveTopupKey = (key: string) => /pass|pwd|secret|pin|matkhau/i.test(key)
+
   const cartSignature = store.cart.map((i) => `${i.pkg.id}:${i.quantity}`).sort().join(",")
   const cartTotalAmount = store.cart.reduce((sum, i) => sum + i.pkg.price * i.quantity, 0)
-  const topupSignature = JSON.stringify(
+
+  // Preserve raw whitespace for passwords/sensitive credentials while trimming other fields
+  const topupRawString = JSON.stringify(
     Object.fromEntries(
       Object.entries(store.checkoutInfo || {})
-        .map(([k, v]) => [k, String(v ?? "").trim()])
+        .map(([k, v]) => [k, isSensitiveTopupKey(k) ? String(v ?? "") : String(v ?? "").trim()])
         .sort(([a], [b]) => a.localeCompare(b))
     )
   )
+
+  const hashSignature = (str: string): string => {
+    let h1 = 0xdeadbeef ^ 0, h2 = 0x41c64e6d ^ 0
+    for (let i = 0, ch; i < str.length; i++) {
+      ch = str.charCodeAt(i)
+      h1 = Math.imul(h1 ^ ch, 2654435761)
+      h2 = Math.imul(h2 ^ ch, 1597334677)
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909)
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16)
+  }
+
+  const topupHash = hashSignature(topupRawString)
+
+  const isTopupSignatureMatch = (parsed: Record<string, unknown>): boolean => {
+    if (typeof parsed.topupHash === "string") return parsed.topupHash === topupHash
+    if (typeof parsed.topupSignature === "string") return parsed.topupSignature === topupRawString
+    return false
+  }
 
   const [payment, setPayment] = useState<PaymentDetails | null>(() => {
     try {
@@ -293,7 +317,7 @@ export function CheckoutRoute() {
         sessionStorage.removeItem("nexa_checkout_payment")
         return null
       }
-      if (parsed.topupSignature && topupSignature !== parsed.topupSignature) {
+      if (!isTopupSignatureMatch(parsed)) {
         sessionStorage.removeItem("nexa_checkout_payment")
         return null
       }
@@ -316,7 +340,7 @@ export function CheckoutRoute() {
             (store.user && parsed.userEmail && store.user.email !== parsed.userEmail) ||
             (cartSignature && parsed.cartSignature && cartSignature !== parsed.cartSignature) ||
             (cartTotalAmount > 0 && parsed.totalAmount && cartTotalAmount !== parsed.totalAmount) ||
-            (parsed.topupSignature && topupSignature !== parsed.topupSignature)
+            !isTopupSignatureMatch(parsed)
           ) {
             setPayment(null)
             sessionStorage.removeItem("nexa_checkout_payment")
@@ -324,7 +348,7 @@ export function CheckoutRoute() {
         } catch {}
       }
     }
-  }, [store.user?.email, cartSignature, cartTotalAmount, topupSignature, payment])
+  }, [store.user?.email, cartSignature, cartTotalAmount, topupHash, payment])
 
   useEffect(() => {
     if (!payment || paymentStatus === "PAID") return
@@ -398,7 +422,7 @@ export function CheckoutRoute() {
             userEmail: store.user.email,
             cartSignature,
             totalAmount: cartTotalAmount,
-            topupSignature,
+            topupHash,
           }))
         } catch {}
         store.setTransactions((current) => [...result.transactions, ...current])

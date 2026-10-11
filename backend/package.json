@@ -13,8 +13,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:backup": "powershell -ExecutionPolicy Bypass -File scripts/backup.ps1",
-    "db:restore": "powershell -ExecutionPolicy Bypass -File scripts/restore.ps1",
-    "db:migrate-passwords": "tsx scripts/migrate_passwords.ts",
+    "db:migrate-passwords": "node dist/scripts/migrate_passwords.js",
+    "db:migrate-passwords:dev": "tsx src/scripts/migrate_passwords.ts",
     "test": "node scripts/test.mjs"
   },
   "dependencies": {

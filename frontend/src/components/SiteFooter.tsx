@@ -13,7 +13,10 @@ export function SiteFooter() {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [draftConfig, setDraftConfig] = useState<FooterConfig>(footerConfig || initialFooterConfig)
   const [saving, setSaving] = useState(false)
-  const [modalMessage, setModalMessage] = useState("")
+  const [modalStatus, setModalStatus] = useState<{
+    type: "success" | "error" | "info"
+    text: string
+  } | null>(null)
 
   // Lắng nghe scroll để hiện nút con mèo chạy theo
   useEffect(() => {
@@ -38,24 +41,27 @@ export function SiteFooter() {
 
   const handleOpenEdit = () => {
     setDraftConfig(footerConfig || initialFooterConfig)
-    setModalMessage("")
+    setModalStatus(null)
     setIsEditOpen(true)
   }
 
   const handleSaveFooter = async () => {
     if (saving) return
     setSaving(true)
-    setModalMessage("")
+    setModalStatus(null)
     try {
       await api.admin.updateSetting("footerConfig", draftConfig as unknown as Record<string, unknown>)
       setFooterConfig(draftConfig)
       setNotice("Đã lưu cấu hình chân trang thành công!")
-      setModalMessage("Đã lưu cấu hình thành công!")
+      setModalStatus({ type: "success", text: "Đã lưu cấu hình thành công!" })
       setTimeout(() => {
         setIsEditOpen(false)
       }, 700)
     } catch (err) {
-      setModalMessage(err instanceof Error ? err.message : "Lỗi khi lưu cấu hình chân trang.")
+      setModalStatus({
+        type: "error",
+        text: err instanceof Error ? err.message : "Lỗi khi lưu cấu hình chân trang.",
+      })
     } finally {
       setSaving(false)
     }
@@ -64,7 +70,10 @@ export function SiteFooter() {
   const handleResetDefault = () => {
     if (window.confirm("Khôi phục toàn bộ chân trang về mặc định ban đầu?")) {
       setDraftConfig({ ...initialFooterConfig })
-      setModalMessage("Đã khôi phục mặc định (nhấn Lưu để cập nhật lên máy chủ).")
+      setModalStatus({
+        type: "info",
+        text: "Đã khôi phục mặc định (nhấn Lưu để cập nhật lên máy chủ).",
+      })
     }
   }
 
@@ -304,13 +313,9 @@ export function SiteFooter() {
             </div>
 
             <div className="footer-edit-modal-body">
-              {modalMessage && (
-                <div
-                  className={`modal-alert-box ${
-                    modalMessage.includes("Lỗi") || modalMessage.includes("không thể") ? "error" : "success"
-                  }`}
-                >
-                  {modalMessage}
+              {modalStatus && (
+                <div className={`modal-alert-box ${modalStatus.type}`}>
+                  {modalStatus.text}
                 </div>
               )}
 

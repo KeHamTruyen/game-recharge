@@ -221,7 +221,14 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
         if (previous.userId !== userId || previous.payloadHash !== payloadHash) {
           throw new AppError('Checkout key was already used for another request', 409);
         }
-        return previous.response;
+        const cached = JSON.parse(JSON.stringify(previous.response)) as Record<string, any>;
+        if (cached && Array.isArray(cached.transactions)) {
+          cached.transactions = cached.transactions.map((txItem: any) => ({
+            ...txItem,
+            topupInfo: maskTopupInfo(txItem.topupInfo, false),
+          }));
+        }
+        return cached;
       }
       if (!env.SEPAY_BANK_CODE || !env.SEPAY_ACCOUNT_NUMBER || !env.SEPAY_ACCOUNT_NAME) {
         throw new AppError('Payment is not configured. Please contact support.', 503);

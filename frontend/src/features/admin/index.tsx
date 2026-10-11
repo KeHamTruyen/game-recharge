@@ -3777,16 +3777,23 @@ export function FooterAdminEditor({
 }) {
   const [config, setConfig] = useState<FooterConfig>(initialConfig || initialFooterConfig)
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState("")
+  const [status, setStatus] = useState<{
+    type: "success" | "error" | "info"
+    text: string
+  } | null>(null)
 
   const save = async () => {
     if (saving || !onSave) return
     setSaving(true)
+    setStatus(null)
     try {
       await onSave(config)
-      setMessage("Đã lưu cấu hình chân trang thành công.")
+      setStatus({ type: "success", text: "Đã lưu cấu hình chân trang thành công." })
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không thể lưu thay đổi.")
+      setStatus({
+        type: "error",
+        text: error instanceof Error ? error.message : "Không thể lưu thay đổi.",
+      })
     } finally {
       setSaving(false)
     }
@@ -3795,7 +3802,10 @@ export function FooterAdminEditor({
   const handleResetDefault = () => {
     if (window.confirm("Khôi phục toàn bộ cấu hình chân trang về mặc định ban đầu?")) {
       setConfig({ ...initialFooterConfig })
-      setMessage("Đã khôi phục mặc định (nhấn Lưu để cập nhật lên máy chủ).")
+      setStatus({
+        type: "info",
+        text: "Đã khôi phục mặc định (nhấn Lưu để cập nhật lên máy chủ).",
+      })
     }
   }
 
@@ -3855,19 +3865,35 @@ export function FooterAdminEditor({
         </div>
       </div>
 
-      {message && (
+      {status && (
         <div
           style={{
             padding: "10px 16px",
             marginBottom: "16px",
             borderRadius: "8px",
-            background: message.includes("lỗi") || message.includes("Không thể") ? "rgba(239, 68, 68, 0.15)" : "rgba(34, 197, 94, 0.15)",
-            border: `1px solid ${message.includes("lỗi") || message.includes("Không thể") ? "rgba(239, 68, 68, 0.4)" : "rgba(34, 197, 94, 0.4)"}`,
-            color: message.includes("lỗi") || message.includes("Không thể") ? "#f87171" : "#4ade80",
+            background:
+              status.type === "error"
+                ? "rgba(239, 68, 68, 0.15)"
+                : status.type === "info"
+                ? "rgba(56, 189, 248, 0.15)"
+                : "rgba(34, 197, 94, 0.15)",
+            border: `1px solid ${
+              status.type === "error"
+                ? "rgba(239, 68, 68, 0.4)"
+                : status.type === "info"
+                ? "rgba(56, 189, 248, 0.4)"
+                : "rgba(34, 197, 94, 0.4)"
+            }`,
+            color:
+              status.type === "error"
+                ? "#f87171"
+                : status.type === "info"
+                ? "#38bdf8"
+                : "#4ade80",
             fontSize: "14px",
           }}
         >
-          {message}
+          {status.text}
         </div>
       )}
 
