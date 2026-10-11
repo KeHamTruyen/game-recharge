@@ -30,21 +30,19 @@ const registerSchema = z.object({
     .trim(),
   password: z
     .string()
-    .min(12, 'Password must be at least 12 characters')
+    .min(6, 'Password must be at least 6 characters')
     .max(72, 'Password must not exceed 72 characters')
     .refine(
       (value) =>
         !/^(.)\1+$/.test(value) &&
         ![
-          '123456789012',
-          '1234567890123456',
-          'password1234',
-          'password12345',
-          'password123456',
-          'qwerty123456',
-          'qwertyuiop12',
-          'qwertyuiopas',
-          'admin12345678',
+          '123456',
+          '12345678',
+          '123456789',
+          '1234567890',
+          'password',
+          'qwerty',
+          'admin123',
         ].includes(value.toLowerCase()),
       'Choose a less common password'
     )
