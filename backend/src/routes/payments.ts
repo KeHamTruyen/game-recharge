@@ -21,7 +21,7 @@ const sePayWebhookSchema = z
       }),
     accountNumber: z.string().trim().max(50).optional(),
     subAccount: z.string().max(50).nullable().optional(),
-    transferType: z.enum(['in', 'out']).optional().default('in'),
+    transferType: z.enum(['in', 'out']),
     transferAmount: z.coerce.number().int().positive().safe(),
     accumulated: z.coerce.number().optional(),
     code: z.string().max(100).nullable().optional(),
@@ -86,11 +86,17 @@ router.post(
         res.status(503).json({ success: false, error: 'Payment account is not configured' });
         return;
       }
-      if (
-        payload.transferType !== 'in' ||
-        (payload.accountNumber && payload.accountNumber !== env.SEPAY_ACCOUNT_NUMBER.trim())
-      ) {
-        res.status(200).json({ success: true });
+
+      // Strictly verify transferType is inbound ('in')
+      if (payload.transferType !== 'in') {
+        res.status(200).json({ success: true, ignored: true, reason: 'Non-inbound transfer' });
+        return;
+      }
+
+      // Strictly verify destination bank account matches the store's configured account
+      const configuredAccount = env.SEPAY_ACCOUNT_NUMBER.trim();
+      if (!payload.accountNumber || payload.accountNumber.trim() !== configuredAccount) {
+        res.status(200).json({ success: true, ignored: true, reason: 'Mismatched account number' });
         return;
       }
 
@@ -101,10 +107,12 @@ router.post(
       }
 
       await prisma.$transaction(async (tx) => {
-        // Concurrency lock per referenceCode or orderCode prevents simultaneous race conditions
+        // Concurrency lock per referenceCode, id, or orderCode prevents simultaneous race conditions
         const lockKey = payload.referenceCode
           ? `sepay:ref:${payload.referenceCode}`
-          : `sepay:order:${orderCode}`;
+          : payload.id
+            ? `sepay:id:${payload.id}`
+            : `sepay:order:${orderCode}`;
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
 
         if (payload.referenceCode) {
@@ -122,9 +130,16 @@ router.post(
         const expectedAmount = transactions.reduce((sum, row) => sum.add(row.amount), new Prisma.Decimal(0));
         if (!transactions.length || !expectedAmount.equals(payload.transferAmount)) return;
 
-        if (payload.id) {
+        // Idempotency: use SePay ID or referenceCode as database unique receipt
+        const receiptExternalId = payload.id
+          ? String(payload.id)
+          : payload.referenceCode
+            ? `ref:${payload.referenceCode}`
+            : null;
+
+        if (receiptExternalId) {
           const receipt = await tx.paymentReceipt.createMany({
-            data: [{ provider: 'sepay', externalId: String(payload.id), paymentOrderCode: orderCode }],
+            data: [{ provider: 'sepay', externalId: receiptExternalId, paymentOrderCode: orderCode }],
             skipDuplicates: true,
           });
           if (!receipt.count) return;

@@ -104,17 +104,63 @@ describe('Payment Status & SePay Webhook Processing', () => {
     assert.strictEqual(resWrongAuth.status, 401);
   });
 
+  it('POST /api/payments/webhook rejects missing transferType with 400', async () => {
+    const res = await webhookClient.post(
+      '/api/payments/webhook',
+      {
+        accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
+        transferAmount,
+        content: `Thanh toan don ${paymentOrderCode}`,
+      },
+      { headers: { authorization: `Apikey ${env.SEPAY_API_KEY}` } }
+    );
+    assert.strictEqual(res.status, 400);
+    assert.strictEqual(res.body.success, false);
+  });
+
   it('POST /api/payments/webhook ignores transferType = out without updating status', async () => {
     const res = await webhookClient.post(
       '/api/payments/webhook',
       {
         transferType: 'out',
+        accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount,
         content: `Thanh toan don ${paymentOrderCode}`,
       },
       { headers: { authorization: `Apikey ${env.SEPAY_API_KEY}` } }
     );
     assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.body.ignored, true);
+
+    const tx = await prisma.transaction.findUnique({ where: { id: transactionId } });
+    assert.strictEqual(tx?.paymentStatus, 'PENDING');
+  });
+
+  it('POST /api/payments/webhook ignores mismatched or missing accountNumber', async () => {
+    const resMissing = await webhookClient.post(
+      '/api/payments/webhook',
+      {
+        transferType: 'in',
+        transferAmount,
+        content: `Thanh toan don ${paymentOrderCode}`,
+      },
+      { headers: { authorization: `Apikey ${env.SEPAY_API_KEY}` } }
+    );
+    assert.strictEqual(resMissing.status, 200);
+    assert.strictEqual(resMissing.body.ignored, true);
+
+    const resWrong = await webhookClient.post(
+      '/api/payments/webhook',
+      {
+        transferType: 'in',
+        accountNumber: '9999999999_wrong',
+        transferAmount,
+        content: `Thanh toan don ${paymentOrderCode}`,
+      },
+      { headers: { authorization: `Apikey ${env.SEPAY_API_KEY}` } }
+    );
+    assert.strictEqual(resWrong.status, 200);
+    assert.strictEqual(resWrong.body.ignored, true);
 
     const tx = await prisma.transaction.findUnique({ where: { id: transactionId } });
     assert.strictEqual(tx?.paymentStatus, 'PENDING');
@@ -125,6 +171,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
       '/api/payments/webhook',
       {
         transferType: 'in',
+        accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount: transferAmount / 2, // Only sent half the amount
         content: `Thanh toan ${paymentOrderCode}`,
       },
@@ -142,6 +189,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
       '/api/payments/webhook',
       {
         transferType: 'in',
+        accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount,
         content: `Chuyen khoan don hang ${paymentOrderCode} thanh cong`,
         referenceCode: refCode,
@@ -166,6 +214,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
       '/api/payments/webhook',
       {
         transferType: 'in',
+        accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount,
         content: `Chuyen khoan don hang ${paymentOrderCode} thanh cong`,
         referenceCode: txBefore?.bankTransactionId,
@@ -184,6 +233,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
       '/api/payments/webhook',
       {
         transferType: 'in',
+        accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
         transferAmount: -50000, // Invalid negative amount
         transactionDate: 'invalid-date-string-not-iso',
         content: `Chuyen khoan don hang ${paymentOrderCode}`,
@@ -198,6 +248,7 @@ describe('Payment Status & SePay Webhook Processing', () => {
     const concurrentRef = `CONCUR_REF_${Date.now()}`;
     const payload = {
       transferType: 'in',
+      accountNumber: env.SEPAY_ACCOUNT_NUMBER || '1029384756',
       transferAmount,
       content: `Chuyen khoan don hang ${paymentOrderCode} thanh cong`,
       referenceCode: concurrentRef,
