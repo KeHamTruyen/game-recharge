@@ -1,7 +1,7 @@
 # -------------------------------------------------------------
 # Backend Multi-stage Build cho Node.js API
 # -------------------------------------------------------------
-FROM node:24-alpine AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
@@ -20,8 +20,8 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build
 
-# Stage chạy Production siêu nhẹ
-FROM node:24-alpine AS runner
+# Stage chạy Production siêu nhẹ (LTS hardened)
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
