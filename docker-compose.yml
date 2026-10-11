@@ -3,7 +3,7 @@ services:
   # 1. Cơ sở dữ liệu PostgreSQL
   # -------------------------------------------------------------
   postgres:
-    image: postgres:16-alpine
+    image: dhi.io/postgres:16-alpine3.24
     container_name: duke1305_postgres
     restart: always
     environment:
@@ -72,7 +72,7 @@ services:
       dockerfile: Dockerfile
     restart: "no"
     environment: *backend_environment
-    command: ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node dist/scripts/migrate_passwords.js"]
+    command: ["node", "/app/scripts/container-entrypoint.js", "migrate"]
     depends_on:
       postgres:
         condition: service_healthy

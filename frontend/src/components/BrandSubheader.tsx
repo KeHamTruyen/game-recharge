@@ -1,15 +1,10 @@
 import { NavLink } from "react-router"
-import { Icon } from "@/components/ui"
 
 export default function BrandSubheader() {
   return (
     <aside className="brand-subheader-card" aria-label="Giới thiệu thương hiệu DUKE1305">
-      {/* Khung logo / mascot bên trái giống ảnh 3 */}
+      {/* Khung logo / mascot màu vàng */}
       <div className="brand-badge-box">
-        <div className="brand-badge-header">
-          <span className="badge-crown">👑</span>
-          <span className="badge-name">DUKE1305</span>
-        </div>
         <div className="brand-badge-avatar-wrap">
           <img
             src="/duke1305.jpg"
