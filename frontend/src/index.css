@@ -551,12 +551,14 @@ h1, h2, h3, p { margin-top: 0; }
 .history-panel > div:first-child { margin-bottom: 12px; display: flex; justify-content: space-between; }
 .history-panel h2 { font-size: 16px; }
 .history-panel > div:first-child > span { color: #647085; font-size: 8px; }
-.history-row { padding: 15px 0; border-top: 1px solid #1d2535; display: grid; grid-template-columns: 39px 1fr auto 90px; align-items: center; gap: 13px; }
+.history-row { padding: 15px 0; border-top: 1px solid #1d2535; display: grid; grid-template-columns: 39px 1fr auto minmax(90px, auto); align-items: center; gap: 13px; }
 .history-icon { width: 37px; height: 37px; border-radius: 9px; display: grid; place-items: center; color: #3fdaed; background: #141c2b; }
-.history-row > span:nth-child(2) { display: flex; flex-direction: column; gap: 5px; }
-.history-row strong { font-size: 10px; }
-.history-row small { color: #606b7e; font-size: 8px; }
-.history-row em { width: max-content; justify-self: end; padding: 5px 8px; border-radius: 99px; color: #4ae0a8; background: rgba(48, 214, 146, .08); font-size: 8px; font-style: normal; }
+.history-row > span:nth-child(2) { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.history-row strong { font-size: 11px; }
+.history-row small { color: #606b7e; font-size: 9px; word-break: break-all; }
+.history-row em { width: max-content; justify-self: end; padding: 4px 8px; border-radius: 99px; color: #4ae0a8; background: rgba(48, 214, 146, .08); font-size: 9px; font-style: normal; }
+.history-desktop-status { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.history-mobile-meta { display: none; }
 .history-row em.pending { color: #f4ba5b; background: rgba(244, 186, 91, .08); }
 .history-row em.status-chờ-thanh-toán, .history-row em.status-đang-xử-lý { color: #f4ba5b; background: rgba(244, 186, 91, .08); }
 .history-row em.status-thất-bại { color: #f1798a; background: rgba(241, 95, 117, .08); }
@@ -1118,8 +1120,10 @@ h1, h2, h3, p { margin-top: 0; }
   .channel-admin-heading { align-items: stretch; flex-direction: column; gap: 12px; }
   .channel-editor-fields { grid-template-columns: 1fr; }
   .channel-editor-fields label.wide { grid-column: auto; }
-  .history-row { grid-template-columns: 37px 1fr auto; }
-  .history-row em { display: none; }
+  .history-row { grid-template-columns: 37px 1fr auto; gap: 10px; }
+  .history-desktop-status { display: none !important; }
+  .history-mobile-meta { display: flex !important; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .history-mobile-meta em { display: inline-block !important; }
   .account-head { align-items: flex-start; flex-wrap: wrap; }
   .account-head .secondary-button { margin-left: 86px; margin-top: -25px; }
   .account-tabs { overflow-x: auto; }

@@ -678,6 +678,9 @@ export function CheckoutPage({
             style={{
               background: isMaintenance ? "#64748b" : undefined,
               cursor: isMaintenance ? "not-allowed" : undefined,
+              whiteSpace: "normal",
+              textAlign: "center",
+              lineHeight: 1.3,
             }}
             onClick={async () => {
               if (isMaintenance) {

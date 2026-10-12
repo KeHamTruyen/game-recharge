@@ -220,4 +220,51 @@ describe('Operational Features Test Suite', () => {
       assert.ok(item.action.includes('UPDATE_SETTING'));
     }
   });
+
+  it('5. Anti-spam pending quota limits orders to MAX_PENDING_ORDERS and frees slot on cancel', async () => {
+    // Clean up existing pending orders for this customer first
+    await prisma.transaction.deleteMany({ where: { userEmail: customerEmail } });
+
+    // Create 5 pending orders (reaching limit)
+    const codes: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const res = await client.request('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify({
+          packageId: pkgId,
+          quantity: 1,
+          topupInfo: { uid: `80000000${i}` },
+        }),
+      });
+      assert.equal(res.status, 201);
+      codes.push(res.body.data.code);
+    }
+
+    // 6th order must be blocked with 400 (anti-spam quota exceeded)
+    const blockedRes = await client.request('/api/orders', {
+      method: 'POST',
+      body: JSON.stringify({
+        packageId: pkgId,
+        quantity: 1,
+        topupInfo: { uid: '800000099' },
+      }),
+    });
+    assert.equal(blockedRes.status, 400);
+    assert.ok(blockedRes.body.error.includes('chờ thanh toán'));
+
+    // Cancel 1 order to free quota
+    const cancelRes = await client.request(`/api/orders/${codes[0]}/cancel`, { method: 'POST' });
+    assert.equal(cancelRes.status, 200);
+
+    // Now order creation succeeds again
+    const successRes = await client.request('/api/orders', {
+      method: 'POST',
+      body: JSON.stringify({
+        packageId: pkgId,
+        quantity: 1,
+        topupInfo: { uid: '800000099' },
+      }),
+    });
+    assert.equal(successRes.status, 201);
+  });
 });

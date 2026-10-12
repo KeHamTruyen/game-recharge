@@ -3536,124 +3536,126 @@ export function AuditLogManager() {
           Không tìm thấy bản ghi nhật ký nào.
         </div>
       ) : (
-        <div className="admin-table" style={{ overflowX: "auto" }}>
-          <div
-            className="admin-table-head"
-            style={{
-              gridTemplateColumns: "160px 170px 90px 1fr 90px 130px 90px",
-              display: "grid",
-              gap: "8px",
-              alignItems: "center",
-            }}
-          >
-            <span>Thời gian</span>
-            <span>Hành động</span>
-            <span>Method</span>
-            <span>Đường dẫn (Path)</span>
-            <span>Status</span>
-            <span>IP / Request</span>
-            <span>Chi tiết</span>
-          </div>
-          {logs.map((log) => {
-            const isSuccess = log.statusCode >= 200 && log.statusCode < 300
-            const isError = log.statusCode >= 400
-            const actionColor =
-              log.action.includes("CREATE") || log.action.includes("CHECKOUT")
-                ? "#10b981"
-                : log.action.includes("CANCEL")
-                  ? "#f59e0b"
-                  : log.action.includes("UPDATE")
-                    ? "#3b82f6"
-                    : log.action.includes("DELETE")
-                      ? "#ef4444"
-                      : "#8b5cf6"
+        <div style={{ width: "100%", maxWidth: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch", borderRadius: "8px" }}>
+          <div className="admin-table" style={{ minWidth: "820px" }}>
+            <div
+              className="admin-table-head"
+              style={{
+                gridTemplateColumns: "160px 170px 90px 1fr 90px 130px 90px",
+                display: "grid",
+                gap: "8px",
+                alignItems: "center",
+              }}
+            >
+              <span>Thời gian</span>
+              <span>Hành động</span>
+              <span>Method</span>
+              <span>Đường dẫn (Path)</span>
+              <span>Status</span>
+              <span>IP / Request</span>
+              <span>Chi tiết</span>
+            </div>
+            {logs.map((log) => {
+              const isSuccess = log.statusCode >= 200 && log.statusCode < 300
+              const isError = log.statusCode >= 400
+              const actionColor =
+                log.action.includes("CREATE") || log.action.includes("CHECKOUT")
+                  ? "#10b981"
+                  : log.action.includes("CANCEL")
+                    ? "#f59e0b"
+                    : log.action.includes("UPDATE")
+                      ? "#3b82f6"
+                      : log.action.includes("DELETE")
+                        ? "#ef4444"
+                        : "#8b5cf6"
 
-            return (
-              <div
-                className="admin-table-row"
-                key={log.id}
-                style={{
-                  gridTemplateColumns: "160px 170px 90px 1fr 90px 130px 90px",
-                  display: "grid",
-                  gap: "8px",
-                  alignItems: "center",
-                  fontSize: "13px",
-                }}
-              >
-                <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
-                  {new Date(log.createdAt).toLocaleString("vi-VN", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                  })}
-                </span>
-                <span>
-                  <strong
-                    style={{
-                      display: "inline-block",
-                      padding: "2px 8px",
-                      borderRadius: "6px",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      background: `${actionColor}20`,
-                      color: actionColor,
-                      border: `1px solid ${actionColor}40`,
-                    }}
-                  >
-                    {log.action}
-                  </strong>
-                </span>
-                <span style={{ fontFamily: "monospace", fontWeight: 600, color: "#93c5fd" }}>
-                  {log.method}
-                </span>
-                <span
+              return (
+                <div
+                  className="admin-table-row"
+                  key={log.id}
                   style={{
-                    fontFamily: "monospace",
-                    fontSize: "12px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    gridTemplateColumns: "160px 170px 90px 1fr 90px 130px 90px",
+                    display: "grid",
+                    gap: "8px",
+                    alignItems: "center",
+                    fontSize: "13px",
                   }}
-                  title={log.path}
                 >
-                  {log.path}
-                </span>
-                <span>
+                  <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                    {new Date(log.createdAt).toLocaleString("vi-VN", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    })}
+                  </span>
+                  <span>
+                    <strong
+                      style={{
+                        display: "inline-block",
+                        padding: "2px 8px",
+                        borderRadius: "6px",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        background: `${actionColor}20`,
+                        color: actionColor,
+                        border: `1px solid ${actionColor}40`,
+                      }}
+                    >
+                      {log.action}
+                    </strong>
+                  </span>
+                  <span style={{ fontFamily: "monospace", fontWeight: 600, color: "#93c5fd" }}>
+                    {log.method}
+                  </span>
                   <span
                     style={{
-                      padding: "2px 6px",
-                      borderRadius: "4px",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      background: isSuccess
-                        ? "rgba(16, 185, 129, 0.15)"
-                        : isError
-                          ? "rgba(239, 68, 68, 0.15)"
-                          : "rgba(156, 163, 175, 0.15)",
-                      color: isSuccess ? "#34d399" : isError ? "#f87171" : "#9ca3af",
+                      fontFamily: "monospace",
+                      fontSize: "12px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
                     }}
+                    title={log.path}
                   >
-                    {log.statusCode}
+                    {log.path}
                   </span>
-                </span>
-                <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
-                  {log.ipAddress || (log.requestId ? log.requestId.slice(0, 8) : "—")}
-                </span>
-                <span>
-                  <button
-                    className="secondary-button"
-                    style={{ padding: "4px 8px", fontSize: "12px" }}
-                    onClick={() => setSelectedLog(log)}
-                  >
-                    Chi tiết
-                  </button>
-                </span>
-              </div>
-            )
-          })}
+                  <span>
+                    <span
+                      style={{
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        background: isSuccess
+                          ? "rgba(16, 185, 129, 0.15)"
+                          : isError
+                            ? "rgba(239, 68, 68, 0.15)"
+                            : "rgba(156, 163, 175, 0.15)",
+                        color: isSuccess ? "#34d399" : isError ? "#f87171" : "#9ca3af",
+                      }}
+                    >
+                      {log.statusCode}
+                    </span>
+                  </span>
+                  <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
+                    {log.ipAddress || (log.requestId ? log.requestId.slice(0, 8) : "—")}
+                  </span>
+                  <span>
+                    <button
+                      className="secondary-button"
+                      style={{ padding: "4px 8px", fontSize: "12px" }}
+                      onClick={() => setSelectedLog(log)}
+                    >
+                      Chi tiết
+                    </button>
+                  </span>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
 
@@ -3668,7 +3670,7 @@ export function AuditLogManager() {
             event.target === event.currentTarget && setSelectedLog(null)
           }
         >
-          <div className="product-modal" style={{ maxWidth: "600px", width: "95%" }}>
+          <div className="product-modal" style={{ maxWidth: "600px", width: "95%", maxHeight: "90vh", overflowY: "auto", boxSizing: "border-box" }}>
             <div className="product-modal-head">
               <div>
                 <span className="section-kicker">AUDIT LOG DETAIL</span>
@@ -3679,30 +3681,30 @@ export function AuditLogManager() {
               </button>
             </div>
             <div className="product-modal-body" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", fontSize: "13px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px", fontSize: "13px" }}>
                 <div>
                   <small style={{ color: "var(--color-text-muted)" }}>Hành động:</small>
-                  <p><strong>{selectedLog.action}</strong></p>
+                  <p style={{ margin: "4px 0", wordBreak: "break-word" }}><strong>{selectedLog.action}</strong></p>
                 </div>
                 <div>
                   <small style={{ color: "var(--color-text-muted)" }}>Thời gian:</small>
-                  <p>{new Date(selectedLog.createdAt).toLocaleString("vi-VN")}</p>
+                  <p style={{ margin: "4px 0" }}>{new Date(selectedLog.createdAt).toLocaleString("vi-VN")}</p>
                 </div>
                 <div>
                   <small style={{ color: "var(--color-text-muted)" }}>HTTP Request:</small>
-                  <p><code>{selectedLog.method} {selectedLog.path}</code> ({selectedLog.statusCode})</p>
+                  <p style={{ margin: "4px 0", wordBreak: "break-all" }}><code>{selectedLog.method} {selectedLog.path}</code> ({selectedLog.statusCode})</p>
                 </div>
                 <div>
                   <small style={{ color: "var(--color-text-muted)" }}>User ID:</small>
-                  <p>{selectedLog.userId || "Khách / Hệ thống (Ẩn danh)"}</p>
+                  <p style={{ margin: "4px 0", wordBreak: "break-all" }}>{selectedLog.userId || "Khách / Hệ thống (Ẩn danh)"}</p>
                 </div>
                 <div>
                   <small style={{ color: "var(--color-text-muted)" }}>IP Address:</small>
-                  <p>{selectedLog.ipAddress || "Không xác định"}</p>
+                  <p style={{ margin: "4px 0" }}>{selectedLog.ipAddress || "Không xác định"}</p>
                 </div>
                 <div>
                   <small style={{ color: "var(--color-text-muted)" }}>Request ID:</small>
-                  <p style={{ fontFamily: "monospace", fontSize: "11px" }}>{selectedLog.requestId || "—"}</p>
+                  <p style={{ fontFamily: "monospace", fontSize: "11px", margin: "4px 0", wordBreak: "break-all" }}>{selectedLog.requestId || "—"}</p>
                 </div>
               </div>
 
@@ -3717,8 +3719,11 @@ export function AuditLogManager() {
                     borderRadius: "8px",
                     padding: "12px",
                     fontSize: "12px",
-                    maxHeight: "260px",
+                    maxHeight: "240px",
                     overflowY: "auto",
+                    overflowX: "auto",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
                     color: "#a7f3d0",
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-all",

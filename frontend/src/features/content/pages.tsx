@@ -424,9 +424,40 @@ export function TransactionHistory({
                 <small>
                   {transaction.code} · {transaction.game} · {new Date(transaction.date).toLocaleString("vi-VN")}
                 </small>
+                <div className="history-mobile-meta">
+                  <em
+                    className={`status-${String(transaction.status).replace(/\s+/g, "-").toLowerCase()}`}
+                  >
+                    {transaction.status}
+                  </em>
+                  {isPending && onCancelOrder && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (window.confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${transaction.code}?`)) {
+                          void onCancelOrder(transaction.code)
+                        }
+                      }}
+                      style={{
+                        fontSize: "11px",
+                        padding: "3px 8px",
+                        background: "rgba(239, 68, 68, 0.15)",
+                        color: "#f87171",
+                        border: "1px solid rgba(239, 68, 68, 0.3)",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }}
+                      title="Hủy đơn hàng chưa thanh toán"
+                    >
+                      Hủy đơn
+                    </button>
+                  )}
+                </div>
               </span>
               <strong>{formatPrice(transaction.amount)}</strong>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="history-desktop-status">
                 <em
                   className={`status-${String(transaction.status).replace(/\s+/g, "-").toLowerCase()}`}
                 >
