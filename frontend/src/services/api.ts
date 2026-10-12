@@ -271,6 +271,12 @@ export const api = {
     async mine() {
       return (await allPages<ApiTransaction>("/orders/mine")).map(mapTransaction)
     },
+    async cancel(code: string) {
+      const result = await client.request<ApiEnvelope<ApiTransaction>>(`/orders/${encodeURIComponent(code)}/cancel`, {
+        method: "POST",
+      })
+      return mapTransaction(result.data)
+    },
   },
   payments: {
     async status(orderCode: string) {
@@ -448,14 +454,45 @@ export const api = {
     }
   },
     async updateTransaction(id: string | number, status: Transaction["status"]) {
-    const backendStatus = Object.entries(statusMap).find(([, label]) => label === status)?.[0] || "PENDING"
-    const result = await client.request<ApiEnvelope<ApiTransaction>>(`/admin/transactions/${String(id)}/status`, {
-      method: "PATCH",
-      body: JSON.stringify({ status: backendStatus }),
-    })
-    return mapTransaction(result.data)
-  },
+      const backendStatus = Object.entries(statusMap).find(([, label]) => label === status)?.[0] || "PENDING"
+      const result = await client.request<ApiEnvelope<ApiTransaction>>(`/admin/transactions/${String(id)}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: backendStatus }),
+      })
+      return mapTransaction(result.data)
     },
+    async auditLogs(params?: { page?: number; limit?: number; search?: string; action?: string }) {
+      const query = new URLSearchParams()
+      if (params?.page) query.set("page", String(params.page))
+      if (params?.limit) query.set("limit", String(params.limit))
+      if (params?.search) query.set("search", params.search)
+      if (params?.action) query.set("action", params.action)
+      const result = await client.request<{
+        success: true
+        data: {
+          items: Array<{
+            id: string
+            userId: string | null
+            action: string
+            method: string
+            path: string
+            statusCode: number
+            ipAddress: string | null
+            requestId: string | null
+            metadata: Record<string, unknown> | null
+            createdAt: string
+          }>
+          total: number
+          page: number
+          limit: number
+          totalPages: number
+          hasNext: boolean
+          hasPrev: boolean
+        }
+      }>(`/admin/audit-logs?${query.toString()}`)
+      return result.data
+    },
+  },
   settings: {
     async get<T>(key: string, publicOnly = true) {
       const path = publicOnly ? `/catalog/settings/${key}` : `/admin/settings/${key}`

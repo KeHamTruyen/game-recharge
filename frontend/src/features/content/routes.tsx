@@ -1,5 +1,6 @@
 import { Navigate, useNavigate } from "react-router"
 import { useAppStore } from "@/app/AppStore"
+import { api } from "@/services/api"
 import {
   AccountPage,
   ContactPage,
@@ -36,6 +37,15 @@ export function AccountRoute() {
       }}
       onUpdateProfile={async (name) => { await store.updateProfile(name) }}
       onChangePassword={store.changePassword}
+      onCancelOrder={async (code: string) => {
+        try {
+          await api.orders.cancel(code)
+          store.setNotice(`Đã hủy đơn hàng #${code} thành công.`)
+          if (store.refreshTransactions) await store.refreshTransactions()
+        } catch (error) {
+          store.setNotice(error instanceof Error ? error.message : "Không thể hủy đơn hàng.")
+        }
+      }}
     />
   )
 }

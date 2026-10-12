@@ -154,6 +154,10 @@ type AppStoreValue = AppSnapshot & {
   changePassword(currentPassword: string, newPassword: string): Promise<void>
 
   refreshTransactions(): Promise<Transaction[]>
+
+  siteConfig: { maintenanceMode?: boolean; maintenanceMessage?: string }
+
+  setSiteConfig: Setter<{ maintenanceMode?: boolean; maintenanceMessage?: string }>
 }
 
 function sanitizeBrandText(text?: string): string {
@@ -271,6 +275,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [middlemanInfo, setMiddlemanInfo] = useState(initial.middlemanInfo)
 
   const [contactInfo, setContactInfo] = useState(initial.contactInfo)
+
+  const [siteConfig, setSiteConfig] = useState<{ maintenanceMode?: boolean; maintenanceMessage?: string }>({
+    maintenanceMode: false,
+    maintenanceMessage: "",
+  })
 
   const [footerConfig, setFooterConfig] = useState<FooterConfig>(
     initial.footerConfig || initialFooterConfig,
@@ -501,15 +510,20 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
         setProductStatuses(catalog.statuses)
 
-        const [remoteMiddleman, remoteContact, remoteFooter] = await Promise.all([
+        const [remoteMiddleman, remoteContact, remoteFooter, remoteSiteConfig] = await Promise.all([
           api.settings.get<MiddlemanInfo>("middlemanInfo"),
 
           api.settings.get<ContactInfo>("contactInfo"),
 
           api.settings.get<FooterConfig>("footerConfig"),
+
+          api.settings.get<{ maintenanceMode?: boolean; maintenanceMessage?: string }>("siteConfig").catch(() => null),
         ])
 
         mergeRemoteContent(remoteMiddleman, remoteContact, remoteFooter)
+        if (remoteSiteConfig && typeof remoteSiteConfig === "object") {
+          setSiteConfig(remoteSiteConfig)
+        }
 
         if (session) {
           const sanitizedSession = {
@@ -667,6 +681,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       setCheckoutInfo,
 
       setNotice,
+      siteConfig,
+      setSiteConfig,
 
       async login(email, password, name, scope) {
         const nextUser = password

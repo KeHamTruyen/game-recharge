@@ -366,10 +366,18 @@ export function CheckoutRoute() {
       topupInfo={store.checkoutInfo}
       payment={payment}
       paymentStatus={paymentStatus}
+      isMaintenance={Boolean(store.siteConfig?.maintenanceMode)}
       onBack={() => navigate("/nap-game/thong-tin")}
       onNotice={store.setNotice}
       onConfirm={async () => {
         try {
+        if (store.siteConfig?.maintenanceMode) {
+          store.setNotice(
+            store.siteConfig.maintenanceMessage ||
+              "Hệ thống đang bảo trì, tạm thời không thể tạo đơn hàng mới.",
+          )
+          return false
+        }
         if (!store.user) {
           store.setNotice("Vui lòng đăng nhập trước khi thanh toán.")
           openLogin()

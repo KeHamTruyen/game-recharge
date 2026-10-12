@@ -123,19 +123,11 @@ export function AdminRoute() {
             store.setTopupTemplates((current) =>
               current.filter((item) => item.id !== id),
             )
-            store.setProducts((current) =>
-              current.map((item) =>
-                item.templateId === id ? { ...item, templateId: "" } : item,
-              ),
-            )
-            store.setServicePackages((current) =>
-              current.map((item) =>
-                item.templateId === id ? { ...item, templateId: "" } : item,
-              ),
-            )
             store.setNotice("Đã xóa mẫu thông tin nạp thành công.")
+            return true
           } catch (error) {
             store.setNotice(error instanceof Error ? error.message : "Xóa mẫu thông tin thất bại.")
+            return false
           }
         }}
         onAddCategory={async (name) => {

@@ -39,6 +39,10 @@ function sanitizeBody(body: unknown): Record<string, unknown> | undefined {
 }
 
 export function auditAdminRequest(req: Request, res: Response, next: NextFunction): void {
+  if (req.method === 'GET' && req.path.includes('/audit-logs')) {
+    next();
+    return;
+  }
   res.on('finish', () => {
     void prisma.auditLog.create({
       data: {

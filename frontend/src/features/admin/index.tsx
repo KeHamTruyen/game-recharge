@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState, lazy, Suspense } from "react"
+import { FormEvent, useCallback, useEffect, useMemo, useState, lazy, Suspense } from "react"
 import type {
   ContactChannel,
   ContactInfo,
@@ -327,7 +327,7 @@ export function AdminPage({
   onDeleteProductStatus: (id: string) => void
   onAddTopupTemplate: (template: TopupTemplate) => void
   onUpdateTopupTemplate: (id: string, template: TopupTemplate) => void
-  onDeleteTopupTemplate: (id: string) => void
+  onDeleteTopupTemplate: (id: string) => Promise<boolean>
   onAddCategory: (name: string) => void | Promise<void>
   onUpdateCategory?: (oldName: string, newName: string) => void | Promise<void>
   onDeleteCategory: (name: string) => void | Promise<void>
@@ -353,12 +353,12 @@ export function AdminPage({
   onStore?: () => void
 }) {
   const [tab, setTab] =
-    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki">(
+    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki" | "audit">(
       "products",
     )
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const selectTab = (
-    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki",
+    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki" | "audit",
   ) => {
     setTab(nextTab)
     setSidebarOpen(false)
@@ -410,9 +410,9 @@ export function AdminPage({
     setProductSaved(false)
     if (!name.trim()) return setProductFormError("Vui lòng nhập tên sản phẩm.")
     if (!game) return setProductFormError("Vui lòng chọn game.")
-    if (!price || Number(price) <= 0)
-      return setProductFormError("Giá bán phải lớn hơn 0.")
     const parsedPrice = Number(price)
+    if (!Number.isInteger(parsedPrice) || parsedPrice < 1 || parsedPrice > 9_999_999_999)
+      return setProductFormError("Giá bán phải là số nguyên từ 1 đến 9.999.999.999đ.")
     if (!productTemplateId)
       return setProductFormError("Vui lòng chọn mẫu thông tin nạp.")
     const payload = {
@@ -676,6 +676,12 @@ export function AdminPage({
           <button className={tab === "wiki" ? "active" : ""} onClick={() => selectTab("wiki")}>
             <Icon name="book" size={18} /> Wiki Aniimo
           </button>
+          <button
+            className={tab === "audit" ? "active" : ""}
+            onClick={() => selectTab("audit")}
+          >
+            <Icon name="shield" size={18} /> Nhật ký hoạt động
+          </button>
           {onStore && (
             <>
               <div className="admin-nav-divider" />
@@ -869,6 +875,9 @@ export function AdminPage({
                             <span>Giá bán</span>
                             <input
                               type="number"
+                              min={1}
+                              max={9_999_999_999}
+                              step={1}
                               value={price}
                               onChange={(event) => setPrice(event.target.value)}
                               placeholder="299000"
@@ -2042,6 +2051,8 @@ export function AdminPage({
             <ContactAdminEditor info={contactInfo} onChange={onUpdateContact} />
           ) : tab === "footer" ? (
             <FooterAdminEditor config={footerConfig} onChange={onUpdateFooter} />
+          ) : tab === "audit" ? (
+            <AuditLogManager />
           ) : (
             <AdminAccount
               initialName={adminName}
@@ -2070,7 +2081,7 @@ export function TopupTemplateManager({
   games: string[]
   onAdd: (template: TopupTemplate) => void
   onUpdate: (id: string, template: TopupTemplate) => void
-  onDelete: (id: string) => void
+  onDelete: (id: string) => Promise<boolean>
 }) {
   const [draft, setDraft] = useState<TopupTemplate | null>(null)
   const [error, setError] = useState("")
@@ -2207,18 +2218,16 @@ export function TopupTemplateManager({
               </button>
               <button
                 type="button"
+                disabled={usage > 0}
                 onClick={() => {
-                  const confirmMsg =
-                    usage > 0
-                      ? `Mẫu "${template.name}" đang được sử dụng bởi ${usage} gói nạp.\n\nNếu xóa, các gói nạp này sẽ được gỡ mẫu thông tin (chuyển sang không dùng mẫu).\n\nBạn có chắc chắn muốn xóa không?`
-                      : `Bạn có chắc chắn muốn xóa mẫu thông tin "${template.name}" không?`
+                  const confirmMsg = `Bạn có chắc chắn muốn xóa mẫu thông tin "${template.name}" không?`
                   if (window.confirm(confirmMsg)) {
                     onDelete(template.id)
                   }
                 }}
                 title={
                   usage > 0
-                    ? `Đang có ${usage} gói nạp sử dụng. Nhấn để xóa.`
+                    ? `Đang có ${usage} gói nạp sử dụng. Chuyển các gói sang mẫu khác trước khi xóa.`
                     : "Xóa mẫu thông tin"
                 }
                 aria-label={`Xóa mẫu ${template.name}`}
@@ -2448,17 +2457,12 @@ export function TopupTemplateManager({
                       alignItems: "center",
                       gap: "6px",
                     }}
-                    onClick={() => {
-                      const usage = products.filter(
-                        (product) => product.templateId === draft.id,
-                      ).length
-                      const confirmMsg =
-                        usage > 0
-                          ? `Mẫu "${draft.name}" đang được sử dụng bởi ${usage} gói nạp.\n\nNếu xóa, các gói nạp này sẽ được gỡ mẫu thông tin.\n\nBạn có chắc chắn muốn xóa không?`
-                          : `Bạn có chắc chắn muốn xóa mẫu thông tin "${draft.name}" không?`
+                    disabled={products.some((product) => product.templateId === draft.id)}
+                    title="Chỉ xóa được mẫu không còn gói sử dụng."
+                    onClick={async () => {
+                      const confirmMsg = `Bạn có chắc chắn muốn xóa mẫu thông tin "${draft.name}" không?`
                       if (window.confirm(confirmMsg)) {
-                        onDelete(draft.id)
-                        setDraft(null)
+                        if (await onDelete(draft.id)) setDraft(null)
                       }
                     }}
                   >
@@ -3405,6 +3409,340 @@ export function AdminUsers({
   )
 }
 
+type AuditLogItem = {
+  id: string
+  userId: string | null
+  action: string
+  method: string
+  path: string
+  statusCode: number
+  ipAddress: string | null
+  requestId: string | null
+  metadata: Record<string, unknown> | null
+  createdAt: string
+}
+
+export function AuditLogManager() {
+  const [logs, setLogs] = useState<AuditLogItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [search, setSearch] = useState("")
+  const [actionFilter, setActionFilter] = useState("all")
+  const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null)
+
+  const fetchLogs = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await api.admin.auditLogs({
+        page,
+        limit: 15,
+        search: search.trim() || undefined,
+        action: actionFilter !== "all" ? actionFilter : undefined,
+      })
+      setLogs(data.items as AuditLogItem[])
+      setTotal(data.total)
+      setTotalPages(data.totalPages || 1)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Không thể tải nhật ký hoạt động.")
+    } finally {
+      setLoading(false)
+    }
+  }, [page, search, actionFilter])
+
+  useEffect(() => {
+    void fetchLogs()
+  }, [fetchLogs])
+
+  return (
+    <div className="admin-data-page">
+      <div className="data-page-heading">
+        <div>
+          <h2>Nhật ký hoạt động (Audit Logs)</h2>
+          <p>Lịch sử các thao tác thay đổi dữ liệu, đăng nhập, nạp đơn và bảo mật hệ thống.</p>
+        </div>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <span>{total} bản ghi</span>
+          <button
+            className="secondary-button"
+            style={{ padding: "6px 12px", fontSize: "13px" }}
+            onClick={() => void fetchLogs()}
+            title="Làm mới dữ liệu"
+          >
+            Làm mới
+          </button>
+        </div>
+      </div>
+
+      <div className="data-filters" style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+        <label className="admin-search" style={{ flex: 1, minWidth: "220px" }}>
+          <Icon name="search" size={17} />
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
+            placeholder="Tìm theo URL, Request ID, IP..."
+          />
+        </label>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <label style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>Hành động:</label>
+          <select
+            value={actionFilter}
+            onChange={(e) => {
+              setActionFilter(e.target.value)
+              setPage(1)
+            }}
+            style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              color: "#fff",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "13px",
+              outline: "none",
+            }}
+          >
+            <option value="all">Tất cả hành động</option>
+            <option value="CREATE_ORDER">Tạo đơn (CREATE_ORDER)</option>
+            <option value="CHECKOUT">Thanh toán giỏ hàng (CHECKOUT)</option>
+            <option value="CANCEL_ORDER">Hủy đơn (CANCEL_ORDER)</option>
+            <option value="UPDATE_ORDER_STATUS">Cập nhật đơn (UPDATE_STATUS)</option>
+            <option value="UPDATE_SETTING">Đổi cấu hình (UPDATE_SETTING)</option>
+            <option value="UPDATE_USER">Cập nhật tài khoản (UPDATE_USER)</option>
+            <option value="LOGIN">Đăng nhập (LOGIN)</option>
+            <option value="LOGOUT">Đăng xuất (LOGOUT)</option>
+            <option value="REGISTER">Đăng ký (REGISTER)</option>
+          </select>
+        </div>
+      </div>
+
+      {error && (
+        <div style={{ color: "#ef4444", padding: "12px", background: "rgba(239,68,68,0.1)", borderRadius: "8px" }}>
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div style={{ padding: "40px", textAlign: "center", color: "var(--color-text-muted)" }}>
+          Đang tải nhật ký hoạt động...
+        </div>
+      ) : logs.length === 0 ? (
+        <div style={{ padding: "40px", textAlign: "center", color: "var(--color-text-muted)" }}>
+          Không tìm thấy bản ghi nhật ký nào.
+        </div>
+      ) : (
+        <div className="admin-table" style={{ overflowX: "auto" }}>
+          <div
+            className="admin-table-head"
+            style={{
+              gridTemplateColumns: "160px 170px 90px 1fr 90px 130px 90px",
+              display: "grid",
+              gap: "8px",
+              alignItems: "center",
+            }}
+          >
+            <span>Thời gian</span>
+            <span>Hành động</span>
+            <span>Method</span>
+            <span>Đường dẫn (Path)</span>
+            <span>Status</span>
+            <span>IP / Request</span>
+            <span>Chi tiết</span>
+          </div>
+          {logs.map((log) => {
+            const isSuccess = log.statusCode >= 200 && log.statusCode < 300
+            const isError = log.statusCode >= 400
+            const actionColor =
+              log.action.includes("CREATE") || log.action.includes("CHECKOUT")
+                ? "#10b981"
+                : log.action.includes("CANCEL")
+                  ? "#f59e0b"
+                  : log.action.includes("UPDATE")
+                    ? "#3b82f6"
+                    : log.action.includes("DELETE")
+                      ? "#ef4444"
+                      : "#8b5cf6"
+
+            return (
+              <div
+                className="admin-table-row"
+                key={log.id}
+                style={{
+                  gridTemplateColumns: "160px 170px 90px 1fr 90px 130px 90px",
+                  display: "grid",
+                  gap: "8px",
+                  alignItems: "center",
+                  fontSize: "13px",
+                }}
+              >
+                <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                  {new Date(log.createdAt).toLocaleString("vi-VN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </span>
+                <span>
+                  <strong
+                    style={{
+                      display: "inline-block",
+                      padding: "2px 8px",
+                      borderRadius: "6px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      background: `${actionColor}20`,
+                      color: actionColor,
+                      border: `1px solid ${actionColor}40`,
+                    }}
+                  >
+                    {log.action}
+                  </strong>
+                </span>
+                <span style={{ fontFamily: "monospace", fontWeight: 600, color: "#93c5fd" }}>
+                  {log.method}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "monospace",
+                    fontSize: "12px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                  title={log.path}
+                >
+                  {log.path}
+                </span>
+                <span>
+                  <span
+                    style={{
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      background: isSuccess
+                        ? "rgba(16, 185, 129, 0.15)"
+                        : isError
+                          ? "rgba(239, 68, 68, 0.15)"
+                          : "rgba(156, 163, 175, 0.15)",
+                      color: isSuccess ? "#34d399" : isError ? "#f87171" : "#9ca3af",
+                    }}
+                  >
+                    {log.statusCode}
+                  </span>
+                </span>
+                <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
+                  {log.ipAddress || (log.requestId ? log.requestId.slice(0, 8) : "—")}
+                </span>
+                <span>
+                  <button
+                    className="secondary-button"
+                    style={{ padding: "4px 8px", fontSize: "12px" }}
+                    onClick={() => setSelectedLog(log)}
+                  >
+                    Chi tiết
+                  </button>
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <Pagination page={page} totalPages={totalPages} onPage={setPage} />
+      )}
+
+      {selectedLog && (
+        <div
+          className="product-modal-backdrop"
+          onMouseDown={(event) =>
+            event.target === event.currentTarget && setSelectedLog(null)
+          }
+        >
+          <div className="product-modal" style={{ maxWidth: "600px", width: "95%" }}>
+            <div className="product-modal-head">
+              <div>
+                <span className="section-kicker">AUDIT LOG DETAIL</span>
+                <h2>Chi tiết nhật ký hoạt động</h2>
+              </div>
+              <button onClick={() => setSelectedLog(null)}>
+                <Icon name="close" size={20} />
+              </button>
+            </div>
+            <div className="product-modal-body" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", fontSize: "13px" }}>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>Hành động:</small>
+                  <p><strong>{selectedLog.action}</strong></p>
+                </div>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>Thời gian:</small>
+                  <p>{new Date(selectedLog.createdAt).toLocaleString("vi-VN")}</p>
+                </div>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>HTTP Request:</small>
+                  <p><code>{selectedLog.method} {selectedLog.path}</code> ({selectedLog.statusCode})</p>
+                </div>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>User ID:</small>
+                  <p>{selectedLog.userId || "Khách / Hệ thống (Ẩn danh)"}</p>
+                </div>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>IP Address:</small>
+                  <p>{selectedLog.ipAddress || "Không xác định"}</p>
+                </div>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>Request ID:</small>
+                  <p style={{ fontFamily: "monospace", fontSize: "11px" }}>{selectedLog.requestId || "—"}</p>
+                </div>
+              </div>
+
+              <div>
+                <small style={{ color: "var(--color-text-muted)", marginBottom: "4px", display: "block" }}>
+                  Metadata / Dữ liệu đính kèm:
+                </small>
+                <pre
+                  style={{
+                    background: "rgba(0, 0, 0, 0.4)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    fontSize: "12px",
+                    maxHeight: "260px",
+                    overflowY: "auto",
+                    color: "#a7f3d0",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-all",
+                  }}
+                >
+                  {selectedLog.metadata
+                    ? JSON.stringify(selectedLog.metadata, null, 2)
+                    : "Không có metadata đính kèm."}
+                </pre>
+              </div>
+
+              <div className="product-modal-actions" style={{ justifyContent: "flex-end" }}>
+                <button className="primary-button" onClick={() => setSelectedLog(null)}>
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function AdminAccount({
   initialName,
   initialEmail,
@@ -3422,16 +3760,35 @@ export function AdminAccount({
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [message, setMessage] = useState("")
+
+  const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [maintenanceMessage, setMaintenanceMessage] = useState("")
+  const [maintenanceLoading, setMaintenanceLoading] = useState(false)
+  const [maintenanceFeedback, setMaintenanceFeedback] = useState("")
+
   useEffect(() => {
     setName(initialName)
     setEmail(initialEmail)
   }, [initialName, initialEmail])
+
+  useEffect(() => {
+    api.settings
+      .get<{ maintenanceMode?: boolean; maintenanceMessage?: string }>("siteConfig", false)
+      .then((cfg) => {
+        if (cfg) {
+          setMaintenanceMode(Boolean(cfg.maintenanceMode))
+          setMaintenanceMessage(cfg.maintenanceMessage || "")
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <div className="admin-account-page">
       <div className="panel-heading">
         <div>
-          <h2>Tài khoản quản trị</h2>
-          <p>Cập nhật hồ sơ và thông tin bảo mật của bạn.</p>
+          <h2>Tài khoản &amp; Cài đặt hệ thống</h2>
+          <p>Cập nhật hồ sơ, bảo mật và công tắc bảo trì vận hành toàn trang.</p>
         </div>
       </div>
       <div className="admin-profile-card">
@@ -3504,6 +3861,98 @@ export function AdminAccount({
         </label>
         <button className="secondary-button">Cập nhật mật khẩu</button>
       </form>
+
+      <form
+        className="admin-account-form"
+        style={{
+          marginTop: "24px",
+          border: maintenanceMode ? "1px solid rgba(239, 68, 68, 0.4)" : "1px solid rgba(255, 255, 255, 0.1)",
+          background: maintenanceMode ? "rgba(239, 68, 68, 0.05)" : "rgba(255, 255, 255, 0.02)",
+        }}
+        onSubmit={async (event) => {
+          event.preventDefault()
+          setMaintenanceLoading(true)
+          setMaintenanceFeedback("")
+          try {
+            await api.admin.updateSetting("siteConfig", {
+              maintenanceMode,
+              maintenanceMessage,
+            })
+            setMaintenanceFeedback(
+              maintenanceMode
+                ? "Đã BẬT chế độ bảo trì: Khách hàng sẽ thấy thông báo và bị chặn tạo đơn mới."
+                : "Đã TẮT chế độ bảo trì: Website hoạt động bình thường.",
+            )
+          } catch (error) {
+            setMaintenanceFeedback(
+              error instanceof Error ? error.message : "Không thể cập nhật trạng thái bảo trì.",
+            )
+          } finally {
+            setMaintenanceLoading(false)
+          }
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ fontSize: "22px" }}>🛠️</span>
+          <div>
+            <h3 style={{ margin: 0 }}>Công tắc Bảo trì toàn trang (Maintenance Mode)</h3>
+            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--color-text-muted)" }}>
+              Khi kích hoạt, hệ thống sẽ chặn khách hàng tạo đơn mới và hiển thị banner cảnh báo trên toàn trang web.
+            </p>
+          </div>
+        </div>
+
+        <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", margin: "14px 0" }}>
+          <input
+            type="checkbox"
+            checked={maintenanceMode}
+            onChange={(event) => setMaintenanceMode(event.target.checked)}
+            style={{ width: "18px", height: "18px", accentColor: "#ef4444", cursor: "pointer" }}
+          />
+          <span style={{ fontWeight: 600, color: maintenanceMode ? "#f87171" : "#10b981" }}>
+            {maintenanceMode ? "ĐANG BẬT BẢO TRÌ (CHẶN ĐẶT ĐƠN)" : "ĐANG TẮT BẢO TRÌ (HOẠT ĐỘNG BÌNH THƯỜNG)"}
+          </span>
+        </label>
+
+        <label>
+          <span>Thông điệp hiển thị cho khách hàng</span>
+          <textarea
+            rows={3}
+            value={maintenanceMessage}
+            onChange={(event) => setMaintenanceMessage(event.target.value)}
+            placeholder="Ví dụ: Hệ thống nạp game đang tạm ngưng nhận đơn để bảo trì nâng cấp. Vui lòng quay lại sau ít phút!"
+            style={{
+              width: "100%",
+              borderRadius: "8px",
+              padding: "10px",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              color: "#fff",
+              fontSize: "14px",
+              resize: "vertical",
+            }}
+          />
+        </label>
+
+        <button
+          className="primary-button"
+          type="submit"
+          disabled={maintenanceLoading}
+          style={{ background: maintenanceMode ? "#dc2626" : undefined }}
+        >
+          {maintenanceLoading ? "Đang lưu..." : "Lưu cài đặt bảo trì"}
+        </button>
+
+        {maintenanceFeedback && (
+          <span
+            className={maintenanceFeedback.startsWith("Đã") ? "form-success" : "form-error"}
+            style={{ marginTop: "10px", display: "block" }}
+          >
+            {maintenanceFeedback}
+          </span>
+        )}
+      </form>
+
       {message && <span className="form-success">{message}</span>}
     </div>
   )

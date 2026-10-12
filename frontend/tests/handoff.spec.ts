@@ -159,6 +159,44 @@ test("admin contact edits are drafts and preserve text after save failure", asyn
   await expect(page.locator(".admin-wiki-manager")).toBeVisible()
 })
 
+test("template deletion is disabled for packages in use", async ({ page }) => {
+  await page.route("**/api/auth/session", (route) => route.fulfill({ json: { success: true, data: {
+    user: { id: "admin", email: "admin@test.invalid", name: "Admin", role: "ADMIN", status: "ACTIVE" },
+  } } }))
+  await page.goto("/admin")
+  await page.getByRole("button", { name: "Mẫu thông tin nạp", exact: true }).click()
+  await expect(page.getByRole("button", { name: `Xóa mẫu ${template.name}`, exact: true })).toBeDisabled()
+  await page.locator(".template-card").getByRole("button", { name: "Sửa", exact: true }).click()
+  await expect(page.getByRole("button", { name: "Xóa mẫu", exact: true })).toBeDisabled()
+})
+
+test("template deletion preserves the editor on server rejection and closes only after success", async ({ page }) => {
+  await page.route("**/api/auth/session", (route) => route.fulfill({ json: { success: true, data: {
+    user: { id: "admin", email: "admin@test.invalid", name: "Admin", role: "ADMIN", status: "ACTIVE" },
+  } } }))
+  await page.route("**/api/admin/packages?*", (route) => route.fulfill({ json: { success: true, data: { items: [], hasNext: false } } }))
+  let attempts = 0
+  await page.route("**/api/admin/topup-templates/tpl", (route) => {
+    attempts += 1
+    return route.fulfill(attempts === 1
+      ? { status: 409, json: { success: false, error: "Template is now in use" } }
+      : { json: { success: true, data: { message: "Template deleted" } } })
+  })
+  page.on("dialog", (dialog) => dialog.accept())
+  await page.goto("/admin")
+  await page.getByRole("button", { name: "Mẫu thông tin nạp", exact: true }).click()
+  await page.locator(".template-card").getByRole("button", { name: "Sửa", exact: true }).click()
+  await page.getByLabel("Tên mẫu", { exact: true }).fill("Unsaved template draft")
+  await page.getByRole("button", { name: "Xóa mẫu", exact: true }).click()
+  await expect(page.getByText("Template is now in use", { exact: true })).toBeVisible()
+  await expect(page.getByLabel("Tên mẫu", { exact: true })).toHaveValue("Unsaved template draft")
+  await expect(page.locator(".template-card")).toHaveCount(1)
+  await page.getByRole("button", { name: "Xóa mẫu", exact: true }).click()
+  await expect(page.locator(".template-editor")).toHaveCount(0)
+  await expect(page.locator(".template-card")).toHaveCount(0)
+  expect(attempts).toBe(2)
+})
+
 for (const width of [390, 820]) {
   test(`mobile navigation remains usable at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 })

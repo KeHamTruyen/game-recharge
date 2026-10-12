@@ -196,6 +196,7 @@ export function AccountPage({
   onUpdateProfile,
   onChangePassword,
   onRefresh,
+  onCancelOrder,
 }: {
   email: string
   displayName?: string
@@ -204,6 +205,7 @@ export function AccountPage({
   onUpdateProfile: (name: string) => Promise<void>
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
   onRefresh?: () => Promise<Transaction[]>
+  onCancelOrder?: (code: string) => Promise<void>
 }) {
   const [tab, setTab] = useState<"overview" | "history" | "profile">("overview")
   const [historyPage, setHistoryPage] = useState(1)
@@ -314,6 +316,7 @@ export function AccountPage({
           <TransactionHistory
             transactions={transactions.slice(0, 3)}
             title="Giao dịch gần đây"
+            onCancelOrder={onCancelOrder}
           />
         </>
       )}
@@ -322,6 +325,7 @@ export function AccountPage({
           <TransactionHistory
             transactions={visibleHistory}
             title="Toàn bộ giao dịch"
+            onCancelOrder={onCancelOrder}
           />
           {transactions.length > 5 && (
             <Pagination
@@ -391,9 +395,11 @@ export function AccountPage({
 export function TransactionHistory({
   transactions,
   title,
+  onCancelOrder,
 }: {
   transactions: Transaction[]
   title: string
+  onCancelOrder?: (code: string) => Promise<void>
 }) {
   return (
     <div className="history-panel">
@@ -402,27 +408,58 @@ export function TransactionHistory({
         <span>{transactions.length} giao dịch</span>
       </div>
       {transactions.length ? (
-        transactions.map((transaction) => (
-          <div className="history-row" key={transaction.id}>
-            <span className="history-icon">
-              <Icon name="bag" />
-            </span>
-            <span>
-              <strong>
-                {transaction.product} × {transaction.quantity || 1}
-              </strong>
-              <small>
-                {transaction.code} · {transaction.game} · {new Date(transaction.date).toLocaleString("vi-VN")}
-              </small>
-            </span>
-            <strong>{formatPrice(transaction.amount)}</strong>
-            <em
-              className={`status-${String(transaction.status).replace(/\s+/g, "-").toLowerCase()}`}
-            >
-              {transaction.status}
-            </em>
-          </div>
-        ))
+        transactions.map((transaction) => {
+          const isPending =
+            transaction.status === "Chờ thanh toán" ||
+            (transaction.status as string) === "PENDING"
+          return (
+            <div className="history-row" key={transaction.id}>
+              <span className="history-icon">
+                <Icon name="bag" />
+              </span>
+              <span>
+                <strong>
+                  {transaction.product} × {transaction.quantity || 1}
+                </strong>
+                <small>
+                  {transaction.code} · {transaction.game} · {new Date(transaction.date).toLocaleString("vi-VN")}
+                </small>
+              </span>
+              <strong>{formatPrice(transaction.amount)}</strong>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <em
+                  className={`status-${String(transaction.status).replace(/\s+/g, "-").toLowerCase()}`}
+                >
+                  {transaction.status}
+                </em>
+                {isPending && onCancelOrder && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (window.confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${transaction.code}?`)) {
+                        void onCancelOrder(transaction.code)
+                      }
+                    }}
+                    style={{
+                      fontSize: "11px",
+                      padding: "3px 8px",
+                      background: "rgba(239, 68, 68, 0.15)",
+                      color: "#f87171",
+                      border: "1px solid rgba(239, 68, 68, 0.3)",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                    title="Hủy đơn hàng chưa thanh toán"
+                  >
+                    Hủy đơn
+                  </button>
+                )}
+              </div>
+            </div>
+          )
+        })
       ) : (
         <div className="account-empty">
           <Icon name="clock" size={24} />

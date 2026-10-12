@@ -276,15 +276,26 @@ router.post('/change-password', requireAuth, async (req, res, next): Promise<voi
     const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
     const user = await prisma.user.findUnique({
       where: { id: req.user!.userId },
-      select: { passwordHash: true, tokenVersion: true },
+      select: { passwordHash: true },
     });
     if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
       throw new AppError('Mật khẩu hiện tại không đúng.', 400);
     }
     const updated = await prisma.user.update({
-      where: { id: req.user!.userId },
+      // Reject changes if the authenticated session or checked password became stale.
+      where: {
+        id: req.user!.userId,
+        tokenVersion: req.user!.tokenVersion ?? 0,
+        passwordHash: user.passwordHash,
+        status: 'ACTIVE',
+      },
       data: { passwordHash: await bcrypt.hash(newPassword, 12), tokenVersion: { increment: 1 } },
       select: { id: true, email: true, name: true, role: true, status: true, tokenVersion: true },
+    }).catch((error: unknown) => {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new AppError('Tài khoản đã thay đổi trong lúc xử lý. Vui lòng đăng nhập lại trước khi đổi mật khẩu.', 409);
+      }
+      throw error;
     });
     setAuthCookie(res, signToken({
       userId: updated.id,

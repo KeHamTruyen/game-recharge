@@ -39,6 +39,8 @@ COPY --chown=65532:65532 uploads ./seed_uploads
 
 COPY --from=build --chown=65532:65532 /app/uploads ./uploads
 
+USER 65532
+
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

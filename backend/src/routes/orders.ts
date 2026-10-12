@@ -6,6 +6,7 @@ import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
 import { AppError, NotFoundError } from '../middleware/errorHandler.js';
+import { vndAmountSchema } from '../utils/money.js';
 import {
   getPagination,
   buildPaginatedResult,
@@ -80,6 +81,9 @@ async function createOrder(
   });
   if (!pkg) throw new NotFoundError('Package');
 
+  const price = vndAmountSchema.parse(pkg.price.toNumber());
+  const amount = vndAmountSchema.parse(price * input.quantity);
+
   const status = await tx.productStatus.findUnique({
     where: { id: pkg.statusId },
     select: { purchasable: true, name: true },
@@ -99,6 +103,7 @@ async function createOrder(
       where: { id: pkg.templateId },
       select: { name: true, fields: true },
     });
+    if (!template) throw new AppError('Mẫu thông tin của gói không còn tồn tại. Vui lòng liên hệ hỗ trợ.', 400);
     templateName = template?.name ?? '';
     templateFields = Array.isArray(template?.fields)
       ? template.fields as Array<Record<string, unknown>>
@@ -180,7 +185,7 @@ async function createOrder(
     data: {
       code, userId, userEmail, serviceId: pkg.service?.id ?? null,
       packageId: pkg.id, packageName: pkg.name, gameName: pkg.service?.game ?? '',
-      amount: new Prisma.Decimal(pkg.price).mul(input.quantity),
+      amount,
       quantity: input.quantity, status: 'PENDING',
       topupFields: Object.keys(input.topupInfo).map((key) => ({
         key, type: isSensitiveFieldKey(key, templateFields) ? 'password' : 'text',
@@ -191,14 +196,42 @@ async function createOrder(
   });
 }
 
+async function checkOrderCreationAllowed(tx: Prisma.TransactionClient, userId: string, role?: string): Promise<void> {
+  const siteConfig = await tx.setting.findUnique({ where: { id: 'siteConfig' } });
+  const configVal = (siteConfig?.value || {}) as Record<string, unknown>;
+  if (configVal.maintenanceMode === true && role !== 'ADMIN') {
+    const msg = typeof configVal.maintenanceMessage === 'string' && configVal.maintenanceMessage.trim()
+      ? configVal.maintenanceMessage.trim()
+      : 'Hệ thống đang bảo trì nạp game định kỳ. Vui lòng quay lại sau ít phút!';
+    throw new AppError(msg, 503);
+  }
+
+  const maxPending = Number(process.env.MAX_PENDING_ORDERS || 5);
+  const pendingCount = await tx.transaction.count({
+    where: {
+      userId,
+      status: 'PENDING',
+      paymentStatus: { in: ['UNPAID', 'PENDING'] },
+    },
+  });
+  if (pendingCount >= maxPending) {
+    throw new AppError(
+      `Bạn đang có ${pendingCount} đơn hàng chờ thanh toán. Vui lòng thanh toán hoặc hủy bớt đơn cũ trước khi tạo đơn mới.`,
+      400
+    );
+  }
+}
+
 // ─── POST / — Create Order ────────────────────────────────────────────────────
 
 // Both creation paths use the same price and template validation.
 router.post('/', requireAuth, async (req, res, next): Promise<void> => {
   try {
     const body = createOrderSchema.parse(req.body);
-    const transaction = await prisma.$transaction((tx) =>
-      createOrder(tx, body, req.user!.userId, req.user!.email));
+    const transaction = await prisma.$transaction(async (tx) => {
+      await checkOrderCreationAllowed(tx, req.user!.userId, req.user!.role);
+      return createOrder(tx, body, req.user!.userId, req.user!.email);
+    });
     const isStaffOrAdmin = req.user!.role === 'ADMIN';
     res.status(201).json({
       success: true,
@@ -247,12 +280,17 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
           new Set(packages.map((item) => item.serviceId)).size > 1) {
         throw new AppError('Cart items must belong to the same active game and top-up template', 400);
       }
+
+      await checkOrderCreationAllowed(tx, userId, req.user!.role);
+
       const transactions = [];
       for (const item of body.items) {
         transactions.push(await createOrder(tx, { ...item, topupInfo: body.topupInfo }, userId, req.user!.email));
       }
       const paymentOrderCode = generateOrderCode();
-      const amount = transactions.reduce((total, item) => total.add(item.amount), new Prisma.Decimal(0)).toNumber();
+      const amount = vndAmountSchema.parse(
+        transactions.reduce((total, item) => total.add(item.amount), new Prisma.Decimal(0)).toNumber(),
+      );
       const qrCode = `https://qr.sepay.vn/img?${new URLSearchParams({
         acc: env.SEPAY_ACCOUNT_NUMBER, bank: env.SEPAY_BANK_CODE,
         amount: String(amount), des: paymentOrderCode,
@@ -383,6 +421,60 @@ router.get(
         data: {
           ...transaction,
           topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword, transaction.topupFields),
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ─── POST /:code/cancel — Cancel Pending Order ────────────────────────────────
+
+router.post(
+  '/:code/cancel',
+  requireAuth,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { code } = z.object({ code: z.string().min(1) }).parse(req.params);
+      const userId = req.user!.userId;
+      const isAdmin = req.user!.role === 'ADMIN';
+
+      const cancelled = await prisma.$transaction(async (tx) => {
+        const order = await tx.transaction.findUnique({
+          where: { code },
+          select: { id: true, userId: true, status: true, paymentStatus: true, code: true },
+        });
+
+        if (!order) throw new NotFoundError('Order');
+
+        if (order.userId !== userId && !isAdmin) {
+          throw new AppError('Bạn không có quyền hủy đơn hàng này', 403);
+        }
+
+        if (order.status !== 'PENDING' || !['UNPAID', 'PENDING'].includes(order.paymentStatus)) {
+          throw new AppError('Chỉ có thể hủy đơn hàng đang ở trạng thái chờ thanh toán', 400);
+        }
+
+        return tx.transaction.update({
+          where: { id: order.id },
+          data: {
+            status: 'FAILED',
+            paymentStatus: 'EXPIRED',
+            paymentMetadata: {
+              cancelledBy: isAdmin ? 'ADMIN' : 'CUSTOMER',
+              cancelledAt: new Date().toISOString(),
+            },
+          },
+          select: transactionSelect,
+        });
+      });
+
+      res.json({
+        success: true,
+        data: {
+          ...cancelled,
+          topupInfo: maskTopupInfo(cancelled.topupInfo, isAdmin, cancelled.topupFields),
         },
       });
     } catch (err) {

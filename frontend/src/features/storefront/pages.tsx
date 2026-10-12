@@ -504,6 +504,7 @@ export function CheckoutPage({
   topupInfo,
   payment,
   paymentStatus,
+  isMaintenance,
   onBack,
   onNotice,
   onConfirm,
@@ -516,6 +517,7 @@ export function CheckoutPage({
   topupInfo: Record<string, string>
   payment: PaymentDetails | null
   paymentStatus: "PENDING" | "PAID"
+  isMaintenance?: boolean
   onBack: () => void
   onNotice: (message: string) => void
   onConfirm: () => boolean | PaymentDetails | void | Promise<boolean | PaymentDetails | void>
@@ -615,15 +617,19 @@ export function CheckoutPage({
                 <span className="section-kicker">THÔNG TIN NẠP</span>
                 <button onClick={onBack}>Chỉnh sửa</button>
               </div>
-              {Object.entries(topupInfo).map(([key, value]) => (
-                <p key={key}>
-                  <span>
-                    {template?.fields.find((field) => field.key === key)
-                      ?.label || key}
-                  </span>
-                  <strong>{value}</strong>
-                </p>
-              ))}
+              {Object.entries(topupInfo).map(([key, value]) => {
+                const field = template?.fields.find((f) => f.key === key)
+                const isPassword =
+                  field?.type === "password" ||
+                  key.toLowerCase().includes("pass") ||
+                  key.toLowerCase().includes("pwd")
+                return (
+                  <p key={key}>
+                    <span>{field?.label || key}</span>
+                    <strong>{isPassword ? "••••••••" : value}</strong>
+                  </p>
+                )
+              })}
             </div>
           )}
         </div>
@@ -668,16 +674,24 @@ export function CheckoutPage({
           </div>
           <button
             className="primary-button confirm-payment"
-            disabled={Boolean(payment) || isSubmitting}
+            disabled={Boolean(payment) || isSubmitting || Boolean(isMaintenance)}
+            style={{
+              background: isMaintenance ? "#64748b" : undefined,
+              cursor: isMaintenance ? "not-allowed" : undefined,
+            }}
             onClick={async () => {
+              if (isMaintenance) {
+                onNotice("Hệ thống đang bảo trì, tạm thời không nhận tạo đơn mới.")
+                return
+              }
               setIsSubmitting(true)
               try { await onConfirm() }
               catch (error) { onNotice(error instanceof Error ? error.message : "Không thể tạo đơn hàng.") }
               finally { setIsSubmitting(false) }
             }}
           >
-            {paymentStatus === "PAID" ? "Đã nhận thanh toán" : payment ? "Đang chờ chuyển khoản" : isSubmitting ? "Đang tạo đơn…" : "Tạo đơn hàng"}{" "}
-            <Icon name="check" size={17} />
+            {isMaintenance ? "Tạm ngưng nhận đơn (Bảo trì)" : paymentStatus === "PAID" ? "Đã nhận thanh toán" : payment ? "Đang chờ chuyển khoản" : isSubmitting ? "Đang tạo đơn…" : "Tạo đơn hàng"}{" "}
+            <Icon name={isMaintenance ? "shield" : "check"} size={17} />
           </button>
         </aside>
       </div>

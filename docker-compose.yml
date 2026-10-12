@@ -76,6 +76,26 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+  # -------------------------------------------------------------
+  # 4. Automated Daily Database Backup
+  # -------------------------------------------------------------
+  backup:
+    image: prodrigestivill/postgres-backup-local:16-alpine
+    container_name: duke1305_backup
+    restart: always
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-duke1305_db}
+      POSTGRES_USER: ${POSTGRES_USER:-duke1305_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_DIR: /backups
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - duke_network
 

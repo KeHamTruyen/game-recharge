@@ -2,14 +2,17 @@ import { createBrowserRouter, Navigate, Outlet } from "react-router"
 import { AppStoreProvider } from "@/app/AppStore"
 import { PublicLayout } from "@/app/layouts"
 import { Seo } from "@/app/Seo"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 import NotFoundPage from "@/app/NotFoundPage"
 
 function AppRoot() {
   return (
-    <AppStoreProvider>
-      <Seo />
-      <Outlet />
-    </AppStoreProvider>
+    <ErrorBoundary>
+      <AppStoreProvider>
+        <Seo />
+        <Outlet />
+      </AppStoreProvider>
+    </ErrorBoundary>
   )
 }
 

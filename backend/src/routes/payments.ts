@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
+import { sendTelegramOrderNotification } from '../utils/telegram.js';
 
 const router = Router();
 
@@ -122,10 +123,29 @@ router.post(
 
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`sepay:order:${orderCode}`}))`;
         const transactions = await tx.transaction.findMany({
-          where: { paymentOrderCode: orderCode }, select: { amount: true },
+          where: { paymentOrderCode: orderCode },
+          select: {
+            id: true,
+            code: true,
+            amount: true,
+            packageName: true,
+            gameName: true,
+            userEmail: true,
+            topupInfo: true,
+            topupLabels: true,
+          },
         });
+        if (!transactions.length) {
+          console.warn(`[SEPAY WEBHOOK] Không tìm thấy đơn hàng cho mã: ${orderCode}`);
+          return;
+        }
         const expectedAmount = transactions.reduce((sum, row) => sum.add(row.amount), new Prisma.Decimal(0));
-        if (!transactions.length || !expectedAmount.equals(payload.transferAmount)) return;
+        if (!expectedAmount.equals(payload.transferAmount)) {
+          console.warn(
+            `[SEPAY WEBHOOK CẢNH BÁO LỆCH TIỀN] Đơn ${orderCode}: Dự kiến ${expectedAmount}đ nhưng nhận ${payload.transferAmount}đ`
+          );
+          return;
+        }
 
         const receipt = await tx.paymentReceipt.createMany({
           data: [{ provider: 'sepay', externalId: String(payload.id), paymentOrderCode: orderCode }],
@@ -156,6 +176,20 @@ router.post(
             bankTransactionId: payload.referenceCode || null,
           },
         });
+
+        // Trigger Telegram notification asynchronously for all affected orders
+        for (const item of transactions) {
+          void sendTelegramOrderNotification({
+            orderCode,
+            amount: Number(item.amount),
+            packageName: item.packageName,
+            gameName: item.gameName,
+            userEmail: item.userEmail,
+            topupInfo: item.topupInfo as Record<string, unknown>,
+            topupLabels: item.topupLabels as Record<string, string>,
+            paidAt,
+          });
+        }
       });
 
       res.status(200).json({ success: true });

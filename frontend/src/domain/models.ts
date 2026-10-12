@@ -86,7 +86,7 @@ export type Product = {
   isActive?: boolean
 }
 
-export type TopupFieldType = "text" | "number" | "email" | "select" | "textarea"
+export type TopupFieldType = "text" | "number" | "email" | "select" | "textarea" | "password"
 
 export type TopupField = {
   id: string

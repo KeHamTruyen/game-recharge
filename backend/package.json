@@ -12,7 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "db:backup": "powershell -ExecutionPolicy Bypass -File scripts/backup.ps1",
+    "db:backup": "node scripts/backup.mjs",
     "db:migrate-passwords": "node dist/scripts/migrate_passwords.js",
     "db:migrate-passwords:dev": "tsx src/scripts/migrate_passwords.ts",
     "test": "node scripts/test.mjs"

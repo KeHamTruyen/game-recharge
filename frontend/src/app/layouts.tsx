@@ -350,6 +350,34 @@ export function PublicLayout() {
           </div>
         ) : null
       })()}
+      {store.siteConfig?.maintenanceMode && (
+        <aside
+          className="maintenance-banner"
+          role="alert"
+          aria-live="polite"
+          style={{
+            background: "linear-gradient(90deg, #b91c1c 0%, #dc2626 50%, #b91c1c 100%)",
+            color: "#ffffff",
+            padding: "12px 20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+            fontSize: "14px",
+            fontWeight: 500,
+            textAlign: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+            zIndex: 90,
+          }}
+        >
+          <span style={{ fontSize: "18px" }}>⚠️</span>
+          <span>
+            <strong>Hệ thống đang bảo trì nạp game:</strong>{" "}
+            {store.siteConfig.maintenanceMessage ||
+              "Hệ thống đang tạm ngừng tiếp nhận đơn mới để bảo trì nâng cấp. Quý khách vui lòng quay lại sau ít phút!"}
+          </span>
+        </aside>
+      )}
       <main>
         <Outlet context={{ openLogin: () => setLoginOpen(true) }} />
       </main>

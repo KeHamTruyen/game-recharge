@@ -15,6 +15,7 @@ import {
   getPaginationSkipTake,
 } from '../utils/pagination.js';
 import { maskTopupInfo } from '../utils/crypto.js';
+import { vndAmountSchema } from '../utils/money.js';
 
 const router = Router();
 const imageValueSchema = z.string().max(10_000_000).refine(
@@ -27,6 +28,14 @@ const imageValueSchema = z.string().max(10_000_000).refine(
 
 // All admin routes require an authenticated administrator.
 router.use(requireAuth, requireRole('ADMIN'), auditAdminRequest);
+
+async function validatePackageTemplate(tx: Prisma.TransactionClient, templateId?: string): Promise<void> {
+  if (!templateId) return;
+  // Hold the template until package assignment commits; deletion takes an exclusive row lock.
+  const templates = await tx.$queryRaw<Array<{ id: string }>>`
+    SELECT id FROM topup_templates WHERE id = ${templateId} FOR SHARE`;
+  if (!templates.length) throw new AppError(`TopupTemplate '${templateId}' does not exist`, 400);
+}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SERVICES CRUD
@@ -125,8 +134,8 @@ const packageSchema = z.object({
   serviceId: z.string().min(1),
   name: z.string().min(1).max(100).trim(),
   description: z.string().max(500).trim().default(''),
-  price: z.coerce.number().positive(),
-  oldPrice: z.coerce.number().positive().nullable().optional(),
+  price: vndAmountSchema,
+  oldPrice: vndAmountSchema.nullable().optional(),
   note: z.string().max(200).trim().default(''),
   tags: z.array(z.string().max(30)).default([]),
   statusId: z.string().min(1).default('available'),
@@ -188,16 +197,10 @@ router.post(
       if (!statusExists) {
         throw new AppError(`ProductStatus '${data.statusId}' does not exist`, 400);
       }
-      if (data.templateId && data.templateId.trim() !== '') {
-        const templateExists = await prisma.topupTemplate.findUnique({
-          where: { id: data.templateId },
-        });
-        if (!templateExists) {
-          throw new AppError(`TopupTemplate '${data.templateId}' does not exist`, 400);
-        }
-      }
-
-      const pkg = await prisma.servicePackage.create({ data });
+      const pkg = await prisma.$transaction(async (tx) => {
+        await validatePackageTemplate(tx, data.templateId);
+        return tx.servicePackage.create({ data });
+      });
       res.status(201).json({ success: true, data: pkg });
     } catch (err) {
       next(err);
@@ -222,16 +225,10 @@ router.put(
           throw new AppError(`ProductStatus '${data.statusId}' does not exist`, 400);
         }
       }
-      if (data.templateId && data.templateId.trim() !== '') {
-        const templateExists = await prisma.topupTemplate.findUnique({
-          where: { id: data.templateId },
-        });
-        if (!templateExists) {
-          throw new AppError(`TopupTemplate '${data.templateId}' does not exist`, 400);
-        }
-      }
-
-      const pkg = await prisma.servicePackage.update({ where: { id }, data });
+      const pkg = await prisma.$transaction(async (tx) => {
+        await validatePackageTemplate(tx, data.templateId);
+        return tx.servicePackage.update({ where: { id }, data });
+      });
       res.json({ success: true, data: pkg });
     } catch (err) {
       next(err);
@@ -615,13 +612,16 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
-      await prisma.$transaction([
-        prisma.servicePackage.updateMany({
-          where: { templateId: id },
-          data: { templateId: '' },
-        }),
-        prisma.topupTemplate.delete({ where: { id } }),
-      ]);
+      await prisma.$transaction(async (tx) => {
+        const templates = await tx.$queryRaw<Array<{ id: string }>>`
+          SELECT id FROM topup_templates WHERE id = ${id} FOR UPDATE`;
+        if (!templates.length) throw new NotFoundError('Template');
+        const usage = await tx.servicePackage.count({ where: { templateId: id } });
+        if (usage) {
+          throw new AppError(`Mẫu thông tin đang được ${usage} gói sử dụng. Hãy chuyển các gói sang mẫu khác trước khi xóa.`, 409);
+        }
+        await tx.topupTemplate.delete({ where: { id } });
+      });
       res.json({ success: true, data: { message: 'Template deleted' } });
     } catch (err) {
       next(err);
@@ -1042,6 +1042,52 @@ router.put(
       });
 
       res.json({ success: true, data: setting });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AUDIT LOGS
+// ══════════════════════════════════════════════════════════════════════════════
+
+router.get(
+  '/audit-logs',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { page, limit } = getPagination(req);
+      const { skip, take } = getPaginationSkipTake(page, limit);
+      const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+      const action = typeof req.query.action === 'string' ? req.query.action.trim() : '';
+
+      const where: Prisma.AuditLogWhereInput = {};
+      if (action) {
+        where.action = { contains: action, mode: 'insensitive' };
+      }
+      if (search) {
+        where.OR = [
+          { path: { contains: search, mode: 'insensitive' } },
+          { ipAddress: { contains: search } },
+          { requestId: { contains: search } },
+          { userId: { contains: search } },
+        ];
+      }
+
+      const [total, items] = await Promise.all([
+        prisma.auditLog.count({ where }),
+        prisma.auditLog.findMany({
+          where,
+          skip,
+          take,
+          orderBy: { createdAt: 'desc' },
+        }),
+      ]);
+
+      res.json({
+        success: true,
+        data: buildPaginatedResult(items, total, page, limit),
+      });
     } catch (err) {
       next(err);
     }
