@@ -98,7 +98,7 @@ Game Recharge Website/
 │   │   ├── container-entrypoint.js    # Entrypoint Docker chuyển tiếp tín hiệu SIGTERM/SIGINT
 │   │   ├── test.mjs                   # Runner chạy test trên schema CSDL độc lập
 │   │   └── test-container-shutdown.mjs# Integration test kiểm tra dừng container an toàn
-│   ├── tests/                         # Bộ 25 test suites kiểm thử toàn diện backend (169 tests)
+│   ├── tests/                         # Bộ 26 test suites kiểm thử toàn diện backend (176 tests)
 │   ├── Dockerfile                     # Dockerfile tối ưu hóa bảo mật (không chứa npm trong runtime)
 │   └── package.json
 ├── frontend/
@@ -154,6 +154,7 @@ Game Recharge Website/
   - Bắt buộc ID giao dịch SePay phải là số nguyên dương an toàn (`safe integer`).
   - Ghi nhận `PaymentReceipt` và cập nhật trạng thái đơn hàng cùng trong 1 database transaction.
   - Chuyển `paymentStatus` sang `PAID`, `status` sang `PROCESSING` (chống xử lý trùng lặp khi webhook gửi lại). Tổng chi tiêu (`totalSpent`) của khách hàng được cộng dồn khi đơn hàng được quản trị viên xử lý hoàn tất (`status = COMPLETED`) và tự động khấu trừ tương ứng nếu đơn hàng được hoàn tiền.
+  - Trường hợp đơn hàng đã bị hủy (`FAILED`) trước khi thanh toán tới muộn, webhook vẫn ghi nhận `paymentStatus = PAID` nhưng giữ nguyên `status = FAILED` để CSKH đối soát chứng từ, không tự động mở lại đơn hoặc cộng chi tiêu sai lệch.
 
 ### 3. Đối soát thanh toán & Ghi nhận hoàn tiền
 - **Tách biệt rõ ràng 2 trạng thái:**
@@ -308,7 +309,7 @@ Khi khởi tạo CSDL bằng lệnh seed hoặc bootstrap:
 Dự án sở hữu bộ kiểm thử tự động toàn diện được thiết kế để chạy độc lập trên các schema thử nghiệm riêng biệt, không gây ảnh hưởng đến dữ liệu đang chạy:
 
 ### 1. Kiểm thử Backend (Node Test Runner)
-Chạy toàn bộ 25 test suites với 169 ca kiểm thử tự động:
+Chạy toàn bộ 26 test suites với 176 ca kiểm thử tự động:
 ```powershell
 npm test --prefix backend
 # Hoặc từ thư mục gốc:
@@ -329,6 +330,9 @@ Bộ test kiểm tra nghiêm ngặt:
   - Script sao lưu kiểm tra `BACKUP_KEEP_DAYS >= 1` và khôi phục tự động nhận diện định dạng.
   - Làm sạch dữ liệu Tombstone wiki soft-deleted và tối ưu polling khi tab ẩn.
   - Phân trang API trực tiếp từ máy chủ và tính toán doanh thu tổng hợp (DB Aggregates).
+- Kiểm tra hồi quy đối soát & tổng hợp nhóm thanh toán (`review-regressions.test.ts`):
+  - Tổng hợp trạng thái nhóm tại `GET /api/payments/status/:orderCode`: chỉ báo `PAID` khi tất cả các dòng đã thanh toán (chống báo thành công giả khi mới trả 1 phần).
+  - Bảo toàn trạng thái đơn hủy nhận tiền muộn: trả về `status: FAILED` kèm `paymentStatus: PAID` để CSKH đối soát chứng từ, không báo nhầm `PROCESSING`.
 
 ### 2. Kiểm tra Kiểu dữ liệu & Build Frontend
 ```powershell
@@ -341,10 +345,10 @@ npm run build --prefix frontend
 
 ### 3. Kiểm thử End-to-End Frontend (Playwright)
 ```powershell
-# Chạy toàn bộ 24 ca kiểm thử E2E
+# Chạy toàn bộ 28 ca kiểm thử E2E
 npx playwright test --config frontend/playwright.config.ts
 ```
-Bao gồm kiểm tra toast thông báo lỗi Admin, luồng hoàn tiền, giỏ hàng checkout, hủy đơn hàng và xử lý trang 404.
+Bao gồm kiểm tra toast thông báo lỗi Admin, luồng hoàn tiền, giỏ hàng checkout, hủy đơn hàng, phát hiện thanh toán muộn trên đơn hủy hiển thị thông báo liên hệ CSKH, và xử lý trang 404.
 
 ### 4. Kiểm thử Dừng Container An toàn
 ```powershell
@@ -436,7 +440,7 @@ Toàn bộ phản hồi API đều tuân thủ chuẩn cấu trúc:
 | `GET` | `/api/orders/:code` | Owner/Admin | Xem chi tiết đơn hàng theo mã |
 | `GET` | `/api/orders/:code/payment` | Owner/Admin | Lấy thông tin & mã QR tiếp tục thanh toán (tính tổng tiền nhóm) |
 | `POST` | `/api/orders/:code/cancel` | Owner/Admin | Hủy đơn hàng pending và mở khóa toàn nhóm thanh toán |
-| `GET` | `/api/payments/status/:orderCode` | Owner/Admin | Polling kiểm tra trạng thái thanh toán đơn hàng |
+| `GET` | `/api/payments/status/:orderCode` | Owner/Admin | Polling kiểm tra trạng thái thanh toán đơn/nhóm thanh toán (tổng hợp trạng thái nhóm, phát hiện đơn hủy nhận tiền muộn trả về status FAILED và paymentStatus PAID để CSKH đối soát) |
 | `POST` | `/api/payments/webhook` | SePay Key | Webhook nhận thông báo biến động số dư VietQR từ SePay |
 
 ### Quản trị viên (`/api/admin`)
