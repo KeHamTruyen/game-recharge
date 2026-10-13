@@ -168,12 +168,6 @@ export function ServiceDetailPage({
             </button>
           ))}
         </div>
-        <button className={`secondary-button cart-button${cartCount > 0 ? " has-items" : ""}`} onClick={onOpenCart}>
-          <Icon name="bag" size={15} />
-          <span>Giỏ hàng</span>
-          <b>{cartCount}</b>
-          {cartCount > 0 && <small>{formatPrice(cartTotal)}</small>}
-        </button>
       </div>
 
       {filtered.length > 0 ? (
@@ -244,6 +238,35 @@ export function ServiceDetailPage({
           <h3>Không có gói nào</h3>
           <p>Dịch vụ này hiện chưa có gói nạp khả dụng.</p>
         </div>
+      )}
+
+      {cartCount > 0 && (
+        <aside
+          className="floating-cart-wrapper"
+          aria-label="Giỏ hàng đã chọn"
+        >
+          <button
+            type="button"
+            className="cart-button floating-cart-bar has-items"
+            onClick={onOpenCart}
+            aria-label={`Giỏ hàng ${cartCount} gói, tổng tiền ${formatPrice(cartTotal)}. Bấm để xem giỏ hàng và tiếp tục.`}
+          >
+            <div className="floating-cart-left">
+              <div className="floating-cart-icon-wrap">
+                <Icon name="bag" size={18} />
+                <b className="floating-cart-badge">{cartCount}</b>
+              </div>
+              <div className="floating-cart-meta">
+                <span className="floating-cart-count-label">Đã chọn {cartCount} gói</span>
+                <strong className="floating-cart-total-price">{formatPrice(cartTotal)}</strong>
+              </div>
+            </div>
+            <div className="floating-cart-right">
+              <span>Xem giỏ hàng</span>
+              <span className="floating-cart-chevron"><Icon name="chevron" size={13} /></span>
+            </div>
+          </button>
+        </aside>
       )}
     </section>
   )
