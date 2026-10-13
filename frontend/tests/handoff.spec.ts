@@ -159,7 +159,7 @@ test("wiki tombstones remove built-in giftcodes, teams and guides without exposi
       `guide:${data.getEffectiveGuides()[0].id}`,
     ]
   })
-  await page.route("**/api/wiki", (route) => route.fulfill({ json: { success: true, data: {
+  await page.route("**/api/wiki*", (route) => route.fulfill({ json: { success: true, data: {
     entries: [...keys, "review:test"].map((key) => ({ key, kind: key.split(":")[0], deleted: true, authorId: null, data: {} })), next: null,
   } } }))
   const result = await page.evaluate(async (keys) => {

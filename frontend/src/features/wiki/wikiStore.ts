@@ -8,18 +8,46 @@ export type WikiEntry = {
   deleted: boolean
 }
 
-let entries: WikiEntry[] = []
+declare global {
+  interface Window {
+    __duke_wiki_entries__?: WikiEntry[]
+  }
+}
+
+let fallbackEntries: WikiEntry[] = []
+
+function getEntries(): WikiEntry[] {
+  if (typeof window !== "undefined") {
+    if (!window.__duke_wiki_entries__) window.__duke_wiki_entries__ = []
+    return window.__duke_wiki_entries__
+  }
+  return fallbackEntries
+}
+
+function setEntries(items: WikiEntry[]) {
+  if (typeof window !== "undefined") {
+    window.__duke_wiki_entries__ = items
+  } else {
+    fallbackEntries = items
+  }
+}
+
 let pending: Promise<void> | null = null
 
 export function getWikiEntries(kind: string, includeDeleted = false) {
-  return entries.filter((entry) => entry.kind === kind && (includeDeleted || !entry.deleted))
+  return getEntries().filter((entry) => entry.kind === kind && (includeDeleted || !entry.deleted))
 }
+
+let currentFetchId = 0
 
 export function refreshWiki(force = false): Promise<void> {
   if (typeof document !== "undefined" && document.visibilityState === "hidden" && !force) {
     return Promise.resolve()
   }
-  if (pending) return pending
+  if (!force && pending) {
+    return pending
+  }
+  const fetchId = ++currentFetchId
   pending = (async () => {
     const next: WikiEntry[] = []
     let cursor: string | null = null
@@ -28,13 +56,17 @@ export function refreshWiki(force = false): Promise<void> {
         await client.request(
           `/wiki${cursor ? `?after=${encodeURIComponent(cursor)}` : ""}`,
         )
+      if (fetchId !== currentFetchId) return
       next.push(...result.data.entries)
       cursor = result.data.next
     } while (cursor)
-    entries = next
+    if (fetchId !== currentFetchId) return
+    setEntries(next)
     window.dispatchEvent(new Event("wiki-data-changed"))
   })().finally(() => {
-    pending = null
+    if (fetchId === currentFetchId) {
+      pending = null
+    }
   })
   return pending
 }

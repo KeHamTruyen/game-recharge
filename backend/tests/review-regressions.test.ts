@@ -81,6 +81,29 @@ describe('Review regressions: refunds, payment groups and SQL restore', () => {
     assert.equal(paid.body.data.qrCode, '');
   });
 
+  it('GET /api/payments/status/:orderCode returns PENDING for partially paid groups and only PAID when all lines are paid', async () => {
+    const paymentOrderCode = `DUKE${randomUUID().replaceAll('-', '')}`;
+    const paidLine = await order({ paymentOrderCode, paymentStatus: 'PAID', amount: 10000 });
+    const pendingLine = await order({ paymentOrderCode, paymentStatus: 'PENDING', amount: 20000 });
+
+    // Polling by paymentOrderCode or by line code must NOT report group as PAID while 1 line is PENDING
+    const byGroup = await admin.get(`/api/payments/status/${paymentOrderCode}`);
+    assert.equal(byGroup.status, 200);
+    assert.equal(byGroup.body.data.paymentStatus, 'PENDING');
+
+    const byLine = await admin.get(`/api/payments/status/${paidLine.code}`);
+    assert.equal(byLine.status, 200);
+    assert.equal(byLine.body.data.paymentStatus, 'PENDING');
+
+    // Once all lines are PAID, group status becomes PAID
+    await prisma.transaction.update({ where: { id: pendingLine.id }, data: { paymentStatus: 'PAID', paidAt: new Date() } });
+    const fullyPaid = await admin.get(`/api/payments/status/${paymentOrderCode}`);
+    assert.equal(fullyPaid.status, 200);
+    assert.equal(fullyPaid.body.data.paymentStatus, 'PAID');
+    assert.equal(fullyPaid.body.data.status, 'PROCESSING');
+    assert.ok(fullyPaid.body.data.paidAt);
+  });
+
   it('SQL restore exits nonzero and rolls back on SQL errors; valid SQL commits', async (context) => {
     if (spawnSync('psql', ['--version']).status !== 0) {
       context.skip('Requires PostgreSQL psql client');

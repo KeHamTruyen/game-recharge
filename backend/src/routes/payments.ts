@@ -37,18 +37,76 @@ router.get(
   requireAuth,
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const transaction = await prisma.transaction.findFirst({
+      const orderCode = req.params.orderCode;
+      const target = await prisma.transaction.findFirst({
         where: {
-          paymentOrderCode: req.params.orderCode,
+          OR: [{ paymentOrderCode: orderCode }, { code: orderCode }],
+          ...(req.user!.role === 'ADMIN' ? {} : { userId: req.user!.userId }),
+        },
+        select: { paymentOrderCode: true, code: true },
+      });
+      if (!target) {
+        res.status(404).json({ success: false, error: 'Payment not found' });
+        return;
+      }
+
+      const des = target.paymentOrderCode || target.code;
+      const groupOrders = await prisma.transaction.findMany({
+        where: {
+          OR: [{ paymentOrderCode: des }, { paymentOrderCode: null, code: des }],
           ...(req.user!.role === 'ADMIN' ? {} : { userId: req.user!.userId }),
         },
         select: { paymentStatus: true, status: true, paidAt: true },
       });
-      if (!transaction) {
+
+      if (!groupOrders.length) {
         res.status(404).json({ success: false, error: 'Payment not found' });
         return;
       }
-      res.json({ success: true, data: transaction });
+
+      const allPaid = groupOrders.every((row) => row.paymentStatus === 'PAID');
+      const allCompleted = groupOrders.every((row) => row.status === 'COMPLETED');
+      const anyRefunded = groupOrders.some((row) => row.paymentStatus === 'REFUNDED' || row.status === 'REFUNDED');
+      const anyFailed = groupOrders.some((row) => row.paymentStatus === 'FAILED' || row.status === 'FAILED');
+      const allExpired = groupOrders.every((row) => row.paymentStatus === 'EXPIRED');
+
+      let paymentStatus: string = 'PENDING';
+      let status: string = 'PENDING';
+      let paidAt: Date | null = null;
+
+      if (allPaid) {
+        paymentStatus = 'PAID';
+        status = allCompleted ? 'COMPLETED' : 'PROCESSING';
+        const sortedPaidDates = groupOrders
+          .map((row) => row.paidAt)
+          .filter((d): d is Date => Boolean(d))
+          .sort((a, b) => b.getTime() - a.getTime());
+        paidAt = sortedPaidDates[0] || new Date();
+      } else if (anyRefunded) {
+        paymentStatus = 'REFUNDED';
+        status = 'REFUNDED';
+      } else if (allExpired) {
+        paymentStatus = 'EXPIRED';
+        status = 'FAILED';
+      } else if (anyFailed && !groupOrders.some((row) => row.paymentStatus === 'PAID')) {
+        paymentStatus = 'FAILED';
+        status = 'FAILED';
+      } else {
+        const anyPending = groupOrders.some((row) => row.paymentStatus === 'PENDING');
+        paymentStatus = anyPending || groupOrders.some((row) => row.paymentStatus === 'PAID')
+          ? 'PENDING'
+          : groupOrders[0].paymentStatus;
+        status = groupOrders.some((row) => row.status === 'PROCESSING') ? 'PROCESSING' : 'PENDING';
+      }
+
+      res.json({
+        success: true,
+        data: {
+          paymentStatus,
+          status,
+          paidAt,
+        },
+      });
     } catch (error) {
       next(error);
     }
