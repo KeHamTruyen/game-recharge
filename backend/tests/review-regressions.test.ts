@@ -104,6 +104,27 @@ describe('Review regressions: refunds, payment groups and SQL restore', () => {
     assert.ok(fullyPaid.body.data.paidAt);
   });
 
+  it('GET /api/payments/status/:orderCode reports FAILED status when late payment is recorded on cancelled order', async () => {
+    const paymentOrderCode = `DUKE${randomUUID().replaceAll('-', '')}`;
+    const cancelledOrder = await order({
+      paymentOrderCode,
+      paymentStatus: 'PAID',
+      status: 'FAILED',
+      paidAt: new Date(),
+    });
+
+    const res = await admin.get(`/api/payments/status/${paymentOrderCode}`);
+    assert.equal(res.status, 200);
+    assert.equal(res.body.data.paymentStatus, 'PAID');
+    assert.equal(res.body.data.status, 'FAILED');
+    assert.ok(res.body.data.paidAt);
+
+    const byLine = await admin.get(`/api/payments/status/${cancelledOrder.code}`);
+    assert.equal(byLine.status, 200);
+    assert.equal(byLine.body.data.paymentStatus, 'PAID');
+    assert.equal(byLine.body.data.status, 'FAILED');
+  });
+
   it('SQL restore exits nonzero and rolls back on SQL errors; valid SQL commits', async (context) => {
     if (spawnSync('psql', ['--version']).status !== 0) {
       context.skip('Requires PostgreSQL psql client');

@@ -76,7 +76,15 @@ router.get(
 
       if (allPaid) {
         paymentStatus = 'PAID';
-        status = allCompleted ? 'COMPLETED' : 'PROCESSING';
+        if (groupOrders.some((row) => row.status === 'FAILED')) {
+          status = 'FAILED';
+        } else if (groupOrders.some((row) => row.status === 'REFUNDED')) {
+          status = 'REFUNDED';
+        } else if (allCompleted) {
+          status = 'COMPLETED';
+        } else {
+          status = 'PROCESSING';
+        }
         const sortedPaidDates = groupOrders
           .map((row) => row.paidAt)
           .filter((d): d is Date => Boolean(d))
@@ -96,7 +104,13 @@ router.get(
         paymentStatus = anyPending || groupOrders.some((row) => row.paymentStatus === 'PAID')
           ? 'PENDING'
           : groupOrders[0].paymentStatus;
-        status = groupOrders.some((row) => row.status === 'PROCESSING') ? 'PROCESSING' : 'PENDING';
+        if (groupOrders.some((row) => row.status === 'FAILED')) {
+          status = 'FAILED';
+        } else if (groupOrders.some((row) => row.status === 'PROCESSING')) {
+          status = 'PROCESSING';
+        } else {
+          status = 'PENDING';
+        }
       }
 
       res.json({
