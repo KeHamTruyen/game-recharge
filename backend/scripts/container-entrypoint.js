@@ -38,6 +38,9 @@ if (mode === 'api') {
     const passwords = spawn(process.execPath, ['/app/dist/scripts/migrate_passwords.js'], { stdio: 'inherit' });
     passwords.on('exit', (passwordCode) => process.exit(passwordCode ?? 1));
   });
+} else if (mode === 'bootstrap') {
+  const bootstrap = spawn(process.execPath, ['/app/dist/scripts/bootstrap.js'], { stdio: 'inherit' });
+  bootstrap.on('exit', (code) => process.exit(code ?? 0));
 } else {
   console.error(`Unknown container mode: ${mode}`);
   process.exit(2);

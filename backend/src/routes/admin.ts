@@ -843,7 +843,6 @@ router.patch(
             if (body.refundReason !== undefined && !body.refundReason.trim()) {
               throw new AppError('Vui lòng nhập lý do hoàn tiền cụ thể', 400);
             }
-            const finalRefundReason = (body.refundReason?.trim() || body.reason || 'Hoàn tiền bởi quản trị viên').trim();
           }
 
           newStatus = 'REFUNDED';

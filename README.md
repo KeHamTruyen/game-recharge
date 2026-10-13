@@ -136,12 +136,11 @@ Game Recharge Website/
   - Khóa nguyên tử (Atomic transaction lock) theo email + mục đích (`REGISTRATION` / `PASSWORD_RESET`).
   - Hết hạn sau 10 phút, tự động khóa sau 5 lần nhập sai, chống brute-force và replay attack.
 - **Phân quyền RBAC:**
-  - `CUSTOMER`: Mua hàng, xem lịch sử đơn của bản thân, bình chọn & đăng đội hình.
-  - `STAFF`: Xem giao dịch, hỗ trợ khách hàng, vận hành xử lý đơn.
-  - `ADMIN`: Toàn quyền quản trị danh mục, sửa template, cấu hình hệ thống, duyệt hoàn tiền, đối soát giao dịch bất thường, xem nhật ký Audit Log.
+  - `CUSTOMER`: Mua hàng, tra cứu lịch sử đơn của bản thân, tiếp tục thanh toán, hủy đơn pending, bình chọn & đăng đội hình, đóng góp giftcode.
+  - `ADMIN`: Toàn quyền quản trị hệ thống: danh mục dịch vụ, gói nạp, mẫu form nạp, xử lý đơn hàng & giải mã thông tin nạp, ghi nhận hoàn tiền, đối soát giao dịch bất thường, quản lý người dùng, cấu hình bảo trì và xem nhật ký Audit Log.
 - **Mã hóa dữ liệu nhạy cảm (AES-256-GCM):**
-  - Mọi trường nhạy cảm trong `topupInfo` (như mật khẩu tài khoản game) được mã hóa tại tầng CSDL với khóa `DATA_ENCRYPTION_KEY`.
-  - Phản hồi trả về phía khách hàng tự động che (mask) trường nhạy cảm (`******`). Chỉ Admin/Staff mới có thể giải mã khi đơn đang ở trạng thái chờ xử lý.
+  - Mọi trường nhạy cảm trong `topupInfo` (như mật khẩu tài khoản game, mã PIN) được chuẩn hóa và mã hóa an toàn tại tầng CSDL với khóa `DATA_ENCRYPTION_KEY` (tiền tố `enc:`).
+  - Phản hồi trả về phía khách hàng tự động che (mask) trường nhạy cảm (`••••••••`). Tài khoản quản trị `ADMIN` có thể xem thông tin đã giải mã khi tra cứu chi tiết đơn để hỗ trợ và xử lý nạp game.
 
 ### 2. Giỏ hàng & Thanh toán VietQR lũy thừa
 - **Khóa chống trùng lặp (Idempotency Key):**
@@ -153,7 +152,7 @@ Game Recharge Website/
 - **Webhook SePay & Xử lý nguyên tử:**
   - Bắt buộc ID giao dịch SePay phải là số nguyên dương an toàn (`safe integer`).
   - Ghi nhận `PaymentReceipt` và cập nhật trạng thái đơn hàng cùng trong 1 database transaction.
-  - Chuyển `paymentStatus` sang `PAID`, `status` sang `PROCESSING`, và tự động cộng dồn `totalSpent` cho khách hàng mà không lo cộng trùng khi webhook gửi lại.
+  - Chuyển `paymentStatus` sang `PAID`, `status` sang `PROCESSING` (chống xử lý trùng lặp khi webhook gửi lại). Tổng chi tiêu (`totalSpent`) của khách hàng được cộng dồn khi đơn hàng được quản trị viên xử lý hoàn tất (`status = COMPLETED`) và tự động khấu trừ tương ứng nếu đơn hàng được hoàn tiền.
 
 ### 3. Đối soát thanh toán & Ghi nhận hoàn tiền
 - **Tách biệt rõ ràng 2 trạng thái:**
@@ -198,7 +197,7 @@ Game Recharge Website/
 - **Quản lý Danh mục & Gói nạp:** Tạo, chỉnh sửa, bật/tắt dịch vụ game và gói nạp linh hoạt.
 - **Trình tạo Form nạp game (Topup Templates):**
   - Thiết lập các trường nhập liệu động (UID, Server, Mật khẩu, Ghi chú...).
-  - Kiểm tra an toàn: Tối đa 20 trường, cấm trùng key, kiểm tra biểu thức RegEx an toàn chống ReDoS.
+  - Kiểm tra an toàn: Tối đa 20 trường, cấm trùng key, kiểm tra tính hợp lệ của biểu thức RegEx và giới hạn độ dài dữ liệu đầu vào.
 - **Quản lý Giao dịch:** Bộ lọc theo mã đơn, email, khoảng ngày, trạng thái thanh toán và trạng thái xử lý; yêu cầu nhập lý do bắt buộc khi Admin đổi trạng thái thủ công.
 - **Upload hình ảnh tối ưu:** Tự động chuyển đổi ảnh tải lên sang định dạng chuẩn WebP, kiểm tra kích thước tối đa và từ chối các file nguy hiểm (như SVG chứa mã script).
 
@@ -231,8 +230,8 @@ Hệ thống sử dụng các biến môi trường được khai báo trong fil
 | `MAIL_FROM` | Tùy chọn | — | Địa chỉ email người gửi hiển thị (vd: `"DUKE1305" <no-reply@duke1305.vn>`) |
 | `TELEGRAM_BOT_TOKEN` | Tùy chọn | — | Token của Bot Telegram nhận thông báo |
 | `TELEGRAM_CHAT_ID` | Tùy chọn | — | ID nhóm hoặc chat cá nhân nhận thông báo Telegram |
-| `ADMIN_EMAIL` | Tùy chọn | `admin@duke1305.vn` | Email tài khoản quản trị khi chạy seed |
-| `ADMIN_PASSWORD` | Tùy chọn | — | Mật khẩu tài khoản quản trị khi chạy seed |
+| `ADMIN_EMAIL` | **Khi Seed/Bootstrap** | `admin@duke1305.vn` | Email tài khoản quản trị khi chạy seed hoặc bootstrap |
+| `ADMIN_PASSWORD` | **Khi Seed/Bootstrap** | — | Mật khẩu tài khoản quản trị khi chạy seed hoặc bootstrap (tối thiểu **12 ký tự**) |
 
 ---
 
@@ -257,10 +256,15 @@ Copy-Item backend\.env.example backend\.env
 ```
 Điền chuỗi kết nối `DATABASE_URL` thực tế của bạn vào file `backend/.env`.
 
-Sau đó tạo schema và seed dữ liệu mẫu:
+Sau đó tạo schema và khởi tạo dữ liệu:
 ```powershell
 npm run db:migrate
+
+# Lựa chọn 1: Khởi tạo dữ liệu phát triển (Dịch vụ mẫu, gói nạp demo, tài khoản test)
 npm run db:seed
+
+# Lựa chọn 2: Khởi tạo dữ liệu hệ thống sạch (Chỉ tạo Admin & danh mục gốc, không chèn dữ liệu rác)
+npm run db:bootstrap
 ```
 
 ### 4. Khởi chạy ứng dụng
@@ -276,12 +280,12 @@ npm run dev:backend
 - **Frontend:** Truy cập tại `http://localhost:5173`
 - **Backend API:** Truy cập tại `http://localhost:3000`
 
-### 5. Tài khoản thử nghiệm mặc định
-Khi seed hoàn tất, bạn có thể đăng nhập bằng các tài khoản sau:
-- **Tài khoản Admin:** `admin@test.com` / `123456`
-- **Tài khoản Khách hàng:** `customer@test.com` / `123456`
+### 5. Khởi tạo dữ liệu & Tài khoản thử nghiệm
+Khi khởi tạo CSDL bằng lệnh seed hoặc bootstrap:
+- **Tài khoản Quản trị viên (Admin):** Khởi tạo tự động dựa trên 2 biến môi trường `ADMIN_EMAIL` và `ADMIN_PASSWORD` (bắt buộc tối thiểu **12 ký tự**) khai báo trong `.env`.
+- **Tài khoản Khách hàng thử nghiệm (chỉ có khi chạy `npm run db:seed`):** `customer@test.com` / `123456`.
 
-*(Lưu ý: Luôn thay đổi mật khẩu quản trị trước khi đưa lên môi trường công khai).*
+*(Lưu ý: Luôn đổi mật khẩu quản trị và giữ bí mật trước khi triển khai môi trường công khai).*
 
 ---
 
@@ -290,19 +294,20 @@ Khi seed hoàn tất, bạn có thể đăng nhập bằng các tài khoản sau
 Dự án sở hữu bộ kiểm thử tự động toàn diện được thiết kế để chạy độc lập trên các schema thử nghiệm riêng biệt, không gây ảnh hưởng đến dữ liệu đang chạy:
 
 ### 1. Kiểm thử Backend (Node Test Runner)
-Chạy toàn bộ 14 test suites với 133 ca kiểm thử tự động:
+Chạy toàn bộ 19 test suites với 150 ca kiểm thử tự động:
 ```powershell
 npm test --prefix backend
 # Hoặc từ thư mục gốc:
 npm run test:backend
 ```
 Bộ test kiểm tra nghiêm ngặt:
-- Luồng OTP, đăng ký, đăng nhập và bảo vệ cookie phiên (`auth.test.ts`).
-- Khóa nguyên tử chống trùng lặp checkout (`orders.test.ts`).
+- Luồng OTP, đăng ký, đăng nhập và bảo vệ cookie phiên `auth_token` (`auth.test.ts`).
+- Khóa nguyên tử chống trùng lặp checkout và xử lý cạnh tranh hủy đơn (`orders.test.ts`, `order-cancellation.test.ts`).
 - Chống spam đơn PENDING & Rate Limiting (`operational-features.test.ts`).
 - Cơ chế phục hồi lỗi CSDL 503 (`operational-features.test.ts`).
 - Đối soát webhook SePay và phát hiện giao dịch bất thường (`payment-reconciliation.test.ts`, `payments.test.ts`).
-- Quy trình ghi nhận hoàn tiền và phân quyền Audit Log (`operational-features.test.ts`, `admin.test.ts`).
+- Nghiệp vụ hoàn tiền an toàn, trừ tổng chi tiêu và phân quyền Audit Log (`operational-features.test.ts`, `p1-fixes-verification.test.ts`, `admin.test.ts`).
+- Chuẩn hóa và mã hóa AES trường mật khẩu topup (`p1-fixes-verification.test.ts`).
 - Phân quyền RBAC Wiki, bình chọn Giftcode và chống spam Team Builder (`wiki.test.ts`).
 
 ### 2. Kiểm tra Kiểu dữ liệu & Build Frontend
@@ -325,7 +330,7 @@ npm run test:container --prefix backend
 
 Hệ thống đã sẵn sàng cho Docker Compose với kiến trúc tách biệt gồm:
 1. `postgres`: Cơ sở dữ liệu PostgreSQL 16 Alpine với healthcheck.
-2. `migrate`: Container chạy migration CSDL và mã hóa dữ liệu tự động trước khi API khởi động.
+2. `migrate`: Container chạy migration CSDL (`prisma migrate deploy`) và mã hóa dữ liệu tự động trước khi API khởi động.
 3. `backend`: Ứng dụng Node.js production loại bỏ npm/npx trong runtime image để giảm thiểu rủi ro bảo mật.
 4. `frontend`: Bản build static Nginx phục vụ SPA với cấu hình nén gzip và bảo vệ security headers.
 5. `backup`: Container tự động sao lưu dữ liệu PostgreSQL hàng ngày vào thư mục `./backups`.
@@ -336,14 +341,24 @@ Hệ thống đã sẵn sàng cho Docker Compose với kiến trúc tách biệt
    ```powershell
    Copy-Item .env.production.example .env
    ```
-   Chỉnh sửa `.env` với các giá trị bí mật thực tế (`JWT_SECRET`, `COOKIE_SECRET`, `DATA_ENCRYPTION_KEY`, `CORS_ORIGIN`, `SEPAY_*`, `SMTP_*`).
+   Chỉnh sửa `.env` với các giá trị bí mật thực tế (`JWT_SECRET`, `COOKIE_SECRET`, `DATA_ENCRYPTION_KEY`, `CORS_ORIGIN`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `SEPAY_*`, `SMTP_*`).
+   *(Lưu ý: `ADMIN_EMAIL` và `ADMIN_PASSWORD` dùng để tạo tài khoản quản trị đầu tiên, mật khẩu bắt buộc từ 12 ký tự trở lên).*
 
 2. **Khởi chạy hệ thống:**
    ```powershell
    docker compose up -d --build
    ```
+   Container `migrate` sẽ tự động áp dụng các migration PostgreSQL mới nhất và chuẩn hóa bảo mật dữ liệu trước khi dịch vụ backend tiếp nhận request.
 
-3. **Sao lưu & Khôi phục CSDL:**
+3. **Khởi tạo dữ liệu hệ thống Production (Bootstrap an toàn):**
+   Trên cơ sở dữ liệu production mới tinh, chạy lệnh bootstrap để tạo tài khoản quản trị `ADMIN` đầu tiên và nạp các danh mục/trạng thái hệ thống thiết yếu (không chèn tài khoản hoặc dữ liệu thử nghiệm):
+   ```powershell
+   docker compose exec backend node dist/scripts/bootstrap.js
+   # Hoặc nếu chạy container độc lập một lần:
+   docker compose run --rm backend node dist/scripts/bootstrap.js
+   ```
+
+4. **Sao lưu & Khôi phục CSDL:**
    - **Sao lưu thủ công:**
      ```powershell
      npm run db:backup
@@ -364,13 +379,15 @@ Toàn bộ phản hồi API đều tuân thủ chuẩn cấu trúc:
 ### Xác thực & Người dùng (`/api/auth`)
 | Phương thức | Endpoint | Yêu cầu quyền | Mô tả |
 |---|---|:---:|---|
-| `POST` | `/api/auth/register` | Public | Gửi mã OTP xác nhận đăng ký tài khoản |
-| `POST` | `/api/auth/verify-registration` | Public | Xác thực mã OTP và hoàn tất đăng ký |
-| `POST` | `/api/auth/login` | Public | Đăng nhập và nhận cookie phiên `token` |
-| `POST` | `/api/auth/forgot-password` | Public | Gửi mã OTP thiết lập lại mật khẩu |
+| `POST` | `/api/auth/register` | Public | Gửi mã OTP xác nhận đăng ký tài khoản qua email |
+| `POST` | `/api/auth/register/verify` | Public | Xác thực mã OTP và hoàn tất đăng ký (cấp cookie `auth_token`) |
+| `POST` | `/api/auth/login` | Public | Đăng nhập và nhận cookie phiên `auth_token` |
+| `POST` | `/api/auth/forgot-password` | Public | Gửi mã OTP thiết lập lại mật khẩu qua email |
 | `POST` | `/api/auth/reset-password` | Public | Xác thực OTP và cập nhật mật khẩu mới |
-| `POST` | `/api/auth/logout` | Public | Xóa cookie phiên và đăng xuất |
-| `GET` | `/api/auth/session` | Public | Lấy thông tin tài khoản đang đăng nhập |
+| `POST` | `/api/auth/logout` | Public | Xóa cookie phiên `auth_token` và đăng xuất |
+| `GET` | `/api/auth/session` | Customer/Admin | Lấy thông tin tài khoản đang đăng nhập |
+| `PUT` | `/api/auth/profile` | Customer/Admin | Cập nhật tên hiển thị tài khoản |
+| `POST` | `/api/auth/change-password` | Customer/Admin | Đổi mật khẩu tài khoản và cấp mới phiên |
 
 ### Danh mục & Gói nạp (`/api/catalog`)
 | Phương thức | Endpoint | Yêu cầu quyền | Mô tả |
@@ -378,45 +395,54 @@ Toàn bộ phản hồi API đều tuân thủ chuẩn cấu trúc:
 | `GET` | `/api/catalog/services` | Public | Danh sách dịch vụ/game đang hoạt động |
 | `GET` | `/api/catalog/services/:id` | Public | Chi tiết dịch vụ kèm danh sách gói nạp |
 | `GET` | `/api/catalog/packages/:id` | Public | Chi tiết một gói nạp cụ thể |
-| `GET` | `/api/catalog/statuses` | Public | Danh sách trạng thái sản phẩm |
-| `GET` | `/api/catalog/topup-templates`| Public | Danh sách mẫu form thông tin nạp |
-| `GET` | `/api/catalog/settings/:key` | Public | Lấy cài đặt công khai (liên hệ, trung gian...) |
+| `GET` | `/api/catalog/product-statuses` | Public | Danh sách trạng thái sản phẩm (`available`, `paused`, `sold-out`) |
+| `GET` | `/api/catalog/tags` | Public | Danh sách thẻ phân loại sản phẩm |
+| `GET` | `/api/catalog/topup-templates` | Public | Danh sách mẫu form thông tin nạp game |
+| `GET` | `/api/catalog/settings/:key` | Public | Lấy cài đặt công khai (`siteConfig`, `footerConfig`, `middlemanInfo`, `contactInfo`) |
 
 ### Đơn hàng & Thanh toán (`/api/orders` & `/api/payments`)
 | Phương thức | Endpoint | Yêu cầu quyền | Mô tả |
 |---|---|:---:|---|
 | `POST` | `/api/orders` | Customer | Tạo đơn hàng đơn lẻ |
 | `POST` | `/api/orders/checkout` | Customer | Tạo đơn giỏ hàng đa sản phẩm với `idempotencyKey` |
-| `GET` | `/api/orders/mine` | Customer | Lấy lịch sử đơn hàng của người dùng |
+| `GET` | `/api/orders/mine` | Customer | Lấy lịch sử đơn hàng của người dùng hiện tại |
 | `GET` | `/api/orders/:code` | Owner/Admin | Xem chi tiết đơn hàng theo mã |
-| `GET` | `/api/orders/:code/payment` | Owner/Admin | Lấy thông tin & mã QR để tiếp tục thanh toán |
-| `GET` | `/api/orders/:code/payment-status`| Public | Polling kiểm tra trạng thái thanh toán theo thời gian thực |
-| `POST` | `/api/payments/webhook` | SePay Key | Webhook nhận thông báo biến động số dư từ SePay |
+| `GET` | `/api/orders/:code/payment` | Owner/Admin | Lấy thông tin & mã QR tiếp tục thanh toán (tính tổng tiền nhóm) |
+| `POST` | `/api/orders/:code/cancel` | Owner/Admin | Hủy đơn hàng pending và mở khóa toàn nhóm thanh toán |
+| `GET` | `/api/payments/status/:orderCode` | Owner/Admin | Polling kiểm tra trạng thái thanh toán đơn hàng |
+| `POST` | `/api/payments/webhook` | SePay Key | Webhook nhận thông báo biến động số dư VietQR từ SePay |
 
 ### Quản trị viên (`/api/admin`)
 | Phương thức | Endpoint | Yêu cầu quyền | Mô tả |
 |---|---|:---:|---|
-| `GET/POST/PUT/DELETE` | `/api/admin/services[/:id]` | Admin | Quản lý danh mục dịch vụ game |
-| `GET/POST/PUT/DELETE` | `/api/admin/packages[/:id]` | Admin | Quản lý các gói nạp |
-| `GET/POST/PUT/DELETE` | `/api/admin/topup-templates[/:id]` | Admin | Quản lý mẫu nhập form nạp game (max 20 fields) |
-| `GET` | `/api/admin/transactions` | Staff/Admin | Danh sách tất cả đơn hàng kèm bộ lọc nâng cao |
-| `GET` | `/api/admin/transactions/:id`| Staff/Admin | Chi tiết đơn kèm thông tin nạp đã giải mã |
-| `PATCH` | `/api/admin/transactions/:id/status` | Staff/Admin | Cập nhật trạng thái xử lý đơn (kèm lý do bắt buộc) |
-| `POST` | `/api/admin/transactions/:id/refund` | Admin | Ghi nhận hoàn tiền đơn hàng (số tiền, mã bank, lý do) |
+| `GET/POST` | `/api/admin/services` | Admin | Lấy danh sách hoặc tạo mới dịch vụ game |
+| `GET/PUT/DELETE` | `/api/admin/services/:id` | Admin | Chi tiết, cập nhật hoặc xóa dịch vụ game |
+| `GET/POST` | `/api/admin/packages` | Admin | Lấy danh sách hoặc tạo mới gói nạp |
+| `PUT/DELETE` | `/api/admin/packages/:id` | Admin | Cập nhật hoặc xóa gói nạp |
+| `GET/POST/DELETE` | `/api/admin/tags[/:id]` | Admin | Quản lý thẻ tag phân loại sản phẩm |
+| `GET/POST` | `/api/admin/product-statuses` | Admin | Lấy danh sách hoặc tạo mới trạng thái sản phẩm |
+| `DELETE` | `/api/admin/product-statuses/:id` | Admin | Xóa trạng thái sản phẩm |
+| `GET/POST` | `/api/admin/topup-templates` | Admin | Lấy danh sách hoặc tạo mới mẫu form nạp (max 20 fields) |
+| `PUT/DELETE` | `/api/admin/topup-templates/:id` | Admin | Cập nhật hoặc xóa mẫu form nạp |
+| `GET` | `/api/admin/transactions` | Admin | Danh sách đơn hàng kèm bộ lọc trạng thái, ngày, tìm kiếm |
+| `GET` | `/api/admin/transactions/:id` | Admin | Chi tiết đơn kèm thông tin nạp game đã giải mã AES |
+| `PATCH` | `/api/admin/transactions/:id/status` | Admin | Cập nhật trạng thái đơn/thanh toán hoặc ghi nhận hoàn tiền (`REFUNDED`) |
 | `GET` | `/api/admin/payment-anomalies` | Admin | Danh sách các giao dịch bất thường chờ đối soát |
 | `PATCH` | `/api/admin/payment-anomalies/:id/resolve` | Admin | Đánh dấu đã giải quyết giao dịch bất thường |
-| `GET` | `/api/admin/audit-logs` | Admin | Xem nhật ký kiểm toán hệ thống |
-| `GET/PATCH` | `/api/admin/users[/:id]` | Admin | Quản lý danh sách tài khoản & phân quyền |
+| `GET` | `/api/admin/audit-logs` | Admin | Xem nhật ký kiểm toán hoạt động hệ thống |
+| `GET/PATCH` | `/api/admin/users[/:id]` | Admin | Quản lý danh sách người dùng và phân quyền |
 | `GET/PUT` | `/api/admin/settings/:key` | Admin | Quản lý cài đặt hệ thống & công tắc bảo trì |
-| `POST` | `/api/admin/upload` | Staff/Admin | Tải lên hình ảnh (tự động tối ưu WebP) |
+| `POST` | `/api/admin/upload` | Admin | Tải lên hình ảnh (tự động tối ưu WebP) |
+| `GET` | `/api/admin/media` | Admin | Lấy danh sách ảnh đã tải lên |
 
 ### Bách khoa toàn thư Wiki (`/api/wiki`)
 | Phương thức | Endpoint | Yêu cầu quyền | Mô tả |
 |---|---|:---:|---|
-| `GET` | `/api/wiki` | Public | Lấy danh sách nội dung wiki |
+| `GET` | `/api/wiki` | Public | Lấy danh sách nội dung wiki (hỗ trợ cursor phân trang) |
 | `POST/PUT/DELETE` | `/api/wiki/teams[/:id]` | Customer/Admin | Đăng, chỉnh sửa và xóa đội hình đề cử |
-| `POST/PUT/DELETE` | `/api/wiki/giftcodes[/:id]` | Customer/Admin | Đóng góp và quản lý danh sách giftcode |
-| `POST` | `/api/wiki/giftcodes/:id/vote`| Customer | Bình chọn trạng thái giftcode (upvote/downvote) |
+| `POST` | `/api/wiki/giftcodes` | Customer/Admin | Đóng góp mã giftcode cộng đồng |
+| `PUT/DELETE` | `/api/wiki/giftcodes/:id` | Admin | Duyệt chỉnh sửa hoặc xóa mã giftcode |
+| `POST` | `/api/wiki/giftcodes/:id/vote` | Customer | Bình chọn trạng thái giftcode (upvote/report) |
 | `PUT` | `/api/wiki/aniimos/:id` | Admin | Cập nhật chỉ số và thông tin chi tiết Aniimo |
 
 ---
