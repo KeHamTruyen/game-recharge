@@ -18,6 +18,7 @@ import {
   maskTopupInfo,
   maskCachedTopupInfo,
 } from '../utils/crypto.js';
+import { safeRegexTest } from '../utils/regex.js';
 
 const router = Router();
 
@@ -116,12 +117,7 @@ async function createOrder(
         throw new AppError(`Field ${String(field.label || key)} is required`, 400);
       }
       if (value !== undefined && field.pattern) {
-        let matches = false;
-        try {
-          matches = new RegExp(String(field.pattern)).test(String(value));
-        } catch {
-          throw new AppError(`Invalid validation pattern for ${String(field.label || key)}`, 500);
-        }
+        const matches = safeRegexTest(String(field.pattern), String(value));
         if (!matches) throw new AppError(`Invalid value for ${String(field.label || key)}`, 400);
       }
       if (value !== undefined && field.type === 'email' &&
@@ -210,7 +206,12 @@ async function createOrder(
   });
 }
 
-async function checkOrderCreationAllowed(tx: Prisma.TransactionClient, userId: string, role?: string): Promise<void> {
+async function checkOrderCreationAllowed(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  incomingCount = 1,
+  role?: string
+): Promise<void> {
   const siteConfig = await tx.setting.findUnique({ where: { id: 'siteConfig' } });
   const configVal = (siteConfig?.value || {}) as Record<string, unknown>;
   if (configVal.maintenanceMode === true && role !== 'ADMIN') {
@@ -220,7 +221,11 @@ async function checkOrderCreationAllowed(tx: Prisma.TransactionClient, userId: s
     throw new AppError(msg, 503);
   }
 
-  const maxPending = Number(process.env.MAX_PENDING_ORDERS || 5);
+  // Serialize quota checks per user across concurrent requests
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'pending_order_quota:' + userId}))`;
+
+  const parsedMax = Number(process.env.MAX_PENDING_ORDERS);
+  const maxPending = Number.isInteger(parsedMax) && parsedMax > 0 ? parsedMax : 5;
   const pendingCount = await tx.transaction.count({
     where: {
       userId,
@@ -228,9 +233,9 @@ async function checkOrderCreationAllowed(tx: Prisma.TransactionClient, userId: s
       paymentStatus: { in: ['UNPAID', 'PENDING'] },
     },
   });
-  if (pendingCount >= maxPending) {
+  if (pendingCount + incomingCount > maxPending) {
     throw new AppError(
-      `Bạn đang có ${pendingCount} đơn hàng chờ thanh toán. Vui lòng thanh toán hoặc hủy bớt đơn cũ trước khi tạo đơn mới.`,
+      `Bạn đang có ${pendingCount} đơn hàng chờ thanh toán. Giới hạn tối đa là ${maxPending} đơn chờ thanh toán. Vui lòng thanh toán hoặc hủy bớt đơn cũ.`,
       400
     );
   }
@@ -243,7 +248,7 @@ router.post('/', requireAuth, async (req, res, next): Promise<void> => {
   try {
     const body = createOrderSchema.parse(req.body);
     const transaction = await prisma.$transaction(async (tx) => {
-      await checkOrderCreationAllowed(tx, req.user!.userId, req.user!.role);
+      await checkOrderCreationAllowed(tx, req.user!.userId, 1, req.user!.role);
       return createOrder(tx, body, req.user!.userId, req.user!.email);
     });
     const isStaffOrAdmin = req.user!.role === 'ADMIN';
@@ -311,7 +316,7 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
         throw new AppError('Cart items must belong to the same active game and top-up template', 400);
       }
 
-      await checkOrderCreationAllowed(tx, userId, req.user!.role);
+      await checkOrderCreationAllowed(tx, userId, body.items.length, req.user!.role);
 
       const transactions = [];
       for (const item of body.items) {

@@ -1,8 +1,8 @@
-import { libraryFullData } from "./libraryData"
+import { getLibraryFullData } from "./libraryData"
 
 import React, { useState, useMemo, useEffect, useRef } from "react"
 
-import { formatImageUrl } from "./wikiData"
+import { formatImageUrl } from "./wikiUtils"
 
 import type { LibraryItem } from "./types"
 
@@ -49,6 +49,22 @@ const QUALITIES = [
 const PAGE_SIZE_OPTIONS = [24, 48, 96]
 
 export default function LibraryPage() {
+  const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    getLibraryFullData().then((data) => {
+      if (active) {
+        setLibraryItems(data)
+        setIsLoading(false)
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
   const [selectedCat, setSelectedCat] = useState("all")
 
   const [selectedQuality, setSelectedQuality] = useState("all")
@@ -68,23 +84,23 @@ export default function LibraryPage() {
   // Calculate category counts
 
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: libraryFullData.length }
+    const counts: Record<string, number> = { all: libraryItems.length }
 
     CATEGORIES.forEach((c) => {
       if (c.id !== "all") {
-        counts[c.id] = libraryFullData.filter(
+        counts[c.id] = libraryItems.filter(
           (item) => item.categoryGroup === c.id,
         ).length
       }
     })
 
     return counts
-  }, [])
+  }, [libraryItems])
 
   // Filter items
 
   const filteredItems = useMemo(() => {
-    return libraryFullData.filter((item) => {
+    return libraryItems.filter((item) => {
       const q = searchQuery.trim().toLowerCase()
 
       const matchSearch =
@@ -103,7 +119,8 @@ export default function LibraryPage() {
 
       return matchSearch && matchCat && matchQuality
     })
-  }, [searchQuery, selectedCat, selectedQuality])
+  }, [libraryItems, searchQuery, selectedCat, selectedQuality])
+
 
   // Reset page to 1 when filters change
 
@@ -181,7 +198,7 @@ export default function LibraryPage() {
         <h1 className="wiki-hero-title">📚 Bách Khoa Toàn Thư Aniimo</h1>
         <p className="wiki-hero-desc">
           Kho dữ liệu tra cứu đầy đủ{" "}
-          <strong>{libraryFullData.length.toLocaleString()}</strong> vật phẩm:
+          <strong>{isLoading ? "..." : libraryItems.length.toLocaleString()}</strong> vật phẩm:
           Ngoại trang, nội thất gia viên, trứng ấp, nguyên liệu tiến hóa, cộng
           hưởng, rương báu và trang bị quý hiếm trong thế giới Aniimo.
         </p>
@@ -268,7 +285,11 @@ export default function LibraryPage() {
       <div ref={itemsGridRef} style={{ scrollMarginTop: "90px" }} />
 
       {/* Items Grid */}
-      {paginatedItems.length === 0 ? (
+      {isLoading ? (
+        <div className="wiki-empty-state" style={{ padding: "4rem 1rem" }}>
+          <p>⏳ Đang tải dữ liệu Bách Khoa Toàn Thư...</p>
+        </div>
+      ) : paginatedItems.length === 0 ? (
         <div className="wiki-empty-state">
           <p>🔍 Không tìm thấy vật phẩm nào phù hợp với bộ lọc hiện tại.</p>
           <button

@@ -16,6 +16,7 @@ import {
 } from '../utils/pagination.js';
 import { maskTopupInfo } from '../utils/crypto.js';
 import { vndAmountSchema } from '../utils/money.js';
+import { checkRegexSafety } from '../utils/regex.js';
 
 const router = Router();
 const imageValueSchema = z.string().max(10_000_000).refine(
@@ -512,22 +513,18 @@ router.delete(
 
 const templateFieldSchema = z.object({
   id: z.string().optional(),
-  key: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_-]+$/, 'Mã trường (key) chỉ được chứa chữ cái, số, gạch ngang và gạch dưới'),
+  key: z.string().min(1).max(50).regex(/^[a-zA-Z0-9_-]+$/, 'Mã trường (key) chỉ được chứa chữ cái, số, gạch ngang và gạch dưới, tối đa 50 ký tự'),
   label: z.string().min(1).max(150),
-  type: z.string().min(1).max(50).default('text'),
+  type: z.enum(['text', 'number', 'email', 'select', 'textarea', 'password']).default('text'),
   placeholder: z.string().max(200).optional().default(''),
   required: z.boolean().optional().default(true),
   hint: z.string().max(300).optional(),
   helpText: z.string().max(300).optional(),
-  pattern: z.string().max(200).optional().refine((val) => {
+  pattern: z.string().max(150).optional().refine((val) => {
     if (!val) return true;
-    try {
-      new RegExp(val);
-      return true;
-    } catch {
-      return false;
-    }
-  }, { message: 'Biểu thức kiểm tra (pattern regex) không hợp lệ' }),
+    const safety = checkRegexSafety(val);
+    return safety.safe;
+  }, { message: 'Biểu thức kiểm tra (pattern regex) không hợp lệ hoặc có nguy cơ gây nghẽn xử lý (ReDoS)' }),
   options: z.array(z.union([
     z.string().max(150),
     z.object({
@@ -535,7 +532,12 @@ const templateFieldSchema = z.object({
       label: z.string().max(150),
     }),
   ])).optional().default([]),
-}).passthrough();
+}).passthrough().refine((field) => {
+  if (field.type === 'select') {
+    return Array.isArray(field.options) && field.options.length > 0;
+  }
+  return true;
+}, { message: 'Trường dạng lựa chọn (select) phải có ít nhất 1 tùy chọn trong options' });
 
 const templateFieldsListSchema = z.array(templateFieldSchema)
   .min(1, 'Mẫu nạp phải có ít nhất 1 trường thông tin')
@@ -697,7 +699,7 @@ router.get(
           : {}),
       };
 
-      const [transactions, total] = await Promise.all([
+      const [transactions, total, revenueAggregate, completedCount] = await Promise.all([
         prisma.transaction.findMany({
           where,
           orderBy: { createdAt: 'desc' },
@@ -734,6 +736,13 @@ router.get(
           },
         }),
         prisma.transaction.count({ where }),
+        prisma.transaction.aggregate({
+          where: { ...where, status: 'COMPLETED' },
+          _sum: { amount: true },
+        }),
+        prisma.transaction.count({
+          where: { ...where, status: 'COMPLETED' },
+        }),
       ]);
 
       const maskedList = transactions.map((t) => ({
@@ -741,10 +750,19 @@ router.get(
         topupInfo: maskTopupInfo(t.topupInfo, true, t.topupFields),
       }));
 
+      const paginated = buildPaginatedResult(maskedList, total, page, limit);
+
       res.json({
         success: true,
-        data: buildPaginatedResult(maskedList, total, page, limit),
+        data: {
+          ...paginated,
+          stats: {
+            totalRevenue: Number(revenueAggregate._sum.amount || 0),
+            totalCompleted: completedCount,
+          },
+        },
       });
+
     } catch (err) {
       next(err);
     }

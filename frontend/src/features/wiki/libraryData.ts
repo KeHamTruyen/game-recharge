@@ -1,4 +1,10 @@
-import rawItems from "@/data/wiki/library_items_full.json"
 import type { LibraryItem } from "./types"
 
-export const libraryFullData = rawItems as LibraryItem[]
+let cachedItems: LibraryItem[] | null = null
+
+export async function getLibraryFullData(): Promise<LibraryItem[]> {
+  if (cachedItems) return cachedItems
+  const mod = await import("@/data/wiki/library_items_full.json")
+  cachedItems = (mod.default || mod) as LibraryItem[]
+  return cachedItems
+}

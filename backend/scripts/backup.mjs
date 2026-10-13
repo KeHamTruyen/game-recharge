@@ -14,16 +14,27 @@ if (!existsSync(backupDir)) {
   mkdirSync(backupDir, { recursive: true });
 }
 
-// Clean connection URL for pg_dump
+// Retention configuration validation: BACKUP_KEEP_DAYS must be an integer >= 1
+// Reject 0, negative or non-integer values early to prevent accidental deletion of fresh backups.
+const keepDaysRaw = process.env.BACKUP_KEEP_DAYS;
+const keepDays = keepDaysRaw !== undefined && keepDaysRaw !== '' ? Number(keepDaysRaw) : 7;
+if (!Number.isInteger(keepDays) || keepDays < 1) {
+  console.error(`❌ Giá trị BACKUP_KEEP_DAYS không hợp lệ: "${keepDaysRaw}". Phải là số nguyên >= 1 để đảm bảo an toàn lưu trữ.`);
+  process.exit(1);
+}
+
+// Clean connection URL for pg_dump: pg_dump operates at the database level, so ?schema= is stripped.
 const url = new URL(databaseUrl);
 url.searchParams.delete('schema');
 const targetDbUrl = url.toString();
+const maskedUrl = `${url.protocol}//${url.username ? '***@' : ''}${url.host}${url.pathname}`;
 
 const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace('T', '_').split('.')[0];
 const filename = `duke1305_${timestamp}.dump`;
 const outputPath = join(backupDir, filename);
 
 console.log(`📦 Đang tiến hành sao lưu database vào: ${filename}...`);
+console.log(`ℹ️ Phạm vi CSDL: ${maskedUrl} (toàn bộ database; các bảng và schema bên trong được lưu trữ)`);
 
 const dumpProcess = spawnSync('pg_dump', [
   '--format=custom',
@@ -42,10 +53,14 @@ if (dumpProcess.status !== 0) {
   process.exit(dumpProcess.status || 1);
 }
 
-console.log(`✅ Sao lưu thành công: ${outputPath}`);
+if (!existsSync(outputPath) || statSync(outputPath).size === 0) {
+  console.error(`❌ Bản sao lưu thất bại hoặc file rỗng: ${outputPath}`);
+  process.exit(1);
+}
 
-// Retention management: delete backups older than BACKUP_KEEP_DAYS (default 7 days)
-const keepDays = Number(process.env.BACKUP_KEEP_DAYS || 7);
+console.log(`✅ Sao lưu thành công: ${outputPath} (${statSync(outputPath).size} bytes)`);
+
+// Retention management: delete backups older than BACKUP_KEEP_DAYS
 const cutoffMs = Date.now() - keepDays * 24 * 60 * 60 * 1000;
 
 try {
@@ -68,4 +83,5 @@ try {
 } catch (cleanupErr) {
   console.warn('⚠️ Lỗi khi dọn dẹp bản sao lưu cũ:', cleanupErr.message);
 }
+
 

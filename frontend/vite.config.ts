@@ -2,6 +2,7 @@ import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
+import fs from 'node:fs'
 
 import siteConfiguration from '../.figma/make/site.json'
 
@@ -130,6 +131,82 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
       })
       }
     },
+    closeBundle() {
+      const distDir = path.resolve(__dirname, 'dist')
+      const indexPath = path.resolve(distDir, 'index.html')
+      if (!fs.existsSync(indexPath)) return
+      const baseHtml = fs.readFileSync(indexPath, 'utf-8')
+
+      const SEO_ROUTES: Record<string, { title: string; description: string }> = {
+        '/nap-game': {
+          title: 'Nạp game online nhanh, an toàn | DUKE1305',
+          description: 'Nạp game chính hãng, giá tốt, thanh toán an toàn và hỗ trợ 24/7.',
+        },
+        '/cay-thue': {
+          title: 'Dịch vụ cày thuê game | DUKE1305',
+          description: 'Thông tin gói cày thuê, giá dịch vụ và hỗ trợ tại DUKE1305.',
+        },
+        '/trung-gian': {
+          title: 'Dịch vụ trung gian game | DUKE1305',
+          description: 'Dịch vụ trung gian giao dịch game an toàn, minh bạch và hỗ trợ nhanh.',
+        },
+        '/lien-he': {
+          title: 'Liên hệ hỗ trợ nạp game | DUKE1305',
+          description: 'Liên hệ DUKE1305 để được hỗ trợ nạp game và xử lý giao dịch.',
+        },
+        '/wiki/giftcode': {
+          title: 'Mã Giftcode Aniimo Mới Nhất & Code Tân Thủ | DUKE1305',
+          description: 'Tổng hợp mã Giftcode Aniimo mới nhất còn hạn sử dụng, phần thưởng tinh thể, trứng cổ đại và hướng dẫn nhập code.',
+        },
+        '/wiki/list': {
+          title: 'Danh Sách Thú Cưng Aniimo & Chỉ Số Chi Tiết | DUKE1305',
+          description: 'Bảng tra cứu toàn bộ 98 thú cưng Aniimo, hệ nguyên tố, chỉ số công thủ HP và vị trí xuất hiện.',
+        },
+        '/wiki/so-sanh': {
+          title: 'So Sánh Chỉ Số Thú Cưng Aniimo | DUKE1305',
+          description: 'So sánh trực quan chỉ số, thuộc tính và sức mạnh giữa các thú cưng Aniimo trong game.',
+        },
+        '/wiki/tier-list': {
+          title: 'Bảng Xếp Hạng Tier List Aniimo Mới Nhất | DUKE1305',
+          description: 'Bảng xếp hạng thú cưng Aniimo từ bậc SSS đến C theo vai trò DPS, Tanker, Supporter và đa dụng.',
+        },
+        '/wiki/map': {
+          title: 'Bản Đồ Vị Trí Thú Cưng Aniimo Map | DUKE1305',
+          description: 'Bản đồ tương tác trực quan hiển thị vị trí bắt thú cưng, boss thế giới và tài nguyên trong Aniimo.',
+        },
+        '/wiki/build': {
+          title: 'Xây Dựng Đội Hình Aniimo & Bảng Khắc Hệ | DUKE1305',
+          description: 'Công cụ tự tạo đội hình thú cưng Aniimo, tính tổng chỉ số, radar năng lực và phân tích tương khắc nguyên tố.',
+        },
+        '/wiki/team': {
+          title: 'Đội Hình Đề Cử & Chiến Thuật Aniimo | DUKE1305',
+          description: 'Khám phá các đội hình mạnh nhất từ ban quản trị và cộng đồng người chơi Aniimo.',
+        },
+        '/wiki/thu-vien': {
+          title: 'Bách Khoa Toàn Thư Aniimo | DUKE1305',
+          description: 'Kho dữ liệu tra cứu vật phẩm, ngoại trang, nội thất gia viên, trứng ấp trong thế giới Aniimo.',
+        },
+        '/wiki/huong-dan': {
+          title: 'Hướng Dẫn Tân Thủ Aniimo Chi Tiết | DUKE1305',
+          description: 'Cẩm nang hướng dẫn chơi cho người mới bắt đầu: cách bắt thú, nâng cấp, phối đội hình và tối ưu tài nguyên.',
+        },
+      }
+
+      for (const [route, meta] of Object.entries(SEO_ROUTES)) {
+        const targetDir = path.resolve(distDir, route.replace(/^\//, ''))
+        fs.mkdirSync(targetDir, { recursive: true })
+        const canonical = `${siteUrl}${route}`
+        let pageHtml = baseHtml
+          .replace(/<title>.*?<\/title>/i, `<title>${meta.title}</title>`)
+          .replace(/<meta name="description" content=".*?"\/?>/i, `<meta name="description" content="${meta.description}" />`)
+          .replace(/<meta property="og:title" content=".*?"\/?>/i, `<meta property="og:title" content="${meta.title}" />`)
+          .replace(/<meta property="og:description" content=".*?"\/?>/i, `<meta property="og:description" content="${meta.description}" />`)
+          .replace(/<\/head>/i, `  <link rel="canonical" href="${canonical}" />\n  <meta property="og:url" content="${canonical}" />\n</head>`)
+
+        fs.writeFileSync(path.resolve(targetDir, 'index.html'), pageHtml, 'utf-8')
+      }
+    },
+
     transformIndexHtml: {
       order: 'pre',
       handler(html) {

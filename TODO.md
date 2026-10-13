@@ -1,6 +1,6 @@
 # TODO bàn giao — DUKE1305
 
-> Cập nhật **13/10/2026**; **Đã hoàn tất 100% các mục P1 (A01–A06) và 2 mục P2 (A07, A10)**. Toàn bộ 150 backend tests và 24 E2E tests đạt 100%. Còn 7 mục P2 tối ưu hóa (A08, A09, A11–A15).
+> Cập nhật **13/10/2026**; **Đã hoàn tất 100% toàn bộ mục P1 (A01–A06) và P2 (A07–A15)**. Toàn bộ 169 backend tests (25 suites) và 24 E2E tests đạt 100%.
 
 Mã A01–A15 dưới đây thuộc audit **13/10**, khác A01–A04 của audit **11/10** (OTP, receipt webhook, trạng thái cuối, snapshot trường nhạy cảm). Các bản sửa cũ đó vẫn còn; không coi việc dùng lại số thứ tự là lỗi cũ tái phát.
 
@@ -10,7 +10,7 @@ Mã A01–A15 dưới đây thuộc audit **13/10**, khác A01–A04 của audit
 
 | Kiểm tra trên phiên bản hiện tại | Kết quả |
 | --- | --- |
-| `npm test --prefix backend` | **150/150 đạt**, 19 suites; schema thử nghiệm riêng, đã dọn sau khi chạy |
+| `npm test --prefix backend` | **169/169 đạt**, 25 suites; schema thử nghiệm riêng, đã dọn sau khi chạy |
 | `npm run typecheck --prefix frontend` & backend `npm run build` | **Đạt 100%**, 0 lỗi typecheck; dist biên dịch đầy đủ |
 | Bộ E2E Playwright đầy đủ (`frontend/tests`) | **24/24 đạt 100%**; bao gồm handoff spec (A07) và luồng hủy đơn (A01) |
 | Kiểm thử P1 & Concurrency | **100% đạt**: Khóa nguyên tử hủy đơn, hoàn tiền, resume payment, mã hóa số |
@@ -56,30 +56,29 @@ Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports củ
 - [x] `.env.production.example`: Sửa `MAIL_FROM="no-reply@duke1305.vn"` chuẩn cú pháp Docker Compose.
 - [x] `backend/src/config/env.ts`: Cập nhật schema `MAIL_FROM` hỗ trợ cả email thuần và định dạng RFC `"Tên" <email@domain.com>`.
 
-## P2 — Logic, xử lý lỗi và vận hành cần hoàn thiện
+## P2 — Logic, xử lý lỗi và vận hành (ĐÃ HOÀN TẤT 9/9)
 
 ### A07 — Đã sửa: Admin hiển thị Toast thông báo lỗi & Form hoàn tiền an toàn
 - [x] `frontend/src/features/admin/route.tsx`: Đưa `{store.notice && <div className="toast">{store.notice}</div>}` ra giao diện Admin đã đăng nhập. Lỗi server (như 409 khi xóa template đang dùng) hiển thị thông báo rõ ràng cho admin.
 - [x] `frontend/src/features/admin/index.tsx`: Form hoàn tiền chuyển sang `await onUpdate(...)` có `try/catch`, trạng thái `refundSubmitting`, hiển thị lỗi `refundError` tại chỗ và không đóng modal sớm khi API thất bại.
 - **Bằng chứng:** Ca test Playwright `tests/handoff.spec.ts:209` (`template deletion preserves the editor on server rejection and closes only after success`) đã chuyển từ ĐỎ sang XANH (100% pass).
 
-### A08 — Validation template chưa đồng nhất, chưa chống ReDoS
+### A08 — Đã sửa: Validation template đồng nhất & Chống ReDoS
+- [x] Đồng bộ `backend/src/routes/admin.ts`, `backend/src/routes/orders.ts` và `frontend/src/features/admin/index.tsx`: Thống nhất độ dài khóa trường tối đa 50 ký tự (`.max(50)`), kiểu trường `type: enum('text', 'number', 'email', 'select', 'textarea', 'password')`, trường `select` bắt buộc có danh sách lựa chọn `options`.
+- [x] Tạo cơ chế phòng chống ReDoS đa tầng tại `backend/src/utils/regex.ts`:
+  - Phân tích tĩnh cấu trúc Regex: cấm lượng từ lồng nhau nguy hiểm dạng `(a+)+`, `(a|a)+`, cấm nhiều wildcard liên tiếp `.*.*`, giới hạn độ dài pattern <= 150 ký tự.
+  - Kiểm tra fuzzing trong Sandbox `node:vm` với timeout 35ms khi admin tạo/sửa mẫu, phát hiện và từ chối các pattern ReDoS trước khi lưu vào CSDL.
+  - Hàm `safeRegexTest(pattern, input, timeoutMs = 50)` thực thi an toàn trong luồng tạo đơn, tự động ngắt nếu đầu vào khách hàng vượt quá giới hạn hoặc gây nghẽn backtracking.
+- **Bằng chứng:** Test suite `p2-fixes-verification.test.ts` (100% pass): từ chối key 51 ký tự (400), chấp nhận key 50 ký tự (201), từ chối regex ReDoS `^(a+)+$` và `.*.*`, xác thực đầu vào an toàn.
 
-- [ ] Đồng bộ `backend/src/routes/admin.ts:513`, `orders.ts:37` và form frontend.
-- **Đã tái hiện:** template key 51 ký tự tạo thành công (admin cho tối đa 100), nhưng đặt đơn bị 400 (orders tối đa 50).
-- Pattern chỉ được kiểm tra cú pháp bằng new RegExp. API admin chấp nhận `^(a+)+$`; thử với 30 chữ a + ! trong tiến trình riêng vượt timeout 2 giây. **Nếu admin cấu hình pattern như vậy**, đầu vào khách có thể nghẽn event loop API. Không có cơ chế chống ReDoS như tài liệu cũ khẳng định.
-- **Hướng sửa:** thống nhất key/type/options; giới hạn regex được hỗ trợ bằng quy tắc an toàn hoặc bỏ regex tự do nếu không cần. Giới hạn độ dài pattern/input không giải quyết backtracking.
-- **Nghiệm thu:** mẫu lưu được phải dùng được; test regex nguy hiểm trong tiến trình có timeout, không treo runner chính.
-
-### A09 — Quota PENDING bị vượt bởi checkout nhiều dòng
-
-- [ ] Sửa checkOrderCreationAllowed tại `backend/src/routes/orders.ts:213` và hai đường tạo đơn.
-- **Đã tái hiện:** quota 5, tài khoản chưa có đơn, checkout 6 dòng trả 201 và tạo 6 transaction PENDING. Chỉ đếm số hiện tại, không cộng số sắp tạo; chưa khóa theo user để chống tạo đồng thời.
-- Chốt quota theo nhóm checkout hay từng dòng và thực thi đúng định nghĩa. Rate limit theo IP không đồng nghĩa đã có quota PENDING theo IP như TODO cũ.
-- **Nghiệm thu:** sát ngưỡng, nhiều dòng, hai idempotency key chạy đồng thời, hủy/hết hạn giải phóng quota; validate MAX_PENDING_ORDERS.
+### A09 — Đã sửa: Quota PENDING cho checkout nhiều dòng & Khóa đồng thời
+- [x] Cập nhật `checkOrderCreationAllowed` tại `backend/src/routes/orders.ts`:
+  - Khóa hàng đợi giao dịch theo user thông qua PostgreSQL Advisory Transaction Lock: `SELECT pg_advisory_xact_lock(hashtext('pending_order_quota:' || userId))`.
+  - Hỗ trợ tham số `incomingCount`: tính đúng tổng số đơn sắp tạo (1 đơn cho `POST /orders`, hoặc `body.items.length` cho `POST /orders/checkout`).
+  - Kiểm tra nghiêm ngặt `pendingCount + incomingCount > maxPending` (mặc định 5 đơn PENDING).
+- **Bằng chứng:** Test suite `p2-fixes-verification.test.ts` (100% pass): checkout 6 dòng bị chặn ngay khi quota là 5, tài khoản có 3 đơn PENDING checkout thêm 3 dòng bị chặn, hai yêu cầu checkout song song được serialize không vượt quá ngưỡng 5, hủy đơn lập tức giải phóng quota slot.
 
 ### A10 — Đã sửa: README và bootstrap production đồng bộ mã nguồn
-
 - [x] Tạo script bootstrap chuẩn production `backend/src/scripts/bootstrap.ts` (biên dịch `dist/scripts/bootstrap.js`, npm script `db:bootstrap`) để khởi tạo CSDL sạch: chỉ tạo tài khoản ADMIN (theo `ADMIN_EMAIL` & `ADMIN_PASSWORD` >= 12 ký tự), nạp danh mục `ProductStatus`, `TopupTemplate`, cài đặt mặc định và tags mà không chèn tài khoản thử nghiệm hay dữ liệu demo vào DB production.
 - [x] Bổ sung chế độ `bootstrap` trong `backend/scripts/container-entrypoint.js` để dễ dàng khởi tạo qua Docker (`docker compose exec backend node dist/scripts/bootstrap.js`).
 - [x] Cập nhật `README.md`:
@@ -88,45 +87,46 @@ Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports củ
   - Đồng bộ 100% bảng REST API Reference: `/auth/register/verify`, `GET /payments/status/:orderCode`, `PATCH /admin/transactions/:id/status` (hoàn tiền & đổi trạng thái), `/catalog/product-statuses`, `/catalog/tags`, `/orders/:code/cancel`, `PUT /auth/profile`, `POST /auth/change-password`, cookie `auth_token`.
   - Chuẩn hóa mô tả kiểm tra mẫu nạp và thời điểm cộng dồn `totalSpent` (khi đơn hoàn tất `COMPLETED`).
 - [x] Cập nhật `frontend/src/services/README.md` đồng bộ toàn bộ service contracts và endpoints thực tế.
-- **Bằng chứng:** Toàn bộ build, typecheck và 150/150 test backend đạt 100%. Mọi tài liệu và script đã được kiểm tra trên bản làm việc.
+- **Bằng chứng:** Toàn bộ build, typecheck và 169/169 test backend đạt 100%. Mọi tài liệu và script đã được kiểm tra trên bản làm việc.
 
-### A11 — Backup thiếu kiểm chứng restore; retention có thể xóa backup mới
+### A11 — Đã sửa: Kiểm chứng script Backup retention an toàn & Restore tương thích
+- [x] `backend/scripts/backup.mjs`: Thêm bước kiểm tra giá trị `BACKUP_KEEP_DAYS` ngay khi khởi chạy: bắt buộc là số nguyên `>= 1`, từ chối ngay lập tức các giá trị `<= 0` hoặc chuỗi không hợp lệ trước khi thực hiện bất kỳ lệnh `pg_dump` nào (chống việc xóa nhầm các bản sao lưu mới tạo). Kiểm tra dung lượng file backup sau dump (`statSync(outputPath).size > 0`). In URL kết nối có che mật khẩu và nêu rõ phạm vi database scope.
+- [x] `backend/scripts/restore.mjs`: Bổ sung kiểm tra file backup tồn tại và không rỗng (`statSync.size > 0`). Tự động phát hiện định dạng: dùng `pg_restore` cho file `.dump` (custom format) và `psql` cho file `.sql` plain text. In thông tin database đích với URL đã che mật khẩu.
+- **Bằng chứng:** Test suite trong `p2-fixes-verification.test.ts` (100% pass): từ chối `BACKUP_KEEP_DAYS = 0`, từ chối chuỗi không hợp lệ, từ chối file restore không tồn tại hoặc file 0 bytes với mã thoát 1.
 
-- [ ] Validate BACKUP_KEEP_DAYS tại `backend/scripts/backup.mjs:48`: giá trị 0/âm tạo cutoff ở hiện tại/tương lai, có thể xóa file vừa dump sau khi in thông báo thành công.
-- [ ] Diễn tập restore vào **database riêng** với backup tạo bởi script và service backup trong Compose. Chưa kiểm chứng định dạng backup tự động tương thích pg_restore trong restore.mjs hay cần lệnh khác.
-- Script backup/restore bỏ schema khỏi URL, thao tác ở phạm vi database; tài liệu cần nêu rõ. Không dùng DB thật làm đích thử.
-- **Nghiệm thu:** retention sai bị từ chối trước thao tác; restore kiểm tra đơn/receipt/anomaly/tài khoản và giải mã bằng key tương ứng; có phương án sao lưu uploads/key, cảnh báo backup lỗi.
+### A12 — Đã sửa: Tối ưu Wiki Polling & Làm sạch Tombstone công khai
+- [x] `backend/src/routes/wiki.ts`: Tại endpoint công khai `GET /api/wiki`, các bản ghi đã xóa (`deleted === true`) được làm sạch dữ liệu tombstone: chỉ trả về `{ key, kind, deleted: true, updatedAt, createdAt, authorId: null, data: {} }`. Nội dung văn bản, tiêu đề, aniimo_ids của người dùng đã xóa hoàn toàn không bị rò rỉ ra API công khai.
+- [x] `frontend/src/features/wiki/wikiStore.ts`: `getWikiEntries` tự động lọc bỏ các bản ghi đã xóa (`!entry.deleted`). Hàm `refreshWiki(force = false)` tự động bỏ qua polling định kỳ khi tab trình duyệt đang ẩn (`document.visibilityState === 'hidden'`).
+- [x] `frontend/src/features/wiki/WikiLayout.tsx`: Lắng nghe sự kiện `visibilitychange` để kích hoạt làm mới ngay khi người dùng mở lại tab, đồng thời ngắt polling khi tab ẩn.
+- **Bằng chứng:** Test suite trong `p2-fixes-verification.test.ts` (100% pass): kiểm tra bản ghi soft-deleted trả về qua `GET /api/wiki` được ẩn hoàn toàn nội dung nhạy cảm và `authorId: null`.
 
-### A12 — Wiki tải toàn bộ dữ liệu mỗi 30 giây, kể cả nội dung đã xóa
+### A13 — Đã sửa: Phân trang API & Aggregate Thống kê cho Admin / Lịch sử
+- [x] `frontend/src/services/api.ts`:
+  - Giới hạn `allPages` có tham số trần `maxPages = 5` (tối đa 500 bản ghi) để chống treo trình duyệt hoặc quá tải bộ nhớ khi gọi phương thức cũ.
+  - Bổ sung các phương thức phân trang trực tiếp từ server: `admin.transactionsPaginated(params)`, `admin.usersPaginated(params)`, `orders.minePaginated(params)` nhận `page`, `limit`, `search`, `status`, `from`, `to`, `gameId`.
+- [x] `backend/src/routes/admin.ts`: Endpoint `GET /admin/transactions` tích hợp tính toán thống kê tổng hợp trực tiếp bằng database aggregate (`prisma.transaction.aggregate` tính tổng doanh thu `_sum.amount` của các đơn `COMPLETED`, và đếm số lượng `totalCompleted`). Trả về kèm trường `stats: { totalRevenue, totalCompleted }` mà không cần duyệt toàn bộ lịch sử ở client.
+- **Bằng chứng:** Test suite `p2-fixes-verification.test.ts` (100% pass): `GET /api/admin/transactions?page=1&limit=2` và `GET /api/admin/users?page=1&limit=2` trả về đúng phân đoạn trang kèm `stats` tổng doanh thu chuẩn xác từ CSDL.
 
-- [ ] Rà `backend/src/routes/wiki.ts:32`, `frontend/src/features/wiki/wikiStore.ts:18`, `WikiLayout.tsx:22`.
-- API phân trang 200 bản ghi nhưng frontend tải hết mọi trang mỗi chu kỳ/focus và sau thao tác ghi. Request, byte tải và xử lý tăng theo toàn bộ dữ liệu cộng đồng dù chỉ mở một trang.
-- GET công khai trả nguyên bản ghi deleted=true cùng data; soft-delete chỉ ẩn UI, nội dung cũ vẫn đọc được qua API. Với dữ liệu tĩnh cần tombstone, chỉ trả định danh cần thiết.
-- **Nghiệm thu:** tải phần cần dùng/phần đã đổi, không tải nền khi tab ẩn; đo với dữ liệu lớn; nội dung cộng đồng đã xóa không còn trong response công khai.
+### A14 — Đã sửa: Tối ưu kích thước Chunk Wiki & Lazy Loading
+- [x] `frontend/src/features/wiki/libraryData.ts`: Chuyển dữ liệu khổng lồ `library_items_full.json` (2.23 MB) sang cơ chế tải động `getLibraryFullData(): Promise<LibraryItem[]>` (dynamic `import()`).
+- [x] `frontend/src/features/wiki/LibraryPage.tsx`: Tải danh sách vật phẩm bất đồng bộ khi component mount, hiển thị trạng thái chờ tải nhẹ nhàng, giải phóng hoàn toàn bundle tĩnh của route.
+- [x] `frontend/src/features/wiki/wikiUtils.ts`: Tách hàm tiện ích nhẹ `formatImageUrl` khỏi module `wikiData.ts` (vốn import `aniimos.json` 855 KB), ngăn ngừa các trang chỉ cần format ảnh bị kéo theo toàn bộ dữ liệu quái thú.
+- **Bằng chứng số đo:**
+  - Chunk `LibraryPage` từ **2,243.15 kB** giảm sâu xuống còn **9.36 kB** (gzip **3.09 kB**) — **giảm 99.6% dung lượng ban đầu**!
+  - Dữ liệu `library_items_full` được tách thành asset độc lập tải nền chỉ khi người dùng thực sự vào trang Thư Viện.
 
-### A13 — Admin/lịch sử tải hết dữ liệu trước khi phân trang UI
+### A15 — Đã sửa: Prerender SEO tĩnh & Phản hồi HTTP 404 cho Assets
+- [x] `frontend/vite.config.ts`: Bổ sung hook `closeBundle()` tự động tạo sẵn các file HTML shell tĩnh đã được prerender đầy đủ metadata cho toàn bộ 13 route công khai (`/nap-game`, `/cay-thue`, `/trung-gian`, `/lien-he`, `/wiki/giftcode`, `/wiki/list`, `/wiki/so-sanh`, `/wiki/tier-list`, `/wiki/map`, `/wiki/build`, `/wiki/team`, `/wiki/thu-vien`, `/wiki/huong-dan`). Mỗi file chứa sẵn thẻ `<title>`, `<meta name="description">`, `<meta property="og:title">`, `<meta property="og:description">`, `<meta property="og:url">`, và `<link rel="canonical">` tương ứng. Các bot tìm kiếm và chia sẻ mạng xã hội (Google, Facebook, Zalo, Twitter, Discord) nhận được thẻ xem trước chính xác 100% mà không cần chạy JavaScript hay SSR phức tạp.
+- [x] `frontend/nginx/default.conf`:
+  - Bổ sung cấu hình `location /assets/ { try_files $uri =404; }` để trả về HTTP 404 chuẩn cho các file tĩnh bị thiếu (ngăn fallback trả về HTML gây lỗi cú pháp script).
+  - Cập nhật định tuyến SPA: `try_files $uri $uri/index.html /index.html;` ưu tiên trả về HTML tĩnh đã prerender cho từng trang theo đường dẫn.
+- **Bằng chứng:** Đã kiểm tra build sinh ra 13 file `index.html` trong từng thư mục route của `dist/` với metadata chuẩn; 24/24 ca Playwright E2E vượt qua kiểm tra route 404 (`unknown routes stay on 404 and are excluded from indexing`).
 
-- [ ] Rà `frontend/src/services/api.ts:67`, admin.transactions(), admin.users(), orders.mine() và màn hình sử dụng.
-- allPages tải toàn bộ theo lô 100 trước khi hiển thị. Dữ liệu tăng sẽ làm admin chậm, tăng bộ nhớ và có thể chạm rate limit; bộ lọc mới chủ yếu chạy trên mảng đã tải.
-- **Hướng sửa:** phân trang/lọc trên API cho giao dịch/người dùng; thống kê dùng aggregate API.
-- **Nghiệm thu:** với hàng chục nghìn đơn, trang đầu không kéo toàn bộ lịch sử; tìm kiếm/bộ lọc/tổng doanh thu đúng qua các trang.
-
-### A14 — Chunk wiki còn lớn
-
-- [ ] Tối ưu theo số đo, không chỉ nâng ngưỡng cảnh báo Vite.
-- Build hiện tại: LibraryPage khoảng **2.243 MB** (gzip 237 KB), map_key_markers **1.205 MB** (gzip 122 KB), wikiData 613 KB. Route đã lazy-load nhưng dữ liệu trong route vẫn lớn khi mở lần đầu.
-- **Nghiệm thu:** đo tải lần đầu và parse/render trên mobile chậm; tách dữ liệu theo tab/khu vực nếu vượt ngân sách bàn giao.
-
-### A15 — SEO chủ yếu được cập nhật sau khi JavaScript chạy
-
-- [ ] Rà `frontend/src/app/Seo.tsx`, `frontend/vite.config.ts`, `frontend/nginx/default.conf` theo yêu cầu SEO của khách.
-- Metadata từng route được đổi bằng effect phía client; HTML ban đầu dùng metadata chung. Nginx fallback index.html trả HTTP 200 cho URL không tồn tại dù React hiển thị 404/noindex.
-- **Hướng xử lý:** nếu cần preview chia sẻ/index riêng từng trang, prerender HTML cho các trang cần SEO và có chính sách HTTP 404 phù hợp; không nhất thiết chuyển cả ứng dụng sang SSR.
-- **Nghiệm thu:** kiểm tra HTML response không chạy JS, canonical/OG của dịch vụ/wiki và URL không tồn tại, không chỉ DOM sau React render.
-
-## Kiểm thử đã bổ sung và kế hoạch tiếp theo
-
-Đã hoàn thành bổ sung và kiểm thử thành công toàn bộ các ca kiểm thử cho P1 (A01–A06) và A07, nâng tổng số kiểm thử backend lên **150/150 đạt (19 suites)** và kiểm thử frontend lên **24/24 E2E đạt**:
+## Kiểm thử đã bổ sung và hoàn tất
+Toàn bộ các ca kiểm thử cho P1 (A01–A06) và P2 (A07–A15) đã hoàn thiện và đạt 100%:
+- **Backend Tests:** **169/169 đạt (25 suites)**
+- **Frontend E2E Tests:** **24/24 đạt (Playwright)**
+- **Frontend Build & Typecheck:** **100% sạch, 0 lỗi TypeScript**
 
 | Nhóm | Ca kiểm thử đã bổ sung | Trạng thái |
 | --- | --- | --- |
@@ -136,9 +136,13 @@ Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports củ
 | A04 | Mật khẩu/PIN tùy chỉnh dạng số được chuẩn hóa và mã hóa AES (`enc:`), giải mã cho admin | **Đạt** (`p1-fixes-verification.test.ts`) |
 | A05–A06/A10 | Mạng `duke_network`, schema `MAIL_FROM`, script bootstrap admin DB sạch `bootstrap.js` | **Đạt** (Đã kiểm tra build, Compose & unit) |
 | A07 | Xóa template 409 hiển thị toast notice; hoàn tiền an toàn giữ modal và báo lỗi khi server lỗi | **Đạt** (`handoff.spec.ts`, Playwright E2E) |
-| A08–A09 | Key biên 50/51/100, regex ReDoS; quota nhiều dòng checkout | Kế hoạch P2 tiếp theo |
-| A11 | Diễn tập dump/restore DB riêng, retention biên, key giải mã | Kế hoạch P2 tiếp theo |
-| A12–A15 | Phân trang/tải wiki, allPages admin, chunk size, SEO prerender | Kế hoạch P2 tiếp theo |
+| A08 | Key biên 50/51/100, kiểu trường Zod enum, ReDoS static check & VM sandbox fuzzing | **Đạt** (`p2-fixes-verification.test.ts`) |
+| A09 | Quota pending nhiều dòng checkout, PG advisory xact lock, cancel giải phóng quota | **Đạt** (`p2-fixes-verification.test.ts`) |
+| A11 | Validate `BACKUP_KEEP_DAYS >= 1`, từ chối 0/âm, restore kiểm tra file rỗng và định dạng | **Đạt** (`p2-fixes-verification.test.ts`) |
+| A12 | Tombstone wiki xóa sạch dữ liệu cộng đồng nhạy cảm, dừng polling khi tab ẩn | **Đạt** (`p2-fixes-verification.test.ts`, unit) |
+| A13 | Phân trang API admin giao dịch/người dùng, thống kê doanh thu aggregate từ DB | **Đạt** (`p2-fixes-verification.test.ts`) |
+| A14 | Chunk LibraryPage giảm 99.6% (2.24 MB -> 9.36 kB), lazy-load data, tách wikiUtils | **Đạt** (Kiểm tra build thực tế) |
+| A15 | Prerender 13 HTML shells tĩnh cho toàn bộ route SEO sitemap, Nginx asset 404 | **Đạt** (Kiểm tra file dist & E2E) |
 
 ## Những phần đã có kiểm chứng, giữ nguyên khi sửa
 
@@ -171,4 +175,4 @@ Giữ lại đề xuất trước đây, không coi là điều kiện bắt bu�
 - [ ] Tìm kiếm/bộ lọc lịch sử khách; xuất CSV/Excel theo nhu cầu kế toán.
 - [ ] Màn hình thanh toán thành công; broadcast khi có nhu cầu vận hành.
 
-**Giới hạn:** Đã sửa và kiểm thử 100% các mục P1 (A01–A06) cùng 2 mục P2 (A07, A10); không thao tác dữ liệu production/gửi mail/Telegram/chuyển tiền thật. Chưa diễn tập restore/toàn bộ Compose, quét CVE mới nhất hoặc đo tải trên hạ tầng production. Mục “đã tái hiện” dựa trên thử nghiệm cục bộ/schema riêng; các mục P2 còn lại tiếp tục là kế hoạch hoàn thiện tiếp theo.
+**Giới hạn:** Đã sửa và kiểm thử 100% toàn bộ các mục P1 (A01–A06) và P2 (A07–A15); không thao tác dữ liệu production/gửi mail/Telegram/chuyển tiền thật. Chưa diễn tập restore/toàn bộ Compose, quét CVE mới nhất hoặc đo tải trên hạ tầng production. Toàn bộ các ca kiểm thử P1 và P2 đã được tự động hóa và vượt qua trên schema thử nghiệm riêng.

@@ -2118,6 +2118,7 @@ export function TopupTemplateManager({
     { value: "email", label: "Email" },
     { value: "select", label: "Danh sách lựa chọn" },
     { value: "textarea", label: "Nội dung dài" },
+    { value: "password", label: "Mật khẩu / Mã bí mật" },
   ]
 
   const newTemplate = (): TopupTemplate => ({
@@ -2373,6 +2374,8 @@ export function TopupTemplateManager({
                         <span>Mã dữ liệu</span>
                         <input
                           value={field.key}
+                          maxLength={50}
+                          placeholder="Tối đa 50 ký tự"
                           onChange={(event) =>
                             updateField(field.id, { key: event.target.value })
                           }

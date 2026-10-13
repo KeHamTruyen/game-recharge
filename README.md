@@ -88,16 +88,17 @@ Game Recharge Website/
 │   │   ├── utils/
 │   │   │   ├── crypto.ts              # Mã hóa/giải mã AES-256-GCM & che thông tin nhạy cảm
 │   │   │   ├── money.ts               # Xử lý số tiền an toàn, chống sai số dấu phẩy động
+│   │   │   ├── regex.ts               # Bộ lọc ReDoS đa tầng (Static analysis + VM sandbox)
 │   │   │   ├── telegram.ts            # Module bắn tin nhắn thông báo Telegram Bot
 │   │   │   └── pagination.ts          # Chuẩn hóa phân trang danh sách
 │   │   └── index.ts                   # Điểm khởi chạy Express server & graceful shutdown
 │   ├── scripts/
-│   │   ├── backup.mjs                 # Script sao lưu CSDL tự động (pg_dump)
-│   │   ├── restore.mjs                # Script khôi phục CSDL an toàn (pg_restore)
+│   │   ├── backup.mjs                 # Script sao lưu CSDL tự động (pg_dump, kiểm tra retention an toàn)
+│   │   ├── restore.mjs                # Script khôi phục CSDL an toàn (pg_restore / psql tự động nhận diện)
 │   │   ├── container-entrypoint.js    # Entrypoint Docker chuyển tiếp tín hiệu SIGTERM/SIGINT
 │   │   ├── test.mjs                   # Runner chạy test trên schema CSDL độc lập
 │   │   └── test-container-shutdown.mjs# Integration test kiểm tra dừng container an toàn
-│   ├── tests/                         # Bộ 14 test suites kiểm thử toàn diện backend
+│   ├── tests/                         # Bộ 25 test suites kiểm thử toàn diện backend (169 tests)
 │   ├── Dockerfile                     # Dockerfile tối ưu hóa bảo mật (không chứa npm trong runtime)
 │   └── package.json
 ├── frontend/
@@ -168,11 +169,16 @@ Game Recharge Website/
 ### 4. Vận hành & Giám sát hệ thống
 - **Thông báo đơn mới qua Telegram Bot:**
   - Tự động gửi thông báo chi tiết (Mã đơn, Tên gói, Tựa game, Số tiền, Email khách hàng) đến nhóm quản trị Telegram ngay khi đơn được tạo hoặc thanh toán thành công.
-- **Tự động Sao lưu Cơ sở dữ liệu hàng ngày:**
-  - Script độc lập `backend/scripts/backup.mjs` (và container `backup` trong Docker Compose) tự động dump CSDL bằng `pg_dump` định kỳ và dọn dẹp các bản sao lưu cũ vượt quá 7 ngày.
-  - Script khôi phục nhanh `backend/scripts/restore.mjs` với giao dịch an toàn (`--single-transaction`).
-- **Chống spam đơn PENDING:**
+- **Tự động Sao lưu Cơ sở dữ liệu hàng ngày & Khôi phục Tương thích:**
+  - Script độc lập `backend/scripts/backup.mjs` (và container `backup` trong Docker Compose) tự động dump CSDL bằng `pg_dump` định kỳ và dọn dẹp các bản sao lưu cũ. Bắt buộc kiểm tra an toàn `BACKUP_KEEP_DAYS >= 1` (từ chối ngay nếu `<= 0` hoặc không hợp lệ để chống xóa nhầm bản sao lưu mới tạo), kiểm tra dung lượng file kết xuất sau dump và in URL kết nối che mật khẩu.
+  - Script khôi phục `backend/scripts/restore.mjs`: kiểm tra file backup tồn tại và không rỗng, tự động nhận diện định dạng (`pg_restore` cho `.dump` và `psql` cho `.sql`) với giao dịch an toàn (`--single-transaction`).
+- **Chống spam đơn PENDING & Khóa cạnh tranh giỏ hàng:**
   - Giới hạn số đơn PENDING tối đa mà một tài khoản hoặc một địa chỉ IP có thể tạo (`MAX_PENDING_ORDERS_PER_USER`, `MAX_PENDING_ORDERS_PER_IP`).
+  - Áp dụng khóa giao dịch PostgreSQL Advisory Transaction Lock (`pg_advisory_xact_lock`) theo từng người dùng, tính đúng tổng số món hàng sắp tạo (`incomingCount`) trong giỏ hàng nhiều dòng checkout, ngăn chặn triệt để tình trạng gọi song song vượt trần quota. Hủy đơn lập tức giải phóng hạn ngạch.
+- **Phòng chống ReDoS đa tầng trong Mẫu form nạp (Topup Templates):**
+  - Phân tích tĩnh Regex: cấm lượng từ lồng nhau nguy hiểm dạng `(a+)+`, `(a|a)+`, cấm nhiều wildcard liên tiếp `.*.*`, giới hạn độ dài pattern <= 150 ký tự.
+  - Fuzzing Sandbox `node:vm` với timeout 35ms phát hiện sớm các biểu thức backtracking nguy hiểm khi Admin cấu hình mẫu.
+  - Hàm `safeRegexTest(pattern, input, timeoutMs = 50)` thực thi an toàn trong luồng tạo đơn của khách, bảo vệ máy chủ khỏi nghẽn luồng xử lý.
 - **Công tắc Chế độ Bảo trì (Maintenance Mode):**
   - Bật/tắt chế độ bảo trì trực tiếp từ trang Admin Content Settings.
   - Khi bật, khách hàng truy cập API storefront sẽ nhận mã lỗi 503 kèm thông điệp bảo trì. Tài khoản Admin được phân quyền bypass tự động để tiếp tục làm việc.
@@ -192,13 +198,21 @@ Game Recharge Website/
 - **Xây dựng Đội hình (Team Builder):** Cơ chế chống đăng trùng lặp tổ hợp tướng, bắt buộc đủ 4 Aniimo hợp lệ và áp dụng thời gian chờ (cooldown 20s) giữa các lần chia sẻ.
 - **Thư viện & So sánh tướng:** Hiển thị huy hiệu song hệ (Dual-Element) chuẩn hóa cho các Aniimo đặc biệt, bảng xếp hạng Tier List phân loại theo vai trò.
 - **Kho Giftcode Cộng đồng:** Cung cấp mã quà tặng game kèm tính năng bình chọn (upvote/downvote) theo thời gian thực để lọc mã hết hạn.
+- **Tối ưu hóa dung lượng Chunk & Lazy-loading:** Tách `library_items_full.json` (2.23 MB) sang cơ chế dynamic `import()`, tách module `wikiUtils.ts`. Giúp kích thước trang Thư Viện (`LibraryPage`) giảm **99.6%** từ **2,243 kB** xuống chỉ còn **9.36 kB** (gzip **3.09 kB**).
+- **Tiết kiệm tài nguyên Polling & Bảo vệ dữ liệu xóa:** Tự động ngắt polling nền khi người dùng ẩn tab (`document.visibilityState === 'hidden'`) và làm mới tức thì khi mở lại. Bản ghi soft-delete trên API `GET /api/wiki` được dọn sạch dữ liệu cá nhân (`authorId: null`, `data: {}`), chống rò rỉ nội dung cộng đồng đã gỡ.
 
 ### 6. Bảng điều khiển Quản trị (Admin Panel)
 - **Quản lý Danh mục & Gói nạp:** Tạo, chỉnh sửa, bật/tắt dịch vụ game và gói nạp linh hoạt.
 - **Trình tạo Form nạp game (Topup Templates):**
   - Thiết lập các trường nhập liệu động (UID, Server, Mật khẩu, Ghi chú...).
-  - Kiểm tra an toàn: Tối đa 20 trường, cấm trùng key, kiểm tra tính hợp lệ của biểu thức RegEx và giới hạn độ dài dữ liệu đầu vào.
-- **Quản lý Giao dịch:** Bộ lọc theo mã đơn, email, khoảng ngày, trạng thái thanh toán và trạng thái xử lý; yêu cầu nhập lý do bắt buộc khi Admin đổi trạng thái thủ công.
+  - Kiểm tra an toàn: Tối đa 20 trường, cấm trùng key (tối đa 50 ký tự), bắt buộc danh sách options cho kiểu `select`, kiểm tra tính hợp lệ và chống ReDoS.
+- **Quản lý Giao dịch & Thống kê Tổng hợp CSDL:**
+  - Bộ lọc theo mã đơn, email, khoảng ngày, trạng thái thanh toán và trạng thái xử lý; yêu cầu nhập lý do bắt buộc khi Admin đổi trạng thái thủ công.
+  - Endpoint `GET /api/admin/transactions` tính toán tổng doanh thu và số lượng đơn hoàn tất trực tiếp qua Prisma Aggregates (`stats: { totalRevenue, totalCompleted }`), không cần duyệt toàn bộ lịch sử ở client.
+  - Hỗ trợ phân trang server-side chuẩn hóa (`admin.transactionsPaginated`, `admin.usersPaginated`, `orders.minePaginated`) với trần an toàn `maxPages = 5`.
+- **Giao diện thông báo lỗi Toast & Modal hoàn tiền an toàn:**
+  - Hiển thị Toast thông báo lỗi trực quan cho Admin khi bị server từ chối (ví dụ: mã lỗi 409 khi xóa template đang có gói sử dụng).
+  - Modal hoàn tiền giữ nguyên trạng thái form và báo lỗi tại chỗ khi API thất bại, không đóng modal sớm gây mất ngữ cảnh thao tác.
 - **Upload hình ảnh tối ưu:** Tự động chuyển đổi ảnh tải lên sang định dạng chuẩn WebP, kiểm tra kích thước tối đa và từ chối các file nguy hiểm (như SVG chứa mã script).
 
 ---
@@ -294,7 +308,7 @@ Khi khởi tạo CSDL bằng lệnh seed hoặc bootstrap:
 Dự án sở hữu bộ kiểm thử tự động toàn diện được thiết kế để chạy độc lập trên các schema thử nghiệm riêng biệt, không gây ảnh hưởng đến dữ liệu đang chạy:
 
 ### 1. Kiểm thử Backend (Node Test Runner)
-Chạy toàn bộ 19 test suites với 150 ca kiểm thử tự động:
+Chạy toàn bộ 25 test suites với 169 ca kiểm thử tự động:
 ```powershell
 npm test --prefix backend
 # Hoặc từ thư mục gốc:
@@ -309,17 +323,30 @@ Bộ test kiểm tra nghiêm ngặt:
 - Nghiệp vụ hoàn tiền an toàn, trừ tổng chi tiêu và phân quyền Audit Log (`operational-features.test.ts`, `p1-fixes-verification.test.ts`, `admin.test.ts`).
 - Chuẩn hóa và mã hóa AES trường mật khẩu topup (`p1-fixes-verification.test.ts`).
 - Phân quyền RBAC Wiki, bình chọn Giftcode và chống spam Team Builder (`wiki.test.ts`).
+- Bộ xác minh toàn diện P2 (`p2-fixes-verification.test.ts`):
+  - Chống ReDoS đa tầng (AST Regex check, sandbox VM fuzzing, safe runtime timeout).
+  - PostgreSQL Advisory Lock cho hạn ngạch đơn `PENDING` giỏ hàng nhiều dòng.
+  - Script sao lưu kiểm tra `BACKUP_KEEP_DAYS >= 1` và khôi phục tự động nhận diện định dạng.
+  - Làm sạch dữ liệu Tombstone wiki soft-deleted và tối ưu polling khi tab ẩn.
+  - Phân trang API trực tiếp từ máy chủ và tính toán doanh thu tổng hợp (DB Aggregates).
 
 ### 2. Kiểm tra Kiểu dữ liệu & Build Frontend
 ```powershell
-# Kiểm tra TypeScript Frontend
+# Kiểm tra TypeScript Frontend (0 lỗi)
 npm run typecheck --prefix frontend
 
-# Build thử nghiệm Frontend
+# Build Frontend (Tự động prerender SEO tĩnh cho 13 route công khai)
 npm run build --prefix frontend
 ```
 
-### 3. Kiểm thử Dừng Container An toàn
+### 3. Kiểm thử End-to-End Frontend (Playwright)
+```powershell
+# Chạy toàn bộ 24 ca kiểm thử E2E
+npx playwright test --config frontend/playwright.config.ts
+```
+Bao gồm kiểm tra toast thông báo lỗi Admin, luồng hoàn tiền, giỏ hàng checkout, hủy đơn hàng và xử lý trang 404.
+
+### 4. Kiểm thử Dừng Container An toàn
 ```powershell
 npm run test:container --prefix backend
 ```
@@ -424,13 +451,13 @@ Toàn bộ phản hồi API đều tuân thủ chuẩn cấu trúc:
 | `DELETE` | `/api/admin/product-statuses/:id` | Admin | Xóa trạng thái sản phẩm |
 | `GET/POST` | `/api/admin/topup-templates` | Admin | Lấy danh sách hoặc tạo mới mẫu form nạp (max 20 fields) |
 | `PUT/DELETE` | `/api/admin/topup-templates/:id` | Admin | Cập nhật hoặc xóa mẫu form nạp |
-| `GET` | `/api/admin/transactions` | Admin | Danh sách đơn hàng kèm bộ lọc trạng thái, ngày, tìm kiếm |
+| `GET` | `/api/admin/transactions` | Admin | Danh sách đơn hàng kèm phân trang server-side, bộ lọc trạng thái, ngày, tìm kiếm & thống kê doanh thu aggregate (`stats`) |
 | `GET` | `/api/admin/transactions/:id` | Admin | Chi tiết đơn kèm thông tin nạp game đã giải mã AES |
 | `PATCH` | `/api/admin/transactions/:id/status` | Admin | Cập nhật trạng thái đơn/thanh toán hoặc ghi nhận hoàn tiền (`REFUNDED`) |
 | `GET` | `/api/admin/payment-anomalies` | Admin | Danh sách các giao dịch bất thường chờ đối soát |
 | `PATCH` | `/api/admin/payment-anomalies/:id/resolve` | Admin | Đánh dấu đã giải quyết giao dịch bất thường |
 | `GET` | `/api/admin/audit-logs` | Admin | Xem nhật ký kiểm toán hoạt động hệ thống |
-| `GET/PATCH` | `/api/admin/users[/:id]` | Admin | Quản lý danh sách người dùng và phân quyền |
+| `GET/PATCH` | `/api/admin/users[/:id]` | Admin | Quản lý danh sách người dùng kèm phân trang server-side và phân quyền |
 | `GET/PUT` | `/api/admin/settings/:key` | Admin | Quản lý cài đặt hệ thống & công tắc bảo trì |
 | `POST` | `/api/admin/upload` | Admin | Tải lên hình ảnh (tự động tối ưu WebP) |
 | `GET` | `/api/admin/media` | Admin | Lấy danh sách ảnh đã tải lên |
@@ -438,7 +465,7 @@ Toàn bộ phản hồi API đều tuân thủ chuẩn cấu trúc:
 ### Bách khoa toàn thư Wiki (`/api/wiki`)
 | Phương thức | Endpoint | Yêu cầu quyền | Mô tả |
 |---|---|:---:|---|
-| `GET` | `/api/wiki` | Public | Lấy danh sách nội dung wiki (hỗ trợ cursor phân trang) |
+| `GET` | `/api/wiki` | Public | Lấy danh sách nội dung wiki (phân trang cursor; tự động dọn sạch dữ liệu tombstone đã xóa) |
 | `POST/PUT/DELETE` | `/api/wiki/teams[/:id]` | Customer/Admin | Đăng, chỉnh sửa và xóa đội hình đề cử |
 | `POST` | `/api/wiki/giftcodes` | Customer/Admin | Đóng góp mã giftcode cộng đồng |
 | `PUT/DELETE` | `/api/wiki/giftcodes/:id` | Admin | Duyệt chỉnh sửa hoặc xóa mã giftcode |

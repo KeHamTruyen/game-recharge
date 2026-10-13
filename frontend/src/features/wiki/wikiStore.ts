@@ -12,10 +12,13 @@ let entries: WikiEntry[] = []
 let pending: Promise<void> | null = null
 
 export function getWikiEntries(kind: string) {
-  return entries.filter((entry) => entry.kind === kind)
+  return entries.filter((entry) => entry.kind === kind && !entry.deleted)
 }
 
-export function refreshWiki(): Promise<void> {
+export function refreshWiki(force = false): Promise<void> {
+  if (typeof document !== "undefined" && document.visibilityState === "hidden" && !force) {
+    return Promise.resolve()
+  }
   if (pending) return pending
   pending = (async () => {
     const next: WikiEntry[] = []
@@ -35,6 +38,7 @@ export function refreshWiki(): Promise<void> {
   })
   return pending
 }
+
 
 export async function writeWiki(path: string, method: string, body?: unknown) {
   const response = await client.request<{ success?: boolean; data?: any }>(`/wiki${path}`, {

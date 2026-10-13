@@ -7,8 +7,11 @@ export default function WikiLayout() {
 
   useEffect(() => {
     let active = true
-    const load = () => {
-      void refreshWiki()
+    const load = (force = false) => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden" && !force) {
+        return
+      }
+      void refreshWiki(force)
         .then(() => {
           if (active) {
             setError("")
@@ -18,13 +21,21 @@ export default function WikiLayout() {
           // Graceful fallback to static wiki data
         })
     }
-    load()
-    const timer = window.setInterval(load, 30_000)
-    window.addEventListener("focus", load)
+    load(true)
+    const timer = window.setInterval(() => load(false), 30_000)
+    const onFocus = () => load(true)
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        load(true)
+      }
+    }
+    window.addEventListener("focus", onFocus)
+    document.addEventListener("visibilitychange", onVisibilityChange)
     return () => {
       active = false
       clearInterval(timer)
-      window.removeEventListener("focus", load)
+      window.removeEventListener("focus", onFocus)
+      document.removeEventListener("visibilitychange", onVisibilityChange)
     }
   }, [])
 

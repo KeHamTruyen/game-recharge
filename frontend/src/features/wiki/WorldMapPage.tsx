@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react"
 import mapZones from "@/data/wiki/map_zones.json"
-import { formatImageUrl } from "./wikiData"
+import { formatImageUrl } from "./wikiUtils"
+
 
 interface MapMarker {
   id: string

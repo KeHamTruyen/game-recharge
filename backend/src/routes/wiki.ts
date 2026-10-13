@@ -37,7 +37,22 @@ router.get('/', async (req, res, next) => {
       orderBy: { key: 'asc' }, take: 200,
       ...(after ? { where: { key: { gt: after } } } : {}),
     });
-    res.json({ success: true, data: { entries, next: entries.length === 200 ? entries[199].key : null } });
+    // Sanitize tombstones: soft-deleted community entries must never leak private data or content
+    const sanitizedEntries = entries.map((entry) => {
+      if (entry.deleted) {
+        return {
+          key: entry.key,
+          kind: entry.kind,
+          authorId: null,
+          deleted: true,
+          updatedAt: entry.updatedAt,
+          createdAt: entry.createdAt,
+          data: {},
+        };
+      }
+      return entry;
+    });
+    res.json({ success: true, data: { entries: sanitizedEntries, next: entries.length === 200 ? entries[199].key : null } });
   } catch (error) { next(error); }
 });
 

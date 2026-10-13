@@ -63,16 +63,18 @@ export type PaymentDetails = {
 
 const client = new HttpClient(import.meta.env.VITE_API_URL || "/api")
 
-// Existing screens paginate locally, so fetch every API page before showing totals.
-async function allPages<T>(path: string): Promise<T[]> {
+// Bounded pagination: cap at maxPages (default 5, max 500 items) to prevent blocking
+// network threads or exhausting memory on large databases when legacy callers omit pagination params.
+async function allPages<T>(path: string, maxPages = 5): Promise<T[]> {
   const items: T[] = []
-  for (let page = 1; ; page += 1) {
+  for (let page = 1; page <= maxPages; page += 1) {
     const result = await client.request<ApiEnvelope<{ items: T[]; hasNext: boolean }>>(
       `${path}${path.includes("?") ? "&" : "?"}limit=100&page=${page}`,
     )
     items.push(...result.data.items)
     if (!result.data.hasNext) return items
   }
+  return items
 }
 
 const roleMap = { CUSTOMER: "customer", ADMIN: "admin" } as const
@@ -294,6 +296,25 @@ export const api = {
     async mine() {
       return (await allPages<ApiTransaction>("/orders/mine")).map(mapTransaction)
     },
+    async minePaginated(params?: { page?: number; limit?: number; status?: string }) {
+      const query = new URLSearchParams()
+      if (params?.page) query.set("page", String(params.page))
+      if (params?.limit) query.set("limit", String(params.limit))
+      if (params?.status) query.set("status", params.status)
+      const result = await client.request<ApiEnvelope<{
+        items: ApiTransaction[]
+        total: number
+        page: number
+        limit: number
+        totalPages: number
+        hasNext: boolean
+        hasPrev: boolean
+      }>>(`/orders/mine?${query.toString()}`)
+      return {
+        ...result.data,
+        items: result.data.items.map(mapTransaction),
+      }
+    },
     async cancel(code: string) {
       const result = await client.request<ApiEnvelope<ApiTransaction>>(`/orders/${encodeURIComponent(code)}/cancel`, {
         method: "POST",
@@ -453,13 +474,82 @@ export const api = {
         email: item.email,
         name: item.name,
         role: roleMap[item.role],
-        status: item.status === "ACTIVE" ? "active" as const : "blocked" as const,
+        status: item.status === "ACTIVE" ? ("active" as const) : ("blocked" as const),
         joined: new Date(item.createdAt).toLocaleDateString("vi-VN"),
         totalSpent: Number(item.totalSpent),
       }))
     },
+    async usersPaginated(params?: { page?: number; limit?: number; search?: string; role?: string; status?: string }) {
+      const query = new URLSearchParams()
+      if (params?.page) query.set("page", String(params.page))
+      if (params?.limit) query.set("limit", String(params.limit))
+      if (params?.search) query.set("search", params.search)
+      if (params?.role) query.set("role", params.role)
+      if (params?.status) query.set("status", params.status)
+      const result = await client.request<ApiEnvelope<{
+        items: Array<{
+          id: string
+          email: string
+          name: string
+          role: "CUSTOMER" | "ADMIN"
+          status: "ACTIVE" | "BLOCKED"
+          totalSpent: string | number
+          createdAt: string
+        }>
+        total: number
+        page: number
+        limit: number
+        totalPages: number
+        hasNext: boolean
+        hasPrev: boolean
+      }>>(`/admin/users?${query.toString()}`)
+      return {
+        ...result.data,
+        items: result.data.items.map((item) => ({
+          id: item.id,
+          email: item.email,
+          name: item.name,
+          role: roleMap[item.role],
+          status: item.status === "ACTIVE" ? ("active" as const) : ("blocked" as const),
+          joined: new Date(item.createdAt).toLocaleDateString("vi-VN"),
+          totalSpent: Number(item.totalSpent),
+        })),
+      }
+    },
     async transactions() {
       return (await allPages<ApiTransaction>("/admin/transactions")).map(mapTransaction)
+    },
+    async transactionsPaginated(params?: {
+      page?: number
+      limit?: number
+      status?: string
+      search?: string
+      from?: string
+      to?: string
+      gameId?: string
+    }) {
+      const query = new URLSearchParams()
+      if (params?.page) query.set("page", String(params.page))
+      if (params?.limit) query.set("limit", String(params.limit))
+      if (params?.status) query.set("status", params.status)
+      if (params?.search) query.set("search", params.search)
+      if (params?.from) query.set("from", params.from)
+      if (params?.to) query.set("to", params.to)
+      if (params?.gameId) query.set("gameId", params.gameId)
+      const result = await client.request<ApiEnvelope<{
+        items: ApiTransaction[]
+        total: number
+        page: number
+        limit: number
+        totalPages: number
+        hasNext: boolean
+        hasPrev: boolean
+        stats?: { totalRevenue?: number; totalCompleted?: number }
+      }>>(`/admin/transactions?${query.toString()}`)
+      return {
+        ...result.data,
+        items: result.data.items.map(mapTransaction),
+      }
     },
     async getTransaction(id: string | number) {
       const result = await client.request<ApiEnvelope<ApiTransaction>>(`/admin/transactions/${encodeURIComponent(String(id))}`)

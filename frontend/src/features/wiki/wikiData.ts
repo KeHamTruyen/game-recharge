@@ -258,17 +258,8 @@ export function getMonsterScore(id: number): number {
   return tierStatsMap[String(id)]?.score ?? 0
 }
 
-export function formatImageUrl(url: string | undefined): string {
-  if (!url) return ""
+export { formatImageUrl } from "./wikiUtils"
 
-  if (url.startsWith("http://") || url.startsWith("https://")) return url
-
-  if (url.startsWith("/wiki/") || url.startsWith("wiki/")) {
-    return url.startsWith("/") ? url : "/" + url
-  }
-
-  return "https://koiseki.com/" + url.replace(/^\//, "")
-}
 
 export const GAME_ELEMENT_ICONS: Record<string, string> = {
   "elem-ice": "/wiki/icons/element-ice.png",
