@@ -549,6 +549,22 @@ export const api = {
       }>(`/admin/audit-logs?${query.toString()}`)
       return result.data
     },
+    async cleanupAuditLogs(params?: { days?: number; clearReadLogs?: boolean }) {
+      const query = new URLSearchParams()
+      if (params?.days) query.set("days", String(params.days))
+      if (params?.clearReadLogs) query.set("clearReadLogs", "true")
+      const result = await client.request<{
+        success: true
+        data: {
+          deletedCount: number
+          retentionDays: number
+          purgedReadLogs: boolean
+        }
+      }>(`/admin/audit-logs/cleanup?${query.toString()}`, {
+        method: "DELETE",
+      })
+      return result.data
+    },
     async paymentAnomalies(params?: {
       page?: number
       limit?: number

@@ -1205,6 +1205,41 @@ router.get(
   }
 );
 
+// DELETE /admin/audit-logs/cleanup - Prune expired or legacy read audit logs
+router.delete(
+  '/audit-logs/cleanup',
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const days = Math.max(7, Math.min(365, Number(req.query.days) || 30));
+      const clearReadLogs = req.query.clearReadLogs === 'true' || req.query.clearReadLogs === '1';
+      const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+      const conditions: Prisma.AuditLogWhereInput[] = [
+        { createdAt: { lt: cutoff } },
+      ];
+
+      if (clearReadLogs) {
+        conditions.push({ method: 'GET' });
+      }
+
+      const { count } = await prisma.auditLog.deleteMany({
+        where: { OR: conditions },
+      });
+
+      res.json({
+        success: true,
+        data: {
+          deletedCount: count,
+          retentionDays: days,
+          purgedReadLogs: clearReadLogs,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 // ══════════════════════════════════════════════════════════════════════════════
 // PAYMENT ANOMALIES (RECONCILIATION)
 // ══════════════════════════════════════════════════════════════════════════════

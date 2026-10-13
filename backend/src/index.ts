@@ -223,12 +223,41 @@ async function startServer(): Promise<void> {
     }, 5 * 60 * 1000);
     staleOrderCheck.unref();
 
+    // Periodic audit log cleanup (60 days retention, runs every 24h)
+    const auditLogRetentionDays = 60;
+    const pruneAuditLogs = async (): Promise<void> => {
+      try {
+        const cutoff = new Date(Date.now() - auditLogRetentionDays * 24 * 60 * 60 * 1000);
+        const { count } = await prisma.auditLog.deleteMany({
+          where: { createdAt: { lt: cutoff } },
+        });
+        if (count > 0) {
+          console.info(JSON.stringify({
+            event: 'audit_logs_pruned',
+            count,
+            retentionDays: auditLogRetentionDays,
+          }));
+        }
+      } catch (err: unknown) {
+        console.error(JSON.stringify({
+          event: 'audit_logs_prune_failure',
+          error: err instanceof Error ? err.message : 'unknown_error',
+        }));
+      }
+    };
+    void pruneAuditLogs();
+    const auditLogCleanupTimer = setInterval(() => {
+      void pruneAuditLogs();
+    }, 24 * 60 * 60 * 1000);
+    auditLogCleanupTimer.unref();
+
     // ─── Graceful Shutdown ─────────────────────────────────────────────────
     const shutdown = async (signal: string): Promise<void> => {
       console.log(`\n⚠️  Received ${signal}. Shutting down gracefully...`);
 
       server.close(async () => {
         clearInterval(staleOrderCheck);
+        clearInterval(auditLogCleanupTimer);
         console.log('🔌 HTTP server closed');
         await prisma.$disconnect();
         console.log('🔌 Database disconnected');

@@ -39,7 +39,9 @@ function sanitizeBody(body: unknown): Record<string, unknown> | undefined {
 }
 
 export function auditAdminRequest(req: Request, res: Response, next: NextFunction): void {
-  if (req.method === 'GET' && req.path.includes('/audit-logs')) {
+  // Only audit mutating admin actions (POST, PUT, PATCH, DELETE).
+  // Read-only GET, HEAD, OPTIONS requests are excluded to avoid polluting the database with UI browsing logs.
+  if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
     next();
     return;
   }

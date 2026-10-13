@@ -3734,6 +3734,22 @@ export function AuditLogManager() {
   const [actionFilter, setActionFilter] = useState("all")
   const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null)
 
+  const [cleaning, setCleaning] = useState(false)
+
+  const handleCleanup = async () => {
+    if (!window.confirm("Bạn có chắc chắn muốn dọn dẹp các log xem dữ liệu cũ và log quá 30 ngày?")) return
+    setCleaning(true)
+    try {
+      const res = await api.admin.cleanupAuditLogs({ days: 30, clearReadLogs: true })
+      alert(`Đã dọn dẹp thành công ${res.deletedCount} bản ghi log cũ/rác.`)
+      await fetchLogs()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Dọn dẹp log thất bại.")
+    } finally {
+      setCleaning(false)
+    }
+  }
+
   const fetchLogs = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -3774,6 +3790,15 @@ export function AuditLogManager() {
             title="Làm mới dữ liệu"
           >
             Làm mới
+          </button>
+          <button
+            className="secondary-button"
+            style={{ padding: "6px 12px", fontSize: "13px", borderColor: "rgba(239, 68, 68, 0.4)", color: "#f87171" }}
+            onClick={() => void handleCleanup()}
+            disabled={cleaning}
+            title="Dọn dẹp các log rác (GET) và log quá 30 ngày"
+          >
+            {cleaning ? "Đang dọn..." : "Dọn dẹp log cũ"}
           </button>
         </div>
       </div>
