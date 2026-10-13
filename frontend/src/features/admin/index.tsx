@@ -34,9 +34,14 @@ export function AdminHeader({
     <header className="admin-header">
       <div className="admin-header-inner">
         <div className="brand">
-          <span className="brand-mark">
-            <Icon name="shield" size={19} />
-          </span>
+          <img
+            src="/duke1305.jpg"
+            alt="DUKE1305 Logo"
+            className="brand-avatar-img"
+            width={38}
+            height={38}
+            loading="eager"
+          />
           <span>
             DUKE<span>1305 ADMIN</span>
           </span>
@@ -5680,9 +5685,14 @@ export function AdminLogin({
   return (
     <main className="admin-login-page">
       <div className="admin-login-brand">
-        <span className="brand-mark">
-          <Icon name="shield" size={20} />
-        </span>
+        <img
+          src="/duke1305.jpg"
+          alt="DUKE1305 Logo"
+          className="brand-avatar-img"
+          width={42}
+          height={42}
+          loading="eager"
+        />
         <span>
           DUKE<span>1305 ADMIN</span>
         </span>

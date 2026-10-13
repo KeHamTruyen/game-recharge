@@ -86,10 +86,15 @@ export function PublicLayout() {
     <div className="app-shell">
       <header className="site-header">
         <div className="header-inner">
-          <NavLink className="brand" to="/nap-game">
-            <span className="brand-mark">
-              <Icon name="spark" size={19} />
-            </span>
+          <NavLink className="brand" to="/nap-game" aria-label="DUKE1305 - Trang chủ nạp game">
+            <img
+              src="/duke1305.jpg"
+              alt="DUKE1305 Logo"
+              className="brand-avatar-img"
+              width={38}
+              height={38}
+              loading="eager"
+            />
             <span>
               DUKE<span>1305</span>
             </span>
