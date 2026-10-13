@@ -738,7 +738,7 @@ router.get(
 
       const maskedList = transactions.map((t) => ({
         ...t,
-        topupInfo: maskTopupInfo(t.topupInfo, false, t.topupFields),
+        topupInfo: maskTopupInfo(t.topupInfo, true, t.topupFields),
       }));
 
       res.json({
@@ -767,13 +767,11 @@ router.get(
       });
       if (!transaction) throw new NotFoundError('Transaction');
 
-      const canViewPassword = transaction.status === 'PENDING' || transaction.status === 'PROCESSING';
-
       res.json({
         success: true,
         data: {
           ...transaction,
-          topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword, transaction.topupFields),
+          topupInfo: maskTopupInfo(transaction.topupInfo, true, transaction.topupFields),
         },
       });
     } catch (err) {

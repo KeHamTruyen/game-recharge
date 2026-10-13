@@ -451,8 +451,8 @@ router.get(
         throw new AppError('You do not have permission to view this order', 403);
       }
 
-      // Passwords are only decrypted for staff/admin during fulfillment (PENDING or PROCESSING)
-      const canViewPassword = isStaffOrAdmin && (transaction.status === 'PENDING' || transaction.status === 'PROCESSING');
+      // Passwords are decrypted for staff/admin, masked for customers
+      const canViewPassword = isStaffOrAdmin;
 
       res.json({
         success: true,
