@@ -81,6 +81,32 @@ export function decryptSensitive(ciphertext: string): string {
   return '[Không thể giải mã: Khóa mã hóa đã thay đổi]';
 }
 
+export const KNOWN_PUBLIC_TOPUP_KEYS = new Set([
+  'uid',
+  'server',
+  'character',
+  'charactername',
+  'riotid',
+  'tagline',
+  'zoneid',
+  'playerid',
+  'roleid',
+  'region',
+  'note',
+  'email',
+  'contactemail',
+  'phone',
+  'ign',
+  'ingamename',
+  'account',
+  'username',
+]);
+
+export function isKnownPublicField(key: string): boolean {
+  const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return KNOWN_PUBLIC_TOPUP_KEYS.has(normalized);
+}
+
 /**
  * Check if a topup field key is considered sensitive (e.g. password, secret).
  * Also inspects topup template fields if provided.
@@ -103,7 +129,10 @@ export function isSensitiveFieldKey(
     normalized.includes('secret') ||
     normalized.includes('pin') ||
     normalized.includes('matkhau') ||
-    normalized.includes('mk')
+    normalized.includes('mk') ||
+    normalized.includes('credential') ||
+    normalized.includes('token') ||
+    normalized.includes('auth')
   );
 }
 
@@ -130,10 +159,28 @@ export function sanitizeTopupInfoForStorage(
   return result;
 }
 
-// Legacy data has no trustworthy historical field types; unknown fields are private.
-export function isPrivateTopupField(key: string, fields: unknown): boolean {
-  return !Array.isArray(fields) || !fields.some((field) => field?.key === key) ||
-    isSensitiveFieldKey(key, fields);
+/**
+ * Check if a topup field should be treated as private/confidential.
+ * Known public game identifiers (like UID, Server, Riot ID) are NEVER private.
+ * Passwords, tokens, credentials, and unrecognized orphan fields without template are private.
+ */
+export function isPrivateTopupField(key: string, fields?: unknown): boolean {
+  if (isSensitiveFieldKey(key, Array.isArray(fields) ? (fields as Array<Record<string, unknown>>) : undefined)) {
+    return true;
+  }
+
+  if (isKnownPublicField(key)) {
+    return false;
+  }
+
+  if (Array.isArray(fields) && fields.length > 0) {
+    const field = fields.find((f) => String(f?.key || f?.id || f?.name) === key);
+    if (field) {
+      return String(field.type).toLowerCase() === 'password';
+    }
+  }
+
+  return true;
 }
 
 /**

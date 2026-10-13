@@ -840,11 +840,11 @@ h1, h2, h3, p { margin-top: 0; }
 .order-info-summary small { color: #626e82; font-size: 7px; text-transform: uppercase; }
 .order-info-summary strong { font-size: 8px; }
 .submitted-info-list { margin-top: 15px; border: 1px solid #222c3e; border-radius: 10px; overflow: hidden; }
-.submitted-info-list > div { min-height: 51px; padding: 9px 12px; border-top: 1px solid #20293a; display: grid; grid-template-columns: 1fr 1.2fr 65px; align-items: center; gap: 10px; background: #090e17; }
+.submitted-info-list > div { min-height: 51px; padding: 9px 12px; border-top: 1px solid #20293a; display: grid; grid-template-columns: 1fr 1.2fr auto; align-items: center; gap: 10px; background: #090e17; }
 .submitted-info-list > div:first-child { border-top: 0; }
 .submitted-info-list span { color: #6d798d; font-size: 8px; }
 .submitted-info-list strong { font-size: 9px; }
-.submitted-info-list button { height: 27px; border: 1px solid #293449; border-radius: 7px; color: #3bdaf7; background: #111927; font-size: 7px; cursor: pointer; }
+.submitted-info-list button { height: 27px; padding: 0 10px; border: 1px solid #293449; border-radius: 7px; color: #3bdaf7; background: #111927; font-size: 7px; cursor: pointer; }
 .order-info-warning { margin-top: 14px; padding: 12px; border-radius: 9px; display: flex; align-items: center; gap: 9px; color: #46dca8; background: rgba(48, 216, 155, .06); }
 .order-info-warning span { color: #718276; font-size: 7px; line-height: 1.5; }
 .order-no-info { min-height: 115px; margin-top: 15px; border: 1px dashed #293449; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; color: #667287; font-size: 8px; }

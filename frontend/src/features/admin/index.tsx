@@ -3124,6 +3124,8 @@ export function AdminTransactions({
   const [refundAmount, setRefundAmount] = useState("")
   const [refundTxId, setRefundTxId] = useState("")
   const [refundReason, setRefundReason] = useState("")
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  const [showSensitive, setShowSensitive] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     if (!selected?.id) return
@@ -3353,6 +3355,12 @@ export function AdminTransactions({
                       playerid: "Player ID",
                       roleid: "Role ID",
                       note: "Ghi chú",
+                      account: "Tài khoản đăng nhập",
+                      password: "Mật khẩu",
+                      pass: "Mật khẩu",
+                      matkhau: "Mật khẩu",
+                      ign: "Tên trong game",
+                      phone: "Số điện thoại",
                     }
                     const normalizedKey = key.toLowerCase().replace(/[^a-z0-9]/g, "")
                     const standardLabel = fallbackDictionary[normalizedKey]
@@ -3361,6 +3369,13 @@ export function AdminTransactions({
                       (rawLabel && rawLabel !== value && rawLabel.toLowerCase() !== key.toLowerCase()
                         ? rawLabel
                         : key)
+
+                    const isSensitive =
+                      normalizedKey.includes("pass") ||
+                      normalizedKey.includes("matkhau") ||
+                      normalizedKey.includes("pwd") ||
+                      normalizedKey.includes("secret") ||
+                      normalizedKey.includes("pin")
 
                     let displayValue = String(value ?? "")
                     if (normalizedKey === "server") {
@@ -3384,16 +3399,47 @@ export function AdminTransactions({
                       displayValue = regionMap[displayValue.toLowerCase()] || displayValue
                     }
 
+                    const isMaskedValue = displayValue === "••••••••"
+
                     return (
                       <div key={key}>
                         <span>{displayLabel}</span>
-                        <strong>{displayValue}</strong>
-                        <button
-                          type="button"
-                          onClick={() => navigator.clipboard?.writeText(String(value))}
-                        >
-                          Sao chép
-                        </button>
+                        <strong>
+                          {isSensitive && !showSensitive[key] && !isMaskedValue
+                            ? "••••••••"
+                            : displayValue}
+                          {isMaskedValue && (
+                            <small style={{ display: "block", fontSize: "11px", color: "#94a3b8", fontWeight: 400 }}>
+                              (Bảo mật sau khi hoàn tất)
+                            </small>
+                          )}
+                        </strong>
+                        <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
+                          {isSensitive && !isMaskedValue && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowSensitive((prev) => ({
+                                  ...prev,
+                                  [key]: !prev[key],
+                                }))
+                              }
+                              title={showSensitive[key] ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                            >
+                              {showSensitive[key] ? "Ẩn" : "Hiện"}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard?.writeText(String(value))
+                              setCopiedKey(key)
+                              setTimeout(() => setCopiedKey(null), 1500)
+                            }}
+                          >
+                            {copiedKey === key ? "Đã chép!" : "Sao chép"}
+                          </button>
+                        </div>
                       </div>
                     )
                   })}
