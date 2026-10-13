@@ -10,10 +10,11 @@
 - A12: Giữ tombstone khi hợp nhất giftcode/team/guide mặc định; vẫn ẩn nội dung đã xóa và review đã xóa. Test frontend cả 3 loại dữ liệu mặc định.
 - A13: Bỏ trần 500 để không mất bản ghi; test danh mục, lịch sử, admin giao dịch/người dùng có 501 bản ghi. **Chưa chuyển màn hình sang tải từng trang từ server**; dữ liệu lớn vẫn tốn thời gian/bộ nhớ.
 - A14: Bắt lỗi tải thư viện, hiển thị lỗi và nút tải lại trang; E2E chặn request rồi xác nhận tải lại thành công.
+- A16: Tổng hợp trạng thái nhóm tại `GET /api/payments/status/:orderCode`: chỉ báo `PAID` khi tất cả các dòng trong nhóm đã thanh toán (chống báo thành công giả khi nhóm mới trả 1 phần); đơn đã hủy nhận tiền muộn giữ nguyên `status=FAILED` kèm `paymentStatus=PAID` (không báo thành `PROCESSING`), bảo toàn chứng từ cho CSKH đối soát.
 
 Bằng chứng bổ sung: `backend/tests/review-regressions.test.ts`, `frontend/tests/handoff.spec.ts`. Kết quả chạy được ghi trong bảng bên dưới.
 
-Mã A01–A15 dưới đây thuộc audit **13/10**, khác A01–A04 của audit **11/10** (OTP, receipt webhook, trạng thái cuối, snapshot trường nhạy cảm). Các bản sửa cũ đó vẫn còn; không coi việc dùng lại số thứ tự là lỗi cũ tái phát.
+Mã A01–A16 dưới đây thuộc audit **13/10**, khác A01–A04 của audit **11/10** (OTP, receipt webhook, trạng thái cuối, snapshot trường nhạy cảm). Các bản sửa cũ đó vẫn còn; không coi việc dùng lại số thứ tự là lỗi cũ tái phát.
 
 ## Phạm vi và kết quả kiểm tra
 
@@ -21,7 +22,7 @@ Mã A01–A15 dưới đây thuộc audit **13/10**, khác A01–A04 của audit
 
 | Kiểm tra trên phiên bản hiện tại | Kết quả |
 | --- | --- |
-| `npm test --prefix backend` | **174/174 đạt**, 26 suites; schema thử nghiệm riêng, đã dọn sau khi chạy |
+| `npm test --prefix backend` | **176/176 đạt**, 26 suites; schema thử nghiệm riêng, đã dọn sau khi chạy |
 | `npm run typecheck --prefix frontend` & backend `npm run build` | **Đạt 100%**, 0 lỗi typecheck; dist biên dịch đầy đủ |
 | Bộ E2E Playwright đầy đủ (`frontend/tests`) | **27/27 đạt 100%**; bao gồm handoff spec (A07) và luồng hủy đơn (A01) |
 | Kiểm thử P1 & Concurrency | **100% đạt**: Khóa nguyên tử hủy đơn, hoàn tiền, resume payment, mã hóa số |
