@@ -40,7 +40,7 @@ export function AccountRoute() {
       onCancelOrder={async (code: string) => {
         try {
           await api.orders.cancel(code)
-          store.setNotice(`Đã hủy đơn hàng #${code} thành công.`)
+          store.setNotice(`Đã hủy đơn hàng #${code} và các đơn cùng mã thanh toán.`)
           if (store.refreshTransactions) await store.refreshTransactions()
         } catch (error) {
           store.setNotice(error instanceof Error ? error.message : "Không thể hủy đơn hàng.")

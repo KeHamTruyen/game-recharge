@@ -785,7 +785,7 @@ const updateTransactionStatusSchema = z.object({
   status: z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'REFUNDED']).optional(),
   paymentStatus: z.enum(['UNPAID', 'PENDING', 'PAID', 'EXPIRED', 'FAILED', 'REFUNDED']).optional(),
   reason: z.string().max(500).optional().default('Điều chỉnh thủ công bởi quản trị viên'),
-  refundAmount: z.coerce.number().positive().max(100_000_000).optional(),
+  refundAmount: z.coerce.number().int({ message: 'Số tiền hoàn phải là số nguyên VND' }).positive().max(100_000_000).optional(),
   refundTxId: z.string().max(100).optional(),
   refundReason: z.string().max(500).optional(),
 }).refine((data) => data.status !== undefined || data.paymentStatus !== undefined, {
@@ -811,12 +811,45 @@ router.patch(
             userId: true,
             amount: true,
             quantity: true,
+            refundAmount: true,
+            refundTxId: true,
+            refundReason: true,
           },
         });
         if (!previous) throw new NotFoundError('Transaction');
 
-        const newStatus = body.status ?? previous.status;
-        const newPaymentStatus = body.paymentStatus ?? previous.paymentStatus;
+        let newStatus = body.status ?? previous.status;
+        let newPaymentStatus = body.paymentStatus ?? previous.paymentStatus;
+        const isRefunding = newStatus === 'REFUNDED' || newPaymentStatus === 'REFUNDED';
+
+        if (isRefunding) {
+          if (previous.status === 'REFUNDED' && previous.paymentStatus === 'REFUNDED') {
+            if (!body.refundAmount && body.status === 'REFUNDED') {
+              // Idempotent repeat status update with no new refund details
+            } else {
+              throw new AppError('Đơn hàng này đã được ghi nhận hoàn tiền trước đó', 400);
+            }
+          } else {
+            if (previous.paymentStatus !== 'PAID' && previous.status !== 'COMPLETED') {
+              throw new AppError('Chỉ có thể hoàn tiền cho đơn hàng đã thanh toán thành công', 400);
+            }
+            const refundAmtNum = body.refundAmount ?? Number(previous.amount);
+            if (!Number.isInteger(refundAmtNum) || refundAmtNum <= 0) {
+              throw new AppError('Số tiền hoàn phải là số nguyên dương VND', 400);
+            }
+            if (refundAmtNum > Number(previous.amount)) {
+              throw new AppError('Số tiền hoàn không được vượt quá số tiền của đơn hàng', 400);
+            }
+            if (body.refundReason !== undefined && !body.refundReason.trim()) {
+              throw new AppError('Vui lòng nhập lý do hoàn tiền cụ thể', 400);
+            }
+            const finalRefundReason = (body.refundReason?.trim() || body.reason || 'Hoàn tiền bởi quản trị viên').trim();
+          }
+
+          newStatus = 'REFUNDED';
+          newPaymentStatus = 'REFUNDED';
+        }
+
         const completedBefore = previous.status === 'COMPLETED';
         const completedAfter = newStatus === 'COMPLETED';
 
@@ -838,12 +871,13 @@ router.patch(
           updateData.paidAt = new Date();
         }
 
-        if (newStatus === 'REFUNDED' || newPaymentStatus === 'REFUNDED') {
+        if (isRefunding) {
           const refundAmt = body.refundAmount ? new Prisma.Decimal(body.refundAmount) : previous.amount;
+          const finalRefundReason = (body.refundReason || (body.reason !== 'Điều chỉnh thủ công bởi quản trị viên' ? body.reason : '') || '').trim();
           updateData.refundAmount = refundAmt;
-          updateData.refundTxId = body.refundTxId || null;
-          updateData.refundReason = body.refundReason || body.reason;
-          updateData.refundedById = req.user?.email || req.user?.userId || 'admin';
+          updateData.refundTxId = body.refundTxId?.trim() || null;
+          updateData.refundReason = finalRefundReason;
+          updateData.refundedById = req.user?.userId || req.user?.email || 'admin';
           updateData.refundedAt = new Date();
         }
 

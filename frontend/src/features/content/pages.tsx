@@ -466,7 +466,7 @@ export function TransactionHistory({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation()
-                          if (window.confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${transaction.code}?`)) {
+                          if (window.confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${transaction.code}? Các đơn có cùng mã thanh toán cũng sẽ được hủy.`)) {
                             void onCancelOrder(transaction.code)
                           }
                         }}
@@ -525,7 +525,7 @@ export function TransactionHistory({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
-                        if (window.confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${transaction.code}?`)) {
+                        if (window.confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${transaction.code}? Các đơn có cùng mã thanh toán cũng sẽ được hủy.`)) {
                           void onCancelOrder(transaction.code)
                         }
                       }}
@@ -613,7 +613,7 @@ export function ResumePaymentModal({
         const res = await api.orders.getPayment(code)
         if (mounted) {
           setData(res)
-          if (res.paymentStatus === "PAID" || res.status === "COMPLETED" || res.status === "PROCESSING") {
+          if (res.paymentStatus === "PAID" || res.status === "COMPLETED") {
             setPaid(true)
           }
         }

@@ -40,7 +40,7 @@ const envSchema = z.object({
   SMTP_SECURE: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
-  MAIL_FROM: z.string().email().optional(),
+  MAIL_FROM: z.string().refine((val) => !val || /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(val) || /^"?([^"<]*)"?\s*<[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+>$/.test(val), { message: 'Invalid email address or "Name" <email> format' }).optional(),
 
   // Telegram Notifications (Optional)
   TELEGRAM_BOT_TOKEN: z.string().optional(),

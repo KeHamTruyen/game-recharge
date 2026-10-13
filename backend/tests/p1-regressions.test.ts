@@ -136,6 +136,12 @@ describe('P1 security and payment regressions', () => {
   it('late webhooks preserve terminal status and never double-count spending', async () => {
     for (const [index, status] of (['COMPLETED', 'FAILED', 'REFUNDED'] as const).entries()) {
       const order = await orders();
+      if (status === 'REFUNDED') {
+        await prisma.transaction.update({
+          where: { id: order.rows[0].id },
+          data: { paymentStatus: 'PAID' },
+        });
+      }
       const endpoint = `/api/admin/transactions/${order.rows[0].id}/status`;
       assert.equal((await admin.patch(endpoint, { status })).status, 200);
       assert.equal((await webhook(order.code, 90100 + index)).status, 200);

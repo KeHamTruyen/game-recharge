@@ -146,12 +146,13 @@ export function sanitizeTopupInfoForStorage(
 ): Record<string, string | number | boolean> {
   const result: Record<string, string | number | boolean> = {};
   for (const [key, value] of Object.entries(topupInfo)) {
-    if (
-      isSensitiveFieldKey(key, templateFields) &&
-      typeof value === 'string' &&
-      value.length > 0
-    ) {
-      result[key] = encryptSensitive(value); // Preserves exact value without trimming
+    if (isSensitiveFieldKey(key, templateFields)) {
+      if (value !== null && value !== undefined && value !== '') {
+        const strVal = typeof value === 'string' ? value : String(value);
+        result[key] = encryptSensitive(strVal); // Preserves exact characters without trimming
+      } else {
+        result[key] = value;
+      }
     } else {
       result[key] = value;
     }

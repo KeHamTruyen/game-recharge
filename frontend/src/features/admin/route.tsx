@@ -315,6 +315,7 @@ export function AdminRoute() {
         onUpdateProfile={async (name) => { await store.updateProfile(name) }}
         onChangePassword={store.changePassword}
       />
+      {store.notice && <div className="toast">{store.notice}</div>}
     </div>
   )
 }

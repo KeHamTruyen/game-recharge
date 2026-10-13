@@ -234,6 +234,46 @@ test.describe("Operational Features & Responsive UI Verification", () => {
     expect(mobileNoOverflow).toBe(true)
   })
 
+  for (const width of [375, 1280]) {
+    test(`cancelling a payment group confirms the scope, reports failure and refreshes all lines at ${width}px`, async ({ page }) => {
+      await setupApiMock(page)
+      await page.setViewportSize({ width, height: 800 })
+      let cancelled = false
+      let attempts = 0
+      await page.route("**/api/orders/mine?*", (route) => route.fulfill({ json: {
+        success: true, data: { items: [1, 2].map((id) => ({
+          ...mockOrder, id: `order-${id}`, code: `DUKE999${id}`, paymentOrderCode: "DUKEGROUP",
+          status: cancelled ? "FAILED" : "PENDING", paymentStatus: cancelled ? "EXPIRED" : "PENDING",
+        })), hasNext: false },
+      } }))
+      await page.route("**/api/orders/*/cancel", (route) => {
+        attempts += 1
+        cancelled = attempts > 1
+        return route.fulfill(cancelled
+          ? { json: { success: true, data: { ...mockOrder, status: "FAILED", paymentStatus: "EXPIRED" } } }
+          : { status: 400, json: { success: false, error: "Không thể hủy nhóm đơn lúc này." } })
+      })
+      await page.goto("/tai-khoan")
+      const buttons = page.locator(width < 600 ? ".history-mobile-meta" : ".history-desktop-status")
+        .getByRole("button", { name: "Hủy đơn", exact: true })
+      await expect(buttons).toHaveCount(2)
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const dialog = page.waitForEvent("dialog")
+        const click = buttons.first().click()
+        const confirmation = await dialog
+        expect(confirmation.message()).toContain("Các đơn có cùng mã thanh toán cũng sẽ được hủy")
+        await confirmation.accept()
+        await click
+        if (attempt === 0) {
+          await expect(page.getByText("Không thể hủy nhóm đơn lúc này.", { exact: true })).toBeVisible()
+          await expect(buttons).toHaveCount(2)
+        }
+      }
+      await expect(buttons).toHaveCount(0)
+      expect(attempts).toBe(2)
+    })
+  }
+
   test("4. Admin panel Audit Log tab renders table with horizontal scroll wrapper, preventing page overflow", async ({ page }) => {
     await setupApiMock(page, { isAdmin: true })
 

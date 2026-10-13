@@ -3140,6 +3140,8 @@ export function AdminTransactions({
   const [refundAmount, setRefundAmount] = useState("")
   const [refundTxId, setRefundTxId] = useState("")
   const [refundReason, setRefundReason] = useState("")
+  const [refundSubmitting, setRefundSubmitting] = useState(false)
+  const [refundError, setRefundError] = useState<string | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
   useEffect(() => {
@@ -3580,35 +3582,53 @@ export function AdminTransactions({
               </button>
             </div>
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault()
                 const amt = Number(refundAmount)
-                if (isNaN(amt) || amt <= 0) {
-                  alert("Số tiền hoàn không hợp lệ.")
+                if (isNaN(amt) || amt <= 0 || !Number.isInteger(amt)) {
+                  setRefundError("Số tiền hoàn phải là số nguyên dương (VNĐ).")
+                  return
+                }
+                if (amt > Number(refundingTx.amount)) {
+                  setRefundError(`Số tiền hoàn không được vượt quá số tiền của đơn hàng (${formatPrice(refundingTx.amount)}).`)
                   return
                 }
                 if (!refundReason.trim()) {
-                  alert("Vui lòng nhập lý do hoàn tiền.")
+                  setRefundError("Vui lòng nhập lý do hoàn tiền cụ thể.")
                   return
                 }
-                onUpdate(
-                  refundingTx.id,
-                  "Đã hoàn tiền",
-                  refundReason.trim(),
-                  "REFUNDED",
-                  {
-                    refundAmount: amt,
-                    refundTxId: refundTxId.trim() || undefined,
-                    refundReason: refundReason.trim(),
-                  },
-                )
-                setRefundingTx(null)
+                try {
+                  setRefundSubmitting(true)
+                  setRefundError(null)
+                  await onUpdate(
+                    refundingTx.id,
+                    "Đã hoàn tiền",
+                    refundReason.trim(),
+                    "REFUNDED",
+                    {
+                      refundAmount: amt,
+                      refundTxId: refundTxId.trim() || undefined,
+                      refundReason: refundReason.trim(),
+                    },
+                  )
+                  setRefundingTx(null)
+                } catch (err) {
+                  setRefundError(err instanceof Error ? err.message : "Không thể thực hiện hoàn tiền. Vui lòng thử lại.")
+                } finally {
+                  setRefundSubmitting(false)
+                }
               }}
               style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}
             >
               <p style={{ fontSize: "13px", color: "var(--color-text-muted)", margin: 0 }}>
                 Ghi nhận thông tin hoàn tiền cho giao dịch <strong>{refundingTx.product}</strong> ({formatPrice(refundingTx.amount)}).
               </p>
+
+              {refundError && (
+                <div style={{ color: "#f87171", fontSize: "13px", padding: "8px 12px", background: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.25)", borderRadius: "7px" }}>
+                  {refundError}
+                </div>
+              )}
 
               <div>
                 <label style={{ fontSize: "13px", fontWeight: 600, display: "block", marginBottom: "4px" }}>
@@ -3618,7 +3638,10 @@ export function AdminTransactions({
                   type="number"
                   required
                   value={refundAmount}
-                  onChange={(e) => setRefundAmount(e.target.value)}
+                  onChange={(e) => {
+                    setRefundAmount(e.target.value)
+                    setRefundError(null)
+                  }}
                   style={{
                     width: "100%",
                     boxSizing: "border-box",
@@ -3664,7 +3687,10 @@ export function AdminTransactions({
                   required
                   rows={3}
                   value={refundReason}
-                  onChange={(e) => setRefundReason(e.target.value)}
+                  onChange={(e) => {
+                    setRefundReason(e.target.value)
+                    setRefundError(null)
+                  }}
                   placeholder="Ví dụ: Khách hủy đơn, đã chuyển trả qua STK Techcombank 1903..."
                   style={{
                     width: "100%",
@@ -3684,16 +3710,21 @@ export function AdminTransactions({
                 <button
                   type="button"
                   className="secondary-button"
-                  onClick={() => setRefundingTx(null)}
+                  disabled={refundSubmitting}
+                  onClick={() => {
+                    setRefundingTx(null)
+                    setRefundError(null)
+                  }}
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   className="primary-button"
+                  disabled={refundSubmitting}
                   style={{ background: "#ef4444", borderColor: "#ef4444" }}
                 >
-                  Xác nhận hoàn tiền
+                  {refundSubmitting ? "Đang xử lý..." : "Xác nhận hoàn tiền"}
                 </button>
               </div>
             </form>

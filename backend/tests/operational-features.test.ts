@@ -508,9 +508,17 @@ describe('Operational Features Test Suite', () => {
   });
 
   it('Refund flow records refundAmount, refundTxId, refundedById, refundedAt and generates AuditLog', async () => {
-    // 1. Pick an existing transaction
-    const targetTx = await prisma.transaction.findFirstOrThrow({
-      select: { id: true, code: true, amount: true },
+    // 1. Create a paid transaction to test refund flow
+    const targetTx = await prisma.transaction.create({
+      data: {
+        code: `ORD-RF-TEST-${Date.now()}`,
+        userEmail: 'test@example.com',
+        packageName: 'Refund Test Pack',
+        gameName: 'Genshin Impact',
+        amount: 50000,
+        status: 'COMPLETED',
+        paymentStatus: 'PAID',
+      },
     });
 
     // 2. Admin refunds the transaction

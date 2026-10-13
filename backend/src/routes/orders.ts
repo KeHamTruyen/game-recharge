@@ -501,22 +501,38 @@ router.get(
         throw new AppError('You do not have permission to view this order', 403);
       }
 
-      const des = transaction.paymentOrderCode || transaction.code;
-      const amountNum = Number(transaction.amount);
+      if (transaction.status === 'FAILED' || transaction.paymentStatus === 'EXPIRED') {
+        throw new AppError('Đơn hàng này đã bị hủy hoặc hết hạn thanh toán', 400);
+      }
+      if (transaction.status === 'REFUNDED' || transaction.paymentStatus === 'REFUNDED') {
+        throw new AppError('Đơn hàng này đã được hoàn tiền', 400);
+      }
+
       const bankCode = env.SEPAY_BANK_CODE || '';
       const accountNumber = env.SEPAY_ACCOUNT_NUMBER || '';
       const accountName = env.SEPAY_ACCOUNT_NAME || '';
 
+      if (!bankCode || !accountNumber || !accountName) {
+        throw new AppError('Hệ thống thanh toán đang được cấu hình. Vui lòng liên hệ CSKH.', 503);
+      }
+
+      const des = transaction.paymentOrderCode || transaction.code;
+      // Calculate group amount if part of a multi-item checkout
+      const groupOrders = await prisma.transaction.findMany({
+        where: { OR: [{ paymentOrderCode: des }, { paymentOrderCode: null, code: des }] },
+        select: { id: true, amount: true },
+      });
+      const totalGroupAmount = groupOrders.reduce((sum, item) => sum + Number(item.amount), 0);
+      const amountNum = totalGroupAmount > 0 ? totalGroupAmount : Number(transaction.amount);
+
       const qrCode =
         transaction.qrCode ||
-        (bankCode && accountNumber
-          ? `https://qr.sepay.vn/img?${new URLSearchParams({
-              acc: accountNumber,
-              bank: bankCode,
-              amount: String(amountNum),
-              des,
-            })}`
-          : '');
+        `https://qr.sepay.vn/img?${new URLSearchParams({
+          acc: accountNumber,
+          bank: bankCode,
+          amount: String(amountNum),
+          des,
+        })}`;
 
       res.json({
         success: true,
@@ -555,7 +571,7 @@ router.post(
       const cancelled = await prisma.$transaction(async (tx) => {
         const order = await tx.transaction.findUnique({
           where: { code },
-          select: { id: true, userId: true, status: true, paymentStatus: true, code: true },
+          select: { id: true, userId: true, paymentOrderCode: true },
         });
 
         if (!order) throw new NotFoundError('Order');
@@ -564,12 +580,24 @@ router.post(
           throw new AppError('Bạn không có quyền hủy đơn hàng này', 403);
         }
 
-        if (order.status !== 'PENDING' || !['UNPAID', 'PENDING'].includes(order.paymentStatus)) {
+        const paymentOrderCode = order.paymentOrderCode || code;
+        // Lock the whole checkout in the same order as the webhook before checking its state.
+        await tx.$queryRaw`SELECT id FROM transactions WHERE "paymentOrderCode" = ${paymentOrderCode}
+          OR ("paymentOrderCode" IS NULL AND code = ${paymentOrderCode}) ORDER BY id FOR UPDATE`;
+        const orders = await tx.transaction.findMany({
+          where: { OR: [{ paymentOrderCode }, { paymentOrderCode: null, code: paymentOrderCode }] },
+          select: { id: true, userId: true, status: true, paymentStatus: true },
+        });
+        if (!orders.some((item) => item.id === order.id)) throw new NotFoundError('Order');
+        if (!isAdmin && orders.some((item) => item.userId !== userId)) {
+          throw new AppError('Bạn không có quyền hủy nhóm đơn hàng này', 403);
+        }
+        if (orders.some((item) => item.status !== 'PENDING' || !['UNPAID', 'PENDING'].includes(item.paymentStatus))) {
           throw new AppError('Chỉ có thể hủy đơn hàng đang ở trạng thái chờ thanh toán', 400);
         }
 
-        return tx.transaction.update({
-          where: { id: order.id },
+        await tx.transaction.updateMany({
+          where: { id: { in: orders.map((item) => item.id) } },
           data: {
             status: 'FAILED',
             paymentStatus: 'EXPIRED',
@@ -578,8 +606,8 @@ router.post(
               cancelledAt: new Date().toISOString(),
             },
           },
-          select: transactionSelect,
         });
+        return tx.transaction.findUniqueOrThrow({ where: { id: order.id }, select: transactionSelect });
       });
 
       res.json({
