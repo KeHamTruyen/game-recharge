@@ -418,3 +418,44 @@ for (const key of ["password", "credential"]) {
     expect(await page.evaluate(() => JSON.stringify(sessionStorage))).not.toContain("DummyPass123");
   });
 }
+
+test("checkout polling detects late payment on cancelled order and notifies user to contact CSKH", async ({ page }) => {
+  await page.route("**/api/orders/checkout", (route) => route.fulfill({
+    json: {
+      success: true,
+      data: {
+        transactions: [],
+        payment: {
+          orderCode: "CANCELLED_ORDER_1",
+          amount: 10000,
+          bankCode: "TEST",
+          accountNumber: "0000",
+          accountName: "TEST",
+          transferContent: "CANCELLED_ORDER_1",
+          qrCode: "",
+          checkoutUrl: "",
+        },
+      },
+    },
+  }));
+  await page.route("**/api/payments/status/*", (route) => route.fulfill({
+    json: {
+      success: true,
+      data: {
+        paymentStatus: "PAID",
+        status: "FAILED",
+        paidAt: new Date().toISOString(),
+      },
+    },
+  }));
+  await page.goto("/nap-game/a");
+  await page.locator(".account-nav-button.signed-in").waitFor({ state: "attached" });
+  await page.locator(".package-card").click();
+  await page.locator(".cart-button").click();
+  await page.getByLabel("UID").fill("800123456");
+  await page.getByLabel("Server").selectOption("asia");
+  await page.locator(".dynamic-topup-form button[type=submit]").click();
+  await page.locator(".confirmation-modal .primary-button").click();
+  await page.locator(".confirm-payment").click();
+  await expect(page.getByText("Đã nhận tiền, đơn đã hủy — liên hệ CSKH")).toBeVisible();
+});

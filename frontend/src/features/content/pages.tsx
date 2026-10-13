@@ -593,6 +593,7 @@ export function ResumePaymentModal({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [paid, setPaid] = useState(false)
+  const [orderStatus, setOrderStatus] = useState<string>("PENDING")
   const [copiedField, setCopiedField] = useState<string | null>(null)
 
   const copy = async (text: string, label: string) => {
@@ -613,6 +614,7 @@ export function ResumePaymentModal({
         const res = await api.orders.getPayment(code)
         if (mounted) {
           setData(res)
+          setOrderStatus(res.status)
           if (res.paymentStatus === "PAID") {
             setPaid(true)
           }
@@ -637,6 +639,7 @@ export function ResumePaymentModal({
         const statusRes = await api.payments.status(orderRef)
         if (statusRes.paymentStatus === "PAID") {
           setPaid(true)
+          setOrderStatus(statusRes.status)
           if (onRefresh) void onRefresh()
         }
       } catch {
@@ -678,22 +681,26 @@ export function ResumePaymentModal({
                   width: "56px",
                   height: "56px",
                   borderRadius: "50%",
-                  background: "rgba(34, 197, 94, 0.2)",
-                  color: "#22c55e",
+                  background: orderStatus === "FAILED" ? "rgba(239, 68, 68, 0.2)" : "rgba(34, 197, 94, 0.2)",
+                  color: orderStatus === "FAILED" ? "#ef4444" : "#22c55e",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   margin: "0 auto 16px",
                 }}
               >
-                <Icon name="check" size={32} />
+                <Icon name={orderStatus === "FAILED" ? "close" : "check"} size={32} />
               </div>
-              <h3 style={{ fontSize: "18px", margin: "0 0 8px", color: "#22c55e" }}>Thanh toán thành công!</h3>
+              <h3 style={{ fontSize: "18px", margin: "0 0 8px", color: orderStatus === "FAILED" ? "#ef4444" : "#22c55e" }}>
+                {orderStatus === "FAILED" ? "Đã nhận tiền, đơn đã hủy" : "Thanh toán thành công!"}
+              </h3>
               <p style={{ fontSize: "13px", color: "var(--color-text-muted)", margin: "0 0 20px" }}>
-                Hệ thống đã nhận thanh toán. Đơn hàng đang được tiến hành xử lý nạp game.
+                {orderStatus === "FAILED"
+                  ? "Đã nhận tiền, đơn đã hủy — liên hệ CSKH"
+                  : "Hệ thống đã nhận thanh toán. Đơn hàng đang được tiến hành xử lý nạp game."}
               </p>
               <button className="primary-button" style={{ width: "100%" }} onClick={onClose}>
-                Xong
+                {orderStatus === "FAILED" ? "Đóng" : "Xong"}
               </button>
             </div>
           ) : data ? (

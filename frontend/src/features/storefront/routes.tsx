@@ -292,6 +292,7 @@ export function CheckoutRoute() {
     }
   })
   const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "PAID">("PENDING")
+  const [orderStatus, setOrderStatus] = useState<string>("PENDING")
   const [recoveryChecked, setRecoveryChecked] = useState(false)
   const [recoveryError, setRecoveryError] = useState("")
   const [recoveryRetry, setRecoveryRetry] = useState(0)
@@ -353,12 +354,17 @@ export function CheckoutRoute() {
         const result = await api.payments.status(payment.orderCode)
         if (!cancelled && result.paymentStatus === "PAID") {
           setPaymentStatus("PAID")
+          setOrderStatus(result.status)
           sessionStorage.removeItem("duke1305_checkout_payment")
           sessionStorage.removeItem("duke1305_checkout_key")
           sessionStorage.removeItem("duke1305_checkout_key_sig")
           sessionStorage.removeItem("duke1305_checkout_attempt")
           store.setCart([])
-          setNotice("Đã nhận thanh toán. Đơn hàng đang được xử lý.")
+          if (result.status === "FAILED") {
+            setNotice("Đã nhận tiền, đơn đã hủy — liên hệ CSKH")
+          } else {
+            setNotice("Đã nhận thanh toán. Đơn hàng đang được xử lý.")
+          }
         }
       } catch {
         // The payment page remains usable while a temporary status request fails.
@@ -406,6 +412,7 @@ export function CheckoutRoute() {
       topupInfo={store.checkoutInfo}
       payment={payment}
       paymentStatus={paymentStatus}
+      orderStatus={orderStatus}
       isMaintenance={Boolean(store.siteConfig?.maintenanceMode)}
       onBack={() => navigate("/nap-game/thong-tin")}
       onNotice={store.setNotice}

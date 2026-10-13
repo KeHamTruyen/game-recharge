@@ -504,6 +504,7 @@ export function CheckoutPage({
   topupInfo,
   payment,
   paymentStatus,
+  orderStatus,
   isMaintenance,
   onBack,
   onNotice,
@@ -517,6 +518,7 @@ export function CheckoutPage({
   topupInfo: Record<string, string>
   payment: PaymentDetails | null
   paymentStatus: "PENDING" | "PAID"
+  orderStatus?: string
   isMaintenance?: boolean
   onBack: () => void
   onNotice: (message: string) => void
@@ -554,7 +556,7 @@ export function CheckoutPage({
               <h2>Chuyển khoản ngân hàng</h2>
             </div>
             <span className="payment-status">
-              <span /> {paymentStatus === "PAID" ? "Đã thanh toán" : "Chờ thanh toán"}
+              <span /> {paymentStatus === "PAID" ? (orderStatus === "FAILED" ? "Đã nhận tiền (Đơn đã hủy)" : "Đã thanh toán") : "Chờ thanh toán"}
             </span>
           </div>
           <div className="bank-payment">
@@ -693,8 +695,16 @@ export function CheckoutPage({
               finally { setIsSubmitting(false) }
             }}
           >
-            {isMaintenance ? "Tạm ngưng nhận đơn (Bảo trì)" : paymentStatus === "PAID" ? "Đã nhận thanh toán" : payment ? "Đang chờ chuyển khoản" : isSubmitting ? "Đang tạo đơn…" : "Tạo đơn hàng"}{" "}
-            <Icon name={isMaintenance ? "shield" : "check"} size={17} />
+            {isMaintenance
+              ? "Tạm ngưng nhận đơn (Bảo trì)"
+              : paymentStatus === "PAID"
+                ? (orderStatus === "FAILED" ? "Đã nhận tiền, đơn đã hủy — liên hệ CSKH" : "Đã nhận thanh toán")
+                : payment
+                  ? "Đang chờ chuyển khoản"
+                  : isSubmitting
+                    ? "Đang tạo đơn…"
+                    : "Tạo đơn hàng"}{" "}
+            <Icon name={isMaintenance ? "shield" : orderStatus === "FAILED" ? "close" : "check"} size={17} />
           </button>
         </aside>
       </div>
