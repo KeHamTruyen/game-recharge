@@ -35,6 +35,15 @@ type ApiTransaction = {
   amount: string | number
   quantity: number
   status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | "REFUNDED"
+  paymentStatus?: "UNPAID" | "PENDING" | "PAID" | "EXPIRED" | "FAILED" | "REFUNDED"
+  paymentOrderCode?: string | null
+  qrCode?: string | null
+  checkoutUrl?: string | null
+  refundAmount?: string | number | null
+  refundTxId?: string | null
+  refundReason?: string | null
+  refundedById?: string | null
+  refundedAt?: string | null
   topupInfo?: Record<string, unknown>
   topupLabels?: Record<string, unknown>
   templateName?: string
@@ -93,6 +102,9 @@ function mapTransaction(item: ApiTransaction): Transaction {
     amount: Number(item.amount),
     quantity: item.quantity,
     status: mapStatus(item.status),
+    paymentStatus: item.paymentStatus,
+    qrCode: item.qrCode,
+    checkoutUrl: item.checkoutUrl,
     date: item.createdAt,
     topupInfo: Object.fromEntries(
       Object.entries(item.topupInfo || {}).map(([key, value]) => [key, String(value)]),
@@ -101,6 +113,11 @@ function mapTransaction(item: ApiTransaction): Transaction {
       Object.entries(item.topupLabels || {}).map(([key, value]) => [key, String(value)]),
     ),
     templateName: item.templateName,
+    refundAmount: item.refundAmount !== undefined && item.refundAmount !== null ? Number(item.refundAmount) : null,
+    refundTxId: item.refundTxId ?? null,
+    refundReason: item.refundReason ?? null,
+    refundedById: item.refundedById ?? null,
+    refundedAt: item.refundedAt ?? null,
   }
 }
 
@@ -235,6 +252,12 @@ export const api = {
     },
   },
   orders: {
+    async recoverCheckout(idempotencyKey: string) {
+      const result = await client.request<ApiEnvelope<{ payment: PaymentDetails | null }>>("/orders/checkout", {
+        headers: { "Idempotency-Key": idempotencyKey },
+      })
+      return result.data.payment
+    },
     async create(packageId: string | number, quantity: number, topupInfo: Record<string, string>, userEmail?: string) {
       const result = await client.request<ApiEnvelope<ApiTransaction>>("/orders", {
         method: "POST",
@@ -246,7 +269,7 @@ export const api = {
       items: Array<{ packageId: string | number; quantity: number }>,
       topupInfo: Record<string, string>,
       userEmail?: string,
-      idempotencyKey = crypto.randomUUID(),
+      idempotencyKey: string = crypto.randomUUID(),
     ) {
       const result = await client.request<ApiEnvelope<{
         transactions: ApiTransaction[]
@@ -276,6 +299,23 @@ export const api = {
         method: "POST",
       })
       return mapTransaction(result.data)
+    },
+    async getPayment(code: string) {
+      const result = await client.request<ApiEnvelope<{
+        orderCode: string
+        paymentOrderCode: string
+        amount: number
+        bankCode: string
+        accountNumber: string
+        accountName: string
+        transferContent: string
+        qrCode: string
+        status: string
+        paymentStatus: string
+        packageName?: string
+        gameName?: string
+      }>>(`/orders/${encodeURIComponent(code)}/payment`)
+      return result.data
     },
   },
   payments: {
@@ -453,11 +493,28 @@ export const api = {
       totalSpent: Number(item.totalSpent),
     }
   },
-    async updateTransaction(id: string | number, status: Transaction["status"]) {
+    async updateTransaction(
+      id: string | number,
+      status: Transaction["status"],
+      reason = "Điều chỉnh thủ công bởi quản trị viên",
+      paymentStatus?: string,
+      refundDetails?: {
+        refundAmount?: number
+        refundTxId?: string
+        refundReason?: string
+      },
+    ) {
       const backendStatus = Object.entries(statusMap).find(([, label]) => label === status)?.[0] || "PENDING"
       const result = await client.request<ApiEnvelope<ApiTransaction>>(`/admin/transactions/${String(id)}/status`, {
         method: "PATCH",
-        body: JSON.stringify({ status: backendStatus }),
+        body: JSON.stringify({
+          status: backendStatus,
+          reason,
+          ...(paymentStatus ? { paymentStatus } : {}),
+          ...(refundDetails?.refundAmount ? { refundAmount: refundDetails.refundAmount } : {}),
+          ...(refundDetails?.refundTxId ? { refundTxId: refundDetails.refundTxId } : {}),
+          ...(refundDetails?.refundReason ? { refundReason: refundDetails.refundReason } : {}),
+        }),
       })
       return mapTransaction(result.data)
     },
@@ -490,6 +547,60 @@ export const api = {
           hasPrev: boolean
         }
       }>(`/admin/audit-logs?${query.toString()}`)
+      return result.data
+    },
+    async paymentAnomalies(params?: {
+      page?: number
+      limit?: number
+      search?: string
+      anomalyType?: string
+      resolved?: boolean
+    }) {
+      const query = new URLSearchParams()
+      if (params?.page) query.set("page", String(params.page))
+      if (params?.limit) query.set("limit", String(params.limit))
+      if (params?.search) query.set("search", params.search)
+      if (params?.anomalyType) query.set("anomalyType", params.anomalyType)
+      if (params?.resolved !== undefined) query.set("resolved", String(params.resolved))
+      const result = await client.request<{
+        success: true
+        data: {
+          items: Array<{
+            id: string
+            provider: string
+            gatewayId: string | null
+            referenceCode: string | null
+            orderCode: string | null
+            accountNumber: string | null
+            amount: string | number
+            expectedAmount: string | number | null
+            content: string
+            anomalyType: string
+            rawPayload: Record<string, unknown> | null
+            resolved: boolean
+            resolvedBy: string | null
+            resolvedAt: string | null
+            resolutionNote: string | null
+            createdAt: string
+          }>
+          total: number
+          page: number
+          limit: number
+          totalPages: number
+          hasNext: boolean
+          hasPrev: boolean
+        }
+      }>(`/admin/payment-anomalies?${query.toString()}`)
+      return result.data
+    },
+    async resolvePaymentAnomaly(id: string, resolutionNote: string) {
+      const result = await client.request<ApiEnvelope<unknown>>(
+        `/admin/payment-anomalies/${encodeURIComponent(id)}/resolve`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ resolutionNote }),
+        },
+      )
       return result.data
     },
   },

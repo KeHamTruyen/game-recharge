@@ -118,6 +118,21 @@ describe('P1 security and payment regressions', () => {
     assert.equal(await prisma.paymentReceipt.count({ where: { provider: 'sepay', externalId: '90001' } }), 1);
   });
 
+  it('one bank reference settles every cart line atomically and survives concurrent retries', async () => {
+    const order = await orders([4000, 6000]);
+    const referenceCode = `REF-${randomUUID()}`;
+    const responses = await Promise.all(Array.from({ length: 3 }, () =>
+      webhook(order.code, 90002, { referenceCode }),
+    ));
+    assert.ok(responses.every((response) => response.status === 200), JSON.stringify(responses.map((r) => r.status)));
+    const rows = await prisma.transaction.findMany({ where: { paymentOrderCode: order.code } });
+    assert.equal(rows.length, 2);
+    assert.ok(rows.every((row) => row.paymentStatus === 'PAID' && row.status === 'PROCESSING'));
+    assert.ok(rows.every((row) => row.bankTransactionId === referenceCode && row.paidAt));
+    assert.equal(await prisma.paymentReceipt.count({ where: { paymentOrderCode: order.code } }), 1);
+    assert.equal((await prisma.user.findUniqueOrThrow({ where: { id: order.owner.id } })).totalSpent.toNumber(), 0);
+  });
+
   it('late webhooks preserve terminal status and never double-count spending', async () => {
     for (const [index, status] of (['COMPLETED', 'FAILED', 'REFUNDED'] as const).entries()) {
       const order = await orders();

@@ -52,6 +52,32 @@ export function errorHandler(
 ): void {
   const isProd = env.NODE_ENV === 'production';
 
+  // Malformed JSON syntax error from body-parser
+  if (
+    (err instanceof SyntaxError && ('status' in err && (err as any).status === 400 || 'body' in err)) ||
+    (err && typeof err === 'object' && (err as any).type === 'entity.parse.failed')
+  ) {
+    res.status(400).json({
+      success: false,
+      error: 'Cú pháp JSON không hợp lệ (Malformed JSON)',
+      requestId: _req.requestId,
+    });
+    return;
+  }
+
+  // Request entity / body too large error
+  if (
+    (err && typeof err === 'object' && ((err as any).type === 'entity.too.large' || (err as any).status === 413)) ||
+    (err instanceof Error && err.name === 'PayloadTooLargeError')
+  ) {
+    res.status(413).json({
+      success: false,
+      error: 'Dung lượng yêu cầu vượt quá giới hạn cho phép (Payload Too Large)',
+      requestId: _req.requestId,
+    });
+    return;
+  }
+
   // Zod validation errors
   if (err instanceof ZodError) {
     const errors = err.errors.map((e) => ({
@@ -63,6 +89,7 @@ export function errorHandler(
       success: false,
       error: 'Validation failed',
       details: errors,
+      requestId: _req.requestId,
     });
     return;
   }
@@ -72,6 +99,7 @@ export function errorHandler(
     res.status(err.statusCode).json({
       success: false,
       error: err.message,
+      requestId: _req.requestId,
     });
     return;
   }
@@ -80,11 +108,21 @@ export function errorHandler(
   if (err instanceof Error && err.constructor.name === 'PrismaClientKnownRequestError') {
     const prismaErr = err as Error & { code?: string; meta?: { target?: string[] } };
 
+    if (['P1000', 'P1001', 'P1002', 'P1008', 'P1017'].includes(prismaErr.code ?? '')) {
+      res.status(503).json({
+        success: false,
+        error: 'Dịch vụ cơ sở dữ liệu tạm thời gián đoạn. Vui lòng thử lại sau ít phút.',
+        requestId: _req.requestId,
+      });
+      return;
+    }
+
     if (prismaErr.code === 'P2002') {
       const fields = prismaErr.meta?.target?.join(', ') ?? 'field';
       res.status(409).json({
         success: false,
         error: `A record with this ${fields} already exists`,
+        requestId: _req.requestId,
       });
       return;
     }
@@ -93,9 +131,26 @@ export function errorHandler(
       res.status(404).json({
         success: false,
         error: 'Record not found',
+        requestId: _req.requestId,
       });
       return;
     }
+  }
+
+  // Prisma connection & initialization errors
+  if (
+    err instanceof Error &&
+    (err.constructor.name === 'PrismaClientInitializationError' ||
+      err.name === 'PrismaClientInitializationError' ||
+      err.constructor.name === 'PrismaClientRustPanicError' ||
+      err.name === 'PrismaClientRustPanicError')
+  ) {
+    res.status(503).json({
+      success: false,
+      error: 'Dịch vụ cơ sở dữ liệu tạm thời gián đoạn. Vui lòng thử lại sau ít phút.',
+      requestId: _req.requestId,
+    });
+    return;
   }
 
   // Unknown/unexpected errors

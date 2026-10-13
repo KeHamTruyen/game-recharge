@@ -96,6 +96,11 @@ app.use(
   })
 );
 
+// ─── Trust Proxy & Request Context ──────────────────────────────────────────
+// Required for rate-limiting behind nginx/load balancer and tracing
+app.set('trust proxy', env.TRUST_PROXY_HOPS);
+app.use(requestContext);
+
 // ─── Body Parsing ─────────────────────────────────────────────────────────────
 
 app.use(express.json({ limit: '10mb' }));
@@ -121,11 +126,6 @@ app.use(
     },
   })
 );
-
-// ─── Trust Proxy ─────────────────────────────────────────────────────────────
-// Required for rate-limiting behind nginx/load balancer
-app.set('trust proxy', env.TRUST_PROXY_HOPS);
-app.use(requestContext);
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 

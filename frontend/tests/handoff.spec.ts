@@ -159,6 +159,42 @@ test("admin contact edits are drafts and preserve text after save failure", asyn
   await expect(page.locator(".admin-wiki-manager")).toBeVisible()
 })
 
+test("payment reconciliation retains the note on failure and confirms only after saving", async ({ page }) => {
+  await page.route("**/api/auth/session", (route) => route.fulfill({ json: { success: true, data: {
+    user: { id: "admin", email: "admin@test.invalid", name: "Admin", role: "ADMIN", status: "ACTIVE" },
+  } } }));
+  const anomaly = { id: "anomaly-test", provider: "sepay", gatewayId: "123", referenceCode: "REF-TEST",
+    orderCode: "DUKETEST", accountNumber: "0000", amount: 10000, expectedAmount: 10000,
+    content: "DUKETEST", anomalyType: "DUPLICATE_PAYMENT", rawPayload: null,
+    resolved: false, resolvedBy: null, resolvedAt: null, resolutionNote: "", createdAt: new Date().toISOString() };
+  let allowSave = false;
+  await page.route("**/api/admin/payment-anomalies**", (route) => {
+    if (route.request().method() === "PATCH") {
+      if (!allowSave) return route.fulfill({ status: 503, json: { success: false, error: "Save unavailable" } });
+      anomaly.resolved = true;
+      anomaly.resolutionNote = route.request().postDataJSON().resolutionNote;
+      return route.fulfill({ json: { success: true, data: anomaly } });
+    }
+    return route.fulfill({ json: { success: true, data: { items: [anomaly], total: 1, totalPages: 1 } } });
+  });
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.goto("/admin");
+  await page.getByRole("button", { name: "Đối soát thanh toán", exact: true }).click();
+  await expect(page.getByText("Chuyển trùng (2 lần)", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Xử lý", exact: true }).click();
+  const save = page.getByRole("button", { name: "Xác nhận đã giải quyết", exact: true });
+  await expect(save).toBeDisabled();
+  await page.locator(".product-modal textarea").fill("Payment reconciled manually");
+  await save.click();
+  await expect(save).toBeEnabled();
+  await expect(page.locator(".product-modal textarea")).toHaveValue("Payment reconciled manually");
+  await expect(page.getByText("Đã xử lý", { exact: true })).toHaveCount(0);
+  allowSave = true;
+  await save.click();
+  await expect(page.locator(".product-modal")).toHaveCount(0);
+  await expect(page.getByText("Đã xử lý", { exact: true })).toBeVisible();
+});
+
 test("template deletion is disabled for packages in use", async ({ page }) => {
   await page.route("**/api/auth/session", (route) => route.fulfill({ json: { success: true, data: {
     user: { id: "admin", email: "admin@test.invalid", name: "Admin", role: "ADMIN", status: "ACTIVE" },
@@ -212,6 +248,58 @@ for (const width of [390, 820]) {
   })
 }
 
+for (const committed of [true, false]) {
+  test(`checkout recovers a lost response after reload (committed=${committed})`, async ({ page }) => {
+    const payment = {
+      orderCode: "RECOVERED_ORDER", amount: 10000, bankCode: "TEST", accountNumber: "0000",
+      accountName: "TEST", transferContent: "RECOVERED_ORDER", qrCode: "", checkoutUrl: "",
+    };
+    const keys: string[] = [];
+    let recoveryUnavailable = true;
+    await page.route("**/api/orders/checkout", async (route) => {
+      const key = route.request().headers()["idempotency-key"];
+      if (route.request().method() === "GET") {
+        expect(key).toBe(keys[0]);
+        if (recoveryUnavailable) return route.fulfill({ status: 503, json: { success: false } });
+        return route.fulfill({ json: { success: true, data: { payment: committed ? payment : null } } });
+      }
+      keys.push(key);
+      if (keys.length === 1) return route.abort("failed");
+      return route.fulfill({ json: { success: true, data: { transactions: [], payment } } });
+    });
+    await page.route("**/api/payments/status/*", (route) => route.fulfill({ json: {
+      success: true, data: { paymentStatus: "PENDING" },
+    } }));
+    await page.goto("/nap-game/a");
+    await page.locator(".account-nav-button.signed-in").waitFor({ state: "attached" });
+    await page.locator(".package-card").click();
+    await page.locator(".cart-button").click();
+    const submit = async () => {
+      await page.getByLabel("UID").fill("800123456");
+      await page.getByLabel("Server").selectOption("asia");
+      await page.locator(".dynamic-topup-form button[type=submit]").click();
+      await page.locator(".confirmation-modal .primary-button").click();
+    };
+    await submit();
+    await page.locator(".confirm-payment").click();
+    await expect.poll(() => keys.length).toBe(1);
+    await page.reload();
+    await expect(page.getByRole("alert")).toContainText("tránh tạo đơn trùng");
+    await expect(page.locator(".confirm-payment")).toHaveCount(0);
+    recoveryUnavailable = false;
+    await page.getByRole("button", { name: "Thử lại", exact: true }).click();
+    if (!committed) {
+      await expect(page).toHaveURL(/nap-game\/thong-tin/);
+      await submit();
+      await page.locator(".confirm-payment").click();
+    }
+    await expect(page.getByText("RECOVERED_ORDER", { exact: true }).first()).toBeVisible();
+    expect(keys.length).toBe(committed ? 1 : 2);
+    expect(new Set(keys).size).toBe(1);
+    expect(await page.evaluate(() => JSON.stringify(sessionStorage))).not.toContain("800123456");
+  });
+}
+
 for (const key of ["password", "credential"]) {
   test(`checkout keeps ${key} out of storage, restores payment and invalidates edits`, async ({ page }) => {
     await page.route("**/api/catalog/topup-templates", (route) => route.fulfill({ json: { success: true, data: [{
@@ -221,8 +309,10 @@ for (const key of ["password", "credential"]) {
       ],
     }] } }));
     let created = 0;
+    const checkoutKeys: string[] = [];
     await page.route("**/api/orders/checkout", (route) => {
       created += 1;
+      checkoutKeys.push(route.request().headers()["idempotency-key"]);
       return route.fulfill({ json: { success: true, data: { transactions: [], payment: {
         orderCode: "DUMMY_ORDER_1", amount: 10000, bankCode: "TEST", accountNumber: "0000",
         accountName: "DUMMY", transferContent: "DUMMY_ORDER_1", qrCode: "", checkoutUrl: "",
@@ -252,6 +342,7 @@ for (const key of ["password", "credential"]) {
     await expect(page.getByText("DUMMY_ORDER_1", { exact: true }).first()).toBeVisible();
     await page.evaluate(() => {
       sessionStorage.setItem("duke1305_checkout_info", JSON.stringify({ credential: "DummyPass123" }));
+      sessionStorage.setItem("duke1305_checkout_key_sig", "legacy:DummyPass123");
       const payment = JSON.parse(sessionStorage.getItem("duke1305_checkout_payment")!);
       payment.topupSignature = JSON.stringify({ credential: "DummyPass123" });
       sessionStorage.setItem("duke1305_checkout_payment", JSON.stringify(payment));
@@ -259,6 +350,7 @@ for (const key of ["password", "credential"]) {
     await page.reload();
     await expect(page.getByText("DUMMY_ORDER_1", { exact: true }).first()).toBeVisible();
     expect(created).toBe(2);
+    expect(new Set(checkoutKeys).size).toBe(2);
     expect(await page.evaluate(() => JSON.stringify(sessionStorage))).not.toContain("DummyPass123");
   });
 }

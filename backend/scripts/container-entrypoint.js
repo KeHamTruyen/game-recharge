@@ -18,9 +18,18 @@ if (mode === 'api') {
     if (error.code !== 'ENOENT') throw error;
   }
   const child = spawn(process.execPath, ['/app/dist/index.js'], { stdio: 'inherit' });
+
+  const forwardSignal = (signal) => {
+    if (!child.killed) {
+      child.kill(signal);
+    }
+  };
+  process.on('SIGTERM', () => forwardSignal('SIGTERM'));
+  process.on('SIGINT', () => forwardSignal('SIGINT'));
+
   child.on('exit', (code, signal) => {
     if (signal) process.kill(process.pid, signal);
-    else process.exit(code ?? 1);
+    else process.exit(code ?? 0);
   });
 } else if (mode === 'migrate') {
   const migrate = spawn(process.execPath, ['/app/node_modules/prisma/build/index.js', 'migrate', 'deploy'], { stdio: 'inherit' });

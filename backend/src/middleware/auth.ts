@@ -70,9 +70,16 @@ export async function requireAuth(
     return;
   }
 
+  let payload: JwtPayload;
   try {
-    const payload = verifyToken(token);
+    payload = verifyToken(token);
+  } catch {
+    clearAuthCookie(res);
+    res.status(401).json({ success: false, error: 'Invalid or expired session' });
+    return;
+  }
 
+  try {
     // Verify user still exists and is active
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
@@ -92,9 +99,9 @@ export async function requireAuth(
     }
     req.user = { userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion };
     next();
-  } catch {
-    clearAuthCookie(res);
-    res.status(401).json({ success: false, error: 'Invalid or expired session' });
+  } catch (error) {
+    // Database connection or query error: DO NOT clear auth cookie, forward to centralized errorHandler
+    next(error);
   }
 }
 
@@ -112,8 +119,15 @@ export async function optionalAuth(
     return;
   }
 
+  let payload: JwtPayload;
   try {
-    const payload = verifyToken(token);
+    payload = verifyToken(token);
+  } catch {
+    next();
+    return;
+  }
+
+  try {
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
       select: { id: true, email: true, role: true, status: true, tokenVersion: true },
@@ -125,7 +139,7 @@ export async function optionalAuth(
       }
     }
   } catch {
-    // Ignore invalid tokens for optional auth
+    // Ignore DB errors during optionalAuth to avoid breaking public browsing
   }
 
   next();

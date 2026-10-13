@@ -58,6 +58,8 @@ services:
       SEPAY_BANK_CODE: ${SEPAY_BANK_CODE:-}
       SEPAY_ACCOUNT_NUMBER: ${SEPAY_ACCOUNT_NUMBER:-}
       SEPAY_ACCOUNT_NAME: ${SEPAY_ACCOUNT_NAME:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
     volumes:
       - backend_uploads:/app/uploads
     networks:

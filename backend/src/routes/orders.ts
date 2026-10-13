@@ -181,12 +181,26 @@ async function createOrder(
     code = generateOrderCode();
   }
 
+  const qrCode =
+    env.SEPAY_BANK_CODE && env.SEPAY_ACCOUNT_NUMBER
+      ? `https://qr.sepay.vn/img?${new URLSearchParams({
+          acc: env.SEPAY_ACCOUNT_NUMBER,
+          bank: env.SEPAY_BANK_CODE,
+          amount: String(amount),
+          des: code,
+        })}`
+      : null;
+
   return tx.transaction.create({
     data: {
       code, userId, userEmail, serviceId: pkg.service?.id ?? null,
       packageId: pkg.id, packageName: pkg.name, gameName: pkg.service?.game ?? '',
       amount,
       quantity: input.quantity, status: 'PENDING',
+      paymentStatus: 'PENDING',
+      paymentOrderCode: code,
+      checkoutUrl: qrCode,
+      qrCode,
       topupFields: Object.keys(input.topupInfo).map((key) => ({
         key, type: isSensitiveFieldKey(key, templateFields) ? 'password' : 'text',
       })),
@@ -237,6 +251,22 @@ router.post('/', requireAuth, async (req, res, next): Promise<void> => {
       success: true,
       data: { ...transaction, topupInfo: maskTopupInfo(transaction.topupInfo, isStaffOrAdmin, transaction.topupFields) },
     });
+  } catch (error) { next(error); }
+});
+
+// Recover a committed checkout without asking the browser to retain credentials.
+router.get('/checkout', requireAuth, async (req, res, next): Promise<void> => {
+  try {
+    res.setHeader('Cache-Control', 'no-store');
+    const rawKey = z.string().min(16).max(128).parse(req.header('Idempotency-Key'));
+    const idempotencyKey = createHash('sha256').update(`${req.user!.userId}:${rawKey}`).digest('hex');
+    const payment = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(('x' || substr(${idempotencyKey}, 1, 16))::bit(64)::bigint)`;
+      const cached = await tx.checkoutRequest.findUnique({ where: { idempotencyKey } });
+      if (!cached || cached.userId !== req.user!.userId) return null;
+      return (cached.response as Prisma.JsonObject).payment;
+    });
+    res.json({ success: true, data: { payment } });
   } catch (error) { next(error); }
 });
 
@@ -353,6 +383,10 @@ router.get(
             amount: true,
             quantity: true,
             status: true,
+            paymentStatus: true,
+            paymentOrderCode: true,
+            qrCode: true,
+            checkoutUrl: true,
             templateName: true,
             createdAt: true,
             updatedAt: true,
@@ -401,6 +435,10 @@ router.get(
           updatedAt: true,
           service: { select: { id: true, name: true, iconText: true, tone: true } },
           package: { select: { id: true, name: true, price: true, description: true } },
+          paymentStatus: true,
+          paymentOrderCode: true,
+          qrCode: true,
+          checkoutUrl: true,
         },
       });
 
@@ -421,6 +459,80 @@ router.get(
         data: {
           ...transaction,
           topupInfo: maskTopupInfo(transaction.topupInfo, canViewPassword, transaction.topupFields),
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ─── GET /:code/payment — Resume Payment for Order ─────────────────────────────
+
+router.get(
+  '/:code/payment',
+  requireAuth,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { code } = z.object({ code: z.string().min(1) }).parse(req.params);
+
+      const transaction = await prisma.transaction.findUnique({
+        where: { code },
+        select: {
+          id: true,
+          code: true,
+          userId: true,
+          amount: true,
+          status: true,
+          paymentStatus: true,
+          paymentOrderCode: true,
+          qrCode: true,
+          checkoutUrl: true,
+          packageName: true,
+          gameName: true,
+        },
+      });
+
+      if (!transaction) throw new NotFoundError('Order');
+
+      const isOwner = transaction.userId === req.user!.userId;
+      const isStaffOrAdmin = req.user!.role === 'ADMIN';
+      if (!isOwner && !isStaffOrAdmin) {
+        throw new AppError('You do not have permission to view this order', 403);
+      }
+
+      const des = transaction.paymentOrderCode || transaction.code;
+      const amountNum = Number(transaction.amount);
+      const bankCode = env.SEPAY_BANK_CODE || '';
+      const accountNumber = env.SEPAY_ACCOUNT_NUMBER || '';
+      const accountName = env.SEPAY_ACCOUNT_NAME || '';
+
+      const qrCode =
+        transaction.qrCode ||
+        (bankCode && accountNumber
+          ? `https://qr.sepay.vn/img?${new URLSearchParams({
+              acc: accountNumber,
+              bank: bankCode,
+              amount: String(amountNum),
+              des,
+            })}`
+          : '');
+
+      res.json({
+        success: true,
+        data: {
+          orderCode: transaction.code,
+          paymentOrderCode: des,
+          amount: amountNum,
+          bankCode,
+          accountNumber,
+          accountName,
+          transferContent: des,
+          qrCode,
+          status: transaction.status,
+          paymentStatus: transaction.paymentStatus || 'PENDING',
+          packageName: transaction.packageName,
+          gameName: transaction.gameName,
         },
       });
     } catch (err) {

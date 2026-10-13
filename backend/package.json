@@ -13,9 +13,11 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:backup": "node scripts/backup.mjs",
+    "db:restore": "node scripts/restore.mjs",
     "db:migrate-passwords": "node dist/scripts/migrate_passwords.js",
     "db:migrate-passwords:dev": "tsx src/scripts/migrate_passwords.ts",
-    "test": "node scripts/test.mjs"
+    "test": "node scripts/test.mjs",
+    "test:container": "docker build -t duke1305-backend:shutdown-test . && node scripts/test-container-shutdown.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

@@ -512,14 +512,22 @@ router.delete(
 
 const templateFieldSchema = z.object({
   id: z.string().optional(),
-  key: z.string().min(1).max(100),
+  key: z.string().min(1).max(100).regex(/^[a-zA-Z0-9_-]+$/, 'Mã trường (key) chỉ được chứa chữ cái, số, gạch ngang và gạch dưới'),
   label: z.string().min(1).max(150),
   type: z.string().min(1).max(50).default('text'),
   placeholder: z.string().max(200).optional().default(''),
   required: z.boolean().optional().default(true),
   hint: z.string().max(300).optional(),
   helpText: z.string().max(300).optional(),
-  pattern: z.string().max(200).optional(),
+  pattern: z.string().max(200).optional().refine((val) => {
+    if (!val) return true;
+    try {
+      new RegExp(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }, { message: 'Biểu thức kiểm tra (pattern regex) không hợp lệ' }),
   options: z.array(z.union([
     z.string().max(150),
     z.object({
@@ -529,14 +537,27 @@ const templateFieldSchema = z.object({
   ])).optional().default([]),
 }).passthrough();
 
-const topupTemplateSchema = z.object({
-  id: z.string().min(1).max(60),
+const templateFieldsListSchema = z.array(templateFieldSchema)
+  .min(1, 'Mẫu nạp phải có ít nhất 1 trường thông tin')
+  .max(20, 'Mẫu nạp không được vượt quá 20 trường thông tin')
+  .refine((fields) => {
+    const keys = fields.map((f) => f.key.toLowerCase());
+    return new Set(keys).size === keys.length;
+  }, { message: 'Không được có trường thông tin trùng mã (duplicate key)' });
+
+const topupTemplateBodySchema = z.object({
   name: z.string().min(1).max(100),
   game: z.string().min(1).max(100),
   description: z.string().max(500).default(''),
   warning: z.string().max(500).default(''),
-  fields: z.array(templateFieldSchema).min(1, 'Template must have at least one field'),
+  fields: templateFieldsListSchema,
 });
+
+const topupTemplateSchema = topupTemplateBodySchema.extend({
+  id: z.string().min(1).max(60),
+});
+
+const updateTopupTemplateSchema = topupTemplateBodySchema.partial();
 
 router.get(
   '/topup-templates',
@@ -588,7 +609,7 @@ router.put(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
-      const data = topupTemplateSchema.partial().omit({ id: true }).parse(req.body);
+      const data = updateTopupTemplateSchema.parse(req.body);
       const { fields, ...metadata } = data;
       const tpl = await prisma.topupTemplate.update({
         where: { id },
@@ -692,6 +713,16 @@ router.get(
             amount: true,
             quantity: true,
             status: true,
+            paymentStatus: true,
+            paymentOrderCode: true,
+            qrCode: true,
+            checkoutUrl: true,
+            paidAt: true,
+            refundAmount: true,
+            refundTxId: true,
+            refundReason: true,
+            refundedById: true,
+            refundedAt: true,
             topupInfo: true,
             topupFields: true,
             topupLabels: true,
@@ -752,26 +783,45 @@ router.get(
 );
 
 // PATCH /admin/transactions/:id/status
+const updateTransactionStatusSchema = z.object({
+  status: z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'REFUNDED']).optional(),
+  paymentStatus: z.enum(['UNPAID', 'PENDING', 'PAID', 'EXPIRED', 'FAILED', 'REFUNDED']).optional(),
+  reason: z.string().max(500).optional().default('Điều chỉnh thủ công bởi quản trị viên'),
+  refundAmount: z.coerce.number().positive().max(100_000_000).optional(),
+  refundTxId: z.string().max(100).optional(),
+  refundReason: z.string().max(500).optional(),
+}).refine((data) => data.status !== undefined || data.paymentStatus !== undefined, {
+  message: 'Cần cập nhật ít nhất trạng thái đơn hoặc trạng thái thanh toán',
+});
+
 router.patch(
   '/transactions/:id/status',
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
-      const { status } = z
-        .object({
-          status: z.enum(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'REFUNDED']),
-        })
-        .parse(req.body);
+      const body = updateTransactionStatusSchema.parse(req.body);
 
       const transaction = await prisma.$transaction(async (tx) => {
         await tx.$queryRaw`SELECT id FROM transactions WHERE id = ${id} FOR UPDATE`;
         const previous = await tx.transaction.findUnique({
           where: { id },
-          select: { status: true, userId: true, amount: true, quantity: true },
+          select: {
+            id: true,
+            code: true,
+            status: true,
+            paymentStatus: true,
+            userId: true,
+            amount: true,
+            quantity: true,
+          },
         });
         if (!previous) throw new NotFoundError('Transaction');
+
+        const newStatus = body.status ?? previous.status;
+        const newPaymentStatus = body.paymentStatus ?? previous.paymentStatus;
         const completedBefore = previous.status === 'COMPLETED';
-        const completedAfter = status === 'COMPLETED';
+        const completedAfter = newStatus === 'COMPLETED';
+
         if (previous.userId && completedBefore !== completedAfter) {
           const delta = completedAfter
             ? new Prisma.Decimal(previous.amount)
@@ -781,26 +831,87 @@ router.patch(
             data: { totalSpent: { increment: delta } },
           });
         }
-        return tx.transaction.update({
+
+        const updateData: Prisma.TransactionUpdateInput = {
+          status: newStatus,
+          paymentStatus: newPaymentStatus,
+        };
+        if (newPaymentStatus === 'PAID' && previous.paymentStatus !== 'PAID') {
+          updateData.paidAt = new Date();
+        }
+
+        if (newStatus === 'REFUNDED' || newPaymentStatus === 'REFUNDED') {
+          const refundAmt = body.refundAmount ? new Prisma.Decimal(body.refundAmount) : previous.amount;
+          updateData.refundAmount = refundAmt;
+          updateData.refundTxId = body.refundTxId || null;
+          updateData.refundReason = body.refundReason || body.reason;
+          updateData.refundedById = req.user?.email || req.user?.userId || 'admin';
+          updateData.refundedAt = new Date();
+        }
+
+        const updated = await tx.transaction.update({
           where: { id },
-          data: { status },
-        select: {
-          id: true,
-          code: true,
-          status: true,
-          updatedAt: true,
-          userEmail: true,
-          packageName: true,
-          gameName: true,
-          amount: true,
-          quantity: true,
-          topupInfo: true,
-          topupFields: true,
-          topupLabels: true,
-          templateName: true,
-          createdAt: true,
-        },
+          data: updateData,
+          select: {
+            id: true,
+            code: true,
+            status: true,
+            paymentStatus: true,
+            updatedAt: true,
+            userEmail: true,
+            packageName: true,
+            gameName: true,
+            amount: true,
+            quantity: true,
+            topupInfo: true,
+            topupFields: true,
+            topupLabels: true,
+            templateName: true,
+            createdAt: true,
+            qrCode: true,
+            checkoutUrl: true,
+            paidAt: true,
+            refundAmount: true,
+            refundTxId: true,
+            refundReason: true,
+            refundedById: true,
+            refundedAt: true,
+          },
         });
+
+        // Audit Log for status override with reason
+        await tx.auditLog.create({
+          data: {
+            userId: req.user?.userId,
+            action: newStatus === 'REFUNDED' ? 'TRANSACTION_REFUND' : 'TRANSACTION_STATUS_UPDATE',
+            method: 'PATCH',
+            path: req.path,
+            statusCode: 200,
+            ipAddress: req.ip || req.socket?.remoteAddress || null,
+            requestId: req.requestId || null,
+            metadata: {
+              transactionId: id,
+              transactionCode: previous.code,
+              oldStatus: previous.status,
+              newStatus,
+              oldPaymentStatus: previous.paymentStatus,
+              newPaymentStatus,
+              reason: body.reason,
+              updatedBy: req.user?.email,
+              ...(newStatus === 'REFUNDED' || newPaymentStatus === 'REFUNDED'
+                ? {
+                    refundAmount: Number(updateData.refundAmount),
+                    refundTxId: updateData.refundTxId,
+                    refundReason: updateData.refundReason,
+                    refundedById: updateData.refundedById,
+                    refundedAt: updateData.refundedAt,
+                  }
+                : {}),
+            },
+          },
+        });
+
+        return updated;
       });
 
       res.json({ success: true, data: {
@@ -1088,6 +1199,87 @@ router.get(
         success: true,
         data: buildPaginatedResult(items, total, page, limit),
       });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PAYMENT ANOMALIES (RECONCILIATION)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// GET /admin/payment-anomalies
+router.get(
+  '/payment-anomalies',
+  requireRole('ADMIN'),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const page = Math.max(1, parseInt(String(req.query.page || '1'), 10) || 1);
+      const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit || '20'), 10) || 20));
+      const { skip, take } = getPaginationSkipTake(page, limit);
+      const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+      const anomalyType = typeof req.query.anomalyType === 'string' ? req.query.anomalyType.trim() : '';
+      const resolved = typeof req.query.resolved === 'string' ? req.query.resolved === 'true' : undefined;
+
+      const where: Prisma.PaymentAnomalyWhereInput = {
+        ...(anomalyType ? { anomalyType } : {}),
+        ...(resolved !== undefined ? { resolved } : {}),
+        ...(search
+          ? {
+              OR: [
+                { orderCode: { contains: search, mode: 'insensitive' } },
+                { referenceCode: { contains: search, mode: 'insensitive' } },
+                { content: { contains: search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      };
+
+      const [total, items] = await Promise.all([
+        prisma.paymentAnomaly.count({ where }),
+        prisma.paymentAnomaly.findMany({
+          where,
+          skip,
+          take,
+          orderBy: { createdAt: 'desc' },
+        }),
+      ]);
+
+      res.json({
+        success: true,
+        data: buildPaginatedResult(items, total, page, limit),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// PATCH /admin/payment-anomalies/:id/resolve
+router.patch(
+  '/payment-anomalies/:id/resolve',
+  requireRole('ADMIN'),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
+      const { resolutionNote } = z
+        .object({
+          resolutionNote: z.string().trim().min(1).max(500),
+        })
+        .parse(req.body);
+
+      const anomaly = await prisma.paymentAnomaly.update({
+        where: { id },
+        data: {
+          resolved: true,
+          resolvedBy: req.user?.email || 'admin',
+          resolvedAt: new Date(),
+          resolutionNote,
+        },
+      });
+
+      res.json({ success: true, data: anomaly });
     } catch (err) {
       next(err);
     }

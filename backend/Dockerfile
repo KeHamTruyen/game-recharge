@@ -28,6 +28,9 @@ FROM dhi.io/node:22-alpine3.24 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
+# Prisma 5 detects Alpine's OpenSSL in /lib when the runtime has no shell.
+COPY --from=build /usr/lib/libssl.so.3 /usr/lib/libcrypto.so.3 /lib/
+
 COPY --from=build --chown=65532:65532 /app/package.json /app/package-lock.json* ./
 COPY --from=build --chown=65532:65532 /app/node_modules ./node_modules
 COPY --from=build --chown=65532:65532 /app/node_modules/.prisma ./node_modules/.prisma

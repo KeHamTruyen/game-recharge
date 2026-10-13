@@ -18,6 +18,7 @@ const childEnv = {
   SEPAY_API_KEY: 'test-only-api-key', SEPAY_BANK_CODE: 'TEST',
   SEPAY_ACCOUNT_NUMBER: '0000000000', SEPAY_ACCOUNT_NAME: 'TEST ONLY',
   SMTP_HOST: '', SMTP_USER: '', SMTP_PASSWORD: '', SMTP_SECURE: 'false',
+  TELEGRAM_BOT_TOKEN: '', TELEGRAM_CHAT_ID: '',
   MAIL_FROM: 'test@example.invalid',
 };
 const prisma = new PrismaClient({ datasources: { db: { url: url.toString() } } });

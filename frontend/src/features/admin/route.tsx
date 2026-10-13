@@ -307,9 +307,9 @@ export function AdminRoute() {
           const updated = await api.admin.updateUser(id, updates)
           store.setUsers((current) => current.map((item) => item.id === id ? updated : item))
         }}
-        onUpdateTransaction={async (id, status) => {
+        onUpdateTransaction={async (id, status, reason, paymentStatus, refundDetails) => {
           const { api } = await import("@/services/api")
-          const updated = await api.admin.updateTransaction(id, status)
+          const updated = await api.admin.updateTransaction(id, status, reason, paymentStatus, refundDetails)
           store.setTransactions((current) => current.map((item) => item.id === id ? updated : item))
         }}
         onUpdateProfile={async (name) => { await store.updateProfile(name) }}

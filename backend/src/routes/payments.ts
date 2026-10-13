@@ -27,7 +27,7 @@ const sePayWebhookSchema = z
     accumulated: z.coerce.number().optional(),
     code: z.string().max(100).nullable().optional(),
     content: z.string().max(500),
-    referenceCode: z.string().max(100).nullable().optional(),
+    referenceCode: z.string().trim().max(100).nullable().optional(),
     description: z.string().max(500).nullable().optional(),
   })
   .strip();
@@ -94,103 +94,110 @@ router.post(
         return;
       }
 
-      // Strictly verify destination bank account matches the store's configured account
       const configuredAccount = env.SEPAY_ACCOUNT_NUMBER.trim();
-      if (!payload.accountNumber || payload.accountNumber.trim() !== configuredAccount) {
-        res.status(200).json({ success: true, ignored: true, reason: 'Mismatched account number' });
-        return;
-      }
+      const contentCode = payload.content.match(/DUKE[A-Z0-9]+/i)?.[0]?.toUpperCase();
+      const gatewayId = String(payload.id);
+      const referenceCode = payload.referenceCode || null;
+      const settled = await prisma.$transaction(async (tx) => {
+        // Serialize by event ID first, even if a retry changes or omits its reference.
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`sepay:id:${gatewayId}`}))`;
+        if (await tx.paymentReceipt.findUnique({ where: { provider_externalId: { provider: 'sepay', externalId: gatewayId } } }) ||
+            await tx.paymentAnomaly.findFirst({ where: { provider: 'sepay', gatewayId } })) return;
 
-      const orderCode = payload.content.match(/DUKE[A-Z0-9]+/i)?.[0]?.toUpperCase();
-      if (!orderCode) {
-        res.status(200).json({ success: true });
-        return;
-      }
-
-      await prisma.$transaction(async (tx) => {
-        const lockKey = payload.referenceCode
-          ? `sepay:ref:${payload.referenceCode}`
-          : `sepay:id:${payload.id}`;
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
-
-        if (payload.referenceCode) {
-          const duplicate = await tx.transaction.findFirst({
-            where: { bankTransactionId: payload.referenceCode },
-            select: { id: true },
+        if (referenceCode) {
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`sepay:ref:${referenceCode}`}))`;
+          const recordedAnomaly = await tx.paymentAnomaly.findFirst({
+            where: { provider: 'sepay', referenceCode, accountNumber: payload.accountNumber || null },
           });
-          if (duplicate) return;
+          if (recordedAnomaly) return;
         }
 
+        let orderCode = contentCode;
+        const recordAnomaly = async (anomalyType: string, expectedAmount?: Prisma.Decimal) => {
+          await tx.paymentAnomaly.create({ data: {
+            provider: 'sepay', gatewayId, referenceCode, orderCode,
+            accountNumber: payload.accountNumber || null,
+            amount: payload.transferAmount, expectedAmount, content: payload.content,
+            anomalyType, rawPayload: payload as Prisma.InputJsonValue,
+          } });
+        };
+        if (!payload.accountNumber || payload.accountNumber !== configuredAccount) {
+          await recordAnomaly('MISMATCHED_ACCOUNT');
+          return;
+        }
+        // The same bank reference is a redelivery, not another incoming payment.
+        if (referenceCode && await tx.transaction.findFirst({ where: { bankTransactionId: referenceCode } })) return;
+        if (!orderCode) {
+          await recordAnomaly('NO_ORDER_CODE');
+          return;
+        }
+        const matched = await tx.transaction.findFirst({
+          where: { OR: [{ paymentOrderCode: orderCode }, { code: orderCode }] },
+          select: { code: true, paymentOrderCode: true },
+        });
+        if (!matched) {
+          await recordAnomaly('ORDER_NOT_FOUND');
+          return;
+        }
+        orderCode = matched.paymentOrderCode || matched.code;
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`sepay:order:${orderCode}`}))`;
+        // Lock the rows too: manual admin updates use row locks, not advisory locks.
+        await tx.$queryRaw`SELECT id FROM transactions WHERE "paymentOrderCode" = ${orderCode}
+          OR ("paymentOrderCode" IS NULL AND code = ${orderCode}) ORDER BY id FOR UPDATE`;
         const transactions = await tx.transaction.findMany({
-          where: { paymentOrderCode: orderCode },
+          where: { OR: [{ paymentOrderCode: orderCode }, { paymentOrderCode: null, code: orderCode }] },
           select: {
-            id: true,
-            code: true,
-            amount: true,
-            packageName: true,
-            gameName: true,
-            userEmail: true,
-            topupInfo: true,
-            topupLabels: true,
+            id: true, amount: true, paymentStatus: true, packageName: true,
+            gameName: true, userEmail: true, topupInfo: true, topupLabels: true,
           },
         });
         if (!transactions.length) {
-          console.warn(`[SEPAY WEBHOOK] Không tìm thấy đơn hàng cho mã: ${orderCode}`);
+          await recordAnomaly('ORDER_NOT_FOUND');
           return;
         }
         const expectedAmount = transactions.reduce((sum, row) => sum.add(row.amount), new Prisma.Decimal(0));
-        if (!expectedAmount.equals(payload.transferAmount)) {
-          console.warn(
-            `[SEPAY WEBHOOK CẢNH BÁO LỆCH TIỀN] Đơn ${orderCode}: Dự kiến ${expectedAmount}đ nhưng nhận ${payload.transferAmount}đ`
-          );
+        if (transactions.some((row) => row.paymentStatus === 'PAID' || row.paymentStatus === 'REFUNDED')) {
+          await recordAnomaly('DUPLICATE_PAYMENT', expectedAmount);
           return;
         }
-
-        const receipt = await tx.paymentReceipt.createMany({
-          data: [{ provider: 'sepay', externalId: String(payload.id), paymentOrderCode: orderCode }],
-          skipDuplicates: true,
+        if (transactions.some((row) => row.paymentStatus === 'FAILED')) {
+          await recordAnomaly('PAYMENT_NOT_PAYABLE', expectedAmount);
+          return;
+        }
+        if (!expectedAmount.equals(payload.transferAmount)) {
+          await recordAnomaly('AMOUNT_MISMATCH', expectedAmount);
+          return;
+        }
+        await tx.paymentReceipt.create({
+          data: { provider: 'sepay', externalId: gatewayId, paymentOrderCode: orderCode },
         });
-        if (!receipt.count) return;
-
-        const paidAt =
-          payload.transactionDate && !isNaN(Date.parse(payload.transactionDate))
-            ? new Date(payload.transactionDate)
-            : new Date();
-
-        // Only pending fulfillment may advance; terminal statuses belong to the admin workflow.
+        const paidAt = payload.transactionDate ? new Date(payload.transactionDate) : new Date();
+        const where = { id: { in: transactions.map((item) => item.id) } };
         await tx.transaction.updateMany({
-          where: { paymentOrderCode: orderCode, status: 'PENDING',
-            paymentStatus: { in: ['PENDING', 'UNPAID', 'EXPIRED'] } },
-          data: { status: 'PROCESSING' },
+          where: { ...where, status: 'PENDING' }, data: { status: 'PROCESSING' },
         });
         await tx.transaction.updateMany({
-          where: {
-            paymentOrderCode: orderCode,
-            paymentStatus: { in: ['PENDING', 'UNPAID', 'EXPIRED'] },
-          },
-          data: {
-            paymentStatus: 'PAID',
-            paidAt,
-            paymentMetadata: payload as Prisma.InputJsonValue,
-            bankTransactionId: payload.referenceCode || null,
-          },
+          where,
+          data: { paymentStatus: 'PAID', paidAt, paymentMetadata: payload as Prisma.InputJsonValue, bankTransactionId: referenceCode },
         });
+        return { transactions, paidAt, orderCode };
+      });
 
-        // Trigger Telegram notification asynchronously for all affected orders
-        for (const item of transactions) {
+      // Notify only after the database commit, and only for newly settled orders.
+      if (settled) {
+        for (const item of settled.transactions) {
           void sendTelegramOrderNotification({
-            orderCode,
-            amount: Number(item.amount),
-            packageName: item.packageName,
-            gameName: item.gameName,
-            userEmail: item.userEmail,
+            orderCode: settled.orderCode, amount: Number(item.amount),
+            packageName: item.packageName, gameName: item.gameName, userEmail: item.userEmail,
             topupInfo: item.topupInfo as Record<string, unknown>,
-            topupLabels: item.topupLabels as Record<string, string>,
-            paidAt,
+            topupLabels: item.topupLabels as Record<string, string>, paidAt: settled.paidAt,
           });
         }
-      });
+      }
+      if (!payload.accountNumber || payload.accountNumber !== configuredAccount) {
+        res.status(200).json({ success: true, ignored: true, reason: 'Mismatched account number' });
+        return;
+      }
 
       res.status(200).json({ success: true });
     } catch (error) {

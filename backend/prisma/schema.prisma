@@ -179,6 +179,11 @@ model Transaction {
   paidAt       DateTime?
   paymentMetadata Json?
   bankTransactionId String?
+  refundAmount Decimal?          @db.Decimal(12, 2)
+  refundTxId   String?
+  refundReason String?
+  refundedById String?
+  refundedAt   DateTime?
   topupInfo    Json              @default("{}")
   topupFields  Json?
   topupLabels  Json              @default("{}")
@@ -268,4 +273,32 @@ model PaymentReceipt {
   @@id([provider, externalId])
   @@index([paymentOrderCode])
   @@map("payment_receipts")
+}
+
+// Anomalous bank transactions (mismatched amount, wrong content, duplicate transfers) for admin reconciliation
+model PaymentAnomaly {
+  id             String    @id @default(cuid())
+  provider       String    @default("sepay")
+  gatewayId      String?
+  referenceCode  String?
+  orderCode      String?
+  accountNumber  String?
+  amount         Decimal   @db.Decimal(12, 2)
+  expectedAmount Decimal?  @db.Decimal(12, 2)
+  content        String
+  anomalyType    String    // NO_ORDER_CODE | ORDER_NOT_FOUND | AMOUNT_MISMATCH | DUPLICATE_PAYMENT | MISMATCHED_ACCOUNT | PAYMENT_NOT_PAYABLE
+  rawPayload     Json?
+  resolved       Boolean   @default(false)
+  resolvedBy     String?
+  resolvedAt     DateTime?
+  resolutionNote String?
+  createdAt      DateTime  @default(now())
+
+  @@index([orderCode])
+  @@index([provider, gatewayId])
+  @@index([referenceCode])
+  @@index([anomalyType])
+  @@index([resolved])
+  @@index([createdAt])
+  @@map("payment_anomalies")
 }

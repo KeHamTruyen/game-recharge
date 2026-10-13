@@ -292,8 +292,37 @@ export function CheckoutRoute() {
     }
   })
   const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "PAID">("PENDING")
-  const [checkoutKey] = useState(() => crypto.randomUUID())
+  const [recoveryChecked, setRecoveryChecked] = useState(false)
+  const [recoveryError, setRecoveryError] = useState("")
+  const [recoveryRetry, setRecoveryRetry] = useState(0)
   const { setNotice } = store
+
+  useEffect(() => {
+    if (!store.apiReady) return
+    let cancelled = false
+    const recover = async () => {
+      try {
+        const saved = sessionStorage.getItem("duke1305_checkout_attempt")
+        const attempt = saved ? JSON.parse(saved) : null
+        if (!payment && store.user && attempt?.userEmail === store.user.email &&
+            attempt.cartSignature === cartSignature && attempt.totalAmount === cartTotalAmount) {
+          const restored = await api.orders.recoverCheckout(attempt.key)
+          if (cancelled) return
+          if (restored) {
+            sessionStorage.setItem("duke1305_checkout_payment", JSON.stringify({
+              payment: restored, userEmail: store.user.email, cartSignature, totalAmount: cartTotalAmount,
+            }))
+            setPayment(restored)
+          }
+        }
+        if (!cancelled) setRecoveryChecked(true)
+      } catch {
+        if (!cancelled) setRecoveryError("Chưa kiểm tra được đơn trước đó. Vui lòng thử lại để tránh tạo đơn trùng.")
+      }
+    }
+    void recover()
+    return () => { cancelled = true }
+  }, [store.apiReady, store.user?.email, cartSignature, cartTotalAmount, recoveryRetry])
 
   useEffect(() => {
     if (payment) {
@@ -325,6 +354,9 @@ export function CheckoutRoute() {
         if (!cancelled && result.paymentStatus === "PAID") {
           setPaymentStatus("PAID")
           sessionStorage.removeItem("duke1305_checkout_payment")
+          sessionStorage.removeItem("duke1305_checkout_key")
+          sessionStorage.removeItem("duke1305_checkout_key_sig")
+          sessionStorage.removeItem("duke1305_checkout_attempt")
           store.setCart([])
           setNotice("Đã nhận thanh toán. Đơn hàng đang được xử lý.")
         }
@@ -340,7 +372,15 @@ export function CheckoutRoute() {
     }
   }, [payment, paymentStatus, setNotice])
 
-  if (!store.apiReady) {
+  if (recoveryError) return <div className="page-width empty-state" role="alert">
+    <p>{recoveryError}</p>
+    <button className="secondary-button" onClick={() => {
+      setRecoveryError("")
+      setRecoveryRetry((value) => value + 1)
+    }}>Thử lại</button>
+  </div>
+
+  if (!store.apiReady || !recoveryChecked) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-3 text-slate-400">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
@@ -383,6 +423,15 @@ export function CheckoutRoute() {
           openLogin()
           return false
         }
+        const savedAttempt = sessionStorage.getItem("duke1305_checkout_attempt")
+        const previous = savedAttempt ? JSON.parse(savedAttempt) : null
+        const checkoutKey = previous?.userEmail === store.user.email &&
+          previous.cartSignature === cartSignature && previous.totalAmount === cartTotalAmount
+          ? previous.key : crypto.randomUUID()
+        // Persist only an opaque request ID and public cart metadata before sending.
+        sessionStorage.setItem("duke1305_checkout_attempt", JSON.stringify({
+          key: checkoutKey, userEmail: store.user.email, cartSignature, totalAmount: cartTotalAmount,
+        }))
         const result = await api.orders.checkout(
           store.cart.map((item) => ({
             packageId: item.pkg.id,

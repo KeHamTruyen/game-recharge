@@ -4,6 +4,8 @@ export type User = { id?: string; email: string; name?: string; role: "customer"
 
 export type TransactionStatus = "Chờ thanh toán" | "Đang xử lý" | "Hoàn thành" | "Thất bại" | "Đã hoàn tiền"
 
+export type PaymentStatus = "UNPAID" | "PENDING" | "PAID" | "EXPIRED" | "FAILED"
+
 export type Transaction = {
   id: string | number
   code: string
@@ -13,10 +15,18 @@ export type Transaction = {
   amount: number
   quantity?: number
   status: TransactionStatus
+  paymentStatus?: PaymentStatus | string
+  qrCode?: string | null
+  checkoutUrl?: string | null
   date: string
   topupInfo?: Record<string, string>
   topupLabels?: Record<string, string>
   templateName?: string
+  refundAmount?: number | null
+  refundTxId?: string | null
+  refundReason?: string | null
+  refundedById?: string | null
+  refundedAt?: string | null
 }
 
 export type ManagedUser = {

@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react"
 import type { ContactInfo, MiddlemanInfo, Transaction } from "@/domain/models"
 import { Icon, Pagination, formatPrice } from "@/components/ui"
 import { platformLogos } from "@/data/mock-data"
+import { api } from "@/services/api"
 
 export function MiddlemanPage({ info }: { info: MiddlemanInfo }) {
   return (
@@ -317,6 +318,7 @@ export function AccountPage({
             transactions={transactions.slice(0, 3)}
             title="Giao dịch gần đây"
             onCancelOrder={onCancelOrder}
+            onRefresh={onRefresh}
           />
         </>
       )}
@@ -326,6 +328,7 @@ export function AccountPage({
             transactions={visibleHistory}
             title="Toàn bộ giao dịch"
             onCancelOrder={onCancelOrder}
+            onRefresh={onRefresh}
           />
           {transactions.length > 5 && (
             <Pagination
@@ -396,11 +399,15 @@ export function TransactionHistory({
   transactions,
   title,
   onCancelOrder,
+  onRefresh,
 }: {
   transactions: Transaction[]
   title: string
   onCancelOrder?: (code: string) => Promise<void>
+  onRefresh?: () => Promise<unknown>
 }) {
+  const [payingOrderCode, setPayingOrderCode] = useState<string | null>(null)
+
   return (
     <div className="history-panel">
       <div>
@@ -430,6 +437,89 @@ export function TransactionHistory({
                   >
                     {transaction.status}
                   </em>
+                  <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                    {isPending && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setPayingOrderCode(transaction.code)
+                        }}
+                        style={{
+                          fontSize: "11px",
+                          padding: "3px 8px",
+                          background: "linear-gradient(135deg, #0284c7 0%, #2563eb 100%)",
+                          color: "#ffffff",
+                          fontWeight: 600,
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                        title="Tiếp tục thanh toán đơn hàng này"
+                      >
+                        Thanh toán ngay
+                      </button>
+                    )}
+                    {isPending && onCancelOrder && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (window.confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${transaction.code}?`)) {
+                            void onCancelOrder(transaction.code)
+                          }
+                        }}
+                        style={{
+                          fontSize: "11px",
+                          padding: "3px 8px",
+                          background: "rgba(239, 68, 68, 0.15)",
+                          color: "#f87171",
+                          border: "1px solid rgba(239, 68, 68, 0.3)",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                        title="Hủy đơn hàng chưa thanh toán"
+                      >
+                        Hủy đơn
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </span>
+              <strong>{formatPrice(transaction.amount)}</strong>
+              <div className="history-desktop-status">
+                <em
+                  className={`status-${String(transaction.status).replace(/\s+/g, "-").toLowerCase()}`}
+                >
+                  {transaction.status}
+                </em>
+                <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                  {isPending && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setPayingOrderCode(transaction.code)
+                      }}
+                      style={{
+                        fontSize: "11px",
+                        padding: "4px 10px",
+                        background: "linear-gradient(135deg, #0284c7 0%, #2563eb 100%)",
+                        color: "#ffffff",
+                        fontWeight: 600,
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        boxShadow: "0 2px 6px rgba(37, 99, 235, 0.3)",
+                      }}
+                      title="Tiếp tục thanh toán đơn hàng này"
+                    >
+                      Thanh toán ngay
+                    </button>
+                  )}
                   {isPending && onCancelOrder && (
                     <button
                       type="button"
@@ -441,7 +531,7 @@ export function TransactionHistory({
                       }}
                       style={{
                         fontSize: "11px",
-                        padding: "3px 8px",
+                        padding: "4px 8px",
                         background: "rgba(239, 68, 68, 0.15)",
                         color: "#f87171",
                         border: "1px solid rgba(239, 68, 68, 0.3)",
@@ -455,38 +545,6 @@ export function TransactionHistory({
                     </button>
                   )}
                 </div>
-              </span>
-              <strong>{formatPrice(transaction.amount)}</strong>
-              <div className="history-desktop-status">
-                <em
-                  className={`status-${String(transaction.status).replace(/\s+/g, "-").toLowerCase()}`}
-                >
-                  {transaction.status}
-                </em>
-                {isPending && onCancelOrder && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (window.confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${transaction.code}?`)) {
-                        void onCancelOrder(transaction.code)
-                      }
-                    }}
-                    style={{
-                      fontSize: "11px",
-                      padding: "3px 8px",
-                      background: "rgba(239, 68, 68, 0.15)",
-                      color: "#f87171",
-                      border: "1px solid rgba(239, 68, 68, 0.3)",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                    title="Hủy đơn hàng chưa thanh toán"
-                  >
-                    Hủy đơn
-                  </button>
-                )}
               </div>
             </div>
           )
@@ -497,6 +555,355 @@ export function TransactionHistory({
           <span>Chưa có giao dịch nào.</span>
         </div>
       )}
+
+      {payingOrderCode && (
+        <ResumePaymentModal
+          code={payingOrderCode}
+          onClose={() => setPayingOrderCode(null)}
+          onRefresh={onRefresh}
+        />
+      )}
     </div>
   )
 }
+
+export function ResumePaymentModal({
+  code,
+  onClose,
+  onRefresh,
+}: {
+  code: string
+  onClose: () => void
+  onRefresh?: () => Promise<unknown>
+}) {
+  const [data, setData] = useState<{
+    orderCode: string
+    paymentOrderCode: string
+    amount: number
+    bankCode: string
+    accountNumber: string
+    accountName: string
+    transferContent: string
+    qrCode: string
+    status: string
+    paymentStatus: string
+    packageName?: string
+    gameName?: string
+  } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [paid, setPaid] = useState(false)
+  const [copiedField, setCopiedField] = useState<string | null>(null)
+
+  const copy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedField(label)
+      setTimeout(() => setCopiedField(null), 2000)
+    } catch {
+      alert(`Đã chọn: ${text}`)
+    }
+  }
+
+  useEffect(() => {
+    let mounted = true
+    async function fetchPayment() {
+      try {
+        setLoading(true)
+        const res = await api.orders.getPayment(code)
+        if (mounted) {
+          setData(res)
+          if (res.paymentStatus === "PAID" || res.status === "COMPLETED" || res.status === "PROCESSING") {
+            setPaid(true)
+          }
+        }
+      } catch (err) {
+        if (mounted) setError(err instanceof Error ? err.message : "Không thể tải thông tin thanh toán.")
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+    void fetchPayment()
+    return () => {
+      mounted = false
+    }
+  }, [code])
+
+  useEffect(() => {
+    if (paid || !data) return
+    const orderRef = data.paymentOrderCode || data.orderCode
+    const interval = setInterval(async () => {
+      try {
+        const statusRes = await api.payments.status(orderRef)
+        if (statusRes.paymentStatus === "PAID") {
+          setPaid(true)
+          if (onRefresh) void onRefresh()
+        }
+      } catch {
+        // Ignore polling transient errors
+      }
+    }, 3500)
+    return () => clearInterval(interval)
+  }, [paid, data, onRefresh])
+
+  return (
+    <div
+      className="product-modal-backdrop"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="product-modal" style={{ maxWidth: "500px", width: "95%", boxSizing: "border-box" }}>
+        <div className="product-modal-head">
+          <div>
+            <span className="section-kicker">TIẾP TỤC THANH TOÁN</span>
+            <h2>Đơn hàng #{code}</h2>
+          </div>
+          <button onClick={onClose} title="Đóng">
+            <Icon name="close" size={20} />
+          </button>
+        </div>
+
+        <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+          {loading ? (
+            <div style={{ padding: "30px", textAlign: "center", color: "var(--color-text-muted)" }}>
+              Đang tải mã QR và thông tin chuyển khoản...
+            </div>
+          ) : error ? (
+            <div style={{ color: "#ef4444", padding: "12px", background: "rgba(239,68,68,0.1)", borderRadius: "8px" }}>
+              {error}
+            </div>
+          ) : paid ? (
+            <div style={{ textAlign: "center", padding: "24px 10px" }}>
+              <div
+                style={{
+                  width: "56px",
+                  height: "56px",
+                  borderRadius: "50%",
+                  background: "rgba(34, 197, 94, 0.2)",
+                  color: "#22c55e",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                }}
+              >
+                <Icon name="check" size={32} />
+              </div>
+              <h3 style={{ fontSize: "18px", margin: "0 0 8px", color: "#22c55e" }}>Thanh toán thành công!</h3>
+              <p style={{ fontSize: "13px", color: "var(--color-text-muted)", margin: "0 0 20px" }}>
+                Hệ thống đã nhận thanh toán. Đơn hàng đang được tiến hành xử lý nạp game.
+              </p>
+              <button className="primary-button" style={{ width: "100%" }} onClick={onClose}>
+                Xong
+              </button>
+            </div>
+          ) : data ? (
+            <>
+              {data.qrCode ? (
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <div
+                    style={{
+                      background: "#ffffff",
+                      padding: "10px",
+                      borderRadius: "12px",
+                      boxShadow: "0 4px 14px rgba(0,0,0,0.3)",
+                      maxWidth: "200px",
+                      width: "100%",
+                      textAlign: "center",
+                    }}
+                  >
+                    <img
+                      src={data.qrCode}
+                      alt="QR SePay"
+                      style={{ width: "100%", height: "auto", display: "block", borderRadius: "6px" }}
+                    />
+                    <small
+                      style={{
+                        color: "#334155",
+                        fontSize: "11px",
+                        display: "block",
+                        marginTop: "4px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Quét mã QR qua App Ngân hàng
+                    </small>
+                  </div>
+                </div>
+              ) : null}
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  background: "rgba(255, 255, 255, 0.03)",
+                  padding: "14px",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    fontSize: "13px",
+                  }}
+                >
+                  <span style={{ color: "var(--color-text-muted)" }}>Ngân hàng:</span>
+                  <strong>{data.bankCode || "SePay"}</strong>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    fontSize: "13px",
+                  }}
+                >
+                  <span style={{ color: "var(--color-text-muted)" }}>Số tài khoản:</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <strong style={{ fontFamily: "monospace", letterSpacing: "0.5px" }}>
+                      {data.accountNumber}
+                    </strong>
+                    <button
+                      type="button"
+                      onClick={() => copy(data.accountNumber, "stk")}
+                      style={{
+                        padding: "2px 8px",
+                        fontSize: "11px",
+                        borderRadius: "4px",
+                        background: "rgba(255,255,255,0.1)",
+                        border: "none",
+                        color: "#38bdf8",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {copiedField === "stk" ? "Đã chép" : "Chép"}
+                    </button>
+                  </div>
+                </div>
+
+                {data.accountName ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      fontSize: "13px",
+                    }}
+                  >
+                    <span style={{ color: "var(--color-text-muted)" }}>Chủ tài khoản:</span>
+                    <strong>{data.accountName}</strong>
+                  </div>
+                ) : null}
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    fontSize: "13px",
+                  }}
+                >
+                  <span style={{ color: "var(--color-text-muted)" }}>Số tiền:</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <strong style={{ color: "#38bdf8", fontSize: "14px" }}>
+                      {formatPrice(data.amount)}
+                    </strong>
+                    <button
+                      type="button"
+                      onClick={() => copy(String(data.amount), "tien")}
+                      style={{
+                        padding: "2px 8px",
+                        fontSize: "11px",
+                        borderRadius: "4px",
+                        background: "rgba(255,255,255,0.1)",
+                        border: "none",
+                        color: "#38bdf8",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {copiedField === "tien" ? "Đã chép" : "Chép"}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    fontSize: "13px",
+                    background: "rgba(245, 158, 11, 0.1)",
+                    padding: "8px 10px",
+                    borderRadius: "6px",
+                    border: "1px solid rgba(245, 158, 11, 0.25)",
+                  }}
+                >
+                  <div>
+                    <span style={{ color: "#f59e0b", fontSize: "11px", display: "block" }}>
+                      Nội dung chuyển khoản (Bắt buộc):
+                    </span>
+                    <strong
+                      style={{
+                        color: "#fbbf24",
+                        fontFamily: "monospace",
+                        fontSize: "14px",
+                        wordBreak: "break-all",
+                      }}
+                    >
+                      {data.transferContent}
+                    </strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => copy(data.transferContent, "nd")}
+                    style={{
+                      padding: "4px 10px",
+                      fontSize: "12px",
+                      borderRadius: "6px",
+                      background: "#f59e0b",
+                      border: "none",
+                      color: "#000",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {copiedField === "nd" ? "Đã chép" : "Sao chép"}
+                  </button>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "var(--color-text-muted)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <span className="online-dot" style={{ background: "#38bdf8" }} />
+                <span>Hệ thống đang tự động theo dõi chuyển khoản...</span>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  className="secondary-button"
+                  onClick={onClose}
+                  style={{ padding: "6px 16px" }}
+                >
+                  Đóng
+                </button>
+              </div>
+            </>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  )
+}
+

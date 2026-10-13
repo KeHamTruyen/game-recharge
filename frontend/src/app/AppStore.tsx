@@ -361,6 +361,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       sessionStorage.removeItem("duke1305_checkout_info")
+      sessionStorage.removeItem("duke1305_checkout_key_sig")
       const saved = sessionStorage.getItem("duke1305_checkout_payment")
       if (saved) {
         const parsed = JSON.parse(saved)
@@ -374,7 +375,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const setCheckoutInfo = (values: Record<string, string>) => {
     const keys = new Set([...Object.keys(checkoutInfo), ...Object.keys(values)])
     if ([...keys].some((key) => checkoutInfo[key] !== values[key])) {
-      try { sessionStorage.removeItem("duke1305_checkout_payment") } catch {}
+      try {
+        sessionStorage.removeItem("duke1305_checkout_payment")
+        // An empty form after reload is not evidence that the customer edited it.
+        if (Object.keys(checkoutInfo).length) sessionStorage.removeItem("duke1305_checkout_attempt")
+      } catch {}
     }
     updateCheckoutInfo(values)
   }
@@ -789,6 +794,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         try {
           sessionStorage.removeItem("duke1305_checkout_payment")
           sessionStorage.removeItem("duke1305_checkout_info")
+          sessionStorage.removeItem("duke1305_checkout_attempt")
+          sessionStorage.removeItem("duke1305_checkout_key")
+          sessionStorage.removeItem("duke1305_checkout_key_sig")
           sessionStorage.removeItem("duke1305_cart")
           sessionStorage.removeItem("duke1305_selected_service")
           sessionStorage.removeItem("duke1305_selected_qty")

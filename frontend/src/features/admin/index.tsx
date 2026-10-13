@@ -345,7 +345,13 @@ export function AdminPage({
   users: ManagedUser[]
   transactions: Transaction[]
   onUpdateUser: (id: string | number, updates: Partial<ManagedUser>) => void
-  onUpdateTransaction: (id: string | number, status: TransactionStatus) => void
+  onUpdateTransaction: (
+    id: string | number,
+    status: TransactionStatus,
+    reason?: string,
+    paymentStatus?: string,
+    refundDetails?: { refundAmount?: number; refundTxId?: string; refundReason?: string },
+  ) => void
   onUpdateProfile: (name: string) => Promise<void>
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
   adminName: string
@@ -353,12 +359,12 @@ export function AdminPage({
   onStore?: () => void
 }) {
   const [tab, setTab] =
-    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki" | "audit">(
+    useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "anomalies" | "users" | "adminAccount" | "analytics" | "wiki" | "audit">(
       "products",
     )
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const selectTab = (
-    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "users" | "adminAccount" | "analytics" | "wiki" | "audit",
+    nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "anomalies" | "users" | "adminAccount" | "analytics" | "wiki" | "audit",
   ) => {
     setTab(nextTab)
     setSidebarOpen(false)
@@ -618,6 +624,12 @@ export function AdminPage({
             onClick={() => selectTab("transactions")}
           >
             <Icon name="clock" size={18} /> Giao dịch
+          </button>
+          <button
+            className={tab === "anomalies" ? "active" : ""}
+            onClick={() => selectTab("anomalies")}
+          >
+            <Icon name="shield" size={18} /> Đối soát thanh toán
           </button>
           <button
             className={tab === "templates" ? "active" : ""}
@@ -2053,6 +2065,8 @@ export function AdminPage({
             <FooterAdminEditor config={footerConfig} onChange={onUpdateFooter} />
           ) : tab === "audit" ? (
             <AuditLogManager />
+          ) : tab === "anomalies" ? (
+            <PaymentAnomalyManager />
           ) : (
             <AdminAccount
               initialName={adminName}
@@ -3079,19 +3093,37 @@ export function AdminAnalytics({
   )
 }
 
+const paymentStatusBadges: Record<string, { label: string; color: string; bg: string }> = {
+  PAID: { label: "Đã TT", color: "#34d399", bg: "rgba(52, 211, 153, 0.15)" },
+  PENDING: { label: "Chờ TT", color: "#fbbf24", bg: "rgba(251, 191, 36, 0.15)" },
+  UNPAID: { label: "Chưa TT", color: "#94a3b8", bg: "rgba(148, 163, 184, 0.15)" },
+  EXPIRED: { label: "Hết hạn", color: "#f87171", bg: "rgba(239, 68, 68, 0.15)" },
+  FAILED: { label: "Thất bại", color: "#f87171", bg: "rgba(239, 68, 68, 0.15)" },
+}
+
 export function AdminTransactions({
   transactions,
   onUpdate,
   onViewAnalytics,
 }: {
   transactions: Transaction[]
-  onUpdate: (id: string | number, status: TransactionStatus) => void
+  onUpdate: (
+    id: string | number,
+    status: TransactionStatus,
+    reason?: string,
+    paymentStatus?: string,
+    refundDetails?: { refundAmount?: number; refundTxId?: string; refundReason?: string },
+  ) => void
   onViewAnalytics?: () => void
 }) {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("Tất cả")
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Transaction | null>(null)
+  const [refundingTx, setRefundingTx] = useState<Transaction | null>(null)
+  const [refundAmount, setRefundAmount] = useState("")
+  const [refundTxId, setRefundTxId] = useState("")
+  const [refundReason, setRefundReason] = useState("")
 
   useEffect(() => {
     if (!selected?.id) return
@@ -3172,7 +3204,8 @@ export function AdminTransactions({
           <span>Khách hàng</span>
           <span>Sản phẩm</span>
           <span>Số tiền</span>
-          <span>Trạng thái</span>
+          <span>Thanh toán</span>
+          <span>Tiến độ nạp</span>
           <span>Thao tác</span>
         </div>
         {visible.map((item) => (
@@ -3189,12 +3222,52 @@ export function AdminTransactions({
               </small>
             </span>
             <strong>{formatPrice(item.amount)}</strong>
+            <span>
+              {(() => {
+                const ps = String(item.paymentStatus || (item.status === "Hoàn thành" ? "PAID" : "PENDING")).toUpperCase()
+                const badge = paymentStatusBadges[ps] || { label: ps, color: "#94a3b8", bg: "rgba(148, 163, 184, 0.15)" }
+                return (
+                  <span
+                    style={{
+                      display: "inline-block",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      padding: "2px 7px",
+                      borderRadius: "6px",
+                      color: badge.color,
+                      backgroundColor: badge.bg,
+                    }}
+                    title={`Trạng thái thanh toán: ${badge.label}`}
+                  >
+                    {badge.label}
+                  </span>
+                )
+              })()}
+            </span>
             <select
               className={`transaction-status status-${String(item.status).replace(/\s+/g, "-").toLowerCase()}`}
               value={item.status}
-              onChange={(event) =>
-                onUpdate(item.id, event.target.value as TransactionStatus)
-              }
+              onChange={(event) => {
+                const nextStatus = event.target.value as TransactionStatus
+                if (nextStatus === item.status) return
+                if (nextStatus === "Đã hoàn tiền") {
+                  setRefundingTx(item)
+                  setRefundAmount(String(item.amount))
+                  setRefundTxId("")
+                  setRefundReason("Khách hủy hoặc hoàn tiền theo yêu cầu")
+                  return
+                }
+                const reason = window.prompt(
+                  `Nhập lý do điều chỉnh trạng thái đơn ${item.code} sang "${nextStatus}":`,
+                  "Điều chỉnh thủ công bởi quản trị viên",
+                )
+                if (reason === null) return
+                if (!reason.trim()) {
+                  alert("Vui lòng nhập lý do điều chỉnh trạng thái.")
+                  return
+                }
+                onUpdate(item.id, nextStatus, reason.trim())
+              }}
             >
               {statuses.slice(1).map((value) => (
                 <option key={value}>{value}</option>
@@ -3246,6 +3319,16 @@ export function AdminTransactions({
                 <span>
                   <small>Khách hàng</small>
                   <strong>{selected.email}</strong>
+                </span>
+                <span>
+                  <small>Thanh toán</small>
+                  <strong>
+                    {selected.paymentStatus === "PAID" ? "Đã thanh toán" : selected.paymentStatus || "Chờ thanh toán"}
+                  </strong>
+                </span>
+                <span>
+                  <small>Tiến độ nạp</small>
+                  <strong>{selected.status}</strong>
                 </span>
                 <span>
                   <small>Mẫu thông tin</small>
@@ -3321,6 +3404,41 @@ export function AdminTransactions({
                   <span>Đơn hàng này chưa có thông tin nạp từ người dùng.</span>
                 </div>
               )}
+
+              {(selected.refundAmount || selected.status === "Đã hoàn tiền" || selected.refundTxId) && (
+                <div style={{ background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.25)", borderRadius: "8px", padding: "14px", marginTop: "14px" }}>
+                  <span style={{ color: "#ef4444", fontWeight: 700, fontSize: "13px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Icon name="check" size={16} /> THÔNG TIN HOÀN TIỀN
+                  </span>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "8px", marginTop: "8px", fontSize: "13px" }}>
+                    <div>
+                      <small style={{ color: "var(--color-text-muted)" }}>Số tiền hoàn:</small>
+                      <p style={{ margin: "2px 0", fontWeight: 700, color: "#f87171" }}>
+                        {formatPrice(selected.refundAmount || selected.amount)}
+                      </p>
+                    </div>
+                    <div>
+                      <small style={{ color: "var(--color-text-muted)" }}>Mã giao dịch hoàn:</small>
+                      <p style={{ margin: "2px 0", fontFamily: "monospace" }}>{selected.refundTxId || "—"}</p>
+                    </div>
+                    <div>
+                      <small style={{ color: "var(--color-text-muted)" }}>Người xác nhận:</small>
+                      <p style={{ margin: "2px 0" }}>{selected.refundedById || "Quản trị viên"}</p>
+                    </div>
+                    <div>
+                      <small style={{ color: "var(--color-text-muted)" }}>Thời điểm hoàn:</small>
+                      <p style={{ margin: "2px 0" }}>{selected.refundedAt ? new Date(selected.refundedAt).toLocaleString("vi-VN") : "—"}</p>
+                    </div>
+                  </div>
+                  {selected.refundReason && (
+                    <div style={{ marginTop: "6px", fontSize: "13px" }}>
+                      <small style={{ color: "var(--color-text-muted)" }}>Lý do hoàn tiền:</small>
+                      <p style={{ margin: "2px 0", wordBreak: "break-word" }}>{selected.refundReason}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="order-info-warning">
                 <Icon name="shield" size={18} />
                 <span>
@@ -3329,6 +3447,143 @@ export function AdminTransactions({
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {refundingTx && (
+        <div
+          className="product-modal-backdrop"
+          onMouseDown={(e) => e.target === e.currentTarget && setRefundingTx(null)}
+        >
+          <div className="product-modal" style={{ maxWidth: "480px", width: "95%", boxSizing: "border-box" }}>
+            <div className="product-modal-head">
+              <div>
+                <span className="section-kicker">XÁC NHẬN HOÀN TIỀN</span>
+                <h2>Đơn hàng #{refundingTx.code}</h2>
+              </div>
+              <button onClick={() => setRefundingTx(null)}>
+                <Icon name="close" size={20} />
+              </button>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const amt = Number(refundAmount)
+                if (isNaN(amt) || amt <= 0) {
+                  alert("Số tiền hoàn không hợp lệ.")
+                  return
+                }
+                if (!refundReason.trim()) {
+                  alert("Vui lòng nhập lý do hoàn tiền.")
+                  return
+                }
+                onUpdate(
+                  refundingTx.id,
+                  "Đã hoàn tiền",
+                  refundReason.trim(),
+                  "REFUNDED",
+                  {
+                    refundAmount: amt,
+                    refundTxId: refundTxId.trim() || undefined,
+                    refundReason: refundReason.trim(),
+                  },
+                )
+                setRefundingTx(null)
+              }}
+              style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}
+            >
+              <p style={{ fontSize: "13px", color: "var(--color-text-muted)", margin: 0 }}>
+                Ghi nhận thông tin hoàn tiền cho giao dịch <strong>{refundingTx.product}</strong> ({formatPrice(refundingTx.amount)}).
+              </p>
+
+              <div>
+                <label style={{ fontSize: "13px", fontWeight: 600, display: "block", marginBottom: "4px" }}>
+                  Số tiền hoàn (VNĐ) (*):
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={refundAmount}
+                  onChange={(e) => setRefundAmount(e.target.value)}
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    borderRadius: "8px",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "#fff",
+                    padding: "10px",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: "13px", fontWeight: 600, display: "block", marginBottom: "4px" }}>
+                  Mã giao dịch ngân hàng / SePay (Tùy chọn):
+                </label>
+                <input
+                  type="text"
+                  value={refundTxId}
+                  onChange={(e) => setRefundTxId(e.target.value)}
+                  placeholder="Ví dụ: FT261013456789"
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    borderRadius: "8px",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "#fff",
+                    padding: "10px",
+                    fontSize: "13px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: "13px", fontWeight: 600, display: "block", marginBottom: "4px" }}>
+                  Lý do hoàn tiền (*):
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  placeholder="Ví dụ: Khách hủy đơn, đã chuyển trả qua STK Techcombank 1903..."
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    borderRadius: "8px",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "#fff",
+                    padding: "10px",
+                    fontSize: "13px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+
+              <div className="product-modal-actions" style={{ justifyContent: "flex-end", gap: "8px" }}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setRefundingTx(null)}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="primary-button"
+                  style={{ background: "#ef4444", borderColor: "#ef4444" }}
+                >
+                  Xác nhận hoàn tiền
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -3741,6 +3996,498 @@ export function AuditLogManager() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function PaymentAnomalyManager() {
+  const [anomalies, setAnomalies] = useState<
+    Array<{
+      id: string
+      provider: string
+      gatewayId: string | null
+      referenceCode: string | null
+      orderCode: string | null
+      accountNumber: string | null
+      amount: string | number
+      expectedAmount: string | number | null
+      content: string
+      anomalyType: string
+      rawPayload: Record<string, unknown> | null
+      resolved: boolean
+      resolvedBy: string | null
+      resolvedAt: string | null
+      resolutionNote: string | null
+      createdAt: string
+    }>
+  >([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [search, setSearch] = useState("")
+  const [anomalyType, setAnomalyType] = useState("all")
+  const [resolvedFilter, setResolvedFilter] = useState("all")
+
+  const [selectedAnomaly, setSelectedAnomaly] = useState<(typeof anomalies)[0] | null>(null)
+  const [resolvingAnomaly, setResolvingAnomaly] = useState<(typeof anomalies)[0] | null>(null)
+  const [resolutionNote, setResolutionNote] = useState("")
+  const [resolving, setResolving] = useState(false)
+
+  const fetchAnomalies = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await api.admin.paymentAnomalies({
+        page,
+        limit: 20,
+        search: search.trim() || undefined,
+        anomalyType: anomalyType === "all" ? undefined : anomalyType,
+        resolved: resolvedFilter === "all" ? undefined : resolvedFilter === "true",
+      })
+      setAnomalies(data.items)
+      setTotal(data.total)
+      setTotalPages(data.totalPages || 1)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Không thể tải danh sách đối soát thanh toán.")
+    } finally {
+      setLoading(false)
+    }
+  }, [page, search, anomalyType, resolvedFilter])
+
+  useEffect(() => {
+    void fetchAnomalies()
+  }, [fetchAnomalies])
+
+  const handleResolveSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!resolvingAnomaly) return
+    if (!resolutionNote.trim()) {
+      alert("Vui lòng nhập ghi chú xử lý.")
+      return
+    }
+    setResolving(true)
+    try {
+      await api.admin.resolvePaymentAnomaly(resolvingAnomaly.id, resolutionNote.trim())
+      setResolvingAnomaly(null)
+      setResolutionNote("")
+      await fetchAnomalies()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Lỗi khi cập nhật trạng thái xử lý.")
+    } finally {
+      setResolving(false)
+    }
+  }
+
+  const renderTypeBadge = (type: string) => {
+    switch (type) {
+      case "AMOUNT_MISMATCH":
+        return <span style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", fontSize: "12px", fontWeight: 600 }}>Sai số tiền</span>
+      case "NO_ORDER_CODE":
+        return <span style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(245, 158, 11, 0.15)", color: "#f59e0b", fontSize: "12px", fontWeight: 600 }}>Không mã đơn</span>
+      case "ORDER_NOT_FOUND":
+        return <span style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(234, 88, 12, 0.15)", color: "#ea580c", fontSize: "12px", fontWeight: 600 }}>Mã không tồn tại</span>
+      case "DUPLICATE_PAYMENT":
+        return <span style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(168, 85, 247, 0.15)", color: "#a855f7", fontSize: "12px", fontWeight: 600 }}>Chuyển trùng (2 lần)</span>
+      case "PAYMENT_NOT_PAYABLE":
+        return <span>Đơn không thể tự nhận thanh toán</span>
+      case "MISMATCHED_ACCOUNT":
+        return <span style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(59, 130, 246, 0.15)", color: "#3b82f6", fontSize: "12px", fontWeight: 600 }}>Sai STK nhận</span>
+      default:
+        return <span style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(255, 255, 255, 0.1)", color: "#e2e8f0", fontSize: "12px" }}>{type}</span>
+    }
+  }
+
+  return (
+    <div className="admin-data-page">
+      <div className="data-page-heading">
+        <div>
+          <h2>Đối soát thanh toán bất thường (SePay)</h2>
+          <p>Tự động ghi nhận các giao dịch chuyển tiền sai số tiền, sai/thiếu mã đơn hoặc chuyển khoản trùng lặp.</p>
+        </div>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <span>{total} giao dịch</span>
+          <button
+            className="secondary-button"
+            style={{ padding: "6px 12px", fontSize: "13px" }}
+            onClick={() => void fetchAnomalies()}
+            title="Làm mới dữ liệu"
+          >
+            Làm mới
+          </button>
+        </div>
+      </div>
+
+      <div className="data-filters" style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+        <label className="admin-search" style={{ flex: 1, minWidth: "220px" }}>
+          <Icon name="search" size={17} />
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
+            placeholder="Tìm theo mã đơn, mã GD, nội dung..."
+          />
+        </label>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          <select
+            value={anomalyType}
+            onChange={(e) => {
+              setAnomalyType(e.target.value)
+              setPage(1)
+            }}
+            style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              color: "#fff",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "13px",
+              outline: "none",
+            }}
+          >
+            <option value="all">Tất cả loại bất thường</option>
+            <option value="AMOUNT_MISMATCH">Sai số tiền</option>
+            <option value="NO_ORDER_CODE">Không có mã đơn</option>
+            <option value="ORDER_NOT_FOUND">Mã đơn không tồn tại</option>
+            <option value="DUPLICATE_PAYMENT">Chuyển trùng lặp (2 lần)</option>
+            <option value="PAYMENT_NOT_PAYABLE">Đơn không thể tự nhận thanh toán</option>
+            <option value="MISMATCHED_ACCOUNT">Sai STK thụ hưởng</option>
+          </select>
+
+          <select
+            value={resolvedFilter}
+            onChange={(e) => {
+              setResolvedFilter(e.target.value)
+              setPage(1)
+            }}
+            style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              color: "#fff",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "13px",
+              outline: "none",
+            }}
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="false">Chờ xử lý (Chưa xong)</option>
+            <option value="true">Đã giải quyết</option>
+          </select>
+        </div>
+      </div>
+
+      {error && (
+        <div style={{ color: "#ef4444", padding: "12px", background: "rgba(239,68,68,0.1)", borderRadius: "8px" }}>
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div style={{ padding: "40px", textAlign: "center", color: "var(--color-text-muted)" }}>
+          Đang tải dữ liệu đối soát...
+        </div>
+      ) : anomalies.length === 0 ? (
+        <div style={{ padding: "40px", textAlign: "center", color: "var(--color-text-muted)" }}>
+          Không có giao dịch bất thường nào cần đối soát.
+        </div>
+      ) : (
+        <div style={{ width: "100%", maxWidth: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch", borderRadius: "8px" }}>
+          <div className="admin-table" style={{ minWidth: "900px" }}>
+            <div
+              className="admin-table-head"
+              style={{
+                gridTemplateColumns: "140px 150px 140px 150px 1fr 110px 110px",
+                display: "grid",
+                gap: "8px",
+                alignItems: "center",
+              }}
+            >
+              <span>Thời gian</span>
+              <span>Phân loại</span>
+              <span>Mã đơn</span>
+              <span>Tiền thực tế / Đơn</span>
+              <span>Nội dung CK</span>
+              <span>Trạng thái</span>
+              <span style={{ textAlign: "right" }}>Thao tác</span>
+            </div>
+
+            {anomalies.map((item) => (
+              <div
+                key={item.id}
+                className="admin-table-row"
+                style={{
+                  gridTemplateColumns: "140px 150px 140px 150px 1fr 110px 110px",
+                  display: "grid",
+                  gap: "8px",
+                  alignItems: "center",
+                }}
+              >
+                <span style={{ fontSize: "12px", color: "var(--color-text-muted)" }}>
+                  {new Date(item.createdAt).toLocaleString("vi-VN", {
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+                <span>{renderTypeBadge(item.anomalyType)}</span>
+                <span style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600 }}>
+                  {item.orderCode || "—"}
+                </span>
+                <span style={{ fontSize: "13px" }}>
+                  <strong style={{ color: "#38bdf8" }}>{formatPrice(Number(item.amount))}</strong>
+                  {item.expectedAmount ? (
+                    <small style={{ display: "block", color: "var(--color-text-muted)", fontSize: "11px" }}>
+                      Đơn: {formatPrice(Number(item.expectedAmount))}
+                    </small>
+                  ) : null}
+                </span>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                  title={item.content}
+                >
+                  {item.content}
+                </span>
+                <span>
+                  {item.resolved ? (
+                    <span style={{ padding: "3px 8px", borderRadius: "6px", background: "rgba(34, 197, 94, 0.15)", color: "#22c55e", fontSize: "12px", fontWeight: 600 }}>
+                      Đã xử lý
+                    </span>
+                  ) : (
+                    <span style={{ padding: "3px 8px", borderRadius: "6px", background: "rgba(249, 115, 22, 0.15)", color: "#f97316", fontSize: "12px", fontWeight: 600 }}>
+                      Chờ xử lý
+                    </span>
+                  )}
+                </span>
+                <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
+                  <button
+                    className="secondary-button"
+                    style={{ padding: "4px 8px", fontSize: "12px" }}
+                    onClick={() => setSelectedAnomaly(item)}
+                    title="Xem chi tiết"
+                  >
+                    Xem
+                  </button>
+                  {!item.resolved && (
+                    <button
+                      className="primary-button"
+                      style={{ padding: "4px 8px", fontSize: "12px" }}
+                      onClick={() => {
+                        setResolvingAnomaly(item)
+                        setResolutionNote("")
+                      }}
+                      title="Giải quyết bất thường"
+                    >
+                      Xử lý
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPage={setPage}
+        />
+      )}
+
+      {/* Modal chi tiết đối soát */}
+      {selectedAnomaly && (
+        <div
+          className="product-modal-backdrop"
+          onMouseDown={(event) =>
+            event.target === event.currentTarget && setSelectedAnomaly(null)
+          }
+        >
+          <div className="product-modal" style={{ maxWidth: "600px", width: "95%", maxHeight: "90vh", overflowY: "auto", boxSizing: "border-box" }}>
+            <div className="product-modal-head">
+              <div>
+                <span className="section-kicker">ĐỐI SOÁT SEPAY</span>
+                <h2>Chi tiết giao dịch bất thường</h2>
+              </div>
+              <button onClick={() => setSelectedAnomaly(null)}>
+                <Icon name="close" size={20} />
+              </button>
+            </div>
+            <div className="product-modal-body" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px", fontSize: "13px" }}>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>Phân loại:</small>
+                  <p style={{ margin: "4px 0" }}>{renderTypeBadge(selectedAnomaly.anomalyType)}</p>
+                </div>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>Thời gian ghi nhận:</small>
+                  <p style={{ margin: "4px 0" }}>{new Date(selectedAnomaly.createdAt).toLocaleString("vi-VN")}</p>
+                </div>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>Mã đơn liên quan:</small>
+                  <p style={{ margin: "4px 0", fontWeight: 600 }}>{selectedAnomaly.orderCode || "Không có"}</p>
+                </div>
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>Số tiền chuyển khoản:</small>
+                  <p style={{ margin: "4px 0", fontWeight: 700, color: "#38bdf8" }}>
+                    {formatPrice(Number(selectedAnomaly.amount))}
+                  </p>
+                </div>
+                {selectedAnomaly.expectedAmount && (
+                  <div>
+                    <small style={{ color: "var(--color-text-muted)" }}>Số tiền đơn dự kiến:</small>
+                    <p style={{ margin: "4px 0", fontWeight: 600 }}>
+                      {formatPrice(Number(selectedAnomaly.expectedAmount))}
+                    </p>
+                  </div>
+                )}
+                <div>
+                  <small style={{ color: "var(--color-text-muted)" }}>Mã tham chiếu SePay:</small>
+                  <p style={{ margin: "4px 0", fontFamily: "monospace", fontSize: "11px" }}>{selectedAnomaly.referenceCode || selectedAnomaly.gatewayId || "—"}</p>
+                </div>
+              </div>
+
+              <div>
+                <small style={{ color: "var(--color-text-muted)" }}>Nội dung chuyển tiền gốc:</small>
+                <div style={{ background: "rgba(255,255,255,0.05)", padding: "8px 12px", borderRadius: "6px", marginTop: "4px", fontSize: "13px", wordBreak: "break-all" }}>
+                  {selectedAnomaly.content}
+                </div>
+              </div>
+
+              {selectedAnomaly.resolved && (
+                <div style={{ background: "rgba(34, 197, 94, 0.08)", border: "1px solid rgba(34, 197, 94, 0.2)", borderRadius: "8px", padding: "12px" }}>
+                  <span style={{ color: "#22c55e", fontWeight: 600, fontSize: "13px" }}>✓ Đã giải quyết bởi {selectedAnomaly.resolvedBy}</span>
+                  <p style={{ fontSize: "12px", color: "var(--color-text-muted)", margin: "4px 0" }}>
+                    Thời điểm: {selectedAnomaly.resolvedAt ? new Date(selectedAnomaly.resolvedAt).toLocaleString("vi-VN") : "—"}
+                  </p>
+                  <p style={{ fontSize: "13px", marginTop: "6px", wordBreak: "break-word" }}>
+                    <strong>Ghi chú:</strong> {selectedAnomaly.resolutionNote}
+                  </p>
+                </div>
+              )}
+
+              {selectedAnomaly.rawPayload && (
+                <div>
+                  <small style={{ color: "var(--color-text-muted)", marginBottom: "4px", display: "block" }}>
+                    Raw Payload Webhook:
+                  </small>
+                  <pre
+                    style={{
+                      background: "rgba(0, 0, 0, 0.4)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: "8px",
+                      padding: "12px",
+                      fontSize: "12px",
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                      color: "#a7f3d0",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-all",
+                    }}
+                  >
+                    {JSON.stringify(selectedAnomaly.rawPayload, null, 2)}
+                  </pre>
+                </div>
+              )}
+
+              <div className="product-modal-actions" style={{ justifyContent: "flex-end" }}>
+                {!selectedAnomaly.resolved && (
+                  <button
+                    className="primary-button"
+                    onClick={() => {
+                      setResolvingAnomaly(selectedAnomaly)
+                      setSelectedAnomaly(null)
+                      setResolutionNote("")
+                    }}
+                  >
+                    Xử lý giao dịch này
+                  </button>
+                )}
+                <button className="secondary-button" onClick={() => setSelectedAnomaly(null)}>
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal xử lý đối soát */}
+      {resolvingAnomaly && (
+        <div
+          className="product-modal-backdrop"
+          onMouseDown={(event) =>
+            event.target === event.currentTarget && !resolving && setResolvingAnomaly(null)
+          }
+        >
+          <div className="product-modal" style={{ maxWidth: "520px", width: "95%", boxSizing: "border-box" }}>
+            <div className="product-modal-head">
+              <div>
+                <span className="section-kicker">XỬ LÝ ĐỐI SOÁT</span>
+                <h2>Ghi nhận kết quả xử lý</h2>
+              </div>
+              <button onClick={() => !resolving && setResolvingAnomaly(null)}>
+                <Icon name="close" size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleResolveSubmit} className="product-modal-body" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+              <p style={{ fontSize: "13px", color: "var(--color-text-muted)", margin: 0 }}>
+                Giao dịch số tiền <strong>{formatPrice(Number(resolvingAnomaly.amount))}</strong> ({resolvingAnomaly.anomalyType}). Vui lòng nhập hướng xử lý đối soát (ví dụ: đã hoàn lại tiền vào STK khách, hoặc đã duyệt nạp bù tay...).
+              </p>
+              <div>
+                <label style={{ fontSize: "13px", fontWeight: 600, display: "block", marginBottom: "6px" }}>
+                  Ghi chú giải quyết (*):
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={resolutionNote}
+                  onChange={(e) => setResolutionNote(e.target.value)}
+                  placeholder="Ví dụ: Đã liên hệ Zalo và chuyển trả 50.000đ thừa qua STK Techcombank 1903..."
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    borderRadius: "8px",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "#fff",
+                    padding: "10px",
+                    fontSize: "13px",
+                    outline: "none",
+                  }}
+                />
+              </div>
+              <div className="product-modal-actions" style={{ justifyContent: "flex-end", gap: "8px" }}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={resolving}
+                  onClick={() => setResolvingAnomaly(null)}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="primary-button"
+                  disabled={resolving || !resolutionNote.trim()}
+                >
+                  {resolving ? "Đang lưu..." : "Xác nhận đã giải quyết"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

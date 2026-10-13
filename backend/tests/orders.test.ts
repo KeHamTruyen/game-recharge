@@ -272,6 +272,18 @@ describe('Orders & Checkout Logic (Atomic & Idempotent)', () => {
 
     const paymentOrderCode = res1.body.data.payment.orderCode;
 
+    const recoveryOptions = { headers: { 'Idempotency-Key': idempotencyKey } };
+    const recovered = await customerClient.get('/api/orders/checkout', recoveryOptions);
+    assert.strictEqual(recovered.status, 200);
+    assert.strictEqual(recovered.headers.get('cache-control'), 'no-store');
+    assert.deepStrictEqual(recovered.body.data, { payment: res1.body.data.payment });
+    assert.strictEqual((await otherClient.get('/api/orders/checkout', recoveryOptions)).body.data.payment, null);
+    assert.strictEqual((await guestClient.get('/api/orders/checkout', recoveryOptions)).status, 401);
+    assert.strictEqual((await customerClient.get('/api/orders/checkout')).status, 400);
+    assert.strictEqual((await customerClient.get('/api/orders/checkout', {
+      headers: { 'Idempotency-Key': crypto.randomUUID() },
+    })).body.data.payment, null);
+
     // Verify exactly 1 transaction created in DB
     const txCount1 = await prisma.transaction.count({
       where: { paymentOrderCode },
