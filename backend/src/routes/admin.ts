@@ -836,31 +836,27 @@ router.patch(
         });
         if (!previous) throw new NotFoundError('Transaction');
 
+        if (previous.status === 'REFUNDED' || previous.paymentStatus === 'REFUNDED') {
+          throw new AppError('Đơn hàng này đã được ghi nhận hoàn tiền trước đó', 400);
+        }
+
         let newStatus = body.status ?? previous.status;
         let newPaymentStatus = body.paymentStatus ?? previous.paymentStatus;
         const isRefunding = newStatus === 'REFUNDED' || newPaymentStatus === 'REFUNDED';
 
         if (isRefunding) {
-          if (previous.status === 'REFUNDED' && previous.paymentStatus === 'REFUNDED') {
-            if (!body.refundAmount && body.status === 'REFUNDED') {
-              // Idempotent repeat status update with no new refund details
-            } else {
-              throw new AppError('Đơn hàng này đã được ghi nhận hoàn tiền trước đó', 400);
-            }
-          } else {
-            if (previous.paymentStatus !== 'PAID' && previous.status !== 'COMPLETED') {
-              throw new AppError('Chỉ có thể hoàn tiền cho đơn hàng đã thanh toán thành công', 400);
-            }
-            const refundAmtNum = body.refundAmount ?? Number(previous.amount);
-            if (!Number.isInteger(refundAmtNum) || refundAmtNum <= 0) {
-              throw new AppError('Số tiền hoàn phải là số nguyên dương VND', 400);
-            }
-            if (refundAmtNum > Number(previous.amount)) {
-              throw new AppError('Số tiền hoàn không được vượt quá số tiền của đơn hàng', 400);
-            }
-            if (body.refundReason !== undefined && !body.refundReason.trim()) {
-              throw new AppError('Vui lòng nhập lý do hoàn tiền cụ thể', 400);
-            }
+          if (previous.paymentStatus !== 'PAID') {
+            throw new AppError('Chỉ có thể hoàn tiền cho đơn hàng đã thanh toán thành công', 400);
+          }
+          const refundAmtNum = body.refundAmount ?? Number(previous.amount);
+          if (!Number.isInteger(refundAmtNum) || refundAmtNum <= 0) {
+            throw new AppError('Số tiền hoàn phải là số nguyên dương VND', 400);
+          }
+          if (refundAmtNum > Number(previous.amount)) {
+            throw new AppError('Số tiền hoàn không được vượt quá số tiền của đơn hàng', 400);
+          }
+          if (!(body.refundReason ?? (body.reason !== 'Điều chỉnh thủ công bởi quản trị viên' ? body.reason : '')).trim()) {
+            throw new AppError('Vui lòng nhập lý do hoàn tiền cụ thể', 400);
           }
 
           newStatus = 'REFUNDED';

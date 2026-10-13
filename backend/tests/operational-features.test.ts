@@ -362,7 +362,7 @@ describe('Operational Features Test Suite', () => {
         { key: 'server_name', label: 'Server Name', type: 'text' },
       ],
     });
-    assert.equal(validRes.status, 201);
+    assert.equal(validRes.status, 201, JSON.stringify(validRes.body));
     assert.equal(validRes.body.success, true);
   });
 

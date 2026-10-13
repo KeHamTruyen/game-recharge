@@ -51,12 +51,18 @@ const PAGE_SIZE_OPTIONS = [24, 48, 96]
 export default function LibraryPage() {
   const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
 
   useEffect(() => {
     let active = true
     getLibraryFullData().then((data) => {
       if (active) {
         setLibraryItems(data)
+        setIsLoading(false)
+      }
+    }).catch(() => {
+      if (active) {
+        setLoadFailed(true)
         setIsLoading(false)
       }
     })
@@ -285,7 +291,14 @@ export default function LibraryPage() {
       <div ref={itemsGridRef} style={{ scrollMarginTop: "90px" }} />
 
       {/* Items Grid */}
-      {isLoading ? (
+      {loadFailed ? (
+        <div className="wiki-empty-state" role="alert">
+          <p>Không thể tải thư viện. Vui lòng thử lại.</p>
+          <button type="button" className="wiki-pill-btn active" onClick={() => window.location.reload()}>
+            Thử lại
+          </button>
+        </div>
+      ) : isLoading ? (
         <div className="wiki-empty-state" style={{ padding: "4rem 1rem" }}>
           <p>⏳ Đang tải dữ liệu Bách Khoa Toàn Thư...</p>
         </div>

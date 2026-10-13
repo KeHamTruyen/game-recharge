@@ -11,8 +11,8 @@ export type WikiEntry = {
 let entries: WikiEntry[] = []
 let pending: Promise<void> | null = null
 
-export function getWikiEntries(kind: string) {
-  return entries.filter((entry) => entry.kind === kind && !entry.deleted)
+export function getWikiEntries(kind: string, includeDeleted = false) {
+  return entries.filter((entry) => entry.kind === kind && (includeDeleted || !entry.deleted))
 }
 
 export function refreshWiki(force = false): Promise<void> {

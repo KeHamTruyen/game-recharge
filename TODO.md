@@ -1,6 +1,17 @@
 # TODO bàn giao — DUKE1305
 
-> Cập nhật **13/10/2026**; **Đã hoàn tất 100% toàn bộ mục P1 (A01–A06) và P2 (A07–A15)**. Toàn bộ 169 backend tests (25 suites) và 24 E2E tests đạt 100%.
+> Cập nhật **13/10/2026** sau kiểm tra lại. Đã sửa 6 lỗi xác nhận được; **A13 còn phần tối ưu phân trang màn hình**. Test pass chỉ xác nhận các ca đã chạy, không bảo đảm hệ thống không còn lỗi.
+
+## Bản sửa sau review
+
+- A02: Chặn mọi thay đổi trạng thái đơn đã hoàn tiền, giữ nguyên chứng từ; chỉ hoàn đơn có `paymentStatus=PAID`, bắt buộc lý do. Test thêm hoàn một phần rồi gửi lại, mở lại đơn, COMPLETED/UNPAID và hoàn đồng thời.
+- A03: Kiểm tra cả nhóm trước khi cấp QR; nhóm đã trả một phần hoặc có dòng không thể thanh toán trả 409 để CSKH đối soát. Nhóm trả đủ không cấp QR; QR nhóm chờ được tạo lại theo tổng hiện tại. UI chỉ báo đã trả khi `paymentStatus=PAID`.
+- A11: `psql` dùng `ON_ERROR_STOP=1`; test SQL thật trên schema thử nghiệm xác nhận lỗi trả mã khác 0 và rollback, SQL hợp lệ commit. Test này cần cài `psql`.
+- A12: Giữ tombstone khi hợp nhất giftcode/team/guide mặc định; vẫn ẩn nội dung đã xóa và review đã xóa. Test frontend cả 3 loại dữ liệu mặc định.
+- A13: Bỏ trần 500 để không mất bản ghi; test danh mục, lịch sử, admin giao dịch/người dùng có 501 bản ghi. **Chưa chuyển màn hình sang tải từng trang từ server**; dữ liệu lớn vẫn tốn thời gian/bộ nhớ.
+- A14: Bắt lỗi tải thư viện, hiển thị lỗi và nút tải lại trang; E2E chặn request rồi xác nhận tải lại thành công.
+
+Bằng chứng bổ sung: `backend/tests/review-regressions.test.ts`, `frontend/tests/handoff.spec.ts`. Kết quả chạy được ghi trong bảng bên dưới.
 
 Mã A01–A15 dưới đây thuộc audit **13/10**, khác A01–A04 của audit **11/10** (OTP, receipt webhook, trạng thái cuối, snapshot trường nhạy cảm). Các bản sửa cũ đó vẫn còn; không coi việc dùng lại số thứ tự là lỗi cũ tái phát.
 
@@ -10,14 +21,14 @@ Mã A01–A15 dưới đây thuộc audit **13/10**, khác A01–A04 của audit
 
 | Kiểm tra trên phiên bản hiện tại | Kết quả |
 | --- | --- |
-| `npm test --prefix backend` | **169/169 đạt**, 25 suites; schema thử nghiệm riêng, đã dọn sau khi chạy |
+| `npm test --prefix backend` | **174/174 đạt**, 26 suites; schema thử nghiệm riêng, đã dọn sau khi chạy |
 | `npm run typecheck --prefix frontend` & backend `npm run build` | **Đạt 100%**, 0 lỗi typecheck; dist biên dịch đầy đủ |
-| Bộ E2E Playwright đầy đủ (`frontend/tests`) | **24/24 đạt 100%**; bao gồm handoff spec (A07) và luồng hủy đơn (A01) |
+| Bộ E2E Playwright đầy đủ (`frontend/tests`) | **27/27 đạt 100%**; bao gồm handoff spec (A07) và luồng hủy đơn (A01) |
 | Kiểm thử P1 & Concurrency | **100% đạt**: Khóa nguyên tử hủy đơn, hoàn tiền, resume payment, mã hóa số |
 | Render Docker Compose & Network | **Đạt**: `migrate` đã gán `duke_network`, `MAIL_FROM` chuẩn RFC |
 | Bootstrap production an toàn | **Đạt**: Script `dist/scripts/bootstrap.js` khởi tạo DB sạch không chứa dữ liệu rác |
 
-Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports của dự án. Typecheck toàn bộ file test và source code đạt chuẩn.
+Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports của dự án. Build kiểm tra TypeScript theo tsconfig; các file test được thực thi bởi runner tương ứng.
 
 **Quy ước:** P1 cần sửa trước khi nhận đơn thật/triển khai theo hướng dẫn; P2 cần hoàn thiện hoặc ghi rõ giới hạn nghiệm thu; P3 tùy chọn. Mật khẩu tối thiểu 6 ký tự là quyết định chủ dự án đã chấp nhận, không đưa yêu cầu tăng độ dài vào danh sách bắt buộc.
 
@@ -42,7 +53,7 @@ Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports củ
 - [x] `backend/src/routes/orders.ts`: Khi mở lại thanh toán (`GET /:code/payment`), nếu đơn thuộc giỏ hàng nhiều món (`paymentOrderCode`), tự động tính tổng số tiền cả nhóm `totalGroupAmount` để khớp chính xác với số tiền trong mã QR và nội dung chuyển khoản SePay.
 - [x] Kiểm tra chặn không cho thanh toán lại đối với các đơn đã hủy (`FAILED`), hết hạn (`EXPIRED`) hoặc đã hoàn tiền (`REFUNDED`).
 - [x] `frontend/src/features/content/pages.tsx`: Sửa modal thanh toán chỉ ghi nhận `setPaid(true)` khi `paymentStatus === "PAID"` hoặc `status === "COMPLETED"`, không còn báo thành công giả khi đơn ở trạng thái `PROCESSING` mà chưa trả tiền.
-- **Bằng chứng:** Đã kiểm thử tự động trong `backend/tests/p1-fixes-verification.test.ts` và toàn bộ 24/24 Playwright e2e test đạt 100%.
+- **Bằng chứng:** Đã kiểm thử tự động trong `backend/tests/p1-fixes-verification.test.ts` và toàn bộ 27/27 Playwright e2e test đạt 100%.
 
 ### A04 — Đã sửa: Mật khẩu topup dạng số được chuẩn hóa và mã hóa AES
 - [x] `backend/src/utils/crypto.ts`: Hàm `sanitizeTopupInfoForStorage` chuẩn hóa các giá trị mật khẩu/secret dạng số (`typeof value !== 'string'` -> `String(value)`) và mã hóa AES với tiền tố `enc:`. Không còn lưu mật khẩu dạng số ở dạng rõ (plain text) trong database.
@@ -56,12 +67,14 @@ Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports củ
 - [x] `.env.production.example`: Sửa `MAIL_FROM="no-reply@duke1305.vn"` chuẩn cú pháp Docker Compose.
 - [x] `backend/src/config/env.ts`: Cập nhật schema `MAIL_FROM` hỗ trợ cả email thuần và định dạng RFC `"Tên" <email@domain.com>`.
 
-## P2 — Logic, xử lý lỗi và vận hành (ĐÃ HOÀN TẤT 9/9)
+## P2 — Logic, xử lý lỗi và vận hành (A13 còn tối ưu màn hình)
+
+- [ ] Theo dõi kiểm tra regex hợp lệ bị từ chối khi máy bận: chạy backend song song build/E2E nhận 400 thay vì 201; chạy lại toàn bộ backend riêng đạt 174/174. Bộ kiểm tra dùng VM timeout 35 ms; cần đo thêm để xác định nguyên nhân, chưa thay đổi giới hạn bảo vệ ReDoS.
 
 ### A07 — Đã sửa: Admin hiển thị Toast thông báo lỗi & Form hoàn tiền an toàn
 - [x] `frontend/src/features/admin/route.tsx`: Đưa `{store.notice && <div className="toast">{store.notice}</div>}` ra giao diện Admin đã đăng nhập. Lỗi server (như 409 khi xóa template đang dùng) hiển thị thông báo rõ ràng cho admin.
 - [x] `frontend/src/features/admin/index.tsx`: Form hoàn tiền chuyển sang `await onUpdate(...)` có `try/catch`, trạng thái `refundSubmitting`, hiển thị lỗi `refundError` tại chỗ và không đóng modal sớm khi API thất bại.
-- **Bằng chứng:** Ca test Playwright `tests/handoff.spec.ts:209` (`template deletion preserves the editor on server rejection and closes only after success`) đã chuyển từ ĐỎ sang XANH (100% pass).
+- **Bằng chứng:** Ca test Playwright `tests/handoff.spec.ts` (`template deletion preserves the editor on server rejection and closes only after success`) đã chuyển từ ĐỎ sang XANH (100% pass).
 
 ### A08 — Đã sửa: Validation template đồng nhất & Chống ReDoS
 - [x] Đồng bộ `backend/src/routes/admin.ts`, `backend/src/routes/orders.ts` và `frontend/src/features/admin/index.tsx`: Thống nhất độ dài khóa trường tối đa 50 ký tự (`.max(50)`), kiểu trường `type: enum('text', 'number', 'email', 'select', 'textarea', 'password')`, trường `select` bắt buộc có danh sách lựa chọn `options`.
@@ -87,7 +100,7 @@ Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports củ
   - Đồng bộ 100% bảng REST API Reference: `/auth/register/verify`, `GET /payments/status/:orderCode`, `PATCH /admin/transactions/:id/status` (hoàn tiền & đổi trạng thái), `/catalog/product-statuses`, `/catalog/tags`, `/orders/:code/cancel`, `PUT /auth/profile`, `POST /auth/change-password`, cookie `auth_token`.
   - Chuẩn hóa mô tả kiểm tra mẫu nạp và thời điểm cộng dồn `totalSpent` (khi đơn hoàn tất `COMPLETED`).
 - [x] Cập nhật `frontend/src/services/README.md` đồng bộ toàn bộ service contracts và endpoints thực tế.
-- **Bằng chứng:** Toàn bộ build, typecheck và 169/169 test backend đạt 100%. Mọi tài liệu và script đã được kiểm tra trên bản làm việc.
+- **Bằng chứng:** Toàn bộ build, typecheck và 174/174 test backend đạt 100%. Mọi tài liệu và script đã được kiểm tra trên bản làm việc.
 
 ### A11 — Đã sửa: Kiểm chứng script Backup retention an toàn & Restore tương thích
 - [x] `backend/scripts/backup.mjs`: Thêm bước kiểm tra giá trị `BACKUP_KEEP_DAYS` ngay khi khởi chạy: bắt buộc là số nguyên `>= 1`, từ chối ngay lập tức các giá trị `<= 0` hoặc chuỗi không hợp lệ trước khi thực hiện bất kỳ lệnh `pg_dump` nào (chống việc xóa nhầm các bản sao lưu mới tạo). Kiểm tra dung lượng file backup sau dump (`statSync(outputPath).size > 0`). In URL kết nối có che mật khẩu và nêu rõ phạm vi database scope.
@@ -96,13 +109,14 @@ Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports củ
 
 ### A12 — Đã sửa: Tối ưu Wiki Polling & Làm sạch Tombstone công khai
 - [x] `backend/src/routes/wiki.ts`: Tại endpoint công khai `GET /api/wiki`, các bản ghi đã xóa (`deleted === true`) được làm sạch dữ liệu tombstone: chỉ trả về `{ key, kind, deleted: true, updatedAt, createdAt, authorId: null, data: {} }`. Nội dung văn bản, tiêu đề, aniimo_ids của người dùng đã xóa hoàn toàn không bị rò rỉ ra API công khai.
-- [x] `frontend/src/features/wiki/wikiStore.ts`: `getWikiEntries` tự động lọc bỏ các bản ghi đã xóa (`!entry.deleted`). Hàm `refreshWiki(force = false)` tự động bỏ qua polling định kỳ khi tab trình duyệt đang ẩn (`document.visibilityState === 'hidden'`).
+- [x] `frontend/src/features/wiki/wikiStore.ts`: `getWikiEntries` mặc định lọc bản ghi đã xóa; các hàm hợp nhất giftcode/team/guide truyền `includeDeleted=true` để loại dữ liệu mặc định theo tombstone. `refreshWiki(force = false)` bỏ qua polling khi tab ẩn.
 - [x] `frontend/src/features/wiki/WikiLayout.tsx`: Lắng nghe sự kiện `visibilitychange` để kích hoạt làm mới ngay khi người dùng mở lại tab, đồng thời ngắt polling khi tab ẩn.
 - **Bằng chứng:** Test suite trong `p2-fixes-verification.test.ts` (100% pass): kiểm tra bản ghi soft-deleted trả về qua `GET /api/wiki` được ẩn hoàn toàn nội dung nhạy cảm và `authorId: null`.
 
-### A13 — Đã sửa: Phân trang API & Aggregate Thống kê cho Admin / Lịch sử
+### A13 — Còn tối ưu: Nối phân trang API vào màn hình Admin / Lịch sử
+- [ ] Nối các hàm phân trang vào màn hình, chuyển tìm kiếm/bộ lọc và thống kê sang server cùng lúc. Hiện AppStore vẫn tải hết dữ liệu để bảo toàn kết quả; không còn trần 500.
 - [x] `frontend/src/services/api.ts`:
-  - Giới hạn `allPages` có tham số trần `maxPages = 5` (tối đa 500 bản ghi) để chống treo trình duyệt hoặc quá tải bộ nhớ khi gọi phương thức cũ.
+  - `allPages` đọc hết dữ liệu, không cắt âm thầm ở 500 bản ghi; báo lỗi nếu server trả trang rỗng nhưng vẫn có trang tiếp.
   - Bổ sung các phương thức phân trang trực tiếp từ server: `admin.transactionsPaginated(params)`, `admin.usersPaginated(params)`, `orders.minePaginated(params)` nhận `page`, `limit`, `search`, `status`, `from`, `to`, `gameId`.
 - [x] `backend/src/routes/admin.ts`: Endpoint `GET /admin/transactions` tích hợp tính toán thống kê tổng hợp trực tiếp bằng database aggregate (`prisma.transaction.aggregate` tính tổng doanh thu `_sum.amount` của các đơn `COMPLETED`, và đếm số lượng `totalCompleted`). Trả về kèm trường `stats: { totalRevenue, totalCompleted }` mà không cần duyệt toàn bộ lịch sử ở client.
 - **Bằng chứng:** Test suite `p2-fixes-verification.test.ts` (100% pass): `GET /api/admin/transactions?page=1&limit=2` và `GET /api/admin/users?page=1&limit=2` trả về đúng phân đoạn trang kèm `stats` tổng doanh thu chuẩn xác từ CSDL.
@@ -120,12 +134,12 @@ Log chạy thử nghiệm lưu trữ tại thư mục temp và test reports củ
 - [x] `frontend/nginx/default.conf`:
   - Bổ sung cấu hình `location /assets/ { try_files $uri =404; }` để trả về HTTP 404 chuẩn cho các file tĩnh bị thiếu (ngăn fallback trả về HTML gây lỗi cú pháp script).
   - Cập nhật định tuyến SPA: `try_files $uri $uri/index.html /index.html;` ưu tiên trả về HTML tĩnh đã prerender cho từng trang theo đường dẫn.
-- **Bằng chứng:** Đã kiểm tra build sinh ra 13 file `index.html` trong từng thư mục route của `dist/` với metadata chuẩn; 24/24 ca Playwright E2E vượt qua kiểm tra route 404 (`unknown routes stay on 404 and are excluded from indexing`).
+- **Bằng chứng:** Đã kiểm tra build sinh ra 13 file `index.html` trong từng thư mục route của `dist/` với metadata chuẩn; 27/27 ca Playwright E2E vượt qua kiểm tra route 404 (`unknown routes stay on 404 and are excluded from indexing`).
 
-## Kiểm thử đã bổ sung và hoàn tất
-Toàn bộ các ca kiểm thử cho P1 (A01–A06) và P2 (A07–A15) đã hoàn thiện và đạt 100%:
-- **Backend Tests:** **169/169 đạt (25 suites)**
-- **Frontend E2E Tests:** **24/24 đạt (Playwright)**
+## Kiểm thử đã bổ sung
+Các ca kiểm thử hiện có cho P1/P2 không đại diện cho toàn bộ tình huống có thể xảy ra:
+- **Backend Tests:** **174/174 đạt (26 suites)**
+- **Frontend E2E Tests:** **27/27 đạt (Playwright)**
 - **Frontend Build & Typecheck:** **100% sạch, 0 lỗi TypeScript**
 
 | Nhóm | Ca kiểm thử đã bổ sung | Trạng thái |
@@ -140,7 +154,7 @@ Toàn bộ các ca kiểm thử cho P1 (A01–A06) và P2 (A07–A15) đã hoàn
 | A09 | Quota pending nhiều dòng checkout, PG advisory xact lock, cancel giải phóng quota | **Đạt** (`p2-fixes-verification.test.ts`) |
 | A11 | Validate `BACKUP_KEEP_DAYS >= 1`, từ chối 0/âm, restore kiểm tra file rỗng và định dạng | **Đạt** (`p2-fixes-verification.test.ts`) |
 | A12 | Tombstone wiki xóa sạch dữ liệu cộng đồng nhạy cảm, dừng polling khi tab ẩn | **Đạt** (`p2-fixes-verification.test.ts`, unit) |
-| A13 | Phân trang API admin giao dịch/người dùng, thống kê doanh thu aggregate từ DB | **Đạt** (`p2-fixes-verification.test.ts`) |
+| A13 | Phân trang API, aggregate DB; không cắt bản ghi 501 ở client | **API và tính đầy đủ dữ liệu đạt**; tối ưu phân trang màn hình còn mở |
 | A14 | Chunk LibraryPage giảm 99.6% (2.24 MB -> 9.36 kB), lazy-load data, tách wikiUtils | **Đạt** (Kiểm tra build thực tế) |
 | A15 | Prerender 13 HTML shells tĩnh cho toàn bộ route SEO sitemap, Nginx asset 404 | **Đạt** (Kiểm tra file dist & E2E) |
 
@@ -158,7 +172,7 @@ Toàn bộ các ca kiểm thử cho P1 (A01–A06) và P2 (A07–A15) đã hoàn
 
 ## Cổng nghiệm thu trước bàn giao
 
-- [x] Đóng toàn bộ 6 mục P1 (A01–A06), chạy lại regression backend 150/150 pass, frontend 24/24 E2E pass.
+- [x] Sửa các mục P1 đã xác nhận và chạy lại regression backend 174/174 pass, frontend 27/27 E2E pass.
 - [ ] Cấu hình SePay/SMTP thật và thử giao dịch nhỏ, đăng ký/quên mật khẩu trên môi trường được phép. Hai tích hợp vẫn chưa được kiểm chứng thật.
 - [ ] Xác nhận Telegram; vận hành vẫn tra được đơn khi Telegram lỗi, không dùng gửi Telegram làm điều kiện commit thanh toán.
 - [ ] Đổi secret/admin password mẫu; HTTPS, cookie/CORS, TRUST_PROXY_HOPS đúng topology; quét dependency/image trên đúng artifact bàn giao.
@@ -176,4 +190,4 @@ Giữ lại đề xuất trước đây, không coi là điều kiện bắt bu�
 - [ ] Tìm kiếm/bộ lọc lịch sử khách; xuất CSV/Excel theo nhu cầu kế toán.
 - [ ] Màn hình thanh toán thành công; broadcast khi có nhu cầu vận hành.
 
-**Giới hạn:** Đã sửa và kiểm thử 100% toàn bộ các mục P1 (A01–A06) và P2 (A07–A15); không thao tác dữ liệu production/gửi mail/Telegram/chuyển tiền thật. Chưa diễn tập restore/toàn bộ Compose, quét CVE mới nhất hoặc đo tải trên hạ tầng production. Toàn bộ các ca kiểm thử P1 và P2 đã được tự động hóa và vượt qua trên schema thử nghiệm riêng.
+**Giới hạn:** Không thao tác dữ liệu production/gửi mail/Telegram/chuyển tiền thật. Restore SQL đã thử trên schema riêng; chưa diễn tập khôi phục toàn database, toàn bộ Compose, quét CVE mới nhất hoặc đo tải production. A13 vẫn cần nối phân trang server vào màn hình nếu dữ liệu lớn; không đánh dấu hoàn tất toàn bộ P2.

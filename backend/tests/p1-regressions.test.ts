@@ -143,10 +143,12 @@ describe('P1 security and payment regressions', () => {
         });
       }
       const endpoint = `/api/admin/transactions/${order.rows[0].id}/status`;
-      assert.equal((await admin.patch(endpoint, { status })).status, 200);
+      assert.equal((await admin.patch(endpoint, {
+        status, ...(status === 'REFUNDED' ? { refundReason: 'Verified refund before late webhook' } : {}),
+      })).status, 200);
       assert.equal((await webhook(order.code, 90100 + index)).status, 200);
       assert.equal((await prisma.transaction.findUniqueOrThrow({ where: { id: order.rows[0].id } })).status, status);
-      assert.equal((await admin.patch(endpoint, { status })).status, 200);
+      assert.equal((await admin.patch(endpoint, { status })).status, status === 'REFUNDED' ? 400 : 200);
       const owner = await prisma.user.findUniqueOrThrow({ where: { id: order.owner.id } });
       assert.equal(Number(owner.totalSpent), status === 'COMPLETED' ? 10000 : 0);
     }

@@ -613,7 +613,7 @@ export function ResumePaymentModal({
         const res = await api.orders.getPayment(code)
         if (mounted) {
           setData(res)
-          if (res.paymentStatus === "PAID" || res.status === "COMPLETED") {
+          if (res.paymentStatus === "PAID") {
             setPaid(true)
           }
         }

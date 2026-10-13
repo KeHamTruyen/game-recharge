@@ -36,6 +36,7 @@ const isSql = backupPath.endsWith('.sql');
 let restoreProcess;
 if (isSql) {
   restoreProcess = spawnSync('psql', [
+    '--set=ON_ERROR_STOP=1',
     '--single-transaction',
     '--file=' + backupPath,
     targetDbUrl,

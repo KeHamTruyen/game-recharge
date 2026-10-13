@@ -525,13 +525,18 @@ router.get(
       // Calculate group amount if part of a multi-item checkout
       const groupOrders = await prisma.transaction.findMany({
         where: { OR: [{ paymentOrderCode: des }, { paymentOrderCode: null, code: des }] },
-        select: { id: true, amount: true },
+        select: { id: true, amount: true, status: true, paymentStatus: true },
       });
+      const allPaid = groupOrders.length > 0 && groupOrders.every((row) => row.paymentStatus === 'PAID');
+      if (groupOrders.some((row) => row.status === 'FAILED' || row.status === 'REFUNDED' ||
+        ['EXPIRED', 'FAILED', 'REFUNDED'].includes(row.paymentStatus)) ||
+        (!allPaid && groupOrders.some((row) => row.paymentStatus === 'PAID'))) {
+        throw new AppError('Nhóm đơn cần được đối soát. Vui lòng liên hệ CSKH trước khi thanh toán thêm.', 409);
+      }
       const totalGroupAmount = groupOrders.reduce((sum, item) => sum + Number(item.amount), 0);
       const amountNum = totalGroupAmount > 0 ? totalGroupAmount : Number(transaction.amount);
 
-      const qrCode =
-        transaction.qrCode ||
+      const qrCode = allPaid ? '' :
         `https://qr.sepay.vn/img?${new URLSearchParams({
           acc: accountNumber,
           bank: bankCode,
@@ -551,7 +556,7 @@ router.get(
           transferContent: des,
           qrCode,
           status: transaction.status,
-          paymentStatus: transaction.paymentStatus || 'PENDING',
+          paymentStatus: allPaid ? 'PAID' : 'PENDING',
           packageName: transaction.packageName,
           gameName: transaction.gameName,
         },

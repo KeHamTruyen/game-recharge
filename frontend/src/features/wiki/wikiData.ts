@@ -22,7 +22,7 @@ export function getEffectiveGiftcodes(): GiftcodeItem[] {
     (rawGiftcodes.data as GiftcodeItem[]).map((code) => [code.id, code]),
   )
 
-  for (const entry of getWikiEntries("giftcode")) {
+  for (const entry of getWikiEntries("giftcode", true)) {
     const id = entry.key.slice("giftcode:".length)
 
     if (entry.deleted) base.delete(id)
@@ -67,7 +67,7 @@ export function getEffectiveCommunityTeams(): CommunityTeam[] {
     (rawTeams as CommunityTeam[]).map((team) => [team.id, team]),
   )
 
-  for (const entry of getWikiEntries("team")) {
+  for (const entry of getWikiEntries("team", true)) {
     const id = Number(entry.key.split(":")[1])
 
     if (entry.deleted) teams.delete(id)
@@ -200,7 +200,7 @@ export function getEffectiveGuides(): GuideArticle[] {
     DEFAULT_GUIDES.map((g) => [g.id, g]),
   )
 
-  for (const entry of getWikiEntries("guide")) {
+  for (const entry of getWikiEntries("guide", true)) {
     const id = entry.key.slice("guide:".length)
     if (entry.deleted) {
       map.delete(id)

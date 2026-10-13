@@ -118,13 +118,77 @@ test("team publication uses the server ID and can update the same saved team", a
   await update
 })
 
-test("catalog fetches the next page instead of silently hiding packages after 100", async ({ page }) => {
+test("catalog fetches beyond 500 packages without silently hiding the last page", async ({ page }) => {
   await page.route(/\/api\/catalog\/services\/a\/packages/, async (route) => {
-    const secondPage = new URL(route.request().url()).searchParams.get("page") === "2"
-    await route.fulfill({ json: { success: true, data: { items: [{ ...pkg, id: secondPage ? "pkg-101" : "pkg-1", name: secondPage ? "Last Package" : "First Package" }], hasNext: !secondPage } } })
+    const pageNumber = Number(new URL(route.request().url()).searchParams.get("page"))
+    const items = Array.from({ length: pageNumber < 6 ? 100 : 1 }, (_, i) => ({
+      ...pkg, id: `pkg-${(pageNumber - 1) * 100 + i}`, name: pageNumber === 6 ? "Last Package" : `Package ${pageNumber}-${i}`,
+    }))
+    await route.fulfill({ json: { success: true, data: { items, hasNext: pageNumber < 6 } } })
   })
   await page.goto("/nap-game/a")
   await expect(page.locator(".package-card").filter({ hasText: "Last Package" })).toBeVisible()
+})
+
+test("order and admin lists retain record 501", async ({ page }) => {
+  await page.route(/\/api\/(orders\/mine|admin\/(transactions|users))\?/, async (route) => {
+    const pageNumber = Number(new URL(route.request().url()).searchParams.get("page"))
+    const items = Array.from({ length: pageNumber < 6 ? 100 : 1 }, (_, i) => ({
+      id: String((pageNumber - 1) * 100 + i), code: "TEST", amount: 10000,
+      status: "PENDING", createdAt: "2026-01-01T00:00:00Z", role: "CUSTOMER", totalSpent: 0,
+    }))
+    await route.fulfill({ json: { success: true, data: { items, hasNext: pageNumber < 6 } } })
+  })
+  await page.goto("/nap-game")
+  const counts = await page.evaluate(async () => {
+    const modulePath = "/src/services/api.ts"
+    const { api } = await import(modulePath)
+    return Promise.all([api.orders.mine(), api.admin.transactions(), api.admin.users()]).then((lists) => lists.map((list) => list.length))
+  })
+  expect(counts).toEqual([501, 501, 501])
+})
+
+test("wiki tombstones remove built-in giftcodes, teams and guides without exposing deleted reviews", async ({ page }) => {
+  await page.goto("/wiki/giftcode")
+  const keys = await page.evaluate(async () => {
+    const modulePath = "/src/features/wiki/wikiData.ts"
+    const data = await import(modulePath)
+    return [
+      `giftcode:${data.getEffectiveGiftcodes()[0].id}`,
+      `team:${data.getEffectiveCommunityTeams()[0].id}`,
+      `guide:${data.getEffectiveGuides()[0].id}`,
+    ]
+  })
+  await page.route("**/api/wiki", (route) => route.fulfill({ json: { success: true, data: {
+    entries: [...keys, "review:test"].map((key) => ({ key, kind: key.split(":")[0], deleted: true, authorId: null, data: {} })), next: null,
+  } } }))
+  const result = await page.evaluate(async (keys) => {
+    const storePath = "/src/features/wiki/wikiStore.ts"
+    const dataPath = "/src/features/wiki/wikiData.ts"
+    const store = await import(storePath)
+    const data = await import(dataPath)
+    await store.refreshWiki(true)
+    return {
+      visible: [data.getEffectiveGiftcodes(), data.getEffectiveCommunityTeams(), data.getEffectiveGuides()]
+        .map((items, index) => items.some((item: { id: string | number }) => String(item.id) === keys[index].split(":")[1])),
+      reviews: store.getWikiEntries("review").length,
+    }
+  }, keys)
+  expect(result).toEqual({ visible: [false, false, false], reviews: 0 })
+})
+
+test("library download failure shows retry and recovers after reload", async ({ page }) => {
+  let fail = true
+  const errors: string[] = []
+  page.on("pageerror", (error) => errors.push(error.message))
+  await page.route("**/library_items_full.json*", (route) => fail ? route.abort() : route.continue())
+  await page.goto("/wiki/thu-vien")
+  await expect(page.getByRole("alert")).toContainText("Không thể tải thư viện")
+  fail = false
+  await page.getByRole("button", { name: "Thử lại", exact: true }).click()
+  await expect(page.locator(".library-item-card").first()).toBeVisible()
+  await expect(page.getByRole("alert")).toHaveCount(0)
+  expect(errors).toEqual([])
 })
 
 test("catalog errors show retry without displaying mock products", async ({ page }) => {

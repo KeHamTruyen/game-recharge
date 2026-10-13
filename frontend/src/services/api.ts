@@ -63,18 +63,17 @@ export type PaymentDetails = {
 
 const client = new HttpClient(import.meta.env.VITE_API_URL || "/api")
 
-// Bounded pagination: cap at maxPages (default 5, max 500 items) to prevent blocking
-// network threads or exhausting memory on large databases when legacy callers omit pagination params.
-async function allPages<T>(path: string, maxPages = 5): Promise<T[]> {
+// shortcut: legacy screens load all rows; migrate their filters and totals together to server pagination for large datasets.
+async function allPages<T>(path: string): Promise<T[]> {
   const items: T[] = []
-  for (let page = 1; page <= maxPages; page += 1) {
+  for (let page = 1; ; page += 1) {
     const result = await client.request<ApiEnvelope<{ items: T[]; hasNext: boolean }>>(
       `${path}${path.includes("?") ? "&" : "?"}limit=100&page=${page}`,
     )
     items.push(...result.data.items)
     if (!result.data.hasNext) return items
+    if (!result.data.items.length) throw new Error("Phân trang không hợp lệ. Vui lòng tải lại.")
   }
-  return items
 }
 
 const roleMap = { CUSTOMER: "customer", ADMIN: "admin" } as const
