@@ -607,6 +607,19 @@ export function AdminPage({
           className={sidebarOpen ? "open" : ""}
           aria-label="Danh mục quản trị"
         >
+          <div className="admin-sidebar-mobile-head">
+            <span>
+              <Icon name="shield" size={16} /> Quản trị hệ thống
+            </span>
+            <button
+              type="button"
+              className="admin-sidebar-close"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Đóng menu"
+            >
+              <Icon name="close" size={16} />
+            </button>
+          </div>
           <button
             className={tab === "products" ? "active" : ""}
             onClick={() => selectTab("products")}
@@ -3118,6 +3131,9 @@ export function AdminTransactions({
 }) {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("Tất cả")
+  const [paymentFilter, setPaymentFilter] = useState("Tất cả")
+  const [gameFilter, setGameFilter] = useState("Tất cả")
+  const [hideExpired, setHideExpired] = useState(false)
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Transaction | null>(null)
   const [refundingTx, setRefundingTx] = useState<Transaction | null>(null)
@@ -3142,6 +3158,7 @@ export function AdminTransactions({
       active = false
     }
   }, [selected?.id])
+
   const statuses: Array<"Tất cả" | TransactionStatus> = [
     "Tất cả",
     "Chờ thanh toán",
@@ -3150,16 +3167,55 @@ export function AdminTransactions({
     "Thất bại",
     "Đã hoàn tiền",
   ]
-  const filtered = transactions.filter(
-    (item) =>
-      (status === "Tất cả" || item.status === status) &&
-      `${item.code} ${item.email} ${item.product}`
-        .toLowerCase()
-        .includes(search.toLowerCase()),
+
+  const gameList = useMemo(() => {
+    const set = new Set<string>()
+    transactions.forEach((t) => {
+      if (t.game && t.game.trim()) {
+        set.add(t.game.trim())
+      }
+    })
+    return Array.from(set).sort()
+  }, [transactions])
+
+  const filtered = useMemo(() => {
+    const s = search.trim().toLowerCase()
+    return transactions.filter((item) => {
+      const ps = String(item.paymentStatus || (item.status === "Hoàn thành" ? "PAID" : "PENDING")).toUpperCase()
+
+      if (hideExpired && ps === "EXPIRED") return false
+      if (paymentFilter !== "Tất cả" && ps !== paymentFilter) return false
+      if (status !== "Tất cả" && item.status !== status) return false
+      if (gameFilter !== "Tất cả" && item.game !== gameFilter) return false
+
+      if (s) {
+        const text = `${item.code} ${item.email} ${item.product} ${item.game || ""}`.toLowerCase()
+        if (!text.includes(s)) return false
+      }
+
+      return true
+    })
+  }, [transactions, search, status, paymentFilter, gameFilter, hideExpired])
+
+  const hasActiveFilters = Boolean(
+    search.trim() ||
+    status !== "Tất cả" ||
+    paymentFilter !== "Tất cả" ||
+    gameFilter !== "Tất cả" ||
+    hideExpired
   )
+
+  const resetFilters = () => {
+    setSearch("")
+    setStatus("Tất cả")
+    setPaymentFilter("Tất cả")
+    setGameFilter("Tất cả")
+    setHideExpired(false)
+  }
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / 8))
   const visible = filtered.slice((page - 1) * 8, page * 8)
-  useEffect(() => setPage(1), [search, status])
+  useEffect(() => setPage(1), [search, status, paymentFilter, gameFilter, hideExpired])
 
   return (
     <div className="admin-data-page">
@@ -3178,7 +3234,11 @@ export function AdminTransactions({
               <Icon name="spark" size={15} /> Thống kê theo game ↗
             </button>
           )}
-          <span>{transactions.length} giao dịch</span>
+          <span>
+            {filtered.length !== transactions.length
+              ? `${filtered.length} / ${transactions.length} giao dịch`
+              : `${transactions.length} giao dịch`}
+          </span>
         </div>
       </div>
       <div className="data-filters transaction-filters">
@@ -3187,17 +3247,59 @@ export function AdminTransactions({
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Mã đơn, email, sản phẩm..."
+            placeholder="Mã đơn, email, game, sản phẩm..."
           />
         </label>
         <select
-          value={status}
-          onChange={(event) => setStatus(event.target.value)}
+          value={gameFilter}
+          onChange={(event) => setGameFilter(event.target.value)}
+          aria-label="Lọc theo game"
         >
-          {statuses.map((item) => (
-            <option key={item}>{item}</option>
+          <option value="Tất cả">Tất cả game ({gameList.length})</option>
+          {gameList.map((g) => (
+            <option key={g} value={g}>{g}</option>
           ))}
         </select>
+        <select
+          value={paymentFilter}
+          onChange={(event) => setPaymentFilter(event.target.value)}
+          aria-label="Lọc trạng thái thanh toán"
+        >
+          <option value="Tất cả">Tất cả thanh toán</option>
+          <option value="PAID">Đã thanh toán (PAID)</option>
+          <option value="PENDING">Chờ thanh toán (PENDING)</option>
+          <option value="EXPIRED">Đã hết hạn (EXPIRED)</option>
+          <option value="FAILED">Thất bại (FAILED)</option>
+        </select>
+        <select
+          value={status}
+          onChange={(event) => setStatus(event.target.value)}
+          aria-label="Lọc tiến độ nạp"
+        >
+          {statuses.map((item) => (
+            <option key={item} value={item}>
+              {item === "Tất cả" ? "Tất cả tiến độ nạp" : item}
+            </option>
+          ))}
+        </select>
+        <label className="filter-checkbox-label" title="Ẩn các đơn quá hạn thanh toán">
+          <input
+            type="checkbox"
+            checked={hideExpired}
+            onChange={(e) => setHideExpired(e.target.checked)}
+          />
+          <span>Ẩn đơn hết hạn</span>
+        </label>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            className="filter-reset-btn"
+            onClick={resetFilters}
+            title="Xóa tất cả bộ lọc về mặc định"
+          >
+            <Icon name="close" size={12} /> Đặt lại
+          </button>
+        )}
       </div>
       <div className="admin-table transaction-table">
         <div className="admin-table-head">
