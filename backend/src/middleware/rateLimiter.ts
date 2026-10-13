@@ -1,5 +1,12 @@
 import rateLimit from 'express-rate-limit';
 
+// Skip rate limiting only during automated tests in non-production environments
+const isTestSkip = (): boolean =>
+  process.env.NODE_ENV !== 'production' &&
+  (process.env.NODE_ENV === 'test' ||
+    Boolean(process.env.NODE_TEST_CONTEXT) ||
+    process.argv.includes('--test'));
+
 // ─── Auth Rate Limiter ────────────────────────────────────────────────────────
 // Strict: 10 requests per 15 minutes per IP
 export const authLimiter = rateLimit({
@@ -11,10 +18,7 @@ export const authLimiter = rateLimit({
     success: false,
     error: 'Too many authentication attempts. Please try again in 15 minutes.',
   },
-  skip: () =>
-    process.env.NODE_ENV === 'test' ||
-    Boolean(process.env.NODE_TEST_CONTEXT) ||
-    process.argv.includes('--test'),
+  skip: isTestSkip,
 });
 
 // ─── API Rate Limiter ─────────────────────────────────────────────────────────
@@ -28,10 +32,7 @@ export const apiLimiter = rateLimit({
     success: false,
     error: 'Too many requests. Please slow down.',
   },
-  skip: () =>
-    process.env.NODE_ENV === 'test' ||
-    Boolean(process.env.NODE_TEST_CONTEXT) ||
-    process.argv.includes('--test'),
+  skip: isTestSkip,
 });
 
 // ─── Admin Rate Limiter ───────────────────────────────────────────────────────
@@ -45,10 +46,7 @@ export const adminLimiter = rateLimit({
     success: false,
     error: 'Too many admin requests. Please slow down.',
   },
-  skip: () =>
-    process.env.NODE_ENV === 'test' ||
-    Boolean(process.env.NODE_TEST_CONTEXT) ||
-    process.argv.includes('--test'),
+  skip: isTestSkip,
 });
 
 // ─── Order Rate Limiter ───────────────────────────────────────────────────────
@@ -62,10 +60,7 @@ export const orderLimiter = rateLimit({
     success: false,
     error: 'Too many orders placed. Please wait before placing another order.',
   },
-  skip: () =>
-    process.env.NODE_ENV === 'test' ||
-    Boolean(process.env.NODE_TEST_CONTEXT) ||
-    process.argv.includes('--test'),
+  skip: isTestSkip,
 });
 
 export const paymentStatusLimiter = rateLimit({
@@ -74,10 +69,7 @@ export const paymentStatusLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many payment status requests.' },
-  skip: () =>
-    process.env.NODE_ENV === 'test' ||
-    Boolean(process.env.NODE_TEST_CONTEXT) ||
-    process.argv.includes('--test'),
+  skip: isTestSkip,
 });
 
 export const paymentWebhookLimiter = rateLimit({
@@ -86,14 +78,11 @@ export const paymentWebhookLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many webhook requests.' },
-  skip: () =>
-    process.env.NODE_ENV === 'test' ||
-    Boolean(process.env.NODE_TEST_CONTEXT) ||
-    process.argv.includes('--test'),
+  skip: isTestSkip,
 });
 
 export const wikiWriteLimiter = rateLimit({
   windowMs: 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
   message: { success: false, error: 'Too many wiki updates. Please wait a minute.' },
-  skip: () => process.env.NODE_ENV === 'test',
+  skip: isTestSkip,
 });

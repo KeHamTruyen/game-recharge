@@ -162,7 +162,8 @@ Toàn bộ các ca kiểm thử cho P1 (A01–A06) và P2 (A07–A15) đã hoàn
 - [ ] Cấu hình SePay/SMTP thật và thử giao dịch nhỏ, đăng ký/quên mật khẩu trên môi trường được phép. Hai tích hợp vẫn chưa được kiểm chứng thật.
 - [ ] Xác nhận Telegram; vận hành vẫn tra được đơn khi Telegram lỗi, không dùng gửi Telegram làm điều kiện commit thanh toán.
 - [ ] Đổi secret/admin password mẫu; HTTPS, cookie/CORS, TRUST_PROXY_HOPS đúng topology; quét dependency/image trên đúng artifact bàn giao.
-- [ ] Diễn tập backup/restore. Chốt lưu audit tài chính: hiện tự xóa sau 60 ngày, cleanup mặc định 30 ngày có thể xóa cả log hoàn tiền/đổi trạng thái; thống nhất thời hạn và cách xuất lưu.
+- [x] Chốt lưu audit tài chính: Đã cập nhật cả auto-prune (60 ngày) và manual cleanup loại trừ các hành động tài chính (`TRANSACTION_REFUND`, `TRANSACTION_STATUS_UPDATE`, `admin.patch`) để bảo lưu vĩnh viễn chứng từ đối soát.
+- [ ] Diễn tập backup/restore. Chốt quy trình xuất lưu dữ liệu khi dung lượng CSDL tăng cao.
 - [ ] Chốt quy định chuyển thiếu/thừa/trùng, tiền vào đơn hủy/hết hạn, hoàn một phần/toàn phần; người vận hành biết đối soát/ghi chứng từ.
 - [ ] Nghiệm thu mobile/laptop thực tế; test viewport hiện có không chứng minh đã kiểm tra mọi trang/thiết bị.
 

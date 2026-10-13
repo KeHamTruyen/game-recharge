@@ -70,9 +70,25 @@ function validateEnv() {
       process.exit(1);
     }
 
+    const uniqueJwtChars = new Set(parsed.data.JWT_SECRET).size;
+    if (uniqueJwtChars < 10) {
+      console.error(
+        '❌ Production requires a JWT_SECRET with sufficient entropy (at least 10 unique characters)'
+      );
+      process.exit(1);
+    }
+
     if (!parsed.data.DATA_ENCRYPTION_KEY || parsed.data.DATA_ENCRYPTION_KEY.length < 32) {
       console.error(
         '❌ Production requires a dedicated DATA_ENCRYPTION_KEY of at least 32 characters'
+      );
+      process.exit(1);
+    }
+
+    const uniqueKeyChars = new Set(parsed.data.DATA_ENCRYPTION_KEY).size;
+    if (uniqueKeyChars < 8) {
+      console.error(
+        '❌ Production requires a DATA_ENCRYPTION_KEY with sufficient entropy (at least 8 unique characters)'
       );
       process.exit(1);
     }

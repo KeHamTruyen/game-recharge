@@ -77,7 +77,6 @@ router.post(
         res.status(400).json({
           success: false,
           error: 'Invalid webhook payload structure',
-          details: parseResult.error.flatten(),
         });
         return;
       }

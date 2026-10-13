@@ -3,7 +3,7 @@ services:
   # 1. Cơ sở dữ liệu PostgreSQL
   # -------------------------------------------------------------
   postgres:
-    image: dhi.io/postgres:16-alpine3.24
+    image: postgres:16-alpine
     container_name: duke1305_postgres
     restart: always
     environment:

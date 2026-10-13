@@ -1149,10 +1149,23 @@ const footerConfigSchema = z.object({
   communityGroups: z.array(footerCommunityGroupSchema).max(30),
   copyrightText: z.string().max(300),
 });
+
+const siteConfigSchema = z.object({
+  siteName: z.string().max(100).optional(),
+  tagline: z.string().max(200).optional(),
+  currency: z.string().max(20).optional(),
+  currencySymbol: z.string().max(10).optional(),
+  maintenanceMode: z.boolean().optional(),
+  maintenanceMessage: z.string().max(500).optional(),
+  allowGuestOrders: z.boolean().optional(),
+  bannerUrl: z.string().max(500).optional(),
+  announcement: z.string().max(1000).optional(),
+}).passthrough();
+
 const settingSchemas = {
   middlemanInfo: middlemanInfoSchema,
   contactInfo: contactInfoSchema,
-  siteConfig: z.record(z.string(), z.unknown()),
+  siteConfig: siteConfigSchema,
   footerConfig: footerConfigSchema,
 } as const;
 
@@ -1263,12 +1276,22 @@ router.delete(
       const clearReadLogs = req.query.clearReadLogs === 'true' || req.query.clearReadLogs === '1';
       const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
+      // Financial and transaction status changes must be preserved for accounting & dispute reconciliation
+      const protectedActions = ['admin.patch', 'TRANSACTION_REFUND', 'TRANSACTION_STATUS_UPDATE'];
+
       const conditions: Prisma.AuditLogWhereInput[] = [
-        { createdAt: { lt: cutoff } },
+        {
+          createdAt: { lt: cutoff },
+          action: { notIn: protectedActions },
+        },
       ];
 
       if (clearReadLogs) {
-        conditions.push({ method: 'GET' });
+        // Read logs (GET) are only purged if they are also older than the cutoff date
+        conditions.push({
+          method: 'GET',
+          createdAt: { lt: cutoff },
+        });
       }
 
       const { count } = await prisma.auditLog.deleteMany({

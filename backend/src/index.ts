@@ -229,7 +229,10 @@ async function startServer(): Promise<void> {
       try {
         const cutoff = new Date(Date.now() - auditLogRetentionDays * 24 * 60 * 60 * 1000);
         const { count } = await prisma.auditLog.deleteMany({
-          where: { createdAt: { lt: cutoff } },
+          where: {
+            createdAt: { lt: cutoff },
+            action: { notIn: ['admin.patch', 'TRANSACTION_REFUND', 'TRANSACTION_STATUS_UPDATE'] },
+          },
         });
         if (count > 0) {
           console.info(JSON.stringify({

@@ -9,20 +9,15 @@ export class ApiError extends Error {
 }
 
 export class HttpClient {
-  constructor(
-    private readonly baseUrl: string,
-    private readonly getAccessToken: () => string | null = () => null,
-  ) {}
+  constructor(private readonly baseUrl: string) {}
 
   async request<T>(path: string, init: RequestInit = {}): Promise<T> {
-    const token = this.getAccessToken()
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...init,
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
         "X-CSRF-Protection": "1",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...init.headers,
       },
     })
