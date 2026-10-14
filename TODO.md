@@ -1,12 +1,12 @@
 # TODO bàn giao — DUKE1305
 
-> Cập nhật **13/10/2026**. Hệ thống đã hoàn tất và kiểm chứng toàn bộ các mục P1 và các bản vá lỗi (176/176 test backend, 28/28 E2E Playwright). Các mục đã hoàn thành đã được dọn sạch khỏi danh sách. Dưới đây là các hạng mục công việc **còn mở** cần thực hiện khi triển khai thực tế.
+> Cập nhật **14/10/2026**. Đã bổ sung các bản sửa trước deploy: restore `.sql.gz`, kiểm tra đủ cấu hình SePay ở cả tạo đơn/khôi phục QR, và cho phép key mã hóa rỗng chỉ ở development/test. Các cổng nghiệm thu production bên dưới vẫn còn mở; test pass không thay thế kiểm chứng môi trường thật.
 
 ## Tình trạng kiểm thử hiện tại
 
 | Hạng mục kiểm thử | Kết quả | Ghi chú |
 | --- | --- | --- |
-| `npm test --prefix backend` | **176/176 đạt** (26 suites) | Schema thử nghiệm riêng, đã dọn sau khi chạy |
+| `npm test --prefix backend` | **179/179 đạt** (26 suites, 14/10) | Schema riêng; thêm cấu hình SePay thiếu/rỗng, env mẫu và restore `.sql.gz` |
 | `npm run typecheck --prefix frontend` & `npm run build` | **Đạt 100%**, 0 lỗi TS | Dist biên dịch đầy đủ, prerender 13 route SEO tĩnh |
 | `npm run test:e2e --prefix frontend` (Playwright) | **28/28 đạt 100%** | Bao gồm mobile/desktop, luồng hủy đơn, đối soát, CSKH |
 | Kiểm thử P1 & Concurrency | **100% đạt** | Khóa nguyên tử hủy đơn, hoàn tiền, resume payment, mã hóa số |

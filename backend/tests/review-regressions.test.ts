@@ -2,11 +2,14 @@ import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, unlinkSync, rmdirSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, unlinkSync, rmdirSync, readFileSync, readdirSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
+import { parse as parseEnv } from 'dotenv';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createTestClient, prisma, TestClient } from './helpers.js';
 import { signToken } from '../src/middleware/auth.js';
+import { env } from '../src/config/env.js';
 
 describe('Review regressions: refunds, payment groups and SQL restore', () => {
   let admin: TestClient;
@@ -125,33 +128,92 @@ describe('Review regressions: refunds, payment groups and SQL restore', () => {
     assert.equal(byLine.body.data.status, 'FAILED');
   });
 
-  it('SQL restore exits nonzero and rolls back on SQL errors; valid SQL commits', async (context) => {
-    if (spawnSync('psql', ['--version']).status !== 0) {
-      context.skip('Requires PostgreSQL psql client');
-      return;
+  it('requires complete payment configuration for new orders, retries, recovery and resume', async () => {
+    const service = await prisma.service.create({ data: { name: 'Payment readiness', game: 'Test' } });
+    const pkg = await prisma.servicePackage.create({ data: { serviceId: service.id, name: 'Test', price: 10000 } });
+    const headers = { 'Idempotency-Key': randomUUID() };
+    const body = { items: [{ packageId: pkg.id, quantity: 1 }] };
+    const checkout = await admin.post('/api/orders/checkout', body, { headers });
+    assert.equal(checkout.status, 201);
+    const code = checkout.body.data.transactions[0].code;
+    const before = await prisma.transaction.count({ where: { userId: user.id } });
+    for (const key of ['SEPAY_API_KEY', 'SEPAY_BANK_CODE', 'SEPAY_ACCOUNT_NUMBER', 'SEPAY_ACCOUNT_NAME'] as const) {
+      const original = env[key];
+      try {
+        for (const missing of ['', '   ']) {
+          env[key] = missing;
+          assert.equal((await admin.post('/api/orders', { packageId: pkg.id })).status, 503, key);
+          assert.equal((await admin.post('/api/orders/checkout', body, { headers })).status, 503, key);
+          assert.equal((await admin.post('/api/orders/checkout', body, { headers: { 'Idempotency-Key': randomUUID() } })).status, 503, key);
+          assert.equal((await admin.get('/api/orders/checkout', { headers })).status, 503, key);
+          assert.equal((await admin.get(`/api/orders/${code}/payment`)).status, 503, key);
+        }
+      } finally { env[key] = original; }
     }
-    const schema = process.env.TEST_SCHEMA!; // helpers enforces isolated test schema.
-    const table = `restore_${randomUUID().replaceAll('-', '')}`;
-    const directory = mkdtempSync(join(tmpdir(), 'restore-review-'));
-    const file = join(directory, 'probe.sql');
-    const sql = `CREATE TABLE "${schema}"."${table}" (id integer); INSERT INTO "${schema}"."${table}" VALUES (1);`;
-    try {
-      writeFileSync(file, `${sql}\nSELECT missing_function_${table}();`);
-      const failed = spawnSync(process.execPath, ['scripts/restore.mjs', file], { encoding: 'utf8' });
-      assert.ifError(failed.error);
-      assert.notEqual(failed.status, 0);
-      const [row] = await prisma.$queryRawUnsafe<Array<{ present: string | null }>>(
-        `SELECT to_regclass('"${schema}"."${table}"')::text AS present`,
-      );
-      assert.equal(row.present, null);
-      writeFileSync(file, sql);
-      const restored = spawnSync(process.execPath, ['scripts/restore.mjs', file], { encoding: 'utf8' });
-      assert.equal(restored.status, 0, restored.stderr);
-      assert.deepEqual(await prisma.$queryRawUnsafe(`SELECT id FROM "${schema}"."${table}"`), [{ id: 1 }]);
-    } finally {
-      await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "${schema}"."${table}"`);
-      unlinkSync(file);
-      rmdirSync(directory);
+    assert.equal(await prisma.transaction.count({ where: { userId: user.id } }), before);
+    assert.equal((await admin.get(`/api/orders/${code}/payment`)).status, 200);
+  });
+
+  it('accepts the development env example but still rejects empty/short encryption keys in production', () => {
+    const example = parseEnv(readFileSync('.env.example'));
+    const probe = (overrides: Record<string, string>) => spawnSync(process.execPath, [
+      '--import', 'tsx', '--input-type=module', '-e', "await import('./src/config/env.ts')",
+    ], { env: { ...process.env, ...example, ...overrides }, encoding: 'utf8' });
+    assert.equal(probe({}).status, 0);
+    for (const key of ['', 'short', 'x'.repeat(20)]) {
+      const result = probe({ NODE_ENV: 'production', CORS_ORIGIN: 'https://test.example',
+        JWT_SECRET: 'test-only-random-characters-1234567890'.repeat(2), DATA_ENCRYPTION_KEY: key });
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /DATA_ENCRYPTION_KEY/);
     }
   });
+
+  for (const compressed of [false, true]) {
+    it(`${compressed ? 'Gzip SQL' : 'SQL'} restore rolls back on errors, commits valid SQL and cleans temporary files`, async (context) => {
+      if (spawnSync('psql', ['--version']).status !== 0) {
+        context.skip('Requires PostgreSQL psql client');
+        return;
+      }
+      const schema = process.env.TEST_SCHEMA!; // helpers enforces isolated test schema.
+      const table = `restore_${randomUUID().replaceAll('-', '')}`;
+      const directory = mkdtempSync(join(tmpdir(), 'restore-review-'));
+      const file = join(directory, compressed ? 'probe.sql.gz' : 'probe.sql');
+      const sql = `CREATE TABLE "${schema}"."${table}" (id integer); INSERT INTO "${schema}"."${table}" VALUES (1);`;
+      const restore = () => spawnSync(process.execPath, ['scripts/restore.mjs', file], {
+        encoding: 'utf8', env: { ...process.env, TEMP: directory, TMP: directory, TMPDIR: directory },
+      });
+      try {
+        if (compressed) {
+          const corrupt = gzipSync(sql);
+          corrupt[corrupt.length - 1] ^= 0xff;
+          for (const invalid of [corrupt, gzipSync('')]) {
+            writeFileSync(file, invalid);
+            assert.notEqual(restore().status, 0);
+          }
+          const [row] = await prisma.$queryRawUnsafe<Array<{ present: string | null }>>(
+            `SELECT to_regclass('"${schema}"."${table}"')::text AS present`,
+          );
+          assert.equal(row.present, null, 'Corrupt gzip must not execute even valid SQL');
+        }
+        const invalidSql = `${sql}\nSELECT missing_function_${table}();`;
+        writeFileSync(file, compressed ? gzipSync(invalidSql) : invalidSql);
+        const failed = restore();
+        assert.ifError(failed.error);
+        assert.notEqual(failed.status, 0);
+        const [row] = await prisma.$queryRawUnsafe<Array<{ present: string | null }>>(
+          `SELECT to_regclass('"${schema}"."${table}"')::text AS present`,
+        );
+        assert.equal(row.present, null);
+        writeFileSync(file, compressed ? gzipSync(sql) : sql);
+        const restored = restore();
+        assert.equal(restored.status, 0, restored.stderr);
+        assert.deepEqual(await prisma.$queryRawUnsafe(`SELECT id FROM "${schema}"."${table}"`), [{ id: 1 }]);
+        assert.deepEqual(readdirSync(directory), [compressed ? 'probe.sql.gz' : 'probe.sql']);
+      } finally {
+        await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "${schema}"."${table}"`);
+        unlinkSync(file);
+        rmdirSync(directory);
+      }
+    });
+  }
 });

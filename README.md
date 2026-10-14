@@ -172,7 +172,7 @@ Game Recharge Website/
   - Tự động gửi thông báo chi tiết (Mã đơn, Tên gói, Tựa game, Số tiền, Email khách hàng) đến nhóm quản trị Telegram ngay khi đơn được tạo hoặc thanh toán thành công.
 - **Tự động Sao lưu Cơ sở dữ liệu hàng ngày & Khôi phục Tương thích:**
   - Script độc lập `backend/scripts/backup.mjs` (và container `backup` trong Docker Compose) tự động dump CSDL bằng `pg_dump` định kỳ và dọn dẹp các bản sao lưu cũ. Bắt buộc kiểm tra an toàn `BACKUP_KEEP_DAYS >= 1` (từ chối ngay nếu `<= 0` hoặc không hợp lệ để chống xóa nhầm bản sao lưu mới tạo), kiểm tra dung lượng file kết xuất sau dump và in URL kết nối che mật khẩu.
-  - Script khôi phục `backend/scripts/restore.mjs`: kiểm tra file backup tồn tại và không rỗng, tự động nhận diện định dạng (`pg_restore` cho `.dump` và `psql` cho `.sql`) với giao dịch an toàn (`--single-transaction`).
+  - Script khôi phục `backend/scripts/restore.mjs`: hỗ trợ `.dump`, `.sql` và `.sql.gz` từ container backup. File gzip được giải nén ra file tạm, kiểm tra đầy đủ trước khi chạy SQL rồi dọn file tạm. SQL lỗi trả mã khác 0 và rollback (`ON_ERROR_STOP=1`, `--single-transaction`).
 - **Chống spam đơn PENDING & Khóa cạnh tranh giỏ hàng:**
   - Giới hạn số đơn PENDING tối đa mà một tài khoản hoặc một địa chỉ IP có thể tạo (`MAX_PENDING_ORDERS_PER_USER`, `MAX_PENDING_ORDERS_PER_IP`).
   - Áp dụng khóa giao dịch PostgreSQL Advisory Transaction Lock (`pg_advisory_xact_lock`) theo từng người dùng, tính đúng tổng số món hàng sắp tạo (`incomingCount`) trong giỏ hàng nhiều dòng checkout, ngăn chặn triệt để tình trạng gọi song song vượt trần quota. Hủy đơn lập tức giải phóng hạn ngạch.
@@ -233,7 +233,7 @@ Hệ thống sử dụng các biến môi trường được khai báo trong fil
 | `PREVIOUS_ENCRYPTION_KEYS` | Không | — | Danh sách các khóa cũ khi xoay vòng key (cách nhau bởi dấu phẩy) |
 | `CORS_ORIGIN` | **Có** | `http://localhost:5173` | Danh sách domain frontend được phép gọi API (cách nhau bởi dấu phẩy) |
 | `TRUST_PROXY_HOPS` | Không | `0` (Local) / `1` (Nginx) | Số lượng reverse proxy phía trước máy chủ Node.js |
-| `SEPAY_API_KEY` | Tùy chọn | — | Khóa API SePay để xác thực Webhook |
+| `SEPAY_API_KEY` | Bắt buộc khi nhận đơn | — | Khóa xác thực webhook; thiếu khóa hoặc thông tin ngân hàng sẽ chặn tạo đơn/cấp lại QR với HTTP 503 |
 | `SEPAY_BANK_CODE` | Tùy chọn | `MBBANK` | Mã ngân hàng nhận thanh toán VietQR |
 | `SEPAY_ACCOUNT_NUMBER` | Tùy chọn | — | Số tài khoản ngân hàng nhận tiền |
 | `SEPAY_ACCOUNT_NAME` | Tùy chọn | `DUKE1305` | Tên chủ tài khoản hiển thị trên mã QR |
@@ -390,6 +390,8 @@ Hệ thống đã sẵn sàng cho Docker Compose với kiến trúc tách biệt
    ```
 
 4. **Sao lưu & Khôi phục CSDL:**
+   Chạy các lệnh dưới đây từ thư mục `backend` trên máy quản trị có Node.js và PostgreSQL client (`pg_dump`, `pg_restore`, `psql`) trong PATH. Runtime Docker DHI không chứa các công cụ này. Đặt `DATABASE_URL` trỏ đúng CSDL đích; lần đầu diễn tập trên CSDL staging riêng.
+
    - **Sao lưu thủ công:**
      ```powershell
      npm run db:backup
@@ -398,6 +400,11 @@ Hệ thống đã sẵn sàng cho Docker Compose với kiến trúc tách biệt
      ```powershell
      npm run db:restore -- path/to/backup.dump
      ```
+   - **Khôi phục bản sao lưu tự động của Compose:**
+     ```powershell
+     npm run db:restore -- ../backups/daily/duke1305_db-YYYYMMDD.sql.gz
+     ```
+     Thay tên file theo bản backup thực tế. SQL được khôi phục vào CSDL sạch; cần đủ dung lượng thư mục tạm cho file SQL sau giải nén. Script không tự xóa dữ liệu hiện có khi dùng `.sql`/`.sql.gz`.
 
 ---
 

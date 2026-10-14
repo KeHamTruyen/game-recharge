@@ -1,6 +1,11 @@
 import 'dotenv/config';
 import { spawnSync } from 'node:child_process';
-import { existsSync, statSync } from 'node:fs';
+import { existsSync, statSync, createReadStream, createWriteStream } from 'node:fs';
+import { mkdtemp, unlink, rmdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createGunzip } from 'node:zlib';
+import { pipeline } from 'node:stream/promises';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -30,40 +35,57 @@ const maskedUrl = `${url.protocol}//${url.username ? '***@' : ''}${url.host}${ur
 console.log(`📦 Đang tiến hành khôi phục CSDL từ file: ${backupPath} (${stats.size} bytes)...`);
 console.log(`🎯 Đích khôi phục: ${maskedUrl} (Phạm vi Database; các schema và bảng sẽ được tái tạo)`);
 
-const isCustomDump = backupPath.endsWith('.dump') || backupPath.endsWith('.dmp');
-const isSql = backupPath.endsWith('.sql');
+const isGzipSql = backupPath.toLowerCase().endsWith('.sql.gz');
+const isSql = isGzipSql || backupPath.toLowerCase().endsWith('.sql');
+let tempDirectory;
+let sqlPath = backupPath;
 
-let restoreProcess;
-if (isSql) {
-  restoreProcess = spawnSync('psql', [
-    '--set=ON_ERROR_STOP=1',
-    '--single-transaction',
-    '--file=' + backupPath,
-    targetDbUrl,
-  ], { stdio: 'inherit' });
-} else {
-  // Use pg_restore for custom format dump
-  restoreProcess = spawnSync('pg_restore', [
-    '--exit-on-error',
-    '--single-transaction',
-    '--clean',
-    '--if-exists',
-    '--no-owner',
-    `--dbname=${targetDbUrl}`,
-    backupPath,
-  ], { stdio: 'inherit' });
+try {
+  if (isGzipSql) {
+    tempDirectory = await mkdtemp(join(tmpdir(), 'duke-restore-'));
+    sqlPath = join(tempDirectory, 'backup.sql');
+    // Verify the entire gzip before touching the database; a broken stream must never commit partial SQL.
+    await pipeline(createReadStream(backupPath), createGunzip(), createWriteStream(sqlPath, { mode: 0o600 }));
+    if (statSync(sqlPath).size === 0) throw new Error('Backup SQL is empty');
+  }
+  let restoreProcess;
+  if (isSql) {
+    restoreProcess = spawnSync('psql', [
+      '--set=ON_ERROR_STOP=1',
+      '--single-transaction',
+      '--file=' + sqlPath,
+      targetDbUrl,
+    ], { stdio: 'inherit' });
+  } else {
+    // Use pg_restore for custom format dump
+    restoreProcess = spawnSync('pg_restore', [
+      '--exit-on-error',
+      '--single-transaction',
+      '--clean',
+      '--if-exists',
+      '--no-owner',
+      `--dbname=${targetDbUrl}`,
+      backupPath,
+    ], { stdio: 'inherit' });
+  }
+
+  if (restoreProcess.error) {
+    throw restoreProcess.error;
+  }
+
+  if (restoreProcess.status !== 0) {
+    throw new Error(`Khôi phục thất bại với mã thoát: ${restoreProcess.status}`);
+  }
+
+  console.log(`✅ Khôi phục CSDL thành công từ: ${backupPath}`);
+} catch (error) {
+  console.error('❌ Khôi phục thất bại:', error.message);
+  process.exitCode = 1;
+} finally {
+  if (tempDirectory) {
+    await unlink(sqlPath).catch((error) => { if (error.code !== 'ENOENT') throw error; });
+    await rmdir(tempDirectory);
+  }
 }
-
-if (restoreProcess.error) {
-  console.error('❌ Lỗi khi thực thi khôi phục:', restoreProcess.error.message);
-  process.exit(1);
-}
-
-if (restoreProcess.status !== 0) {
-  console.error(`❌ Khôi phục thất bại với mã thoát: ${restoreProcess.status}`);
-  process.exit(restoreProcess.status || 1);
-}
-
-console.log(`✅ Khôi phục CSDL thành công từ: ${backupPath}`);
 
 

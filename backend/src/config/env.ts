@@ -28,7 +28,7 @@ const envSchema = z.object({
   AUTH_COOKIE_SAMESITE: z.enum(['strict', 'lax', 'none']).default('strict'),
   AUTH_COOKIE_DOMAIN: z.string().optional(),
   // Data encryption key (separate from JWT)
-  DATA_ENCRYPTION_KEY: z.string().min(16).optional(),
+  DATA_ENCRYPTION_KEY: z.preprocess((value) => value === '' ? undefined : value, z.string().min(16).optional()),
   PREVIOUS_ENCRYPTION_KEYS: z.string().optional(),
 
   SEPAY_API_KEY: z.string().optional(),

@@ -22,6 +22,15 @@ import { safeRegexTest } from '../utils/regex.js';
 
 const router = Router();
 
+function paymentConfig() {
+  const { SEPAY_API_KEY: apiKey, SEPAY_BANK_CODE: bankCode,
+    SEPAY_ACCOUNT_NUMBER: accountNumber, SEPAY_ACCOUNT_NAME: accountName } = env;
+  if (!apiKey?.trim() || !bankCode?.trim() || !accountNumber?.trim() || !accountName?.trim()) {
+    throw new AppError('Hệ thống thanh toán đang được cấu hình. Vui lòng liên hệ CSKH.', 503);
+  }
+  return { bankCode, accountNumber, accountName };
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function generateOrderCode(): string {
@@ -76,6 +85,7 @@ async function createOrder(
   userId: string | null,
   userEmail: string,
 ) {
+  const bank = paymentConfig();
   const pkg = await tx.servicePackage.findFirst({
     where: { id: input.packageId, isActive: true, service: { isActive: true } },
     include: { service: { select: { id: true, name: true, game: true } } },
@@ -177,15 +187,9 @@ async function createOrder(
     code = generateOrderCode();
   }
 
-  const qrCode =
-    env.SEPAY_BANK_CODE && env.SEPAY_ACCOUNT_NUMBER
-      ? `https://qr.sepay.vn/img?${new URLSearchParams({
-          acc: env.SEPAY_ACCOUNT_NUMBER,
-          bank: env.SEPAY_BANK_CODE,
-          amount: String(amount),
-          des: code,
-        })}`
-      : null;
+  const qrCode = `https://qr.sepay.vn/img?${new URLSearchParams({
+    acc: bank.accountNumber, bank: bank.bankCode, amount: String(amount), des: code,
+  })}`;
 
   return tx.transaction.create({
     data: {
@@ -247,6 +251,7 @@ async function checkOrderCreationAllowed(
 router.post('/', requireAuth, async (req, res, next): Promise<void> => {
   try {
     const body = createOrderSchema.parse(req.body);
+    paymentConfig();
     const transaction = await prisma.$transaction(async (tx) => {
       await checkOrderCreationAllowed(tx, req.user!.userId, 1, req.user!.role);
       return createOrder(tx, body, req.user!.userId, req.user!.email);
@@ -263,6 +268,7 @@ router.post('/', requireAuth, async (req, res, next): Promise<void> => {
 router.get('/checkout', requireAuth, async (req, res, next): Promise<void> => {
   try {
     res.setHeader('Cache-Control', 'no-store');
+    paymentConfig();
     const rawKey = z.string().min(16).max(128).parse(req.header('Idempotency-Key'));
     const idempotencyKey = createHash('sha256').update(`${req.user!.userId}:${rawKey}`).digest('hex');
     const payment = await prisma.$transaction(async (tx) => {
@@ -278,6 +284,7 @@ router.get('/checkout', requireAuth, async (req, res, next): Promise<void> => {
 router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
   try {
     const body = checkoutSchema.parse(req.body);
+    const bank = paymentConfig();
     const rawKey = z.string().min(16).max(128).parse(req.header('Idempotency-Key'));
     const userId = req.user!.userId;
     // Namespace keys by owner; legacy unscoped cached responses are never returned.
@@ -302,9 +309,6 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
         }
         return cached;
       }
-      if (!env.SEPAY_BANK_CODE || !env.SEPAY_ACCOUNT_NUMBER || !env.SEPAY_ACCOUNT_NAME) {
-        throw new AppError('Payment is not configured. Please contact support.', 503);
-      }
       const packageIds = [...new Set(body.items.map((item) => item.packageId))];
       const packages = await tx.servicePackage.findMany({
         where: { id: { in: packageIds }, isActive: true, service: { isActive: true } },
@@ -327,7 +331,7 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
         transactions.reduce((total, item) => total.add(item.amount), new Prisma.Decimal(0)).toNumber(),
       );
       const qrCode = `https://qr.sepay.vn/img?${new URLSearchParams({
-        acc: env.SEPAY_ACCOUNT_NUMBER, bank: env.SEPAY_BANK_CODE,
+        acc: bank.accountNumber, bank: bank.bankCode,
         amount: String(amount), des: paymentOrderCode,
       })}`;
       const paymentFields = { paymentStatus: 'PENDING' as const, paymentOrderCode, checkoutUrl: qrCode, qrCode };
@@ -342,8 +346,7 @@ router.post('/checkout', requireAuth, async (req, res, next): Promise<void> => {
         })),
         payment: {
           orderCode: paymentOrderCode, amount, checkoutUrl: qrCode, qrCode,
-          bankCode: env.SEPAY_BANK_CODE, accountNumber: env.SEPAY_ACCOUNT_NUMBER,
-          accountName: env.SEPAY_ACCOUNT_NAME, transferContent: paymentOrderCode,
+          ...bank, transferContent: paymentOrderCode,
         },
       })) as Prisma.InputJsonObject;
       await tx.checkoutRequest.create({ data: { idempotencyKey, userId, payloadHash, paymentOrderCode, response: data } });
@@ -513,13 +516,7 @@ router.get(
         throw new AppError('Đơn hàng này đã được hoàn tiền', 400);
       }
 
-      const bankCode = env.SEPAY_BANK_CODE || '';
-      const accountNumber = env.SEPAY_ACCOUNT_NUMBER || '';
-      const accountName = env.SEPAY_ACCOUNT_NAME || '';
-
-      if (!bankCode || !accountNumber || !accountName) {
-        throw new AppError('Hệ thống thanh toán đang được cấu hình. Vui lòng liên hệ CSKH.', 503);
-      }
+      const { bankCode, accountNumber, accountName } = paymentConfig();
 
       const des = transaction.paymentOrderCode || transaction.code;
       // Calculate group amount if part of a multi-item checkout
