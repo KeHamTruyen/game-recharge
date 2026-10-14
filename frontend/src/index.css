@@ -1806,7 +1806,7 @@ h1, h2, h3, p { margin-top: 0; }
 
 .brand-subheader-card {
   width: 100%;
-  max-width: 820px;
+  max-width: 1040px;
   margin-inline: auto;
   display: flex;
   align-items: center;
@@ -1891,16 +1891,22 @@ h1, h2, h3, p { margin-top: 0; }
   gap: 8px;
 }
 
+@media (min-width: 860px) {
+  .brand-action-pills {
+    flex-wrap: nowrap;
+  }
+}
+
 .brand-pill-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 16px;
+  gap: 6px;
+  padding: 6.5px 14px;
   border-radius: 999px;
   background: rgba(18, 27, 46, 0.9);
   border: 1px solid rgba(56, 219, 248, 0.22);
   color: #e2e8f0;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
