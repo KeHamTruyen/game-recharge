@@ -1087,6 +1087,35 @@ router.patch(
   }
 );
 
+// DELETE /admin/users/:id
+router.delete(
+  '/users/:id',
+  requireRole('ADMIN'),
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = z.object({ id: z.string().min(1) }).parse(req.params);
+
+      if (id === req.user!.userId) {
+        throw new AppError('Bạn không thể tự xóa tài khoản của chính mình.', 400);
+      }
+
+      const existing = await prisma.user.findUnique({ where: { id } });
+      if (!existing) {
+        throw new NotFoundError('User');
+      }
+
+      await prisma.$transaction(async (tx) => {
+        await tx.wikiVote.deleteMany({ where: { userId: id } });
+        await tx.user.delete({ where: { id } });
+      });
+
+      res.json({ success: true, data: { message: 'Đã xóa tài khoản thành công', id } });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 // ══════════════════════════════════════════════════════════════════════════════
 // SETTINGS
 // ══════════════════════════════════════════════════════════════════════════════

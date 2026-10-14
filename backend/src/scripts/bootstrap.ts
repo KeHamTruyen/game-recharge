@@ -134,6 +134,7 @@ export async function bootstrapSystem(): Promise<void> {
       role: 'ADMIN',
       status: 'ACTIVE',
       passwordHash: adminPasswordHash,
+      tokenVersion: { increment: 1 },
     },
     create: {
       email: adminEmail,

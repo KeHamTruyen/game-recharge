@@ -312,6 +312,7 @@ export function AdminPage({
   users,
   transactions,
   onUpdateUser,
+  onDeleteUser,
   onUpdateTransaction,
   onUpdateProfile,
   onChangePassword,
@@ -350,6 +351,7 @@ export function AdminPage({
   users: ManagedUser[]
   transactions: Transaction[]
   onUpdateUser: (id: string | number, updates: Partial<ManagedUser>) => void
+  onDeleteUser?: (id: string | number) => void | Promise<void>
   onUpdateTransaction: (
     id: string | number,
     status: TransactionStatus,
@@ -1096,7 +1098,7 @@ export function AdminPage({
               onViewAnalytics={() => selectTab("analytics")}
             />
           ) : tab === "users" ? (
-            <AdminUsers users={users} onUpdate={onUpdateUser} />
+            <AdminUsers users={users} onUpdate={onUpdateUser} onDelete={onDeleteUser} />
           ) : tab === "categories" ? (
             <>
               <div className="panel-heading">
@@ -3747,9 +3749,11 @@ export function AdminTransactions({
 export function AdminUsers({
   users,
   onUpdate,
+  onDelete,
 }: {
   users: ManagedUser[]
   onUpdate: (id: string | number, updates: Partial<ManagedUser>) => void
+  onDelete?: (id: string | number) => void | Promise<void>
 }) {
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
@@ -3765,7 +3769,7 @@ export function AdminUsers({
       <div className="data-page-heading">
         <div>
           <h2>Quản lý người dùng</h2>
-          <p>Phân quyền và quản lý trạng thái tài khoản.</p>
+          <p>Phân quyền, quản lý trạng thái và xóa tài khoản thành viên.</p>
         </div>
         <span>{users.length} tài khoản</span>
       </div>
@@ -3784,7 +3788,8 @@ export function AdminUsers({
           <span>Người dùng</span>
           <span>Ngày tham gia</span>
           <span>Tổng chi tiêu</span>
-            <span>Trạng thái</span>
+          <span>Trạng thái</span>
+          <span>Thao tác</span>
         </div>
         {visible.map((item) => (
           <div className="admin-table-row" key={item.id}>
@@ -3807,6 +3812,25 @@ export function AdminUsers({
             >
               {item.status === "active" ? "Đang hoạt động" : "Đã khóa"}
             </button>
+            <div className="user-actions-cell">
+              <button
+                type="button"
+                className="user-delete-btn"
+                title={`Xóa tài khoản ${item.name}`}
+                aria-label={`Xóa tài khoản ${item.name}`}
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Bạn có chắc chắn muốn xóa tài khoản "${item.name}" (${item.email}) không?\n\nLưu ý: Lịch sử đơn hàng vẫn được lưu trữ đối soát, chỉ tài khoản đăng nhập bị xóa.`
+                    )
+                  ) {
+                    void onDelete?.(item.id)
+                  }
+                }}
+              >
+                <Icon name="trash" size={14} /> Xóa
+              </button>
+            </div>
           </div>
         ))}
       </div>

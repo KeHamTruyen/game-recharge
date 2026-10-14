@@ -582,6 +582,11 @@ export const api = {
       totalSpent: Number(item.totalSpent),
     }
   },
+  async deleteUser(id: string | number) {
+    await client.request<ApiEnvelope<{ id: string }>>(`/admin/users/${String(id)}`, {
+      method: "DELETE",
+    })
+  },
     async updateTransaction(
       id: string | number,
       status: Transaction["status"],

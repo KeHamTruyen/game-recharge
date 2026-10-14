@@ -298,6 +298,7 @@ npm run dev:backend
 ### 5. Khởi tạo dữ liệu & Tài khoản thử nghiệm
 Khi khởi tạo CSDL bằng lệnh seed hoặc bootstrap:
 - **Tài khoản Quản trị viên (Admin):** Khởi tạo tự động dựa trên 2 biến môi trường `ADMIN_EMAIL` và `ADMIN_PASSWORD` (bắt buộc tối thiểu **12 ký tự**) khai báo trong `.env`.
+- Chạy lại **bootstrap** sẽ đặt lại mật khẩu admin và thu hồi toàn bộ phiên đăng nhập cũ của tài khoản đó; admin cần đăng nhập lại.
 - **Tài khoản Khách hàng thử nghiệm (chỉ có khi chạy `npm run db:seed`):** `customer@test.com` / `123456`.
 
 *(Lưu ý: Luôn đổi mật khẩu quản trị và giữ bí mật trước khi triển khai môi trường công khai).*

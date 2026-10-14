@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react"
 
@@ -34,8 +35,6 @@ import {
   initialServicePackages,
   initialServices,
   initialTopupTemplates,
-  initialTransactions,
-  initialUsers,
 } from "@/data/mock-data"
 
 import {
@@ -68,15 +67,13 @@ const fallbackSnapshot: AppSnapshot = {
   contactInfo: initialContactInfo,
 
   footerConfig: initialFooterConfig,
-
-  users: initialUsers,
-
-  transactions: initialTransactions,
 }
 
 type Setter<T> = Dispatch<SetStateAction<T>>
 
 type AppStoreValue = AppSnapshot & {
+  users: ManagedUser[]
+  transactions: Transaction[]
   services: Service[]
 
   servicePackages: ServicePackage[]
@@ -142,7 +139,7 @@ type AppStoreValue = AppSnapshot & {
 
   login(
     email: string,
-    password?: string,
+    password: string,
     name?: string,
     scope?: "storefront" | "admin",
   ): Promise<User>
@@ -296,6 +293,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   )
 
   const [user, setUser] = useState<User | null>(null)
+  const sessionGeneration = useRef(0)
+  const authPending = useRef(false)
+  const renderedSession = sessionGeneration.current
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
@@ -452,6 +452,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false
+    const generation = sessionGeneration.current
+    const isCurrent = () => !cancelled && generation === sessionGeneration.current
 
     void Promise.all([api.auth.session(), api.catalog.load()])
 
@@ -525,12 +527,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           api.settings.get<{ maintenanceMode?: boolean; maintenanceMessage?: string }>("siteConfig").catch(() => null),
         ])
 
+        if (cancelled) return
         mergeRemoteContent(remoteMiddleman, remoteContact, remoteFooter)
         if (remoteSiteConfig && typeof remoteSiteConfig === "object") {
           setSiteConfig(remoteSiteConfig)
         }
 
-        if (session) {
+        setApiReady(true)
+        if (session && isCurrent()) {
           const sanitizedSession = {
             ...session,
 
@@ -551,6 +555,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
                 api.admin.packages(),
               ])
 
+            if (!isCurrent()) return
             setTransactions(adminTx)
 
             setUsers(adminUsers)
@@ -603,7 +608,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
               }),
             )
           } else {
-            setTransactions(await api.orders.mine())
+            const nextTx = await api.orders.mine()
+            if (isCurrent()) setTransactions(nextTx)
           }
         }
 
@@ -612,7 +618,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
       .catch(() => {
         if (!cancelled) {
-          setApiError("Không thể tải dữ liệu từ máy chủ. Vui lòng thử lại.")
+          if (isCurrent()) setApiError("Không thể tải dữ liệu từ máy chủ. Vui lòng thử lại.")
           setApiReady(true)
         }
       })
@@ -623,18 +629,19 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const refreshTransactions = useCallback(async () => {
-        if (!user) return []
+        if (!user || renderedSession !== sessionGeneration.current) return []
 
         const nextTx =
           user.role === "admin"
             ? await api.admin.transactions()
             : await api.orders.mine()
 
+        if (renderedSession !== sessionGeneration.current) return []
         setTransactions(nextTx)
 
         return nextTx
 
-  }, [user])
+  }, [user, renderedSession])
 
   const value = useMemo<AppStoreValue>(
     () => ({
@@ -673,8 +680,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       footerConfig,
       setFooterConfig,
 
-      setUsers,
-      setTransactions,
+      // Async callers retain setters from their original session.
+      setUsers: (next) => setUsers((current) => renderedSession === sessionGeneration.current
+        ? typeof next === "function" ? next(current) : next : current),
+      setTransactions: (next) => setTransactions((current) => renderedSession === sessionGeneration.current
+        ? typeof next === "function" ? next(current) : next : current),
       setServices,
       setServicePackages,
       setSelectedProduct,
@@ -690,11 +700,21 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       setSiteConfig,
 
       async login(email, password, name, scope) {
-        const nextUser = password
-          ? name
+        if (!password) throw new Error("Vui lòng nhập mật khẩu hoặc mã xác nhận.")
+        if (authPending.current) throw new Error("Vui lòng chờ thao tác đăng nhập/đăng xuất hoàn tất.")
+        ++sessionGeneration.current
+        setUsers([])
+        setTransactions([])
+        authPending.current = true
+        let nextUser: User
+        try {
+          nextUser = name
             ? await api.auth.verifyRegistration(email, password)
             : await api.auth.login(email, password, scope)
-          : { email, role: "customer" as const }
+        } finally {
+          authPending.current = false
+        }
+        const generation = ++sessionGeneration.current
 
         const sanitizedNextUser = {
           ...nextUser,
@@ -703,82 +723,87 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         }
 
         setUser(sanitizedNextUser)
+        setUsers([])
+        setTransactions([])
 
-        if (password) {
-          if (sanitizedNextUser.role === "admin") {
-            const [adminTx, adminUsers, adminServices, adminPackages] =
-              await Promise.all([
-                api.admin.transactions(),
+        if (sanitizedNextUser.role === "admin") {
+          const [adminTx, adminUsers, adminServices, adminPackages] =
+            await Promise.all([
+              api.admin.transactions(),
 
-                api.admin.users(),
+              api.admin.users(),
 
-                api.admin.services(),
+              api.admin.services(),
 
-                api.admin.packages(),
-              ])
+              api.admin.packages(),
+            ])
 
-            setTransactions(adminTx)
+          if (generation !== sessionGeneration.current) throw new Error("Phiên đăng nhập đã thay đổi.")
+          setTransactions(adminTx)
 
-            setUsers(adminUsers)
+          setUsers(adminUsers)
 
-            setServices(adminServices)
+          setServices(adminServices)
 
-            setServicePackages(adminPackages)
+          setServicePackages(adminPackages)
 
-            setGames(
-              Array.from(new Set(adminServices.map((s) => s.name || s.game))),
-            )
+          setGames(
+            Array.from(new Set(adminServices.map((s) => s.name || s.game))),
+          )
 
-            setProducts(
-              adminPackages.map((pkg) => {
-                const service = adminServices.find(
-                  (item) => item.id === pkg.serviceId,
-                )
+          setProducts(
+            adminPackages.map((pkg) => {
+              const service = adminServices.find(
+                (item) => item.id === pkg.serviceId,
+              )
 
-                return {
-                  id: pkg.id,
+              return {
+                id: pkg.id,
 
-                  name: pkg.name,
+                name: pkg.name,
 
-                  game: service?.name || service?.game || "Game",
+                game: service?.name || service?.game || "Game",
 
-                  tags: pkg.tags,
+                tags: pkg.tags,
 
-                  price: pkg.price,
+                price: pkg.price,
 
-                  oldPrice: pkg.oldPrice ?? 0,
+                oldPrice: pkg.oldPrice ?? 0,
 
-                  note: pkg.note,
+                note: pkg.note,
 
-                  art: (service?.iconText || service?.name || "GAME")
-                    .slice(0, 3)
-                    .toUpperCase(),
+                art: (service?.iconText || service?.name || "GAME")
+                  .slice(0, 3)
+                  .toUpperCase(),
 
-                  tone: service?.tone || "cyan",
+                tone: service?.tone || "cyan",
 
-                  statusId: pkg.statusId,
+                statusId: pkg.statusId,
 
-                  templateId: pkg.templateId,
+                templateId: pkg.templateId,
 
-                  image: pkg.image,
+                image: pkg.image,
 
-                  imagePosition: pkg.imagePosition,
+                imagePosition: pkg.imagePosition,
 
-                  isActive: pkg.isActive,
-                }
-              }),
-            )
-          } else {
-            setTransactions(await api.orders.mine())
-          }
+                isActive: pkg.isActive,
+              }
+            }),
+          )
+        } else {
+          const nextTx = await api.orders.mine()
+          if (generation !== sessionGeneration.current) throw new Error("Phiên đăng nhập đã thay đổi.")
+          setTransactions(nextTx)
         }
 
         return nextUser
       },
 
       async updateProfile(name) {
+        if (renderedSession !== sessionGeneration.current) throw new Error("Phiên đăng nhập đã thay đổi.")
         const nextUser = await api.auth.updateProfile(name)
 
+        if (renderedSession !== sessionGeneration.current) throw new Error("Phiên đăng nhập đã thay đổi.")
         setUser(nextUser)
 
         return nextUser
@@ -789,7 +814,17 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       },
 
       async logout() {
-        await api.auth.logout()
+        if (authPending.current) throw new Error("Vui lòng chờ thao tác đăng nhập/đăng xuất hoàn tất.")
+        authPending.current = true
+        ++sessionGeneration.current
+        try {
+          await api.auth.logout()
+        } finally {
+          authPending.current = false
+          ++sessionGeneration.current
+          setUsers([])
+          setTransactions([])
+        }
 
         try {
           sessionStorage.removeItem("duke1305_checkout_payment")
@@ -814,6 +849,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       refreshTransactions,
     }),
     [
+      renderedSession,
       refreshTransactions,
       products,
       productStatuses,

@@ -307,6 +307,16 @@ export function AdminRoute() {
           const updated = await api.admin.updateUser(id, updates)
           store.setUsers((current) => current.map((item) => item.id === id ? updated : item))
         }}
+        onDeleteUser={async (id) => {
+          try {
+            const { api } = await import("@/services/api")
+            await api.admin.deleteUser(id)
+            store.setUsers((current) => current.filter((item) => item.id !== id))
+            store.setNotice("Đã xóa tài khoản thành công.")
+          } catch (error) {
+            store.setNotice(error instanceof Error ? error.message : "Xóa tài khoản thất bại.")
+          }
+        }}
         onUpdateTransaction={async (id, status, reason, paymentStatus, refundDetails) => {
           const { api } = await import("@/services/api")
           const updated = await api.admin.updateTransaction(id, status, reason, paymentStatus, refundDetails)

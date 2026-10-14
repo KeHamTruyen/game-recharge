@@ -1,12 +1,10 @@
 import type {
   ContactInfo,
   FooterConfig,
-  ManagedUser,
   MiddlemanInfo,
   Product,
   ProductStatus,
   TopupTemplate,
-  Transaction,
 } from "@/domain/models"
 
 export type AppSnapshot = {
@@ -18,8 +16,6 @@ export type AppSnapshot = {
   middlemanInfo: MiddlemanInfo
   contactInfo: ContactInfo
   footerConfig?: FooterConfig
-  users?: ManagedUser[]
-  transactions?: Transaction[]
 }
 
 const STORAGE_KEY = "duke1305-app-snapshot-v1"

@@ -2,13 +2,15 @@
 
 > Cập nhật **14/10/2026**. Đã bổ sung các bản sửa trước deploy: restore `.sql.gz`, kiểm tra đủ cấu hình SePay ở cả tạo đơn/khôi phục QR, và cho phép key mã hóa rỗng chỉ ở development/test. Các cổng nghiệm thu production bên dưới vẫn còn mở; test pass không thay thế kiểm chứng môi trường thật.
 
+Đã chặn phản hồi/callback từ phiên cũ ghi dữ liệu riêng tư vào phiên mới, bỏ đăng nhập giả và dữ liệu mẫu tài khoản/giao dịch khỏi frontend. Bootstrap đặt lại mật khẩu admin đồng thời thu hồi token cũ. Có test hồi quy cho các thay đổi này.
+
 ## Tình trạng kiểm thử hiện tại
 
 | Hạng mục kiểm thử | Kết quả | Ghi chú |
 | --- | --- | --- |
-| `npm test --prefix backend` | **179/179 đạt** (26 suites, 14/10) | Schema riêng; thêm cấu hình SePay thiếu/rỗng, env mẫu và restore `.sql.gz` |
+| `npm test --prefix backend` | **180/180 đạt** (26 suites, 14/10) | Schema riêng; thêm kiểm tra bootstrap thu hồi token admin cũ |
 | `npm run typecheck --prefix frontend` & `npm run build` | **Đạt 100%**, 0 lỗi TS | Dist biên dịch đầy đủ, prerender 13 route SEO tĩnh |
-| `npm run test:e2e --prefix frontend` (Playwright) | **28/28 đạt 100%** | Bao gồm mobile/desktop, luồng hủy đơn, đối soát, CSKH |
+| `npm run test:e2e --prefix frontend` (Playwright) | **32/32 đạt** (14/10) | Thêm 4 test cách ly phiên: khôi phục, refresh, login, cập nhật hồ sơ; kiểm tra callback cũ, chặn đăng nhập giả và lỗi mạng khi logout |
 | Kiểm thử P1 & Concurrency | **100% đạt** | Khóa nguyên tử hủy đơn, hoàn tiền, resume payment, mã hóa số |
 | Docker Compose & Network | **Đạt** | `migrate` đã gán `duke_network`, `MAIL_FROM` chuẩn RFC |
 | Bootstrap production an toàn | **Đạt** | `dist/scripts/bootstrap.js` khởi tạo DB sạch |

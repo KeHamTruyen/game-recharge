@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { createTestClient, prisma, TestClient } from './helpers.js';
 import { signToken } from '../src/middleware/auth.js';
 import { env } from '../src/config/env.js';
+import { bootstrapSystem } from '../src/scripts/bootstrap.js';
 
 describe('Review regressions: refunds, payment groups and SQL restore', () => {
   let admin: TestClient;
@@ -22,6 +23,40 @@ describe('Review regressions: refunds, payment groups and SQL restore', () => {
     admin.cookie = `auth_token=${signToken({ userId: user.id, email: user.email, role: 'ADMIN', tokenVersion: 0 })}`;
   });
   after(async () => { await admin.close(); });
+
+  it('revokes existing admin sessions when bootstrap resets the password', async () => {
+    const savedEmail = process.env.ADMIN_EMAIL;
+    const savedPassword = process.env.ADMIN_PASSWORD;
+    const email = `${randomUUID()}@test.invalid`;
+    const client = await createTestClient();
+    try {
+      process.env.ADMIN_EMAIL = email;
+      process.env.ADMIN_PASSWORD = 'bootstrap-old-test-password';
+      await bootstrapSystem();
+      assert.equal((await client.post('/api/auth/login', {
+        email, password: process.env.ADMIN_PASSWORD, scope: 'admin',
+      })).status, 200);
+      const oldCookie = client.cookie!;
+      process.env.ADMIN_PASSWORD = 'bootstrap-new-test-password';
+      await bootstrapSystem();
+      assert.equal((await client.get('/api/auth/session')).status, 401);
+      assert.equal((await client.post('/api/auth/login', {
+        email, password: 'bootstrap-old-test-password', scope: 'admin',
+      })).status, 401);
+      assert.equal((await client.post('/api/auth/login', {
+        email, password: process.env.ADMIN_PASSWORD, scope: 'admin',
+      })).status, 200);
+      assert.equal((await client.get('/api/auth/session')).status, 200);
+      assert.equal((await client.request('/api/admin/users', { cookie: oldCookie })).status, 401);
+      assert.equal((await prisma.user.findUniqueOrThrow({ where: { email } })).tokenVersion, 1);
+    } finally {
+      if (savedEmail === undefined) delete process.env.ADMIN_EMAIL;
+      else process.env.ADMIN_EMAIL = savedEmail;
+      if (savedPassword === undefined) delete process.env.ADMIN_PASSWORD;
+      else process.env.ADMIN_PASSWORD = savedPassword;
+      await client.close();
+    }
+  });
 
   function order(extra: Record<string, unknown> = {}) {
     return prisma.transaction.create({ data: {
@@ -126,6 +161,63 @@ describe('Review regressions: refunds, payment groups and SQL restore', () => {
     assert.equal(byLine.status, 200);
     assert.equal(byLine.body.data.paymentStatus, 'PAID');
     assert.equal(byLine.body.data.status, 'FAILED');
+  });
+
+  it('DELETE /api/admin/users/:id deletes customer account, rejects self-deletion, and preserves order history', async () => {
+    const customer = await prisma.user.create({
+      data: {
+        email: `delete-test-${randomUUID()}@example.com`,
+        name: 'Delete Target',
+        passwordHash: 'dummy-hash',
+        role: 'CUSTOMER',
+      },
+    });
+
+    // Customer has an order
+    const custOrder = await prisma.transaction.create({
+      data: {
+        code: `ORD-${randomUUID().slice(0, 8)}`,
+        userId: customer.id,
+        userEmail: customer.email,
+        packageName: 'Test Package',
+        gameName: 'Test Game',
+        amount: 50000,
+        status: 'COMPLETED',
+      },
+    });
+
+    // Customer cannot delete users (403)
+    const custClient = await createTestClient();
+    try {
+      custClient.cookie = `auth_token=${signToken({ userId: customer.id, email: customer.email, role: 'CUSTOMER', tokenVersion: 0 })}`;
+      const forbidden = await custClient.delete(`/api/admin/users/${customer.id}`);
+      assert.equal(forbidden.status, 403);
+    } finally {
+      await custClient.close();
+    }
+
+    // Admin cannot self-delete (400)
+    const selfDelete = await admin.delete(`/api/admin/users/${user.id}`);
+    assert.equal(selfDelete.status, 400);
+
+    // Admin successfully deletes target customer (200)
+    const res = await admin.delete(`/api/admin/users/${customer.id}`);
+    assert.equal(res.status, 200);
+    assert.equal(res.body.success, true);
+
+    // User is removed from DB
+    const deletedUser = await prisma.user.findUnique({ where: { id: customer.id } });
+    assert.equal(deletedUser, null);
+
+    // Order record is preserved with userId set to null (SetNull relation)
+    const preservedOrder = await prisma.transaction.findUnique({ where: { id: custOrder.id } });
+    assert.ok(preservedOrder);
+    assert.equal(preservedOrder.userId, null);
+    assert.equal(preservedOrder.userEmail, customer.email);
+
+    // Deleting again returns 404
+    const notFound = await admin.delete(`/api/admin/users/${customer.id}`);
+    assert.equal(notFound.status, 404);
   });
 
   it('requires complete payment configuration for new orders, retries, recovery and resume', async () => {
