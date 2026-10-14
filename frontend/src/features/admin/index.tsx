@@ -706,12 +706,13 @@ export function AdminPage({
           <button className={tab === "wiki" ? "active" : ""} onClick={() => selectTab("wiki")}>
             <Icon name="book" size={18} /> Wiki Aniimo
           </button>
-          <button
+          {/* Tạm thời ẩn tab Nhật ký hoạt động (Audit log) theo yêu cầu */}
+          {/* <button
             className={tab === "audit" ? "active" : ""}
             onClick={() => selectTab("audit")}
           >
             <Icon name="shield" size={18} /> Nhật ký hoạt động
-          </button>
+          </button> */}
           {onStore && (
             <>
               <div className="admin-nav-divider" />
