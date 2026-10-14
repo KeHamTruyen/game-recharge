@@ -18,30 +18,30 @@ export default function BrandSubheader() {
       {/* Phần thông điệp & các nút thao tác nhanh bên phải */}
       <div className="brand-subheader-body">
         <p className="brand-subheader-text">
-          <strong>Duke</strong> nhận <strong>Nạp Giá Rẻ Game Mobile</strong> —{" "}
-          <strong>Trung Gian Đổi Mail</strong> — <strong>Cày Hộ Acc Game</strong>,
-          mọi người có nhu cầu thì ủng hộ Duke nha, nhớ bấm theo dõi kênh &amp; liên hệ hỗ trợ 24/7, cám ơn mọi người rất nhiều!
+          <span className="brand-text-line">
+            <strong>Duke</strong> nhận <strong>Nạp Giá Rẻ Game Mobile</strong> —{" "}
+            <strong>Trung Gian Đổi Mail</strong> — <strong>Cày Hộ Acc Game</strong>, mọi người có nhu cầu
+          </span>{" "}
+          <span className="brand-text-line">
+            thì ủng hộ Duke nha, nhớ bấm theo dõi kênh &amp; liên hệ hỗ trợ 24/7, cám ơn mọi người rất nhiều!
+          </span>
         </p>
 
         <div className="brand-action-pills">
           <NavLink to="/nap-game" className="brand-pill-btn">
-            <span className="pill-icon">🎮</span>
-            <span>Nạp Game Giá Rẻ</span>
+            Nạp Game Giá Rẻ
           </NavLink>
 
           <NavLink to="/trung-gian" className="brand-pill-btn">
-            <span className="pill-icon">🤝</span>
-            <span>Trung Gian Đổi Mail</span>
+            Trung Gian Đổi Mail
           </NavLink>
 
           <NavLink to="/cay-thue" className="brand-pill-btn">
-            <span className="pill-icon">⚔️</span>
-            <span>Nhận Cày Hộ Acc</span>
+            Nhận Cày Hộ Acc
           </NavLink>
 
           <NavLink to="/lien-he" className="brand-pill-btn highlight">
-            <span className="pill-icon">💬</span>
-            <span>Kênh Hỗ Trợ Duke</span>
+            Kênh Hỗ Trợ Duke
           </NavLink>
         </div>
       </div>

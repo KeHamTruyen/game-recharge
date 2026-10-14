@@ -1806,7 +1806,7 @@ h1, h2, h3, p { margin-top: 0; }
 
 .brand-subheader-card {
   width: 100%;
-  max-width: 1040px;
+  max-width: 920px;
   margin-inline: auto;
   display: flex;
   align-items: center;
@@ -1877,6 +1877,12 @@ h1, h2, h3, p { margin-top: 0; }
   line-height: 1.55;
   color: #e2e8f0;
   font-weight: 400;
+}
+
+@media (min-width: 860px) {
+  .brand-text-line {
+    display: block;
+  }
 }
 
 .brand-subheader-text strong {
