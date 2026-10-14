@@ -20,6 +20,7 @@
     "db:migrate-passwords:dev": "tsx src/scripts/migrate_passwords.ts",
     "test": "node scripts/test.mjs",
     "test:email": "tsx scripts/test-email.ts",
+    "test:telegram": "tsx scripts/test-telegram.ts",
     "test:container": "docker build -t duke1305-backend:shutdown-test . && node scripts/test-container-shutdown.mjs"
   },
   "dependencies": {
