@@ -79,6 +79,20 @@ describe('Review regressions: refunds, payment groups and SQL restore', () => {
     }
   });
 
+  it('requires payment before fulfillment and leaves customer spending unchanged on rejection', async () => {
+    const row = await order({ paymentStatus: 'PENDING' });
+    const before = (await prisma.user.findUniqueOrThrow({ where: { id: user.id } })).totalSpent.toString();
+    for (const status of ['PROCESSING', 'COMPLETED']) {
+      assert.equal((await admin.patch(`/api/admin/transactions/${row.id}/status`, { status })).status, 400);
+    }
+    assert.equal((await prisma.transaction.findUniqueOrThrow({ where: { id: row.id } })).status, 'PENDING');
+    assert.equal((await prisma.user.findUniqueOrThrow({ where: { id: user.id } })).totalSpent.toString(), before);
+    assert.equal((await admin.patch(`/api/admin/transactions/${row.id}/status`, {
+      status: 'COMPLETED', paymentStatus: 'PAID', reason: 'Verified transfer',
+    })).status, 200);
+    assert.equal(Number((await prisma.user.findUniqueOrThrow({ where: { id: user.id } })).totalSpent), Number(before) + 10000);
+  });
+
   it('requires paid money and a reason, and accepts only one concurrent refund', async () => {
     const unpaid = await order({ status: 'COMPLETED', paymentStatus: 'UNPAID' });
     assert.equal((await admin.patch(`/api/admin/transactions/${unpaid.id}/status`, {

@@ -1,6 +1,6 @@
 # TODO bàn giao — DUKE1305
 
-> Cập nhật **15/10/2026**. Đã sửa hiển thị lỗi OTP, script test gửi thất bại, che dữ liệu Telegram và lưu hàng đợi gửi lại sau lỗi/restart. Migration hàng đợi đã được áp dụng trên CSDL local sau khi đối chiếu và đồng bộ lịch sử migration cũ. Các cổng nghiệm thu production bên dưới vẫn còn mở.
+> Cập nhật **15/10/2026**. Telegram hiển thị đầy đủ thông tin nạp/mật khẩu theo yêu cầu; nội dung hàng đợi được mã hóa khi lưu và giải mã khi gửi. Đã chặn xử lý/hoàn thành đơn chưa thanh toán, chặn PAID về chưa thanh toán và chia tin dài thành nhiều phần. Migration dữ liệu bảo vệ cả hàng đợi cũ; local không còn bản ghi hàng đợi dạng rõ cần chuyển đổi. Các cổng nghiệm thu production bên dưới vẫn còn mở.
 
 Đã chặn phản hồi/callback từ phiên cũ ghi dữ liệu riêng tư vào phiên mới, bỏ đăng nhập giả và dữ liệu mẫu tài khoản/giao dịch khỏi frontend. Bootstrap đặt lại mật khẩu admin đồng thời thu hồi token cũ. Có test hồi quy cho các thay đổi này.
 
@@ -8,7 +8,7 @@
 
 | Hạng mục kiểm thử | Kết quả | Ghi chú |
 | --- | --- | --- |
-| `npm test --prefix backend` | **188/188 đạt** (27 suites, 15/10) | Schema riêng; thêm retry, rollback hàng đợi, khôi phục lease, hai tiến trình, shutdown khi đang gửi, che dữ liệu và mã thoát script |
+| `npm test --prefix backend` | **192/192 đạt** (27 suites, 15/10) | Schema riêng; thêm trạng thái thanh toán, mã hóa hàng đợi/migration cũ, lỗi giải mã và tin dài Unicode; kiểm chứng Telegram vẫn nhận mật khẩu rõ bằng mock |
 | `npm run typecheck --prefix frontend` & `npm run build` | **Đạt 100%**, 0 lỗi TS | Dist biên dịch đầy đủ, prerender 13 route SEO tĩnh |
 | `npm run test:e2e --prefix frontend` (Playwright) | **34/34 đạt** (15/10) | Thêm lỗi OTP đăng ký/reset hiển thị và hết lỗi sau xác minh lại thành công |
 | Kiểm thử P1 & Concurrency | **100% đạt** | Khóa nguyên tử hủy đơn, hoàn tiền, resume payment, mã hóa số |
@@ -30,7 +30,7 @@ Các bước này cần thực hiện trực tiếp trên hạ tầng và tài k
 
 - [x] **Brevo tại local:** Đã chạy luồng đăng ký/reset với SMTP thật; người dùng xác nhận nhận đủ 2 email ngày 15/10. CSDL thử đã dọn.
 - [ ] **SePay & SMTP trên production:** Chạy thử giao dịch nhỏ thực tế và nhận OTP trên hạ tầng triển khai thật.
-- [ ] **Telegram trên production:** Bot đã từng gửi thành công tại local theo xác nhận người dùng. Bản sửa retry/che dữ liệu được kiểm chứng bằng giả lập, chưa gửi thật lại sau sửa. Cần nghiệm thu sau khi deploy; mất phản hồi sau khi Telegram đã nhận có thể làm tin nhắn gửi lại bị trùng.
+- [ ] **Telegram trên production:** Bot đã từng gửi thành công tại local theo xác nhận người dùng. Bản sửa mã hóa hàng đợi/chia tin dài được kiểm chứng bằng giả lập, chưa gửi thật lại sau sửa. Chạy service `migrate` trước API để bảo vệ dữ liệu hàng đợi cũ. Cần nghiệm thu sau khi deploy; mất phản hồi hoặc lỗi giữa các phần có thể làm tin gửi lại bị trùng.
 - [ ] **Đổi secret & mật khẩu quản trị mẫu:** Thay đổi các biến `JWT_SECRET`, `COOKIE_SECRET`, `DATA_ENCRYPTION_KEY`, `ADMIN_PASSWORD` sang chuỗi bảo mật ngẫu nhiên mạnh theo chuẩn production; cấu hình đúng HTTPS, domain CORS và `TRUST_PROXY_HOPS` theo topology proxy thực tế.
 - [ ] **Diễn tập sao lưu & khôi phục CSDL (Backup & Restore):** Chạy thử script backup định kỳ và diễn tập khôi phục trên CSDL staging để đảm bảo quy trình sẵn sàng khi có sự cố.
 - [ ] **Chốt quy định nghiệp vụ đối soát tài chính:** Ban hành quy trình nội bộ hướng dẫn nhân viên CSKH/vận hành xử lý các trường hợp: khách chuyển thiếu/thừa/trùng tiền, tiền vào đơn đã hủy hoặc hết hạn, quy trình ghi nhận hoàn tiền qua giao diện Admin `PaymentAnomalyManager` và `RefundModal`.

@@ -178,6 +178,7 @@ describe('Admin Panel Operations & Audit Logging', () => {
   it('PATCH /api/admin/transactions/:id/status updates transaction status', async () => {
     const res = await adminClient.patch(`/api/admin/transactions/${testTransactionId}/status`, {
       status: 'PROCESSING',
+      paymentStatus: 'PAID',
     });
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.body.success, true);

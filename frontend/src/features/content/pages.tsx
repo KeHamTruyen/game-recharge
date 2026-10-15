@@ -640,7 +640,7 @@ export function ResumePaymentModal({
         if (statusRes.paymentStatus === "PAID") {
           setPaid(true)
           setOrderStatus(statusRes.status)
-          if (onRefresh) void onRefresh()
+          if (onRefresh) await onRefresh()
         }
       } catch {
         // Ignore polling transient errors

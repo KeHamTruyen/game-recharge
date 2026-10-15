@@ -138,15 +138,15 @@ export function AdminRoute() {
             store.setNotice(`Đã thêm tag "${name}" thành công.`)
           } catch (error) {
             store.setNotice(error instanceof Error ? error.message : "Thêm tag thất bại.")
+            throw error
           }
         }}
         onUpdateCategory={async (oldName, newName) => {
           try {
             const tags = await api.admin.tags()
             const tag = tags.find((item) => item.name === oldName)
-            if (tag) {
-              await api.admin.updateTag(tag.id, newName)
-            }
+            if (!tag) throw new Error("Tag không còn tồn tại. Vui lòng tải lại danh sách.")
+            await api.admin.updateTag(tag.id, newName)
             store.setCategories((current) =>
               current.map((item) => (item === oldName ? newName : item))
             )
@@ -165,15 +165,15 @@ export function AdminRoute() {
             store.setNotice(`Đã đổi tên tag thành "${newName}".`)
           } catch (error) {
             store.setNotice(error instanceof Error ? error.message : "Cập nhật tag thất bại.")
+            throw error
           }
         }}
         onDeleteCategory={async (name) => {
           try {
             const tags = await api.admin.tags()
             const tag = tags.find((item) => item.name === name)
-            if (tag) {
-              await api.admin.deleteTag(tag.id)
-            }
+            if (!tag) throw new Error("Tag không còn tồn tại. Vui lòng tải lại danh sách.")
+            await api.admin.deleteTag(tag.id)
             store.setCategories((current) => current.filter((item) => item === "Tất cả" || item !== name))
             store.setServicePackages((current) =>
               current.map((item) => ({
@@ -214,7 +214,7 @@ export function AdminRoute() {
           })
           store.setServices((current) => [...current, created])
           if (!store.games.includes(created.name)) {
-            store.setGames((current) => [...current, created.name])
+            store.setGames((current) => current.includes(created.name) ? current : [...current, created.name])
           }
           store.setNotice(`Đã tạo dịch vụ "${created.name}" (${created.category === "boosting" ? "Cày thuê" : "Nạp game"}) thành công.`)
           return created
@@ -325,7 +325,7 @@ export function AdminRoute() {
         onUpdateProfile={async (name) => { await store.updateProfile(name) }}
         onChangePassword={store.changePassword}
       />
-      {store.notice && <div className="toast">{store.notice}</div>}
+      {store.notice && <div className="toast" role="alert">{store.notice}</div>}
     </div>
   )
 }

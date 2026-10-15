@@ -80,21 +80,42 @@ export async function sendTelegramMessage(message: string): Promise<boolean> {
   }
 
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: 'HTML',
-        disable_web_page_preview: true,
-      }),
-      signal: AbortSignal.timeout(6000),
-    });
-    const result = await res.json() as { ok?: boolean };
-    if (!res.ok || result.ok !== true) {
-      console.warn(`[TELEGRAM] Gửi thông báo thất bại (HTTP ${res.status})`);
-      return false;
+    // Long notifications use plain-text parts so HTML tags/entities cannot be split.
+    const plain = message.length > 4096
+      ? message.replace(/<\/?(?:b|i|code)>/g, '')
+        .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'").replace(/&amp;/g, '&')
+      : undefined;
+    const parts: string[] = [];
+    if (plain !== undefined) {
+      for (let start = 0; start < plain.length;) {
+        let end = Math.min(start + 4000, plain.length);
+        if (end < plain.length && /[\uD800-\uDBFF]/.test(plain[end - 1])) end--;
+        parts.push(plain.slice(start, end));
+        start = end;
+      }
+    } else {
+      parts.push(message);
+    }
+    // Finish before the worker's 60-second lease expires, including multipart sends.
+    const deadline = AbortSignal.timeout(45_000);
+    for (const text of parts) {
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+          ...(plain === undefined ? { parse_mode: 'HTML' } : {}),
+          disable_web_page_preview: true,
+        }),
+        signal: AbortSignal.any([deadline, AbortSignal.timeout(6000)]),
+      });
+      const result = await res.json() as { ok?: boolean };
+      if (!res.ok || result.ok !== true) {
+        console.warn(`[TELEGRAM] Gửi thông báo thất bại (HTTP ${res.status})`);
+        return false;
+      }
     }
 
     return true;

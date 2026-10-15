@@ -38,6 +38,137 @@ async function mockApi(page: Page) {
 
 test.beforeEach(async ({ page }) => { await mockApi(page) })
 
+test.describe("admin mutation errors", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route("**/api/auth/session", route => route.fulfill({ json: { success: true, data: {
+      user: { id: "admin", email: "admin@test.invalid", name: "Admin", role: "ADMIN", status: "ACTIVE" },
+    } } }));
+    await page.route("**/api/admin/**", route => route.request().method() === "GET"
+      ? route.fallback()
+      : route.fulfill({ status: 400, json: { success: false, error: "Action rejected by server" } }));
+    page.on("dialog", dialog => dialog.accept("Test reason"));
+  });
+
+  test("order status rejection is visible, preserves status and allows a successful retry", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    const order = { id: "order", code: "DUKETEST", userEmail: "customer@test.invalid", gameName: "Game Alpha",
+      packageName: "100 Gems", amount: "10000", quantity: 1, status: "PENDING", paymentStatus: "PENDING",
+      createdAt: new Date().toISOString(), topupInfo: {} };
+    await page.route("**/api/admin/transactions?*", route => route.fulfill({ json: {
+      success: true, data: { items: [order], hasNext: false },
+    } }));
+    await page.goto("/admin");
+    await page.getByRole("button", { name: "Giao dịch", exact: true }).click();
+    const status = page.locator("select.transaction-status");
+    await status.selectOption({ label: "Hoàn thành" });
+    await expect(page.getByRole("alert")).toHaveText("Action rejected by server");
+    await expect(status).toHaveValue("Chờ thanh toán");
+    await page.route("**/api/admin/transactions/order/status", route => route.fulfill({ json: {
+      success: true, data: { ...order, status: "FAILED" },
+    } }));
+    await status.selectOption({ label: "Thất bại" });
+    await expect(status).toHaveValue("Thất bại");
+    expect(errors).toEqual([]);
+  });
+
+  test("user block rejection leaves the account active", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    await page.route("**/api/admin/users?*", route => route.fulfill({ json: { success: true, data: {
+      items: [{ id: "customer", email: "customer@test.invalid", name: "Test User", role: "CUSTOMER",
+        status: "ACTIVE", totalSpent: "0", createdAt: new Date().toISOString() }], hasNext: false,
+    } } }));
+    await page.goto("/admin");
+    await page.getByRole("button", { name: "Người dùng", exact: true }).click();
+    await page.locator(".user-status").click();
+    await expect(page.getByRole("alert")).toHaveText("Action rejected by server");
+    await expect(page.locator(".user-status")).toHaveText("Đang hoạt động");
+    expect(errors).toEqual([]);
+  });
+
+  test("tag rename retains its draft when saving is rejected", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    for (const path of ["catalog/tags", "admin/tags"]) {
+      await page.route(`**/api/${path}`, route => route.fulfill({ json: {
+        success: true, data: [{ id: "tag", name: "Existing tag" }],
+      } }));
+    }
+    await page.goto("/admin");
+    await page.getByRole("button", { name: "Danh mục & tag", exact: true }).click();
+    await page.getByRole("button", { name: "Sửa tag Existing tag", exact: true }).click();
+    await page.locator(".tag-manager-edit-form input").fill("New tag name");
+    await page.locator(".tag-manager-edit-form button[type=submit]").click();
+    await expect(page.getByRole("alert")).toHaveText("Action rejected by server");
+    await expect(page.locator(".tag-manager-edit-form input")).toHaveValue("New tag name");
+    expect(errors).toEqual([]);
+  });
+
+  test("game creation retry only creates the service that failed", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    const categories: string[] = [];
+    await page.route("**/api/admin/services", async route => {
+      if (route.request().method() !== "POST") return route.fallback();
+      const body = route.request().postDataJSON();
+      categories.push(body.category);
+      if (categories.length === 2) return route.fulfill({ status: 503, json: { success: false, error: "Partial creation failed" } });
+      return route.fulfill({ json: { success: true, data: { ...body, id: body.category } } });
+    });
+    await page.goto("/admin");
+    await page.getByRole("button", { name: "Danh sách game", exact: true }).click();
+    await page.getByLabel("Tên game mới", { exact: true }).fill("Partial game");
+    await page.getByLabel("Tạo mục Nạp game").check();
+    await page.getByLabel("Tạo mục Cày thuê").check();
+    const submit = page.locator(".game-add-form button").last();
+    await submit.click();
+    await expect(page.getByRole("alert")).toHaveText("Partial creation failed");
+    await expect(page.getByLabel("Tên game mới", { exact: true })).toHaveValue("Partial game");
+    await submit.click();
+    await expect(page.getByLabel("Tên game mới", { exact: true })).toHaveValue("");
+    expect(categories).toEqual(["topup", "boosting", "boosting"]);
+    expect(errors).toEqual([]);
+  });
+
+  for (const action of ["Ẩn gói nạp", "Xóa 100 Gems"]) {
+    test(`product action ${action} reports failure without removing the product`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on("pageerror", error => errors.push(error.message));
+      await page.goto("/admin");
+      await page.getByRole("button", { name: action, exact: true }).click();
+      await expect(page.getByRole("alert")).toHaveText("Action rejected by server");
+      await expect(page.getByRole("button", { name: "Ẩn gói nạp", exact: true })).toBeVisible();
+      expect(errors).toEqual([]);
+    });
+  }
+
+  for (const form of [
+    { tab: "Trạng thái sản phẩm", field: "Tên trạng thái", selector: ".status-create-form" },
+    { tab: "Danh mục & tag", field: "Tên tag mới", selector: ".category-form" },
+    { tab: "Danh sách game", field: "Tên game mới", selector: ".game-add-form" },
+  ]) {
+    test(`${form.tab} retains draft on failure and clears it only after success`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on("pageerror", error => errors.push(error.message));
+      await page.goto("/admin");
+      await page.getByRole("button", { name: form.tab, exact: true }).click();
+      const field = page.getByLabel(form.field, { exact: true });
+      await field.fill("Draft value");
+      await page.locator(form.selector).locator("button").last().click();
+      await expect(page.getByRole("alert")).toHaveText("Action rejected by server");
+      await expect(field).toHaveValue("Draft value");
+      await page.route("**/api/admin/**", async route => {
+        if (route.request().method() !== "POST") return route.fallback();
+        return route.fulfill({ json: { success: true, data: { ...route.request().postDataJSON(), id: "created" } } });
+      });
+      await page.locator(form.selector).locator("button").last().click();
+      await expect(field).toHaveValue("");
+      expect(errors).toEqual([]);
+    });
+  }
+});
+
 test("service detail follows the URL after selecting a different service", async ({ page }) => {
   await page.goto("/nap-game")
   await page.locator(".service-card").filter({ hasText: "Game Alpha" }).click()

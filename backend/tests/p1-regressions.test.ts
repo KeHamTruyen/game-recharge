@@ -136,7 +136,7 @@ describe('P1 security and payment regressions', () => {
   it('late webhooks preserve terminal status and never double-count spending', async () => {
     for (const [index, status] of (['COMPLETED', 'FAILED', 'REFUNDED'] as const).entries()) {
       const order = await orders();
-      if (status === 'REFUNDED') {
+      if (status === 'REFUNDED' || status === 'COMPLETED') {
         await prisma.transaction.update({
           where: { id: order.rows[0].id },
           data: { paymentStatus: 'PAID' },
@@ -160,7 +160,14 @@ describe('P1 security and payment regressions', () => {
       admin.patch(`/api/admin/transactions/${order.rows[0].id}/status`, { status: 'COMPLETED' }),
       webhook(order.code, 90200),
     ]);
-    assert.ok(responses.every((r) => r.status === 200));
+    assert.equal(responses[1].status, 200);
+    assert.ok([200, 400].includes(responses[0].status));
+    if (responses[0].status === 400) {
+      assert.equal(Number((await prisma.user.findUniqueOrThrow({ where: { id: order.owner.id } })).totalSpent), 0);
+      assert.equal((await admin.patch(`/api/admin/transactions/${order.rows[0].id}/status`, {
+        status: 'COMPLETED',
+      })).status, 200);
+    }
     const row = await prisma.transaction.findUniqueOrThrow({ where: { id: order.rows[0].id } });
     assert.equal(row.status, 'COMPLETED');
     assert.equal(row.paymentStatus, 'PAID');
@@ -186,7 +193,9 @@ describe('P1 security and payment regressions', () => {
       const detail = await admin.get(`/api/admin/transactions/${row.id}`);
       assert.equal(detail.body.data.topupInfo.credential, ' legacy password ');
       assert.equal(detail.body.data.topupInfo.uid, '800123456');
-      const closed = await admin.patch(`/api/admin/transactions/${row.id}/status`, { status: 'COMPLETED' });
+      const closed = await admin.patch(`/api/admin/transactions/${row.id}/status`, {
+        status: 'COMPLETED', paymentStatus: 'PAID', reason: 'Verified transfer',
+      });
       assert.equal(closed.status, 200);
       assert.ok(!JSON.stringify(closed.body).includes(data.credential));
       assert.ok(!JSON.stringify(closed.body).includes(' legacy password '));

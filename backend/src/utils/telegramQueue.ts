@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
 import { sendTelegramMessage } from './telegram.js';
+import { decryptSensitive, encryptSensitive } from './crypto.js';
 
 let running: Promise<void> | undefined;
 let stopping = false;
@@ -15,10 +16,17 @@ async function deliverDue(): Promise<void> {
     // A lease survives crashes and prevents multiple API replicas sending the same job concurrently.
     const claimed = await prisma.telegramNotification.updateMany({
       where: { id: job.id, attempts: job.attempts, sentAt: null, nextAttemptAt: { lte: new Date() } },
-      data: { attempts: { increment: 1 }, nextAttemptAt: new Date(Date.now() + 60_000) },
+      data: { attempts: { increment: 1 }, nextAttemptAt: new Date(Date.now() + 60_000),
+        ...(!job.message.startsWith('enc:') ? { message: encryptSensitive(job.message) } : {}),
+      },
     });
     if (!claimed.count) continue;
-    const sent = await sendTelegramMessage(job.message);
+    let sent = false;
+    try {
+      sent = await sendTelegramMessage(decryptSensitive(job.message, true));
+    } catch {
+      console.error('[TELEGRAM] Cannot decrypt queued notification; check encryption keys.');
+    }
     await prisma.telegramNotification.updateMany({
       where: { id: job.id, attempts: job.attempts + 1, sentAt: null },
       data: sent

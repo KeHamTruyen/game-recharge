@@ -77,6 +77,21 @@ export async function migrateLegacyPasswords() {
   }
 
   console.log(`✅ Checkout cache migration complete: Purged plain passwords from ${updatedCheckoutCount} cached checkout request(s).`);
+
+  // Protect legacy queue contents, including jobs scheduled for a later retry.
+  while (true) {
+    const jobs = await prisma.telegramNotification.findMany({
+      where: { message: { not: '' }, NOT: { message: { startsWith: 'enc:' } } },
+      take: 100,
+    });
+    if (!jobs.length) break;
+    for (const job of jobs) {
+      await prisma.telegramNotification.updateMany({
+        where: { id: job.id, message: job.message },
+        data: { message: job.sentAt ? '' : encryptSensitive(job.message) },
+      });
+    }
+  }
 }
 
 if (require.main === module) {

@@ -7,6 +7,7 @@ import { env } from '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
 import { formatTelegramOrderMessage } from '../utils/telegram.js';
 import { flushTelegramNotifications } from '../utils/telegramQueue.js';
+import { encryptSensitive } from '../utils/crypto.js';
 
 const router = Router();
 
@@ -255,12 +256,12 @@ router.post(
         await tx.telegramNotification.createMany({
           data: transactions.map((item) => ({
             id: item.id,
-            message: formatTelegramOrderMessage({
+            message: encryptSensitive(formatTelegramOrderMessage({
               orderCode: orderCode!, amount: Number(item.amount),
               packageName: item.packageName, gameName: item.gameName, userEmail: item.userEmail,
               topupInfo: item.topupInfo as Record<string, unknown>,
               topupLabels: item.topupLabels as Record<string, string>, topupFields: item.topupFields, paidAt,
-            }),
+            })),
           })),
         });
         return true;

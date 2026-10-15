@@ -5,8 +5,10 @@ import { spawn, spawnSync } from 'node:child_process';
 import { createTestClient, prisma, TestClient } from './helpers.js';
 import { env } from '../src/config/env.js';
 import { flushTelegramNotifications } from '../src/utils/telegramQueue.js';
-import { formatTelegramOrderMessage, sendTelegramOrderNotification } from '../src/utils/telegram.js';
-import { encryptSensitive } from '../src/utils/crypto.js';
+import { formatTelegramOrderMessage, sendTelegramOrderNotification, sendTelegramMessage } from '../src/utils/telegram.js';
+import { encryptSensitive, decryptSensitive } from '../src/utils/crypto.js';
+import { migrateLegacyPasswords } from '../src/scripts/migrate_passwords.js';
+import { signToken } from '../src/middleware/auth.js';
 
 const sample = { orderCode: 'DUKETEST', amount: 10000, packageName: 'Test', gameName: 'Test', userEmail: 'test@example.invalid' };
 
@@ -33,7 +35,7 @@ describe('Notification delivery regressions', () => {
     return prisma.transaction.create({ data: {
       code, paymentOrderCode: code, userEmail: sample.userEmail,
       packageName: sample.packageName, gameName: sample.gameName, amount: 10000,
-      paymentStatus: 'PENDING', topupInfo: { credential: 'enc:private-ciphertext', uid: '800123456' },
+      paymentStatus: 'PENDING', topupInfo: { credential: encryptSensitive('actual-test-password'), uid: '800123456' },
     } });
   }
   function incoming(code: string) {
@@ -43,12 +45,12 @@ describe('Notification delivery regressions', () => {
   const webhook = (body: object) => client.post('/api/payments/webhook', body, {
     headers: { authorization: `Apikey ${env.SEPAY_API_KEY}` },
   });
-  function enableSender(send: () => Promise<Response>) {
+  function enableSender(send: (options?: RequestInit) => Promise<Response>) {
     env.TELEGRAM_BOT_TOKEN = 'test-token';
     env.TELEGRAM_CHAT_ID = 'test-chat';
     const realFetch = globalThis.fetch;
     mock.method(globalThis, 'fetch', (url: Parameters<typeof fetch>[0], options?: RequestInit) =>
-      String(url).startsWith('https://api.telegram.org/') ? send() : realFetch(url, options));
+      String(url).startsWith('https://api.telegram.org/') ? send(options) : realFetch(url, options));
   }
 
   it('keeps a failed notification, retries without another payment, and never requeues webhook duplicates', async () => {
@@ -56,10 +58,17 @@ describe('Notification delivery regressions', () => {
     const body = incoming(row.code);
     assert.equal((await webhook(body)).status, 200);
     const queued = await prisma.telegramNotification.findUniqueOrThrow({ where: { id: row.id } });
-    assert.ok(!queued.message.includes('enc:'));
-    assert.ok(queued.message.includes('800123456'));
+    assert.ok(queued.message.startsWith('enc:'));
+    assert.ok(!queued.message.includes('actual-test-password'));
+    assert.ok(decryptSensitive(queued.message, true).includes('800123456'));
     let calls = 0;
-    enableSender(async () => { calls++; return new Response(JSON.stringify({ ok: calls > 1 }), { status: calls === 1 ? 503 : 200 }); });
+    enableSender(async (options) => {
+      const payload = JSON.parse(String(options?.body));
+      assert.ok(payload.text.includes('actual-test-password'));
+      assert.ok(!payload.text.includes('enc:'));
+      calls++;
+      return new Response(JSON.stringify({ ok: calls > 1 }), { status: calls === 1 ? 503 : 200 });
+    });
     await flushTelegramNotifications();
     const failed = await prisma.telegramNotification.findUniqueOrThrow({ where: { id: row.id } });
     assert.equal(failed.sentAt, null);
@@ -91,6 +100,65 @@ describe('Notification delivery regressions', () => {
     }
     assert.equal((await webhook(body)).status, 200);
     assert.equal(await prisma.telegramNotification.count(), 1);
+  });
+
+  it('blocks reopening paid orders and acknowledges later transfers without queue conflicts', async () => {
+    const row = await order();
+    assert.equal((await webhook(incoming(row.code))).status, 200);
+    const admin = await prisma.user.create({ data: {
+      email: `${randomUUID()}@test.invalid`, name: 'Admin', passwordHash: 'unused', role: 'ADMIN',
+    } });
+    const cookie = `auth_token=${signToken({ userId: admin.id, email: admin.email, role: 'ADMIN', tokenVersion: 0 })}`;
+    for (const paymentStatus of ['PENDING', 'UNPAID', 'FAILED', 'EXPIRED']) {
+      const res = await client.patch(`/api/admin/transactions/${row.id}/status`, {
+        status: 'PENDING', paymentStatus,
+      }, { headers: { Cookie: cookie } });
+      assert.equal(res.status, 400);
+    }
+    assert.equal((await webhook(incoming(row.code))).status, 200);
+    assert.equal(await prisma.telegramNotification.count(), 1);
+    assert.equal((await prisma.transaction.findUniqueOrThrow({ where: { id: row.id } })).paymentStatus, 'PAID');
+  });
+
+  it('encrypts legacy queued messages idempotently and never sends unreadable ciphertext', async () => {
+    const legacy = await prisma.telegramNotification.create({ data: {
+      id: randomUUID(), message: 'legacy-secret', nextAttemptAt: new Date(Date.now() + 3600000),
+    } });
+    await migrateLegacyPasswords();
+    const encrypted = await prisma.telegramNotification.findUniqueOrThrow({ where: { id: legacy.id } });
+    assert.ok(encrypted.message.startsWith('enc:'));
+    assert.equal(decryptSensitive(encrypted.message, true), 'legacy-secret');
+    await migrateLegacyPasswords();
+    assert.equal((await prisma.telegramNotification.findUniqueOrThrow({ where: { id: legacy.id } })).message, encrypted.message);
+    const broken = await prisma.telegramNotification.create({ data: {
+      id: randomUUID(), message: 'enc:invalid', nextAttemptAt: new Date(0),
+    } });
+    let calls = 0;
+    enableSender(async () => { calls++; return new Response('{"ok":true}'); });
+    await flushTelegramNotifications();
+    assert.equal(calls, 0);
+    const saved = await prisma.telegramNotification.findUniqueOrThrow({ where: { id: broken.id } });
+    assert.equal(saved.sentAt, null);
+    assert.equal(saved.attempts, 1);
+  });
+
+  it('sends long messages in bounded parts without losing credentials, Unicode or literal HTML', async () => {
+    const password = '<code>&amp;"secret</code>' + '😀'.repeat(5000);
+    const message = formatTelegramOrderMessage({ ...sample, topupInfo: { password } });
+    const bodies: Array<{ text: string; parse_mode?: string }> = [];
+    enableSender(async (options) => {
+      bodies.push(JSON.parse(String(options?.body)));
+      return new Response('{"ok":true}');
+    });
+    assert.equal(await sendTelegramMessage(message), true);
+    assert.ok(bodies.length > 1);
+    assert.ok(bodies.every(body => body.text.length <= 4096 && !body.parse_mode && body.text.isWellFormed()));
+    assert.ok(bodies.map(body => body.text).join('').includes(password));
+    mock.restoreAll();
+    let calls = 0;
+    enableSender(async () => { calls++; return new Response(JSON.stringify({ ok: calls === 1 })); });
+    assert.equal(await sendTelegramMessage(message), false);
+    assert.equal(calls, 2);
   });
 
   it('recovers an expired worker lease and sends once across two independent processes', async () => {

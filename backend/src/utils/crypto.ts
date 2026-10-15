@@ -57,11 +57,14 @@ export function encryptSensitive(text: string): string {
  * Decrypt an AES-256-GCM encrypted string.
  * Tries the primary key, followed by fallback key candidates to support secret rotation.
  */
-export function decryptSensitive(ciphertext: string): string {
+export function decryptSensitive(ciphertext: string, strict = false): string {
   if (!ciphertext || !ciphertext.startsWith('enc:')) return ciphertext;
 
   const parts = ciphertext.split(':');
-  if (parts.length !== 4) return ciphertext;
+  if (parts.length !== 4) {
+    if (strict) throw new Error('Invalid encrypted message');
+    return ciphertext;
+  }
   const [, ivHex, tagHex, dataHex] = parts;
 
   for (const key of FALLBACK_KEYS) {
@@ -78,6 +81,7 @@ export function decryptSensitive(ciphertext: string): string {
     }
   }
 
+  if (strict) throw new Error('Unable to decrypt message');
   return '[Không thể giải mã: Khóa mã hóa đã thay đổi]';
 }
 

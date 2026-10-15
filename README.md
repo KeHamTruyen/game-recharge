@@ -169,10 +169,10 @@ Game Recharge Website/
 
 ### 4. Vận hành & Giám sát hệ thống
 - **Thông báo đơn mới qua Telegram Bot:**
-  - Webhook thanh toán ghi thông báo vào bảng `telegram_notifications` trong cùng transaction với thanh toán; chỉ gửi sau khi commit. Các trường nhạy cảm được che trước khi lưu vào hàng đợi.
+  - Webhook thanh toán ghi thông báo vào bảng `telegram_notifications` trong cùng transaction với thanh toán; chỉ gửi sau khi commit. Nội dung hàng đợi được mã hóa bằng `DATA_ENCRYPTION_KEY`, giải mã khi gửi; Telegram vẫn hiển thị đầy đủ thông tin nạp và mật khẩu theo cấu hình nghiệp vụ. Chỉ cấp quyền chat cho người xử lý đơn. Script `db:migrate-passwords` mã hóa cả thông báo cũ chưa gửi; Docker chạy bước này trong service `migrate`.
   - Backend xử lý tối đa 10 thông báo mỗi lượt, quét lại mỗi 30 giây và khi khởi động. Gửi lỗi sẽ thử lại với khoảng chờ tăng từ 30 giây đến tối đa 1 giờ; công việc đang xử lý được giữ chỗ 60 giây để phục hồi sau restart. Nếu chưa cấu hình Telegram, thông báo nằm chờ và được gửi khi bật cấu hình.
   - Không thể bảo đảm Telegram chỉ nhận đúng một lần: nếu Telegram đã nhận nhưng phản hồi bị mất, hoặc tiến trình dừng trước khi ghi nhận thành công, lần thử lại có thể tạo tin trùng. Nhân viên đối chiếu mã đơn trên Admin trước khi xử lý; việc gửi lại không thanh toán lại đơn.
-  - Node được tăng thời gian thử kết nối IPv4/IPv6 lên tối thiểu 1.500 ms; toàn bộ yêu cầu gửi vẫn bị giới hạn 6 giây.
+  - Node được tăng thời gian thử kết nối IPv4/IPv6 lên tối thiểu 1.500 ms; mỗi yêu cầu gửi giới hạn 6 giây. Tin dài được chia thành các phần văn bản thuần tối đa 4.000 ký tự, giữ nguyên dữ liệu; cả lượt gửi giới hạn 45 giây. Nếu một phần thất bại, lần gửi lại có thể lặp phần đã nhận.
   - Test gửi thật: `npm run test:email --prefix backend -- recipient@example.com` và `npm run test:telegram --prefix backend`. Script trả mã thoát khác 0 khi lỗi; SMTP chấp nhận thư chưa đồng nghĩa thư đã vào Inbox.
 - **Tự động Sao lưu Cơ sở dữ liệu hàng ngày & Khôi phục Tương thích:**
   - Script độc lập `backend/scripts/backup.mjs` (và container `backup` trong Docker Compose) tự động dump CSDL bằng `pg_dump` định kỳ và dọn dẹp các bản sao lưu cũ. Bắt buộc kiểm tra an toàn `BACKUP_KEEP_DAYS >= 1` (từ chối ngay nếu `<= 0` hoặc không hợp lệ để chống xóa nhầm bản sao lưu mới tạo), kiểm tra dung lượng file kết xuất sau dump và in URL kết nối che mật khẩu.

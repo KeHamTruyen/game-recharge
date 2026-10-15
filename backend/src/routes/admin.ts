@@ -844,6 +844,13 @@ router.patch(
         let newPaymentStatus = body.paymentStatus ?? previous.paymentStatus;
         const isRefunding = newStatus === 'REFUNDED' || newPaymentStatus === 'REFUNDED';
 
+        if (previous.paymentStatus === 'PAID' && newPaymentStatus !== 'PAID' && !isRefunding) {
+          throw new AppError('Không thể đưa đơn đã thanh toán về chưa thanh toán. Hãy dùng chức năng hoàn tiền.', 400);
+        }
+        if (!isRefunding && ['PROCESSING', 'COMPLETED'].includes(newStatus) && newPaymentStatus !== 'PAID') {
+          throw new AppError('Chỉ có thể xử lý hoặc hoàn thành đơn đã thanh toán.', 400);
+        }
+
         if (isRefunding) {
           if (previous.paymentStatus !== 'PAID') {
             throw new AppError('Chỉ có thể hoàn tiền cho đơn hàng đã thanh toán thành công', 400);

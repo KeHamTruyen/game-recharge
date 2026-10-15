@@ -20,6 +20,7 @@ import type {
 import { initialFooterConfig, platformLogos } from "@/data/mock-data"
 import { Icon, Pagination, ProductCard, ServiceCard, formatPrice } from "@/components/ui"
 import { api } from "@/services/api"
+import { useAppStore } from "@/app/AppStore"
 
 export function AdminHeader({
   email,
@@ -329,15 +330,15 @@ export function AdminPage({
   onAddProduct: (product: Omit<Product, "id">) => void | Promise<void>
   onDeleteProduct: (id: string | number) => void | Promise<void>
   onUpdateProduct: (id: string | number, updates: Partial<Product>) => void | Promise<void>
-  onAddProductStatus: (status: ProductStatus) => void
-  onDeleteProductStatus: (id: string) => void
+  onAddProductStatus: (status: ProductStatus) => void | Promise<void>
+  onDeleteProductStatus: (id: string) => void | Promise<void>
   onAddTopupTemplate: (template: TopupTemplate) => void
   onUpdateTopupTemplate: (id: string, template: TopupTemplate) => void
   onDeleteTopupTemplate: (id: string) => Promise<boolean>
   onAddCategory: (name: string) => void | Promise<void>
   onUpdateCategory?: (oldName: string, newName: string) => void | Promise<void>
   onDeleteCategory: (name: string) => void | Promise<void>
-  onAddGame: (name: string) => void
+  onAddGame: (name: string) => void | Promise<void>
   onDeleteGame: (name: string) => void
   onUpdateGame: (name: string, updates: Partial<Service>) => void | Promise<void>
   onUpdateService?: (serviceId: string | number, updates: Partial<Service>) => void | Promise<void>
@@ -350,7 +351,7 @@ export function AdminPage({
   onUpdateFooter?: (config: FooterConfig) => void | Promise<void>
   users: ManagedUser[]
   transactions: Transaction[]
-  onUpdateUser: (id: string | number, updates: Partial<ManagedUser>) => void
+  onUpdateUser: (id: string | number, updates: Partial<ManagedUser>) => void | Promise<void>
   onDeleteUser?: (id: string | number) => void | Promise<void>
   onUpdateTransaction: (
     id: string | number,
@@ -358,7 +359,7 @@ export function AdminPage({
     reason?: string,
     paymentStatus?: string,
     refundDetails?: { refundAmount?: number; refundTxId?: string; refundReason?: string },
-  ) => void
+  ) => void | Promise<void>
   onUpdateProfile: (name: string) => Promise<void>
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>
   adminName: string
@@ -369,6 +370,8 @@ export function AdminPage({
     useState<"products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "anomalies" | "users" | "adminAccount" | "analytics" | "wiki" | "audit">(
       "products",
     )
+  const { setNotice } = useAppStore()
+  const showActionError = (error: unknown) => setNotice(error instanceof Error ? error.message : "Thao tác thất bại. Vui lòng thử lại.")
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const selectTab = (
     nextTab: "products" | "templates" | "statuses" | "categories" | "games" | "middleman" | "contacts" | "footer" | "transactions" | "anomalies" | "users" | "adminAccount" | "analytics" | "wiki" | "audit",
@@ -550,10 +553,10 @@ export function AdminPage({
   const existingGalleryImages = useMemo(() => {
     const set = new Set<string>()
     set.add("/uploads/animo.jpg")
-    for (const s of services || []) {
+    for (const s of Array.isArray(services) ? services : []) {
       if (s?.image) set.add(s.image)
     }
-    for (const p of products || []) {
+    for (const p of Array.isArray(products) ? products : []) {
       if (p?.image) set.add(p.image)
     }
     return Array.from(set)
@@ -805,9 +808,10 @@ export function AdminPage({
                       <span className="product-actions">
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={async () => {
                             const newActive = product.isActive === false ? true : false
-                            onUpdateProduct(product.id, { isActive: newActive })
+                            try { await onUpdateProduct(product.id, { isActive: newActive }) }
+                            catch (error) { showActionError(error) }
                           }}
                           aria-label={product.isActive === false ? "Hiện gói nạp" : "Ẩn gói nạp"}
                           title={product.isActive === false ? "Đang ẩn - Bấm để hiển thị lên website" : "Đang hiện - Bấm để ẩn khỏi website"}
@@ -825,9 +829,10 @@ export function AdminPage({
                           <Icon name="edit" size={17} />
                         </button>
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}" không?`)) {
-                              onDeleteProduct(product.id)
+                              try { await onDeleteProduct(product.id) }
+                              catch (error) { showActionError(error) }
                             }
                           }}
                           aria-label={`Xóa ${product.name}`}
@@ -1111,11 +1116,13 @@ export function AdminPage({
               </div>
               <form
                 className="category-form"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault()
                   if (newCategory.trim()) {
-                    onAddCategory(newCategory.trim())
-                    setNewCategory("")
+                    try {
+                      await onAddCategory(newCategory.trim())
+                      setNewCategory("")
+                    } catch (error) { showActionError(error) }
                   }
                 }}
               >
@@ -1145,10 +1152,12 @@ export function AdminPage({
                           onSubmit={async (e) => {
                             e.preventDefault()
                             if (editingTag && editingTag.name.trim()) {
+                              try {
                               if (onUpdateCategory) {
                                 await onUpdateCategory(editingTag.oldName, editingTag.name.trim())
                               }
                               setEditingTag(null)
+                              } catch (error) { showActionError(error) }
                             }
                           }}
                         >
@@ -1250,7 +1259,9 @@ export function AdminPage({
                   event.preventDefault()
                   if (!newGame.trim()) return
                   const gameTitle = newGame.trim()
-                  if (newGameCreateTopup && onAddService) {
+                  try {
+                  if (newGameCreateTopup && onAddService && !services.some(service =>
+                    (service.name === gameTitle || service.game === gameTitle) && service.category === "topup")) {
                     await onAddService({
                       name: gameTitle,
                       game: gameTitle,
@@ -1262,7 +1273,8 @@ export function AdminPage({
                       isActive: true,
                     })
                   }
-                  if (newGameCreateBoosting && onAddService) {
+                  if (newGameCreateBoosting && onAddService && !services.some(service =>
+                    (service.name === gameTitle || service.game === gameTitle) && service.category === "boosting")) {
                     await onAddService({
                       name: gameTitle,
                       game: gameTitle,
@@ -1275,10 +1287,11 @@ export function AdminPage({
                     })
                   }
                   if (!newGameCreateTopup && !newGameCreateBoosting) {
-                    onAddGame(gameTitle)
+                    await onAddGame(gameTitle)
                   }
                   setNewGame("")
                   if (!game) setGame(gameTitle)
+                  } catch (error) { showActionError(error) }
                 }}
               >
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", flex: 1 }}>
@@ -1529,16 +1542,18 @@ export function AdminPage({
                           {topupService && (
                             <button
                               type="button"
-                              onClick={() => {
+                              onClick={async () => {
+                                try {
                                 if (onUpdateService) {
-                                  void onUpdateService(topupService.id, {
+                                  await onUpdateService(topupService.id, {
                                     isActive: !topupService.isActive,
                                   })
                                 } else {
-                                  onUpdateGame(item, {
+                                  await onUpdateGame(item, {
                                     isActive: !topupService.isActive,
                                   })
                                 }
+                                } catch (error) { showActionError(error) }
                               }}
                               title={
                                 topupService.isActive !== false
@@ -1583,12 +1598,14 @@ export function AdminPage({
                           {boostingService ? (
                             <button
                               type="button"
-                              onClick={() => {
+                              onClick={async () => {
+                                try {
                                 if (onUpdateService) {
-                                  void onUpdateService(boostingService.id, {
+                                  await onUpdateService(boostingService.id, {
                                     isActive: !boostingService.isActive,
                                   })
                                 }
+                                } catch (error) { showActionError(error) }
                               }}
                               title={
                                 boostingService.isActive !== false
@@ -1634,6 +1651,7 @@ export function AdminPage({
                             <button
                               type="button"
                               onClick={async () => {
+                                try {
                                 if (onAddService) {
                                   await onAddService({
                                     name: item,
@@ -1646,6 +1664,7 @@ export function AdminPage({
                                     isActive: true,
                                   })
                                 }
+                                } catch (error) { showActionError(error) }
                               }}
                               title={`Tạo dịch vụ Cày thuê cho ${item}`}
                               style={{
@@ -2528,9 +2547,10 @@ export function ProductStatusManager({
 }: {
   statuses: ProductStatus[]
   products: Product[]
-  onAdd: (status: ProductStatus) => void
-  onDelete: (id: string) => void
+  onAdd: (status: ProductStatus) => void | Promise<void>
+  onDelete: (id: string) => void | Promise<void>
 }) {
+  const { setNotice } = useAppStore()
   const [name, setName] = useState("")
   const [icon, setIcon] = useState<IconName>("check")
   const [color, setColor] = useState<ProductStatus["color"]>("green")
@@ -2545,10 +2565,11 @@ export function ProductStatusManager({
     { value: "game", label: "Tay cầm" },
   ]
 
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (!name.trim()) return
-    onAdd({
+    try {
+    await onAdd({
       id: `status-${Date.now()}`,
       name: name.trim(),
       icon,
@@ -2559,6 +2580,7 @@ export function ProductStatusManager({
     setIcon("check")
     setColor("green")
     setPurchasable(true)
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Không thể tạo trạng thái.") }
   }
 
   return (
@@ -2647,13 +2669,14 @@ export function ProductStatusManager({
               </span>
               {status.id !== "available" ? (
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     const confirmMsg =
                       usage > 0
                         ? `Trạng thái "${status.name}" đang được sử dụng bởi ${usage} sản phẩm.\n\nNếu xóa, các sản phẩm này sẽ được chuyển về trạng thái khả dụng mặc định.\n\nBạn có chắc chắn muốn xóa không?`
                         : `Bạn có chắc chắn muốn xóa trạng thái "${status.name}" không?`
                     if (window.confirm(confirmMsg)) {
-                      onDelete(status.id)
+                      try { await onDelete(status.id) }
+                      catch (error) { setNotice(error instanceof Error ? error.message : "Không thể xóa trạng thái.") }
                     }
                   }}
                   aria-label={`Xóa ${status.name}`}
@@ -3137,9 +3160,10 @@ export function AdminTransactions({
     reason?: string,
     paymentStatus?: string,
     refundDetails?: { refundAmount?: number; refundTxId?: string; refundReason?: string },
-  ) => void
+  ) => void | Promise<void>
   onViewAnalytics?: () => void
 }) {
+  const { setNotice } = useAppStore()
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("Tất cả")
   const [paymentFilter, setPaymentFilter] = useState("Tất cả")
@@ -3363,7 +3387,7 @@ export function AdminTransactions({
             <select
               className={`transaction-status status-${String(item.status).replace(/\s+/g, "-").toLowerCase()}`}
               value={item.status}
-              onChange={(event) => {
+              onChange={async (event) => {
                 const nextStatus = event.target.value as TransactionStatus
                 if (nextStatus === item.status) return
                 if (nextStatus === "Đã hoàn tiền") {
@@ -3382,7 +3406,8 @@ export function AdminTransactions({
                   alert("Vui lòng nhập lý do điều chỉnh trạng thái.")
                   return
                 }
-                onUpdate(item.id, nextStatus, reason.trim())
+                try { await onUpdate(item.id, nextStatus, reason.trim()) }
+                catch (error) { setNotice(error instanceof Error ? error.message : "Không thể cập nhật trạng thái đơn.") }
               }}
             >
               {statuses.slice(1).map((value) => (
@@ -3752,9 +3777,10 @@ export function AdminUsers({
   onDelete,
 }: {
   users: ManagedUser[]
-  onUpdate: (id: string | number, updates: Partial<ManagedUser>) => void
+  onUpdate: (id: string | number, updates: Partial<ManagedUser>) => void | Promise<void>
   onDelete?: (id: string | number) => void | Promise<void>
 }) {
+  const { setNotice } = useAppStore()
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const filtered = users.filter((item) =>
@@ -3804,11 +3830,12 @@ export function AdminUsers({
             <strong>{formatPrice(item.totalSpent)}</strong>
             <button
               className={`user-status ${item.status}`}
-              onClick={() =>
-                onUpdate(item.id, {
+              onClick={async () => {
+                try { await onUpdate(item.id, {
                   status: item.status === "active" ? "blocked" : "active",
-                })
-              }
+                }) }
+                catch (error) { setNotice(error instanceof Error ? error.message : "Không thể cập nhật tài khoản.") }
+              }}
             >
               {item.status === "active" ? "Đang hoạt động" : "Đã khóa"}
             </button>
