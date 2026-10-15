@@ -12,6 +12,7 @@ import { apiLimiter, adminLimiter, orderLimiter, paymentStatusLimiter, paymentWe
 import { requestContext } from './middleware/requestContext.js';
 import { AppError, errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { prisma } from './lib/prisma.js';
+import { flushTelegramNotifications, stopTelegramNotifications } from './utils/telegramQueue.js';
 
 import authRouter from './routes/auth.js';
 import catalogRouter from './routes/catalog.js';
@@ -170,6 +171,9 @@ async function startServer(): Promise<void> {
   try {
     // Test DB connection
     await prisma.$connect();
+    void flushTelegramNotifications();
+    const telegramTimer = setInterval(() => { void flushTelegramNotifications(); }, 30_000);
+    telegramTimer.unref();
     console.log('✅ Database connected');
 
     const server = app.listen(env.PORT, () => {
@@ -257,11 +261,14 @@ async function startServer(): Promise<void> {
     // ─── Graceful Shutdown ─────────────────────────────────────────────────
     const shutdown = async (signal: string): Promise<void> => {
       console.log(`\n⚠️  Received ${signal}. Shutting down gracefully...`);
+      clearInterval(telegramTimer);
+      const telegramStopped = stopTelegramNotifications();
 
       server.close(async () => {
         clearInterval(staleOrderCheck);
         clearInterval(auditLogCleanupTimer);
         console.log('🔌 HTTP server closed');
+        await telegramStopped;
         await prisma.$disconnect();
         console.log('🔌 Database disconnected');
         process.exit(0);

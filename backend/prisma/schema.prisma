@@ -275,6 +275,18 @@ model PaymentReceipt {
   @@map("payment_receipts")
 }
 
+// Written atomically with settlement; only masked text is stored here.
+model TelegramNotification {
+  id            String    @id
+  message       String
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime  @default(now())
+  sentAt        DateTime?
+
+  @@index([sentAt, nextAttemptAt])
+  @@map("telegram_notifications")
+}
+
 // Anomalous bank transactions (mismatched amount, wrong content, duplicate transfers) for admin reconciliation
 model PaymentAnomaly {
   id             String    @id @default(cuid())

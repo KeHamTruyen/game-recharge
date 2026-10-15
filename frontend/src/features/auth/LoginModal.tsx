@@ -26,6 +26,7 @@ export function LoginModal({
   const [newPassword, setNewPassword] = useState("")
   const submit = async (event: FormEvent) => {
     event.preventDefault()
+    setError("")
     if (mode === "forgot") {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
         return setError("Vui lòng nhập đúng định dạng email.")
@@ -61,6 +62,8 @@ export function LoginModal({
     setMode(nextMode)
     setError("")
     setResetSent(false)
+    setVerification(null)
+    setCode("")
   }
   return (
     <div
@@ -113,6 +116,7 @@ export function LoginModal({
             <button
               className="primary-button"
               onClick={async () => {
+                setError("")
                 try {
                   if (verification === "register") {
                     await onLogin(email, code, displayName)
@@ -194,7 +198,6 @@ export function LoginModal({
                 </div>
               </label>
             )}
-            {error && <span className="form-error">{error}</span>}
             <button className="primary-button" type="submit">
               {mode === "login"
                 ? "Đăng nhập"
@@ -214,6 +217,7 @@ export function LoginModal({
             )}
           </form>
         )}
+        {error && <span className="form-error" role="alert">{error}</span>}
         {mode === "register" && (
           <small>
             Bằng cách đăng ký, bạn đồng ý với điều khoản sử dụng và chính sách bảo mật.

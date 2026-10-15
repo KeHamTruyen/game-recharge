@@ -5,7 +5,8 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { env } from '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
-import { sendTelegramOrderNotification } from '../utils/telegram.js';
+import { formatTelegramOrderMessage } from '../utils/telegram.js';
+import { flushTelegramNotifications } from '../utils/telegramQueue.js';
 
 const router = Router();
 
@@ -219,7 +220,7 @@ router.post(
           where: { OR: [{ paymentOrderCode: orderCode }, { paymentOrderCode: null, code: orderCode }] },
           select: {
             id: true, amount: true, paymentStatus: true, packageName: true,
-            gameName: true, userEmail: true, topupInfo: true, topupLabels: true,
+            gameName: true, userEmail: true, topupInfo: true, topupLabels: true, topupFields: true,
           },
         });
         if (!transactions.length) {
@@ -251,20 +252,21 @@ router.post(
           where,
           data: { paymentStatus: 'PAID', paidAt, paymentMetadata: payload as Prisma.InputJsonValue, bankTransactionId: referenceCode },
         });
-        return { transactions, paidAt, orderCode };
+        await tx.telegramNotification.createMany({
+          data: transactions.map((item) => ({
+            id: item.id,
+            message: formatTelegramOrderMessage({
+              orderCode: orderCode!, amount: Number(item.amount),
+              packageName: item.packageName, gameName: item.gameName, userEmail: item.userEmail,
+              topupInfo: item.topupInfo as Record<string, unknown>,
+              topupLabels: item.topupLabels as Record<string, string>, topupFields: item.topupFields, paidAt,
+            }),
+          })),
+        });
+        return true;
       });
 
-      // Notify only after the database commit, and only for newly settled orders.
-      if (settled) {
-        for (const item of settled.transactions) {
-          void sendTelegramOrderNotification({
-            orderCode: settled.orderCode, amount: Number(item.amount),
-            packageName: item.packageName, gameName: item.gameName, userEmail: item.userEmail,
-            topupInfo: item.topupInfo as Record<string, unknown>,
-            topupLabels: item.topupLabels as Record<string, string>, paidAt: settled.paidAt,
-          });
-        }
-      }
+      if (settled) void flushTelegramNotifications();
       if (!payload.accountNumber || payload.accountNumber !== configuredAccount) {
         res.status(200).json({ success: true, ignored: true, reason: 'Mismatched account number' });
         return;

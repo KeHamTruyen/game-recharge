@@ -550,11 +550,11 @@ export function AdminPage({
   const existingGalleryImages = useMemo(() => {
     const set = new Set<string>()
     set.add("/uploads/animo.jpg")
-    for (const s of services) {
-      if (s.image) set.add(s.image)
+    for (const s of services || []) {
+      if (s?.image) set.add(s.image)
     }
-    for (const p of products) {
-      if (p.image) set.add(p.image)
+    for (const p of products || []) {
+      if (p?.image) set.add(p.image)
     }
     return Array.from(set)
   }, [services, products])

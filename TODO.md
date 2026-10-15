@@ -1,6 +1,6 @@
 # TODO bàn giao — DUKE1305
 
-> Cập nhật **14/10/2026**. Đã bổ sung các bản sửa trước deploy: restore `.sql.gz`, kiểm tra đủ cấu hình SePay ở cả tạo đơn/khôi phục QR, và cho phép key mã hóa rỗng chỉ ở development/test. Các cổng nghiệm thu production bên dưới vẫn còn mở; test pass không thay thế kiểm chứng môi trường thật.
+> Cập nhật **15/10/2026**. Đã sửa hiển thị lỗi OTP, script test gửi thất bại, che dữ liệu Telegram và lưu hàng đợi gửi lại sau lỗi/restart. Migration hàng đợi đã được áp dụng trên CSDL local sau khi đối chiếu và đồng bộ lịch sử migration cũ. Các cổng nghiệm thu production bên dưới vẫn còn mở.
 
 Đã chặn phản hồi/callback từ phiên cũ ghi dữ liệu riêng tư vào phiên mới, bỏ đăng nhập giả và dữ liệu mẫu tài khoản/giao dịch khỏi frontend. Bootstrap đặt lại mật khẩu admin đồng thời thu hồi token cũ. Có test hồi quy cho các thay đổi này.
 
@@ -8,9 +8,9 @@
 
 | Hạng mục kiểm thử | Kết quả | Ghi chú |
 | --- | --- | --- |
-| `npm test --prefix backend` | **180/180 đạt** (26 suites, 14/10) | Schema riêng; thêm kiểm tra bootstrap thu hồi token admin cũ |
+| `npm test --prefix backend` | **188/188 đạt** (27 suites, 15/10) | Schema riêng; thêm retry, rollback hàng đợi, khôi phục lease, hai tiến trình, shutdown khi đang gửi, che dữ liệu và mã thoát script |
 | `npm run typecheck --prefix frontend` & `npm run build` | **Đạt 100%**, 0 lỗi TS | Dist biên dịch đầy đủ, prerender 13 route SEO tĩnh |
-| `npm run test:e2e --prefix frontend` (Playwright) | **32/32 đạt** (14/10) | Thêm 4 test cách ly phiên: khôi phục, refresh, login, cập nhật hồ sơ; kiểm tra callback cũ, chặn đăng nhập giả và lỗi mạng khi logout |
+| `npm run test:e2e --prefix frontend` (Playwright) | **34/34 đạt** (15/10) | Thêm lỗi OTP đăng ký/reset hiển thị và hết lỗi sau xác minh lại thành công |
 | Kiểm thử P1 & Concurrency | **100% đạt** | Khóa nguyên tử hủy đơn, hoàn tiền, resume payment, mã hóa số |
 | Docker Compose & Network | **Đạt** | `migrate` đã gán `duke_network`, `MAIL_FROM` chuẩn RFC |
 | Bootstrap production an toàn | **Đạt** | `dist/scripts/bootstrap.js` khởi tạo DB sạch |
@@ -28,8 +28,9 @@
 
 Các bước này cần thực hiện trực tiếp trên hạ tầng và tài khoản production thật:
 
-- [ ] **Cấu hình SePay & SMTP thật:** Điền thông tin tài khoản ngân hàng, webhook SePay và cấu hình SMTP thật, chạy thử một giao dịch nhỏ thực tế và kiểm tra luồng nhận OTP đăng ký/quên mật khẩu qua email.
-- [ ] **Xác nhận Telegram Bot:** Điền `TELEGRAM_BOT_TOKEN` và `TELEGRAM_CHAT_ID`, kiểm tra tin nhắn thông báo đơn mới gửi về nhóm quản trị. *(Vận hành vẫn tra được đơn bình thường nếu Telegram gặp sự cố, không dùng Telegram làm điều kiện commit giao dịch).*
+- [x] **Brevo tại local:** Đã chạy luồng đăng ký/reset với SMTP thật; người dùng xác nhận nhận đủ 2 email ngày 15/10. CSDL thử đã dọn.
+- [ ] **SePay & SMTP trên production:** Chạy thử giao dịch nhỏ thực tế và nhận OTP trên hạ tầng triển khai thật.
+- [ ] **Telegram trên production:** Bot đã từng gửi thành công tại local theo xác nhận người dùng. Bản sửa retry/che dữ liệu được kiểm chứng bằng giả lập, chưa gửi thật lại sau sửa. Cần nghiệm thu sau khi deploy; mất phản hồi sau khi Telegram đã nhận có thể làm tin nhắn gửi lại bị trùng.
 - [ ] **Đổi secret & mật khẩu quản trị mẫu:** Thay đổi các biến `JWT_SECRET`, `COOKIE_SECRET`, `DATA_ENCRYPTION_KEY`, `ADMIN_PASSWORD` sang chuỗi bảo mật ngẫu nhiên mạnh theo chuẩn production; cấu hình đúng HTTPS, domain CORS và `TRUST_PROXY_HOPS` theo topology proxy thực tế.
 - [ ] **Diễn tập sao lưu & khôi phục CSDL (Backup & Restore):** Chạy thử script backup định kỳ và diễn tập khôi phục trên CSDL staging để đảm bảo quy trình sẵn sàng khi có sự cố.
 - [ ] **Chốt quy định nghiệp vụ đối soát tài chính:** Ban hành quy trình nội bộ hướng dẫn nhân viên CSKH/vận hành xử lý các trường hợp: khách chuyển thiếu/thừa/trùng tiền, tiền vào đơn đã hủy hoặc hết hạn, quy trình ghi nhận hoàn tiền qua giao diện Admin `PaymentAnomalyManager` và `RefundModal`.

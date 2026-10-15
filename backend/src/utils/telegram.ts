@@ -1,4 +1,9 @@
 import { env } from '../config/env.js';
+import { getDefaultAutoSelectFamilyAttemptTimeout, setDefaultAutoSelectFamilyAttemptTimeout } from 'node:net';
+import { maskTopupInfo } from './crypto.js';
+
+// Allow slow IPv4 connections before Node falls back to unavailable IPv6.
+setDefaultAutoSelectFamilyAttemptTimeout(Math.max(1500, getDefaultAutoSelectFamilyAttemptTimeout()));
 
 interface TelegramOrderPayload {
   orderCode: string;
@@ -8,6 +13,7 @@ interface TelegramOrderPayload {
   userEmail: string;
   topupInfo?: Record<string, unknown>;
   topupLabels?: Record<string, string>;
+  topupFields?: unknown;
   paidAt?: Date | string;
 }
 
@@ -34,13 +40,10 @@ export function formatTelegramOrderMessage(payload: TelegramOrderPayload): strin
   // Format top-up fields
   const topupLines: string[] = [];
   if (payload.topupInfo && typeof payload.topupInfo === 'object') {
-    for (const [key, val] of Object.entries(payload.topupInfo)) {
+    const masked = maskTopupInfo(payload.topupInfo, false, payload.topupFields) as Record<string, unknown>;
+    for (const [key, val] of Object.entries(masked)) {
       const label = payload.topupLabels?.[key] || key;
-      const lowerKey = key.toLowerCase();
-      let displayVal = String(val ?? '');
-      if (lowerKey.includes('pass') || lowerKey.includes('pwd')) {
-        displayVal = '•••••••• (Mã hóa an toàn)';
-      }
+      const displayVal = String(val ?? '');
       topupLines.push(`• <b>${escapeHtml(label)}:</b> <code>${escapeHtml(displayVal)}</code>`);
     }
   }
@@ -65,22 +68,18 @@ export function formatTelegramOrderMessage(payload: TelegramOrderPayload): strin
 }
 
 export async function sendTelegramOrderNotification(payload: TelegramOrderPayload): Promise<boolean> {
+  return sendTelegramMessage(formatTelegramOrderMessage(payload));
+}
+
+export async function sendTelegramMessage(message: string): Promise<boolean> {
   const token = env.TELEGRAM_BOT_TOKEN?.trim();
   const chatId = env.TELEGRAM_CHAT_ID?.trim();
 
   if (!token || !chatId) {
-    if (env.NODE_ENV !== 'production') {
-      console.info(`[TELEGRAM NOTIFICATION (SKIPPED - NO CONFIG)] Đơn mới #${payload.orderCode} - ${payload.gameName} (${formatVnd(payload.amount)})`);
-    }
     return false;
   }
 
   try {
-    const message = formatTelegramOrderMessage(payload);
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
-
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -90,13 +89,11 @@ export async function sendTelegramOrderNotification(payload: TelegramOrderPayloa
         parse_mode: 'HTML',
         disable_web_page_preview: true,
       }),
-      signal: controller.signal,
+      signal: AbortSignal.timeout(6000),
     });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      console.warn(`[TELEGRAM] Gửi thông báo thất bại (HTTP ${res.status}): ${errText}`);
+    const result = await res.json() as { ok?: boolean };
+    if (!res.ok || result.ok !== true) {
+      console.warn(`[TELEGRAM] Gửi thông báo thất bại (HTTP ${res.status})`);
       return false;
     }
 

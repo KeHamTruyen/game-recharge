@@ -10,7 +10,7 @@ async function main() {
   const token = env.TELEGRAM_BOT_TOKEN?.trim();
   const chatId = env.TELEGRAM_CHAT_ID?.trim();
 
-  console.log(`- Bot Token: ${token ? token.substring(0, 10) + '...' + token.substring(token.length - 6) : '❌ Chưa cấu hình'}`);
+  console.log(`- Bot Token: ${token ? 'Đã cấu hình' : '❌ Chưa cấu hình'}`);
   console.log(`- Chat ID  : ${chatId || '❌ Chưa cấu hình'}`);
 
   if (!token || !chatId) {
@@ -21,7 +21,7 @@ async function main() {
   // 1. Kiểm tra Bot info qua getMe
   console.log('\n🔄 1. Đang kiểm tra danh tính Bot với Telegram API...');
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+    const res = await fetch(`https://api.telegram.org/bot${token}/getMe`, { signal: AbortSignal.timeout(10000) });
     const data = (await res.json()) as { ok: boolean; result?: { id: number; first_name: string; username: string }; description?: string };
 
     if (!data.ok || !data.result) {
@@ -77,6 +77,7 @@ async function main() {
     console.log(`👉 Bot đã gửi tin nhắn thông báo đơn hàng mẫu vào Telegram (Chat ID: ${chatId}).`);
     console.log('👉 Hãy mở ứng dụng Telegram trên điện thoại/máy tính để kiểm tra ngay!\n');
   } else {
+    process.exitCode = 1;
     console.log('\n⚠️ GỬI TIN NHẮN THẤT BẠI!');
     console.log('💡 Gợi ý xử lý:');
     console.log('1. Đảm bảo bạn đã nhấn nút "START" (Bắt đầu trò chuyện) với Bot trên Telegram.');
@@ -85,4 +86,4 @@ async function main() {
   }
 }
 
-main();
+main().catch(() => { console.error('Telegram test failed'); process.exitCode = 1; });
