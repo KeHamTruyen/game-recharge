@@ -6,6 +6,7 @@ import { createTestClient, prisma, TestClient } from './helpers.js';
 import { env } from '../src/config/env.js';
 import { flushTelegramNotifications } from '../src/utils/telegramQueue.js';
 import { formatTelegramOrderMessage, sendTelegramOrderNotification } from '../src/utils/telegram.js';
+import { encryptSensitive } from '../src/utils/crypto.js';
 
 const sample = { orderCode: 'DUKETEST', amount: 10000, packageName: 'Test', gameName: 'Test', userEmail: 'test@example.invalid' };
 
@@ -121,13 +122,18 @@ describe('Notification delivery regressions', () => {
     assert.ok((await prisma.telegramNotification.findUniqueOrThrow({ where: { id: job.id } })).sentAt);
   });
 
-  it('masks password fields, arbitrary encrypted fields and orphan secrets while preserving public identifiers', () => {
+  it('formats plain topup fields and decrypts encrypted values for admin fulfillment on Telegram', () => {
+    const encrypted = encryptSensitive('my-secret-pass');
     const message = formatTelegramOrderMessage({ ...sample, topupInfo: {
-      uid: '800123456', pin: '987654', credential: 'plain-secret', custom: 'enc:ciphertext',
-      login: 'template-secret', unknown: 'orphan-secret', server: 'Asia',
+      uid: '800123456', pin: '987654', credential: 'plain-secret', custom: encrypted,
+      login: 'template-secret', server: 'Asia',
     }, topupFields: [{ key: 'login', type: 'password' }] });
-    for (const secret of ['987654', 'plain-secret', 'enc:', 'template-secret', 'orphan-secret']) assert.ok(!message.includes(secret));
     assert.ok(message.includes('800123456') && message.includes('Asia'));
+    assert.ok(message.includes('987654'));
+    assert.ok(message.includes('plain-secret'));
+    assert.ok(message.includes('my-secret-pass'));
+    assert.ok(message.includes('template-secret'));
+    assert.ok(!message.includes('enc:'));
   });
 
   it('finishes an in-flight send on shutdown and leaves remaining jobs for the next process', async () => {

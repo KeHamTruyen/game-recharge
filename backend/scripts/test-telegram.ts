@@ -47,16 +47,18 @@ async function main() {
     userEmail: 'kienphotoclone01@gmail.com',
     paidAt: new Date(),
     topupInfo: {
+      account: 'duke_gamer2026',
+      password: 'PassWord123@',
       server: 'Asia',
       uid: '812948210',
       characterName: 'Traveler_Duke',
-      loginType: 'UID Trực Tiếp',
     },
     topupLabels: {
+      account: 'Tài khoản',
+      password: 'Mật khẩu',
       server: 'Máy chủ',
       uid: 'UID Nhân Vật',
       characterName: 'Tên Nhân Vật',
-      loginType: 'Hình thức nạp',
     },
   };
 

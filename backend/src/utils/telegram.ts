@@ -37,11 +37,11 @@ export function formatTelegramOrderMessage(payload: TelegramOrderPayload): strin
     ? new Date(payload.paidAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
     : new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
 
-  // Format top-up fields
+  // Format top-up fields (decrypted for admin fulfillment in Telegram)
   const topupLines: string[] = [];
   if (payload.topupInfo && typeof payload.topupInfo === 'object') {
-    const masked = maskTopupInfo(payload.topupInfo, false, payload.topupFields) as Record<string, unknown>;
-    for (const [key, val] of Object.entries(masked)) {
+    const unmasked = maskTopupInfo(payload.topupInfo, true, payload.topupFields) as Record<string, unknown>;
+    for (const [key, val] of Object.entries(unmasked)) {
       const label = payload.topupLabels?.[key] || key;
       const displayVal = String(val ?? '');
       topupLines.push(`• <b>${escapeHtml(label)}:</b> <code>${escapeHtml(displayVal)}</code>`);

@@ -125,9 +125,8 @@ describe('Operational Features Test Suite', () => {
     // HTML special characters must be escaped
     assert.ok(!message.includes('<script>'));
     assert.ok(message.includes('&lt;script&gt;'));
-    // Password must be masked with bullet points
-    assert.ok(!message.includes('SuperSecretPassword123'));
-    assert.ok(message.includes('••••••••'));
+    // Password is shown clearly in telegram for admin fulfillment
+    assert.ok(message.includes('SuperSecretPassword123'));
   });
 
   it('2. Maintenance Mode blocks customer order creation with 503 and unblocks when disabled', async () => {

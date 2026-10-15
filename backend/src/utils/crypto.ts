@@ -205,7 +205,8 @@ export function maskTopupInfo(
     if (isSensitive) {
       if (isStaffOrAdmin) {
         if (isEncrypted) {
-          result[key] = decryptSensitive(value as string);
+          const dec = decryptSensitive(value as string);
+          result[key] = dec.startsWith('enc:') ? '••••••••' : dec;
         } else {
           // Plaintext password in legacy records: visible to staff/admin for fulfillment
           result[key] = value;
