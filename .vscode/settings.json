@@ -1,0 +1,18 @@
+{
+  "sonarlint.analysisExcludes": "**/node_modules/**,**/dist/**,**/build/**,**/test-results/**,**/coverage/**,**/*.dump,**/*.sql.gz,**/*.min.js,**/*.min.css,**/public/uploads/**",
+  "sonarlint.rules": {
+    "typescript:S1874": {
+      "level": "on"
+    },
+    "javascript:S3776": {
+      "level": "on"
+    },
+    "typescript:S6571": {
+      "level": "on"
+    }
+  },
+  "files.associations": {
+    "*.env*": "properties"
+  }
+}
+

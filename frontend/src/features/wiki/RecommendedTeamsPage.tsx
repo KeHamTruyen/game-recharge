@@ -12,14 +12,12 @@ import type { CommunityTeam } from "./types"
 
 import { useAppStore } from "@/app/AppStore"
 
-import { Link, useNavigate } from "react-router"
+import { Link } from "react-router"
 
 import { Icon } from "@/components/ui"
 
 export default function RecommendedTeamsPage() {
   const { user, setNotice } = useAppStore()
-
-  const navigate = useNavigate()
 
   const [teams, setTeams] = useState<CommunityTeam[]>(
     getEffectiveCommunityTeams(),
@@ -28,8 +26,6 @@ export default function RecommendedTeamsPage() {
   const [filterQuery, setFilterQuery] = useState("")
 
   const [activeTab, setActiveTab] = useState<"all" | "mine">("all")
-
-  const isAdmin = user?.role === "admin"
 
   useEffect(() => {
     const handleUpdate = () => setTeams(getEffectiveCommunityTeams())

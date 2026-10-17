@@ -32,8 +32,6 @@ import {
   initialMiddlemanInfo,
   initialProducts,
   initialProductStatuses,
-  initialServicePackages,
-  initialServices,
   initialTopupTemplates,
 } from "@/data/mock-data"
 

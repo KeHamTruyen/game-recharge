@@ -402,7 +402,7 @@ export function AdminPage({
   const [gameImage, setGameImage] = useState("")
   const [gameImageX, setGameImageX] = useState(50)
   const [gameImageY, setGameImageY] = useState(50)
-  const [gameIsActive, setGameIsActive] = useState(true)
+  const [gameIsActive] = useState(true)
   const [topupIsActive, setTopupIsActive] = useState(true)
   const [boostingIsActive, setBoostingIsActive] = useState(true)
   const [image, setImage] = useState("")
@@ -474,13 +474,6 @@ export function AdminPage({
         ? current.filter((item) => item !== tag)
         : [...current, tag],
     )
-
-  const chooseImage = (file?: File) => {
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => setImage(String(reader.result))
-    reader.readAsDataURL(file)
-  }
 
   const resetProductForm = () => {
     setName("")

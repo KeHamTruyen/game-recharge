@@ -20,7 +20,6 @@ export function LoginModal({
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
-  const [resetSent, setResetSent] = useState(false)
   const [verification, setVerification] = useState<"register" | "reset" | null>(null)
   const [code, setCode] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -61,7 +60,6 @@ export function LoginModal({
   const changeMode = (nextMode: "login" | "register" | "forgot") => {
     setMode(nextMode)
     setError("")
-    setResetSent(false)
     setVerification(null)
     setCode("")
   }
@@ -126,7 +124,6 @@ export function LoginModal({
                     await onResetPassword(email, code, newPassword)
                     setVerification(null)
                     setMode("login")
-                    setResetSent(true)
                   }
                 } catch (error) {
                   setError(error instanceof Error ? error.message : "Mã xác minh không đúng.")

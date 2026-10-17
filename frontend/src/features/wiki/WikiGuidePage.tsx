@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react"
-import { Icon } from "@/components/ui"
 import { useAppStore } from "@/app/AppStore"
 import {
   type GuideArticle,

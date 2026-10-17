@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import type { ContactInfo, MiddlemanInfo, Transaction } from "@/domain/models"
 import { Icon, Pagination, formatPrice } from "@/components/ui"
 import { platformLogos } from "@/data/mock-data"

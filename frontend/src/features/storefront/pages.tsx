@@ -2,7 +2,6 @@ import { FormEvent, useEffect, useState } from "react"
 import type { CartItem, Product, ProductStatus, Service, ServicePackage, TopupTemplate } from "@/domain/models"
 import {
   Icon,
-  Pagination,
   ServiceCard,
   TrustStrip,
   formatPrice,
@@ -276,12 +275,12 @@ export function ServiceDetailPage({
 
 export function TopupInformationPage({
   pkg,
-  service,
+  service: _service,
   cart,
-  productStatuses,
+  productStatuses: _productStatuses,
   template,
   quantity,
-  onQuantityChange,
+  onQuantityChange: _onQuantityChange,
   onQuantityChangeForPackage,
   onRemoveFromCart,
   isLoggedIn,
@@ -519,11 +518,11 @@ export function TopupInformationPage({
 // ─── Trang thanh toán ────────────────────────────────────────────────────────
 
 export function CheckoutPage({
-  pkg,
+  pkg: _pkg,
   service,
   cart,
   template,
-  quantity,
+  quantity: _quantity,
   topupInfo,
   payment,
   paymentStatus,

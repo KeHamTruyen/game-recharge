@@ -11,7 +11,7 @@ import { wikiWriteLimiter } from '../middleware/rateLimiter.js';
 const router = Router();
 const idSchema = z.string().regex(/^[\w-]{1,100}$/);
 const text = z.string().trim().min(1).max(200);
-const image = z.string().max(1000).refine((v) => !v || /^https:\/\//.test(v) || /^\/(?!\/)/.test(v), 'Invalid image URL');
+const image = z.string().max(1000).refine((v) => !v || v.startsWith('https://') || /^\/(?!\/)/.test(v), 'Invalid image URL');
 const skill = z.object({
   aniimo_id: z.number().int().positive(),
   s1_name: z.string().max(200).optional(), s1_icon: image.optional(),
@@ -98,7 +98,7 @@ router.put('/teams/:id', async (req, res, next) => {
         OR: [{ data: { path: ['signature'], equals: signature } }, { data: { path: ['normalizedTitle'], equals: body.title.toLowerCase() } }],
       } });
       if (duplicate) throw new AppError('Team or title already exists', 409);
-      const data = { ...(existing?.data as Prisma.JsonObject || {}), ...body, id,
+      const data = { ...(existing?.data as Prisma.JsonObject), ...body, id,
         signature, normalizedTitle: body.title.toLowerCase(), time_ago: 'Vừa cập nhật' };
       return tx.wikiEntry.upsert({ where: { key: `team:${id}` },
         create: { key: `team:${id}`, kind: 'team', data }, update: { data } });
@@ -142,7 +142,7 @@ router.put('/giftcodes/:id', requireRole('ADMIN'), auditAdminRequest, async (req
     const entry = await prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))`;
       const existing = await tx.wikiEntry.findUnique({ where: { key } });
-      const data = { ...(existing?.data as Prisma.JsonObject || {}), ...body, id, code: body.code.toUpperCase() };
+      const data = { ...(existing?.data as Prisma.JsonObject), ...body, id, code: body.code.toUpperCase() };
       return tx.wikiEntry.upsert({ where: { key },
         create: { key, kind: 'giftcode', data }, update: { data, deleted: false } });
     });

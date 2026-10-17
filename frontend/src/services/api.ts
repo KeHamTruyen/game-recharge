@@ -1,7 +1,5 @@
 import type {
-  ContactInfo,
   ManagedUser,
-  MiddlemanInfo,
   ProductStatus,
   Service,
   ServicePackage,

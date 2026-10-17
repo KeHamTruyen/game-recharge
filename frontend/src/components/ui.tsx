@@ -1,5 +1,5 @@
 import { useEffect, PointerEvent as ReactPointerEvent, useRef } from "react"
-import type { IconName, Product, ProductStatus, Service, ServicePackage } from "@/domain/models"
+import type { IconName, Product, ProductStatus, Service } from "@/domain/models"
 import { initialProductStatuses } from "@/data/mock-data"
 
 export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
