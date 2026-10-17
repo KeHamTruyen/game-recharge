@@ -23,17 +23,17 @@ if (!rawArg || typeof rawArg !== 'string') {
 // Reject directory traversal sequences, null bytes, and non-path characters
 if (!/^[a-zA-Z0-9_\-./\\:]+$/.test(rawArg) || rawArg.includes('..') || rawArg.includes('\0')) {
   console.error('❌ Đường dẫn file backup chứa ký tự không hợp lệ hoặc điều hướng thư mục không an toàn.');
-  process.exit(1);
+  throw new Error('Invalid backup file path: directory traversal characters detected');
 }
 
-// Canonicalize path and enforce boundary against base or temp directories
+// Canonicalize path anchored strictly to base or temp directory
 const baseDir = resolve(process.cwd());
 const tempDir = resolve(tmpdir());
-const resolvedPath = isAbsolute(rawArg) ? resolve(rawArg) : resolve(baseDir, rawArg);
+const resolvedPath = resolve(baseDir, rawArg);
 
 if (!resolvedPath.startsWith(baseDir + sep) && !resolvedPath.startsWith(tempDir + sep) && resolvedPath !== baseDir) {
   console.error('❌ Đường dẫn file backup không an toàn hoặc nằm ngoài phạm vi cho phép.');
-  process.exit(1);
+  throw new Error('Access denied: Path traversal attempt detected');
 }
 
 // Enforce valid backup file extensions
