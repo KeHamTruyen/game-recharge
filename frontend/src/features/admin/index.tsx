@@ -3212,7 +3212,7 @@ export function AdminTransactions({
         set.add(t.game.trim())
       }
     })
-    return Array.from(set).sort()
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "vi"))
   }, [transactions])
 
   const filtered = useMemo(() => {

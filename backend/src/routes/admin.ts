@@ -384,8 +384,7 @@ router.get(
         const dirFiles = fs
           .readdirSync(uploadsDir)
           .filter((f) => /\.(png|jpe?g|webp|svg|gif)$/i.test(f))
-          .sort()
-          .reverse();
+          .sort((a, b) => b.localeCompare(a));
         for (const f of dirFiles) {
           files.push(`/uploads/${f}`);
         }

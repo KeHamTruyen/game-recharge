@@ -263,7 +263,7 @@ export function CheckoutRoute() {
 
   const pkg = store.cart[0]?.pkg
   const service = store.selectedService
-  const cartSignature = store.cart.map((i) => `${i.pkg.id}:${i.quantity}`).sort().join(",")
+  const cartSignature = store.cart.map((i) => `${i.pkg.id}:${i.quantity}`).sort((a, b) => a.localeCompare(b)).join(",")
   const cartTotalAmount = store.cart.reduce((sum, i) => sum + i.pkg.price * i.quantity, 0)
 
   const [payment, setPayment] = useState<PaymentDetails | null>(() => {
