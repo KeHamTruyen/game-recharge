@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, realpathSync, statSync, createReadStream, createWriteStream } from 'node:fs';
 import { mkdtemp, unlink, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve, relative, isAbsolute, sep } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { createGunzip } from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 
@@ -26,23 +26,25 @@ if (rawArg.includes('\0')) {
 }
 
 // Permit documented backup locations, including paths with spaces, but not escapes or symlinks outside them.
-const baseDir = resolve(process.cwd());
-const tempDir = resolve(tmpdir());
+const baseDir = existsSync(process.cwd()) ? realpathSync(resolve(process.cwd())) : resolve(process.cwd());
+const backupsDir = existsSync(resolve(baseDir, '../backups')) ? realpathSync(resolve(baseDir, '../backups')) : resolve(baseDir, '../backups');
+const tempDir = existsSync(tmpdir()) ? realpathSync(resolve(tmpdir())) : resolve(tmpdir());
 const candidatePath = resolve(baseDir, rawArg);
-const allowedRoots = [baseDir, resolve(baseDir, '../backups'), tempDir]
-  .filter(existsSync).map((directory) => realpathSync(directory));
-
-function isWithin(root, target) {
-  const subpath = relative(root, target);
-  return subpath !== '..' && !subpath.startsWith(`..${sep}`) && !isAbsolute(subpath);
-}
 
 if (!existsSync(candidatePath)) {
   console.error('❌ File backup không tồn tại.');
   process.exit(1);
 }
+
 const resolvedPath = realpathSync(candidatePath);
-if (!allowedRoots.some((root) => isWithin(root, resolvedPath))) {
+
+// Direct boundary check without callbacks so SAST / Sonar taint analyzers recognize the sanitizer
+const isAllowed =
+  resolvedPath === baseDir || resolvedPath.startsWith(baseDir + sep) ||
+  resolvedPath === backupsDir || resolvedPath.startsWith(backupsDir + sep) ||
+  resolvedPath === tempDir || resolvedPath.startsWith(tempDir + sep);
+
+if (!isAllowed) {
   console.error('❌ Đường dẫn file backup không an toàn hoặc nằm ngoài phạm vi cho phép.');
   throw new Error('Access denied: Path traversal attempt detected');
 }
