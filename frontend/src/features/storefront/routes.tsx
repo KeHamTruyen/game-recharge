@@ -293,6 +293,7 @@ export function CheckoutRoute() {
   })
   const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "PAID">("PENDING")
   const [orderStatus, setOrderStatus] = useState<string>("PENDING")
+  const [paymentError, setPaymentError] = useState("")
   const [recoveryChecked, setRecoveryChecked] = useState(false)
   const [recoveryError, setRecoveryError] = useState("")
   const [recoveryRetry, setRecoveryRetry] = useState(0)
@@ -347,11 +348,12 @@ export function CheckoutRoute() {
   }, [store.user?.email, cartSignature, cartTotalAmount, store.checkoutInfo, payment])
 
   useEffect(() => {
-    if (!payment || paymentStatus === "PAID") return
+    if (!payment || paymentStatus === "PAID" || paymentError) return
     let cancelled = false
     const checkStatus = async () => {
       try {
         const result = await api.payments.status(payment.orderCode)
+        if (cancelled) return
         if (!cancelled && result.paymentStatus === "PAID") {
           setPaymentStatus("PAID")
           setOrderStatus(result.status)
@@ -365,6 +367,11 @@ export function CheckoutRoute() {
           } else {
             setNotice("Đã nhận thanh toán. Đơn hàng đang được xử lý.")
           }
+        } else if (["EXPIRED", "FAILED", "REFUNDED"].includes(result.paymentStatus) ||
+          ["FAILED", "REFUNDED"].includes(result.status)) {
+          setPaymentError("Đơn đã hủy, hết hạn hoặc hoàn tiền. Vui lòng không chuyển khoản vào mã này; liên hệ CSKH nếu đã chuyển tiền.")
+          sessionStorage.removeItem("duke1305_checkout_payment")
+          sessionStorage.removeItem("duke1305_checkout_attempt")
         }
       } catch {
         // The payment page remains usable while a temporary status request fails.
@@ -376,7 +383,12 @@ export function CheckoutRoute() {
       cancelled = true
       window.clearInterval(timer)
     }
-  }, [payment, paymentStatus, setNotice])
+  }, [payment, paymentStatus, paymentError, setNotice])
+
+  if (paymentError) return <div className="page-width empty-state" role="alert">
+    <p>{paymentError}</p>
+    <button className="secondary-button" onClick={() => navigate("/nap-game")}>Quay lại chọn gói</button>
+  </div>
 
   if (recoveryError) return <div className="page-width empty-state" role="alert">
     <p>{recoveryError}</p>

@@ -437,6 +437,19 @@ describe('Orders & Checkout Logic (Atomic & Idempotent)', () => {
     await migrateLegacyPasswords();
     const again = await prisma.transaction.findUniqueOrThrow({ where: { id: tx.id } });
     assert.deepStrictEqual(again.topupInfo, tx.topupInfo);
+    for (const value of [123456, 0, false]) {
+      await prisma.transaction.update({ where: { id: tx.id }, data: {
+        topupInfo: { uid: '800123456', credential: value },
+      } });
+      await migrateLegacyPasswords();
+      const migratedNumber = await prisma.transaction.findUniqueOrThrow({ where: { id: tx.id } });
+      const numericInfo = migratedNumber.topupInfo as Record<string, string>;
+      assert.ok(numericInfo.credential.startsWith('enc:'));
+      assert.equal(decryptSensitive(numericInfo.credential), String(value));
+      assert.equal(numericInfo.uid, '800123456');
+      await migrateLegacyPasswords();
+      assert.deepEqual((await prisma.transaction.findUniqueOrThrow({ where: { id: tx.id } })).topupInfo, numericInfo);
+    }
   });
 
 });

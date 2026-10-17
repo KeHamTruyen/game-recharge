@@ -180,6 +180,7 @@ model Transaction {
   paymentMetadata Json?
   bankTransactionId String?
   refundAmount Decimal?          @db.Decimal(12, 2)
+  refundFromCompleted Boolean    @default(false)
   refundTxId   String?
   refundReason String?
   refundedById String?

@@ -22,6 +22,14 @@ import { Icon, Pagination, ProductCard, ServiceCard, formatPrice } from "@/compo
 import { api } from "@/services/api"
 import { useAppStore } from "@/app/AppStore"
 
+function completedRevenue(transaction: Transaction): number {
+  if (transaction.status === "Hoàn thành") return transaction.amount
+  if (transaction.status === "Đã hoàn tiền" && transaction.refundFromCompleted) {
+    return transaction.amount - (transaction.refundAmount ?? transaction.amount)
+  }
+  return 0
+}
+
 export function AdminHeader({
   email,
   onStore,
@@ -539,9 +547,7 @@ export function AdminPage({
   )
 
   const totalCompletedRevenue = useMemo(() => {
-    return transactions
-      .filter((t) => t.status === "Hoàn thành")
-      .reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+    return transactions.reduce((sum, t) => sum + completedRevenue(t), 0)
   }, [transactions])
 
   const existingGalleryImages = useMemo(() => {
@@ -2743,6 +2749,7 @@ export function AdminAnalytics({
     )
 
     let totalRevenue = 0
+    let totalRevenueOrders = 0
     let totalCompleted = 0
     let totalOrders = 0
 
@@ -2756,13 +2763,15 @@ export function AdminAnalytics({
         (t) => t.status === "Thất bại" || t.status === "Đã hoàn tiền",
       )
 
-      const revenue = completedList.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+      const revenue = gameTransactions.reduce((sum, t) => sum + completedRevenue(t), 0)
+      const revenueOrderCount = gameTransactions.filter((t) => completedRevenue(t) > 0).length
       const orderCount = gameTransactions.length
       const completedCount = completedList.length
-      const aov = completedCount > 0 ? Math.round(revenue / completedCount) : 0
+      const aov = revenueOrderCount > 0 ? Math.round(revenue / revenueOrderCount) : 0
       const rate = orderCount > 0 ? Math.round((completedCount / orderCount) * 100) : 0
 
       totalRevenue += revenue
+      totalRevenueOrders += revenueOrderCount
       totalCompleted += completedCount
       totalOrders += orderCount
 
@@ -2805,7 +2814,7 @@ export function AdminAnalytics({
         revenue: totalRevenue,
         completed: totalCompleted,
         orders: totalOrders,
-        aov: totalCompleted > 0 ? Math.round(totalRevenue / totalCompleted) : 0,
+        aov: totalRevenueOrders > 0 ? Math.round(totalRevenue / totalRevenueOrders) : 0,
         rate: totalOrders > 0 ? Math.round((totalCompleted / totalOrders) * 100) : 0,
       },
       topRevenueGame: topRev,

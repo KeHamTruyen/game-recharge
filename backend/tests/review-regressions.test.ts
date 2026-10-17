@@ -2,11 +2,11 @@ import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, unlinkSync, rmdirSync, readFileSync, readdirSync } from 'node:fs';
+import { mkdirSync, existsSync, mkdtempSync, writeFileSync, unlinkSync, rmdirSync, readFileSync, readdirSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { parse as parseEnv } from 'dotenv';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve, relative } from 'node:path';
 import { createTestClient, prisma, TestClient } from './helpers.js';
 import { signToken } from '../src/middleware/auth.js';
 import { env } from '../src/config/env.js';
@@ -274,18 +274,36 @@ describe('Review regressions: refunds, payment groups and SQL restore', () => {
     }
   });
 
-  for (const compressed of [false, true]) {
-    it(`${compressed ? 'Gzip SQL' : 'SQL'} restore rolls back on errors, commits valid SQL and cleans temporary files`, async (context) => {
+  it('restore rejects an existing SQL file outside the allowed backup roots', () => {
+    const directory = mkdtempSync(resolve('../frontend/restore-boundary-'));
+    const file = join(directory, 'probe.sql');
+    try {
+      writeFileSync(file, 'SELECT 1;');
+      const result = spawnSync(process.execPath, ['scripts/restore.mjs', file], {
+        encoding: 'utf8', env: process.env,
+      });
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /Access denied/);
+    } finally { unlinkSync(file); rmdirSync(directory); }
+  });
+
+  for (const location of ['temp-sql', 'temp-gzip', 'project-backup']) {
+    const compressed = location === 'temp-gzip';
+    it(`${location} restore accepts spaces and documented paths, rolls back errors and cleans temporary files`, async (context) => {
       if (spawnSync('psql', ['--version']).status !== 0) {
         context.skip('Requires PostgreSQL psql client');
         return;
       }
       const schema = process.env.TEST_SCHEMA!; // helpers enforces isolated test schema.
       const table = `restore_${randomUUID().replaceAll('-', '')}`;
-      const directory = mkdtempSync(join(tmpdir(), 'restore-review-'));
+      const parent = location === 'project-backup' ? resolve('../backups') : tmpdir();
+      const createdParent = !existsSync(parent);
+      if (createdParent) mkdirSync(parent);
+      const directory = mkdtempSync(join(parent, 'restore review-'));
       const file = join(directory, compressed ? 'probe.sql.gz' : 'probe.sql');
       const sql = `CREATE TABLE "${schema}"."${table}" (id integer); INSERT INTO "${schema}"."${table}" VALUES (1);`;
-      const restore = () => spawnSync(process.execPath, ['scripts/restore.mjs', file], {
+      const argument = location === 'project-backup' ? relative(process.cwd(), file) : file;
+      const restore = () => spawnSync(process.execPath, ['scripts/restore.mjs', argument], {
         encoding: 'utf8', env: { ...process.env, TEMP: directory, TMP: directory, TMPDIR: directory },
       });
       try {
@@ -319,6 +337,7 @@ describe('Review regressions: refunds, payment groups and SQL restore', () => {
         await prisma.$executeRawUnsafe(`DROP TABLE IF EXISTS "${schema}"."${table}"`);
         unlinkSync(file);
         rmdirSync(directory);
+        if (createdParent) rmdirSync(parent);
       }
     });
   }

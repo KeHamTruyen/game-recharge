@@ -632,22 +632,28 @@ export function ResumePaymentModal({
   }, [code])
 
   useEffect(() => {
-    if (paid || !data) return
+    if (paid || !data || error) return
+    let cancelled = false
     const orderRef = data.paymentOrderCode || data.orderCode
     const interval = setInterval(async () => {
       try {
         const statusRes = await api.payments.status(orderRef)
+        if (cancelled) return
         if (statusRes.paymentStatus === "PAID") {
           setPaid(true)
           setOrderStatus(statusRes.status)
+          if (onRefresh) await onRefresh()
+        } else if (["EXPIRED", "FAILED", "REFUNDED"].includes(statusRes.paymentStatus) ||
+          ["FAILED", "REFUNDED"].includes(statusRes.status)) {
+          setError("Đơn đã hủy, hết hạn hoặc hoàn tiền. Vui lòng không chuyển khoản vào mã này; liên hệ CSKH nếu đã chuyển tiền.")
           if (onRefresh) await onRefresh()
         }
       } catch {
         // Ignore polling transient errors
       }
     }, 3500)
-    return () => clearInterval(interval)
-  }, [paid, data, onRefresh])
+    return () => { cancelled = true; clearInterval(interval) }
+  }, [paid, data, error, onRefresh])
 
   return (
     <div

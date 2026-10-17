@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import { spawnSync } from 'node:child_process';
-import { existsSync, statSync, createReadStream, createWriteStream } from 'node:fs';
+import { existsSync, realpathSync, statSync, createReadStream, createWriteStream } from 'node:fs';
 import { mkdtemp, unlink, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve, isAbsolute, sep } from 'node:path';
+import { join, resolve, relative, isAbsolute, sep } from 'node:path';
 import { createGunzip } from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 
@@ -20,18 +20,29 @@ if (!rawArg || typeof rawArg !== 'string') {
   process.exit(1);
 }
 
-// Reject directory traversal sequences, null bytes, and non-path characters
-if (!/^[a-zA-Z0-9_\-./\\:]+$/.test(rawArg) || rawArg.includes('..') || rawArg.includes('\0')) {
+if (rawArg.includes('\0')) {
   console.error('❌ Đường dẫn file backup chứa ký tự không hợp lệ hoặc điều hướng thư mục không an toàn.');
   throw new Error('Invalid backup file path: directory traversal characters detected');
 }
 
-// Canonicalize path anchored strictly to base or temp directory
+// Permit documented backup locations, including paths with spaces, but not escapes or symlinks outside them.
 const baseDir = resolve(process.cwd());
 const tempDir = resolve(tmpdir());
-const resolvedPath = resolve(baseDir, rawArg);
+const candidatePath = resolve(baseDir, rawArg);
+const allowedRoots = [baseDir, resolve(baseDir, '../backups'), tempDir]
+  .filter(existsSync).map((directory) => realpathSync(directory));
 
-if (!resolvedPath.startsWith(baseDir + sep) && !resolvedPath.startsWith(tempDir + sep) && resolvedPath !== baseDir) {
+function isWithin(root, target) {
+  const subpath = relative(root, target);
+  return subpath !== '..' && !subpath.startsWith(`..${sep}`) && !isAbsolute(subpath);
+}
+
+if (!existsSync(candidatePath)) {
+  console.error('❌ File backup không tồn tại.');
+  process.exit(1);
+}
+const resolvedPath = realpathSync(candidatePath);
+if (!allowedRoots.some((root) => isWithin(root, resolvedPath))) {
   console.error('❌ Đường dẫn file backup không an toàn hoặc nằm ngoài phạm vi cho phép.');
   throw new Error('Access denied: Path traversal attempt detected');
 }
@@ -40,11 +51,6 @@ if (!resolvedPath.startsWith(baseDir + sep) && !resolvedPath.startsWith(tempDir 
 const validExtensions = ['.dump', '.sql', '.sql.gz'];
 if (!validExtensions.some((ext) => resolvedPath.toLowerCase().endsWith(ext))) {
   console.error('❌ Định dạng file không hợp lệ. Chỉ chấp nhận các file có đuôi: .dump, .sql, .sql.gz');
-  process.exit(1);
-}
-
-if (!existsSync(resolvedPath)) {
-  console.error('❌ File backup không tồn tại:', resolvedPath);
   process.exit(1);
 }
 

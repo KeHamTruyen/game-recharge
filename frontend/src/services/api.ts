@@ -38,6 +38,7 @@ type ApiTransaction = {
   qrCode?: string | null
   checkoutUrl?: string | null
   refundAmount?: string | number | null
+  refundFromCompleted?: boolean
   refundTxId?: string | null
   refundReason?: string | null
   refundedById?: string | null
@@ -114,6 +115,7 @@ function mapTransaction(item: ApiTransaction): Transaction {
     templateName: item.templateName,
     refundAmount: item.refundAmount !== undefined && item.refundAmount !== null ? Number(item.refundAmount) : null,
     refundTxId: item.refundTxId ?? null,
+    refundFromCompleted: item.refundFromCompleted ?? false,
     refundReason: item.refundReason ?? null,
     refundedById: item.refundedById ?? null,
     refundedAt: item.refundedAt ?? null,

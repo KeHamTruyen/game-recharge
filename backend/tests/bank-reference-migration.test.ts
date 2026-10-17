@@ -6,6 +6,27 @@ import { prisma } from './helpers.js';
 
 const migration = readFileSync('prisma/migrations/20261013020000_drop_legacy_unique_bank_reference/migration.sql', 'utf8');
 
+it('refund revenue migration recovers completion from audit history, not from payment alone', async () => {
+  const schema = `test_${randomUUID().replaceAll('-', '')}`;
+  const sql = readFileSync('prisma/migrations/20261017120000_refund_revenue_origin/migration.sql', 'utf8');
+  await prisma.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe(`CREATE SCHEMA "${schema}"`);
+    await tx.$executeRawUnsafe(`SET LOCAL search_path TO "${schema}"`);
+    await tx.$executeRawUnsafe('CREATE TABLE transactions (id TEXT PRIMARY KEY, status TEXT)');
+    await tx.$executeRawUnsafe('CREATE TABLE audit_logs (action TEXT, metadata JSONB)');
+    await tx.$executeRaw`INSERT INTO transactions VALUES ('completed', 'REFUNDED'), ('unfinished', 'REFUNDED'), ('missing-audit', 'REFUNDED')`;
+    await tx.$executeRaw`INSERT INTO audit_logs VALUES
+      ('TRANSACTION_REFUND', '{"transactionId":"completed","oldStatus":"COMPLETED"}'),
+      ('TRANSACTION_REFUND', '{"transactionId":"unfinished","oldStatus":"PROCESSING"}')`;
+    for (const statement of sql.split(';').filter((part) => part.trim())) await tx.$executeRawUnsafe(statement);
+    assert.deepEqual(await tx.$queryRaw`SELECT id, "refundFromCompleted" FROM transactions ORDER BY id`, [
+      { id: 'completed', refundFromCompleted: true }, { id: 'missing-audit', refundFromCompleted: false },
+      { id: 'unfinished', refundFromCompleted: false },
+    ]);
+    await tx.$executeRawUnsafe(`DROP SCHEMA "${schema}" CASCADE`);
+  });
+});
+
 for (const legacy of ['index', 'constraint', 'already-fixed']) {
   it(`bank reference migration preserves paid data (${legacy}) and can run twice`, async () => {
     // DDL and fixtures live in a disposable schema; failure rolls back its creation.

@@ -245,6 +245,23 @@ describe('P1 Fixes Verification: A02 (Refund Rules), A03 (Payment Group), A04 (N
       // Check totalSpent was decremented by 40000 (100000 - 40000 = 60000)
       const updatedUser = await prisma.user.findUniqueOrThrow({ where: { id: customerUser.id } });
       assert.equal(Number(updatedUser.totalSpent), 60000);
+      assert.equal(res.body.data.refundFromCompleted, true);
+      const report = await admin.get('/api/admin/transactions?search=Partial%20Refund%20Pkg');
+      assert.equal(report.body.data.stats.totalRevenue, 60000);
+      assert.equal(report.body.data.items[0].refundFromCompleted, true);
+
+      const unfinished = await prisma.transaction.create({ data: {
+        code: `ORD-${randomUUID()}`, userId: customerUser.id, userEmail: customerUser.email,
+        packageName: 'Partial Refund Pkg', gameName: 'Game', amount: 100000,
+        status: 'PROCESSING', paymentStatus: 'PAID',
+      } });
+      const refundUnfinished = await admin.patch(`/api/admin/transactions/${unfinished.id}/status`, {
+        status: 'REFUNDED', refundAmount: 40000, refundReason: 'Not fulfilled',
+      });
+      assert.equal(refundUnfinished.status, 200);
+      assert.equal(refundUnfinished.body.data.refundFromCompleted, false);
+      assert.equal((await admin.get('/api/admin/transactions?search=Partial%20Refund%20Pkg')).body.data.stats.totalRevenue, 60000);
+      assert.equal(Number((await prisma.user.findUniqueOrThrow({ where: { id: customerUser.id } })).totalSpent), 60000);
     });
   });
 

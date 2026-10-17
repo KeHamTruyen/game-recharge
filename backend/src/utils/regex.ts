@@ -1,4 +1,7 @@
+import { Script } from 'node:vm';
 
+// The script is constant; pattern and input are data, never executable source.
+const boundedMatch = new Script('new RegExp(pattern).test(input)');
 export interface RegexSafetyResult {
   safe: boolean;
   error?: string;
@@ -42,7 +45,9 @@ export function checkRegexSafety(pattern: string): RegexSafetyResult {
     const altGroupMatch = pattern.match(/\(((?:[^|()]*\|)+[^()]*)\)[+*]/);
     if (altGroupMatch) {
       const branches = altGroupMatch[1].split('|');
-      const hasQuantifierInBranch = branches.some((b) => /[*+]|\{\d+/.test(b));
+      const hasQuantifierInBranch = branches.some((b) => /[*+]|\{\d+/.test(b)) ||
+        branches.some((branch, index) => branches.some((other, otherIndex) =>
+          index !== otherIndex && (branch.startsWith(other) || other.startsWith(branch))));
       if (hasQuantifierInBranch) {
         return { safe: false, error: 'Biểu thức chứa nhóm phân nhánh lặp có nguy cơ ReDoS' };
       }
@@ -53,9 +58,9 @@ export function checkRegexSafety(pattern: string): RegexSafetyResult {
 }
 
 /**
- * Execute regex.test with static safety verification and length constraint.
+ * Bound execution even for patterns the static checks cannot classify.
  */
-export function safeRegexTest(pattern: string, input: string, _timeoutMs = 50): boolean {
+export function safeRegexTest(pattern: string, input: string, timeoutMs = 50): boolean {
   if (!pattern) return true;
   const strInput = typeof input === 'string' ? input : String(input);
 
@@ -67,8 +72,10 @@ export function safeRegexTest(pattern: string, input: string, _timeoutMs = 50): 
   if (!safety.safe) return false;
 
   try {
-    const regex = new RegExp(pattern);
-    return regex.test(strInput);
+    return Boolean(boundedMatch.runInNewContext(
+      { pattern, input: strInput },
+      { timeout: Math.max(1, Math.min(100, timeoutMs)), contextCodeGeneration: { strings: false, wasm: false } },
+    ));
   } catch {
     return false;
   }

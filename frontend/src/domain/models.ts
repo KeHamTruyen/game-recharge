@@ -23,6 +23,7 @@ export type Transaction = {
   topupLabels?: Record<string, string>
   templateName?: string
   refundAmount?: number | null
+  refundFromCompleted?: boolean
   refundTxId?: string | null
   refundReason?: string | null
   refundedById?: string | null

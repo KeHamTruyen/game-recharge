@@ -698,7 +698,7 @@ router.get(
           : {}),
       };
 
-      const [transactions, total, revenueAggregate, completedCount] = await Promise.all([
+      const [transactions, total, revenueAggregate, refundAggregate, completedCount] = await Promise.all([
         prisma.transaction.findMany({
           where,
           orderBy: { createdAt: 'desc' },
@@ -720,6 +720,7 @@ router.get(
             checkoutUrl: true,
             paidAt: true,
             refundAmount: true,
+            refundFromCompleted: true,
             refundTxId: true,
             refundReason: true,
             refundedById: true,
@@ -739,6 +740,10 @@ router.get(
           where: { ...where, status: 'COMPLETED' },
           _sum: { amount: true },
         }),
+        prisma.transaction.aggregate({
+          where: { ...where, status: 'REFUNDED', refundFromCompleted: true },
+          _sum: { amount: true, refundAmount: true },
+        }),
         prisma.transaction.count({
           where: { ...where, status: 'COMPLETED' },
         }),
@@ -756,7 +761,8 @@ router.get(
         data: {
           ...paginated,
           stats: {
-            totalRevenue: Number(revenueAggregate._sum.amount || 0),
+            totalRevenue: Number(revenueAggregate._sum.amount || 0) +
+              Number(refundAggregate._sum.amount || 0) - Number(refundAggregate._sum.refundAmount || 0),
             totalCompleted: completedCount,
           },
         },
@@ -895,6 +901,7 @@ router.patch(
         if (isRefunding) {
           const finalRefundReason = (body.refundReason || (body.reason !== 'Điều chỉnh thủ công bởi quản trị viên' ? body.reason : '') || '').trim();
           updateData.refundAmount = refundAmt;
+          updateData.refundFromCompleted = completedBefore;
           updateData.refundTxId = body.refundTxId?.trim() || null;
           updateData.refundReason = finalRefundReason;
           updateData.refundedById = req.user?.userId || req.user?.email || 'admin';
@@ -924,6 +931,7 @@ router.patch(
             checkoutUrl: true,
             paidAt: true,
             refundAmount: true,
+            refundFromCompleted: true,
             refundTxId: true,
             refundReason: true,
             refundedById: true,

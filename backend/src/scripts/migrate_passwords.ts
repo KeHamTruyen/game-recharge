@@ -22,11 +22,11 @@ export async function migrateLegacyPasswords() {
     for (const [key, value] of Object.entries(original)) {
       if (
         isPrivateTopupField(key, tx.topupFields) &&
-        typeof value === 'string' &&
-        value.length > 0 &&
-        !value.startsWith('enc:')
+        ['string', 'number', 'boolean'].includes(typeof value) &&
+        String(value).length > 0 &&
+        !(typeof value === 'string' && value.startsWith('enc:'))
       ) {
-        updated[key] = encryptSensitive(value);
+        updated[key] = encryptSensitive(String(value));
         hasChanges = true;
       } else {
         updated[key] = value;
