@@ -131,6 +131,52 @@ test.describe("admin mutation errors", () => {
     expect(errors).toEqual([]);
   });
 
+  for (const firstDeleteStatus of [200, 404]) {
+    test(`game deletion keeps partial progress and retries only remaining services (${firstDeleteStatus})`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on("pageerror", error => errors.push(error.message));
+      const deleteIds: string[] = [];
+      await page.route("**/api/admin/services?*", route => route.fulfill({ json: { success: true, data: [
+        ...services, { ...services[0], id: "boost-a", category: "boosting" },
+      ] } }));
+      await page.route("**/api/admin/packages?*", route => route.fulfill({ json: { success: true, data: {
+        items: [pkg, { ...pkg, id: "pkg-boost-a", serviceId: "boost-a", name: "Boost Alpha" },
+          { ...pkg, id: "pkg-b", serviceId: "b", name: "Beta Gems" }], hasNext: false,
+      } } }));
+      await page.route("**/api/admin/services/*", route => {
+        if (route.request().method() !== "DELETE") return route.fallback();
+        const id = new URL(route.request().url()).pathname.split("/").pop()!;
+        deleteIds.push(id);
+        const status = id === "a" ? firstDeleteStatus : deleteIds.length === 2 ? 503 : 200;
+        return route.fulfill({ status, json: status === 200
+          ? { success: true, data: {} }
+          : { success: false, error: status === 404 ? "Service not found" : "Partial deletion failed" } });
+      });
+      await page.goto("/admin");
+      await expect(page.getByRole("button", { name: "Xóa Boost Alpha", exact: true })).toBeVisible();
+      await page.getByRole("button", { name: "Danh sách game", exact: true }).click();
+      const remove = page.getByRole("button", { name: "Xóa Game Alpha", exact: true });
+      await remove.click();
+      await expect(page.getByRole("alert")).toContainText("Đã xóa 1/2 dịch vụ.");
+      await expect(remove).toBeEnabled();
+      const card = page.locator(".game-manager-card").filter({ has: remove });
+      await expect(card).toContainText("Nạp: Chưa tạo");
+      await page.getByRole("button", { name: "Sản phẩm", exact: true }).click();
+      await expect(page.getByRole("button", { name: "Xóa 100 Gems", exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Xóa Boost Alpha", exact: true })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Xóa Beta Gems", exact: true })).toBeVisible();
+      await page.getByRole("button", { name: "Danh sách game", exact: true }).click();
+      await remove.click();
+      await expect(remove).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Xóa Game Beta", exact: true })).toBeVisible();
+      await page.getByRole("button", { name: "Sản phẩm", exact: true }).click();
+      await expect(page.getByRole("button", { name: "Xóa Boost Alpha", exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Xóa Beta Gems", exact: true })).toBeVisible();
+      expect(deleteIds).toEqual(["a", "boost-a", "boost-a"]);
+      expect(errors).toEqual([]);
+    });
+  }
+
   for (const action of ["Ẩn gói nạp", "Xóa 100 Gems"]) {
     test(`product action ${action} reports failure without removing the product`, async ({ page }) => {
       const errors: string[] = [];

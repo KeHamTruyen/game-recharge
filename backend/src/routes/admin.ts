@@ -851,6 +851,7 @@ router.patch(
           throw new AppError('Chỉ có thể xử lý hoặc hoàn thành đơn đã thanh toán.', 400);
         }
 
+        let refundAmt: Prisma.Decimal | undefined;
         if (isRefunding) {
           if (previous.paymentStatus !== 'PAID') {
             throw new AppError('Chỉ có thể hoàn tiền cho đơn hàng đã thanh toán thành công', 400);
@@ -866,6 +867,7 @@ router.patch(
             throw new AppError('Vui lòng nhập lý do hoàn tiền cụ thể', 400);
           }
 
+          refundAmt = new Prisma.Decimal(refundAmtNum);
           newStatus = 'REFUNDED';
           newPaymentStatus = 'REFUNDED';
         }
@@ -876,7 +878,7 @@ router.patch(
         if (previous.userId && completedBefore !== completedAfter) {
           const delta = completedAfter
             ? new Prisma.Decimal(previous.amount)
-            : new Prisma.Decimal(previous.amount).neg();
+            : (refundAmt ?? new Prisma.Decimal(previous.amount)).neg();
           await tx.user.update({
             where: { id: previous.userId },
             data: { totalSpent: { increment: delta } },
@@ -892,7 +894,6 @@ router.patch(
         }
 
         if (isRefunding) {
-          const refundAmt = body.refundAmount ? new Prisma.Decimal(body.refundAmount) : previous.amount;
           const finalRefundReason = (body.refundReason || (body.reason !== 'Điều chỉnh thủ công bởi quản trị viên' ? body.reason : '') || '').trim();
           updateData.refundAmount = refundAmt;
           updateData.refundTxId = body.refundTxId?.trim() || null;

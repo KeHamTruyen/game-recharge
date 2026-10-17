@@ -339,7 +339,7 @@ export function AdminPage({
   onUpdateCategory?: (oldName: string, newName: string) => void | Promise<void>
   onDeleteCategory: (name: string) => void | Promise<void>
   onAddGame: (name: string) => void | Promise<void>
-  onDeleteGame: (name: string) => void
+  onDeleteGame: (name: string) => Promise<boolean>
   onUpdateGame: (name: string, updates: Partial<Service>) => void | Promise<void>
   onUpdateService?: (serviceId: string | number, updates: Partial<Service>) => void | Promise<void>
   onAddService?: (serviceData: Omit<Service, "id">) => Promise<Service>
@@ -389,6 +389,7 @@ export function AdminPage({
   const [newCategory, setNewCategory] = useState("")
   const [editingTag, setEditingTag] = useState<{ oldName: string; name: string } | null>(null)
   const [newGame, setNewGame] = useState("")
+  const [deletingGame, setDeletingGame] = useState<string | null>(null)
   const [newGameCreateTopup, setNewGameCreateTopup] = useState(true)
   const [newGameCreateBoosting, setNewGameCreateBoosting] = useState(true)
   const [gameFilter, setGameFilter] = useState<"all" | "topup" | "boosting" | "hiddenTopup" | "hiddenBoosting">("all")
@@ -1717,14 +1718,20 @@ export function AdminPage({
                           <button
                             type="button"
                             className="tag-delete"
-                            onClick={() => {
+                            disabled={deletingGame !== null}
+                            onClick={async () => {
                               const confirmMsg = `Bạn có chắc chắn muốn xóa toàn bộ dịch vụ của game "${item}" không?`
                               if (window.confirm(confirmMsg)) {
-                                onDeleteGame(item)
-                                if (game === item)
-                                  setGame(
-                                    games.find((entry) => entry !== item) || "",
-                                  )
+                                setDeletingGame(item)
+                                try {
+                                  if (await onDeleteGame(item) && game === item) {
+                                    setGame(games.find((entry) => entry !== item) || "")
+                                  }
+                                } catch (error) {
+                                  showActionError(error)
+                                } finally {
+                                  setDeletingGame(null)
+                                }
                               }
                             }}
                             title={`Xóa game "${item}"`}

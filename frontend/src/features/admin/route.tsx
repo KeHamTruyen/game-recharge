@@ -2,6 +2,7 @@ import { useNavigate } from "react-router"
 import { useAppStore } from "@/app/AppStore"
 import { AdminHeader, AdminLogin, AdminPage } from "@/features/admin"
 import { api } from "@/services/api"
+import { ApiError } from "@/services/http-client"
 
 export function AdminRoute() {
   const store = useAppStore()
@@ -223,22 +224,32 @@ export function AdminRoute() {
           const matchingServices = store.services.filter(
             (item) => item.name === name || item.game === name,
           )
+          let deletedCount = 0
           try {
             for (const service of matchingServices) {
-              await api.admin.deleteService(service.id)
+              try {
+                await api.admin.deleteService(service.id)
+              } catch (error) {
+                // A previous delete may have committed before its response was lost.
+                if (!(error instanceof ApiError && error.status === 404)) throw error
+              }
+              deletedCount += 1
+              const packageIds = new Set(store.servicePackages
+                .filter((item) => item.serviceId === service.id).map((item) => item.id))
+              store.setServices((current) => current.filter((item) => item.id !== service.id))
+              store.setServicePackages((current) => current.filter((item) => item.serviceId !== service.id))
+              store.setProducts((current) => current.filter((item) => !packageIds.has(item.id)))
             }
-            const matchingIds = new Set(matchingServices.map((s) => s.id))
-            store.setServices((current) =>
-              current.filter((item) => !matchingIds.has(item.id)),
-            )
-            store.setServicePackages((current) =>
-              current.filter((item) => !matchingIds.has(item.serviceId)),
-            )
             store.setProducts((current) => current.filter((item) => item.game !== name))
             store.setGames((current) => current.filter((item) => item !== name))
             store.setNotice(`Đã xóa toàn bộ dịch vụ của game "${name}" thành công.`)
+            return true
           } catch (error) {
-            store.setNotice(error instanceof Error ? error.message : "Xóa game thất bại.")
+            const message = error instanceof Error ? error.message : "Xóa game thất bại."
+            store.setNotice(deletedCount
+              ? `Đã xóa ${deletedCount}/${matchingServices.length} dịch vụ. ${message} Vui lòng thử lại phần còn lại.`
+              : message)
+            return false
           }
         }}
         onUpdateGame={async (name, updates) => {

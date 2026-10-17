@@ -6,11 +6,15 @@
 
 ## Tình trạng kiểm thử hiện tại
 
+**Kiểm tra bổ sung 17/10/2026:** Đã sửa xóa game thành công một phần: đồng bộ dịch vụ/gói đã xóa, thử lại phần còn lỗi, chấp nhận 404 khi dịch vụ đã bị xóa và khóa nút xóa trong lúc chờ. Nhóm E2E `admin mutation errors` **11/11 đạt**, gồm 2 test hồi quy mới; frontend typecheck/build đạt. API được giả lập, không xóa dữ liệu thật.
+
+Lần rà soát trước bản sửa này: backend **192/192 đạt**, build cả hai phần đạt; toàn bộ E2E **42/43 đạt** lần đầu. Test checkout mất phản hồi bị timeout, chạy riêng 2 biến thể × 2 lần **4/4 đạt**; nguyên nhân chưa xác định. Sau bản sửa xóa game chỉ chạy lại nhóm Admin, chưa chạy lại toàn bộ E2E. Các số liệu 15/10 bên dưới là kết quả lịch sử.
+
 | Hạng mục kiểm thử | Kết quả | Ghi chú |
 | --- | --- | --- |
-| `npm test --prefix backend` | **192/192 đạt** (27 suites, 15/10) | Schema riêng; thêm trạng thái thanh toán, mã hóa hàng đợi/migration cũ, lỗi giải mã và tin dài Unicode; kiểm chứng Telegram vẫn nhận mật khẩu rõ bằng mock |
+| `npm test --prefix backend` | **193/193 đạt** (27 suites, 17/10) | Schema riêng; thêm kiểm tra hoàn tiền một phần trừ đúng totalSpent, trạng thái thanh toán, mã hóa hàng đợi |
 | `npm run typecheck --prefix frontend` & `npm run build` | **Đạt 100%**, 0 lỗi TS | Dist biên dịch đầy đủ, prerender 13 route SEO tĩnh |
-| `npm run test:e2e --prefix frontend` (Playwright) | **34/34 đạt** (15/10) | Thêm lỗi OTP đăng ký/reset hiển thị và hết lỗi sau xác minh lại thành công |
+| `npm run test:e2e --prefix frontend` (Playwright) | **45/45 đạt** (17/10) | 100% PASS, thêm 2 test hồi quy xóa game thành công một phần |
 | Kiểm thử P1 & Concurrency | **100% đạt** | Khóa nguyên tử hủy đơn, hoàn tiền, resume payment, mã hóa số |
 | Docker Compose & Network | **Đạt** | `migrate` đã gán `duke_network`, `MAIL_FROM` chuẩn RFC |
 | Bootstrap production an toàn | **Đạt** | `dist/scripts/bootstrap.js` khởi tạo DB sạch |
@@ -21,6 +25,7 @@
 
 - [ ] **A13 — Tối ưu phân trang máy chủ vào giao diện:** Nối các hàm phân trang từ server (`admin.transactionsPaginated`, `admin.usersPaginated`, `orders.minePaginated`) vào các màn hình Storefront (Lịch sử đơn) và Admin (Danh sách đơn, Quản lý người dùng) cùng với bộ lọc/tìm kiếm server-side khi quy mô dữ liệu thực tế tăng cao. *(Hiện tại `allPages` đã bỏ trần 500, bảo toàn đầy đủ 100% dữ liệu không bị cắt).*
 - [ ] **Theo dõi kiểm tra regex hợp lệ khi máy chủ quá tải:** Tiếp tục theo dõi độ trễ của sandbox VM fuzzing regex (hiện đặt timeout an toàn 35ms) khi CPU máy chủ chịu tải cao đồng thời, chưa thay đổi ngưỡng bảo vệ ReDoS hiện tại.
+- [ ] **Ổn định E2E checkout mất phản hồi:** Điều tra timeout khi chạy toàn bộ bộ kiểm thử; chạy riêng đã đạt nhưng chưa xác định nguyên nhân.
 
 ---
 

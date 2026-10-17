@@ -213,6 +213,40 @@ describe('P1 Fixes Verification: A02 (Refund Rules), A03 (Payment Group), A04 (N
       assert.equal(repeated.status, 400);
       assert.match(repeated.body.error, /đã được ghi nhận hoàn tiền/i);
     });
+
+    it('successfully processes partial refund on paid order and decrements only the refunded amount from totalSpent', async () => {
+      await prisma.user.update({
+        where: { id: customerUser.id },
+        data: { totalSpent: 100000 },
+      });
+
+      const order = await prisma.transaction.create({
+        data: {
+          code: `ORD-${randomUUID().slice(0, 8)}`,
+          userId: customerUser.id,
+          userEmail: customerUser.email,
+          packageName: 'Partial Refund Pkg',
+          gameName: 'Game',
+          amount: 100000,
+          status: 'COMPLETED',
+          paymentStatus: 'PAID',
+        },
+      });
+
+      const res = await admin.patch(`/api/admin/transactions/${order.id}/status`, {
+        status: 'REFUNDED',
+        refundAmount: 40000,
+        refundTxId: 'SEPAY-RF-PARTIAL',
+        refundReason: 'Hoàn lại 40k theo thỏa thuận',
+      });
+      assert.equal(res.status, 200);
+      assert.equal(res.body.data.status, 'REFUNDED');
+      assert.equal(Number(res.body.data.refundAmount), 40000);
+
+      // Check totalSpent was decremented by 40000 (100000 - 40000 = 60000)
+      const updatedUser = await prisma.user.findUniqueOrThrow({ where: { id: customerUser.id } });
+      assert.equal(Number(updatedUser.totalSpent), 60000);
+    });
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
