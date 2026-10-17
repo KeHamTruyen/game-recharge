@@ -6,7 +6,7 @@ FROM dhi.io/node:22-alpine3.24-dev AS build
 WORKDIR /app/frontend
 
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts && npm rebuild esbuild
 
 COPY frontend/ .
 COPY .figma/make/site.json /app/.figma/make/site.json
