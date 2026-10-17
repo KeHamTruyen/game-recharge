@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, statSync, createReadStream, createWriteStream } from 'node:fs';
 import { mkdtemp, unlink, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, isAbsolute, sep } from 'node:path';
 import { createGunzip } from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 
@@ -20,16 +20,18 @@ if (!rawArg || typeof rawArg !== 'string') {
   process.exit(1);
 }
 
-// Reject directory traversal sequences and null bytes
-if (rawArg.includes('..') || rawArg.includes('\0')) {
-  console.error('❌ Đường dẫn file backup chứa ký tự điều hướng thư mục không an toàn.');
+// Reject directory traversal sequences, null bytes, and non-path characters
+if (!/^[a-zA-Z0-9_\-./\\:]+$/.test(rawArg) || rawArg.includes('..') || rawArg.includes('\0')) {
+  console.error('❌ Đường dẫn file backup chứa ký tự không hợp lệ hoặc điều hướng thư mục không an toàn.');
   process.exit(1);
 }
 
-// Canonicalize path and verify boundary against project or temp directories
-const resolvedPath = resolve(rawArg);
-const allowedRoots = [resolve(process.cwd()), resolve(tmpdir())];
-if (!allowedRoots.some((root) => resolvedPath.startsWith(root))) {
+// Canonicalize path and enforce boundary against base or temp directories
+const baseDir = resolve(process.cwd());
+const tempDir = resolve(tmpdir());
+const resolvedPath = isAbsolute(rawArg) ? resolve(rawArg) : resolve(baseDir, rawArg);
+
+if (!resolvedPath.startsWith(baseDir + sep) && !resolvedPath.startsWith(tempDir + sep) && resolvedPath !== baseDir) {
   console.error('❌ Đường dẫn file backup không an toàn hoặc nằm ngoài phạm vi cho phép.');
   process.exit(1);
 }
