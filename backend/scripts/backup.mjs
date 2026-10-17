@@ -27,14 +27,12 @@ if (!Number.isInteger(keepDays) || keepDays < 1) {
 const url = new URL(databaseUrl);
 url.searchParams.delete('schema');
 const targetDbUrl = url.toString();
-const maskedUrl = `${url.protocol}//${url.username ? '***@' : ''}${url.host}${url.pathname}`;
-
 const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace('T', '_').split('.')[0];
 const filename = `duke1305_${timestamp}.dump`;
 const outputPath = join(backupDir, filename);
 
 console.log(`📦 Đang tiến hành sao lưu database vào: ${filename}...`);
-console.log(`ℹ️ Phạm vi CSDL: ${maskedUrl} (toàn bộ database; các bảng và schema bên trong được lưu trữ)`);
+console.log('ℹ️ Phạm vi CSDL: Toàn bộ database (các bảng và schema bên trong được lưu trữ)');
 
 const dumpProcess = spawnSync('pg_dump', [
   '--format=custom',

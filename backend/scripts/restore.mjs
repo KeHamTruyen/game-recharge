@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, statSync, createReadStream, createWriteStream } from 'node:fs';
 import { mkdtemp, unlink, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve, relative } from 'node:path';
 import { createGunzip } from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 
@@ -13,27 +13,53 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-const backupPath = process.argv[2];
-if (!backupPath || !existsSync(backupPath)) {
+const rawArg = process.argv[2];
+if (!rawArg || typeof rawArg !== 'string') {
   console.error('❌ File backup không tồn tại hoặc chưa được chỉ định.');
   console.error('👉 Sử dụng: npm run db:restore -- path/to/backup.dump');
   process.exit(1);
 }
 
-const stats = statSync(backupPath);
-if (stats.size === 0) {
-  console.error(`❌ File backup bị rỗng (0 bytes): ${backupPath}`);
+// Canonicalize path and prevent directory traversal
+const resolvedPath = resolve(process.cwd(), rawArg);
+const relativeToCwd = relative(process.cwd(), resolvedPath);
+if (relativeToCwd.startsWith('..')) {
+  console.error('❌ Đường dẫn file backup không an toàn hoặc nằm ngoài thư mục dự án.');
   process.exit(1);
 }
+
+// Enforce valid backup file extensions
+const validExtensions = ['.dump', '.sql', '.sql.gz'];
+if (!validExtensions.some((ext) => resolvedPath.toLowerCase().endsWith(ext))) {
+  console.error('❌ Định dạng file không hợp lệ. Chỉ chấp nhận các file có đuôi: .dump, .sql, .sql.gz');
+  process.exit(1);
+}
+
+if (!existsSync(resolvedPath)) {
+  console.error('❌ File backup không tồn tại:', resolvedPath);
+  process.exit(1);
+}
+
+const stats = statSync(resolvedPath);
+if (!stats.isFile()) {
+  console.error('❌ Đường dẫn chỉ định không phải là một file hợp lệ.');
+  process.exit(1);
+}
+
+if (stats.size === 0) {
+  console.error(`❌ File backup bị rỗng (0 bytes): ${resolvedPath}`);
+  process.exit(1);
+}
+
+const backupPath = resolvedPath;
 
 // Clean connection URL: pg_restore/psql operates at database level, table schemas are preserved in the backup.
 const url = new URL(databaseUrl);
 url.searchParams.delete('schema');
 const targetDbUrl = url.toString();
-const maskedUrl = `${url.protocol}//${url.username ? '***@' : ''}${url.host}${url.pathname}`;
 
 console.log(`📦 Đang tiến hành khôi phục CSDL từ file: ${backupPath} (${stats.size} bytes)...`);
-console.log(`🎯 Đích khôi phục: ${maskedUrl} (Phạm vi Database; các schema và bảng sẽ được tái tạo)`);
+console.log('🎯 Đích khôi phục: Database đích (Phạm vi Database; các schema và bảng sẽ được tái tạo)');
 
 const isGzipSql = backupPath.toLowerCase().endsWith('.sql.gz');
 const isSql = isGzipSql || backupPath.toLowerCase().endsWith('.sql');
