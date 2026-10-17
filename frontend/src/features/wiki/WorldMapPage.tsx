@@ -29,6 +29,25 @@ interface ZonePolygon {
   poly: number[]
 }
 
+function renderSafeZoneDesc(desc: string) {
+  if (!desc) return null
+  const lines = desc.split(/<br\s*\/?>/i)
+  return lines.map((line, lineIdx) => {
+    const parts = line.split(/(<b>[\s\S]*?<\/b>)/i)
+    return (
+      <React.Fragment key={lineIdx}>
+        {lineIdx > 0 && <br />}
+        {parts.map((part, pIdx) => {
+          if (part.toLowerCase().startsWith("<b>") && part.toLowerCase().endsWith("</b>")) {
+            return <strong key={pIdx}>{part.slice(3, -4)}</strong>
+          }
+          return part
+        })}
+      </React.Fragment>
+    )
+  })
+}
+
 interface UndergroundTile {
   src: string
   left: number
@@ -1198,10 +1217,9 @@ export default function WorldMapPage() {
                 ✕
               </button>
               <h4>🏞️ {selectedZone.name}</h4>
-              <div
-                className="zone-desc-html"
-                dangerouslySetInnerHTML={{ __html: selectedZone.desc }}
-              />
+              <div className="zone-desc-html">
+                {renderSafeZoneDesc(selectedZone.desc)}
+              </div>
             </div>
           )}
 

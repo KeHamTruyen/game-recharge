@@ -34,7 +34,7 @@ describe('Role-Based Access Control (RBAC) & Data Isolation', () => {
     });
 
     // Setup Customer 1
-    const customer = await prisma.user.upsert({
+    await prisma.user.upsert({
       where: { email: customerEmail },
       update: { passwordHash, role: 'CUSTOMER', status: 'ACTIVE', tokenVersion: 0 },
       create: { email: customerEmail, name: 'Customer RBAC 1', passwordHash, role: 'CUSTOMER', status: 'ACTIVE', tokenVersion: 0 },

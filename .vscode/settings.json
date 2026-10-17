@@ -1,15 +1,32 @@
 {
   "sonarlint.analysisExcludes": "**/node_modules/**,**/dist/**,**/build/**,**/test-results/**,**/coverage/**,**/*.dump,**/*.sql.gz,**/*.min.js,**/*.min.css,**/public/uploads/**",
   "sonarlint.rules": {
-    "typescript:S1874": {
-      "level": "on"
-    },
-    "javascript:S3776": {
-      "level": "on"
-    },
-    "typescript:S6571": {
-      "level": "on"
-    }
+    "javascript:S3776": { "level": "off" },
+    "typescript:S3776": { "level": "off" },
+    "javascript:S6268": { "level": "on" },
+    "typescript:S6268": { "level": "on" },
+    "javascript:S5148": { "level": "on" },
+    "typescript:S5148": { "level": "on" },
+    "javascript:S2068": { "level": "on" },
+    "typescript:S2068": { "level": "on" },
+    "javascript:S2077": { "level": "on" },
+    "typescript:S2077": { "level": "on" },
+    "javascript:S2245": { "level": "on" },
+    "typescript:S2245": { "level": "on" },
+    "javascript:S3330": { "level": "on" },
+    "typescript:S3330": { "level": "on" },
+    "javascript:S2092": { "level": "on" },
+    "typescript:S2092": { "level": "on" },
+    "javascript:S5122": { "level": "on" },
+    "typescript:S5122": { "level": "on" },
+    "javascript:S5689": { "level": "on" },
+    "typescript:S5689": { "level": "on" },
+    "javascript:S5883": { "level": "on" },
+    "typescript:S5883": { "level": "on" },
+    "javascript:S6350": { "level": "on" },
+    "typescript:S6350": { "level": "on" },
+    "typescript:S1874": { "level": "on" },
+    "typescript:S6571": { "level": "on" }
   },
   "files.associations": {
     "*.env*": "properties"

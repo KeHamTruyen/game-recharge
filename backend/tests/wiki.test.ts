@@ -15,7 +15,6 @@ describe('Wiki API (Teams, Giftcodes, Aniimos, Voting & RBAC)', () => {
   const password = 'Password123!';
 
   let authorId: string;
-  let otherId: string;
   let createdTeamId: number;
 
   before(async () => {
@@ -33,12 +32,11 @@ describe('Wiki API (Teams, Giftcodes, Aniimos, Voting & RBAC)', () => {
     });
     authorId = authorUser.id;
 
-    const otherUser = await prisma.user.upsert({
+    await prisma.user.upsert({
       where: { email: otherEmail },
       update: { passwordHash, role: 'CUSTOMER', status: 'ACTIVE', tokenVersion: 0 },
       create: { email: otherEmail, name: 'Other User', passwordHash, role: 'CUSTOMER', status: 'ACTIVE', tokenVersion: 0 },
     });
-    otherId = otherUser.id;
 
     await prisma.user.upsert({
       where: { email: adminEmail },

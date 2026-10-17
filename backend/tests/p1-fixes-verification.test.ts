@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { createTestClient, prisma, TestClient } from './helpers.js';
 import { signToken } from '../src/middleware/auth.js';
-import { env } from '../src/config/env.js';
 
 describe('P1 Fixes Verification: A02 (Refund Rules), A03 (Payment Group), A04 (Numeric Secrets)', () => {
   let customer: TestClient;

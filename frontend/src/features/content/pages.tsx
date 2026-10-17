@@ -33,7 +33,7 @@ export function MiddlemanPage({ info }: { info: MiddlemanInfo }) {
           <span className="section-kicker">HỖ TRỢ NHANH CHÓNG</span>
           <h2>{info.contactTitle}</h2>
           <p>{info.contactDescription}</p>
-          <a href={info.zaloUrl} target="_blank" rel="noreferrer">
+          <a href={info.zaloUrl} target="_blank" rel="noopener noreferrer">
             {info.zaloName}
             <span>Tạo Nhóm Zalo Ngay ↗</span>
           </a>
@@ -147,7 +147,7 @@ export function ContactPage({ info }: { info: ContactInfo }) {
             key={channel.id}
             href={channel.url}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
             <span className="channel-image">
               <img
