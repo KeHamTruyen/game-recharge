@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, statSync, createReadStream, createWriteStream } from 'node:fs';
 import { mkdtemp, unlink, rmdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve, relative } from 'node:path';
+import { join, resolve } from 'node:path';
 import { createGunzip } from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 
@@ -20,11 +20,17 @@ if (!rawArg || typeof rawArg !== 'string') {
   process.exit(1);
 }
 
-// Canonicalize path and prevent directory traversal
-const resolvedPath = resolve(process.cwd(), rawArg);
-const relativeToCwd = relative(process.cwd(), resolvedPath);
-if (relativeToCwd.startsWith('..')) {
-  console.error('❌ Đường dẫn file backup không an toàn hoặc nằm ngoài thư mục dự án.');
+// Reject directory traversal sequences and null bytes
+if (rawArg.includes('..') || rawArg.includes('\0')) {
+  console.error('❌ Đường dẫn file backup chứa ký tự điều hướng thư mục không an toàn.');
+  process.exit(1);
+}
+
+// Canonicalize path and verify boundary against project or temp directories
+const resolvedPath = resolve(rawArg);
+const allowedRoots = [resolve(process.cwd()), resolve(tmpdir())];
+if (!allowedRoots.some((root) => resolvedPath.startsWith(root))) {
+  console.error('❌ Đường dẫn file backup không an toàn hoặc nằm ngoài phạm vi cho phép.');
   process.exit(1);
 }
 

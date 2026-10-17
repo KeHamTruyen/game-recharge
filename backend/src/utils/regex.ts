@@ -1,4 +1,3 @@
-import vm from 'node:vm';
 
 export interface RegexSafetyResult {
   safe: boolean;
@@ -50,58 +49,26 @@ export function checkRegexSafety(pattern: string): RegexSafetyResult {
     }
   }
 
-  // 4. Dynamic Sandbox Fuzzing with VM timeout
-  // Test pattern against adversarial inputs designed to trigger exponential backtracking
-  const adversarialInputs = [
-    'a'.repeat(30) + '!',
-    '0'.repeat(30) + 'x',
-    ' '.repeat(30) + '_',
-    'x'.repeat(30) + '?',
-    'A'.repeat(25) + '@',
-    '1234567890'.repeat(3) + '!',
-  ];
-
-  for (const input of adversarialInputs) {
-    try {
-      vm.runInNewContext(
-        'regex.test(input)',
-        { regex: new RegExp(pattern), input },
-        { timeout: 35 } // 35ms timeout is plenty for linear regex, but halts exponential backtracking
-      );
-    } catch (err: any) {
-      if (err?.code === 'ERR_SCRIPT_EXECUTION_TIMEOUT') {
-        return {
-          safe: false,
-          error: 'Biểu thức kiểm tra gây nghẽn xử lý (phát hiện lỗi backtracking ReDoS)',
-        };
-      }
-      return { safe: false, error: 'Lỗi khi kiểm tra an toàn biểu thức regex' };
-    }
-  }
-
   return { safe: true };
 }
 
 /**
- * Execute regex.test in a time-bounded VM context to guarantee Node.js event loop
- * cannot be locked by unexpected adversarial customer input.
+ * Execute regex.test with static safety verification and length constraint.
  */
-export function safeRegexTest(pattern: string, input: string, timeoutMs = 50): boolean {
+export function safeRegexTest(pattern: string, input: string, _timeoutMs = 50): boolean {
   if (!pattern) return true;
   const strInput = typeof input === 'string' ? input : String(input);
 
   // If input is unreasonably long (> 500 chars), reject immediately
   if (strInput.length > 500) return false;
 
+  // Statically check regex safety first to prevent catastrophic backtracking
+  const safety = checkRegexSafety(pattern);
+  if (!safety.safe) return false;
+
   try {
     const regex = new RegExp(pattern);
-    return Boolean(
-      vm.runInNewContext(
-        'regex.test(input)',
-        { regex, input: strInput },
-        { timeout: timeoutMs }
-      )
-    );
+    return regex.test(strInput);
   } catch {
     return false;
   }
