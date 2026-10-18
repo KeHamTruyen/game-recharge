@@ -3986,6 +3986,7 @@ export function AuditLogManager() {
           <label style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>Hành động:</label>
           <select
             value={actionFilter}
+            aria-label="Lọc hành động nhật ký"
             onChange={(e) => {
               setActionFilter(e.target.value)
               setPage(1)
@@ -4001,15 +4002,12 @@ export function AuditLogManager() {
             }}
           >
             <option value="all">Tất cả hành động</option>
-            <option value="CREATE_ORDER">Tạo đơn (CREATE_ORDER)</option>
-            <option value="CHECKOUT">Thanh toán giỏ hàng (CHECKOUT)</option>
-            <option value="CANCEL_ORDER">Hủy đơn (CANCEL_ORDER)</option>
-            <option value="UPDATE_ORDER_STATUS">Cập nhật đơn (UPDATE_STATUS)</option>
-            <option value="UPDATE_SETTING">Đổi cấu hình (UPDATE_SETTING)</option>
-            <option value="UPDATE_USER">Cập nhật tài khoản (UPDATE_USER)</option>
-            <option value="LOGIN">Đăng nhập (LOGIN)</option>
-            <option value="LOGOUT">Đăng xuất (LOGOUT)</option>
-            <option value="REGISTER">Đăng ký (REGISTER)</option>
+            <option value="TRANSACTION_STATUS_UPDATE">Cập nhật trạng thái đơn</option>
+            <option value="TRANSACTION_REFUND">Hoàn tiền</option>
+            <option value="admin.post">Thao tác quản trị POST</option>
+            <option value="admin.put">Thao tác quản trị PUT</option>
+            <option value="admin.patch">Thao tác quản trị PATCH</option>
+            <option value="admin.delete">Thao tác quản trị DELETE</option>
           </select>
         </div>
       </div>
@@ -4333,6 +4331,8 @@ export function PaymentAnomalyManager() {
         return <span style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(168, 85, 247, 0.15)", color: "#a855f7", fontSize: "12px", fontWeight: 600 }}>Chuyển trùng (2 lần)</span>
       case "PAYMENT_NOT_PAYABLE":
         return <span>Đơn không thể tự nhận thanh toán</span>
+      case "PAYMENT_AFTER_CANCELLATION":
+        return <span>Tiền vào đơn đã hủy</span>
       case "MISMATCHED_ACCOUNT":
         return <span style={{ padding: "4px 8px", borderRadius: "6px", background: "rgba(59, 130, 246, 0.15)", color: "#3b82f6", fontSize: "12px", fontWeight: 600 }}>Sai STK nhận</span>
       default:
@@ -4391,6 +4391,7 @@ export function PaymentAnomalyManager() {
           >
             <option value="all">Tất cả loại bất thường</option>
             <option value="AMOUNT_MISMATCH">Sai số tiền</option>
+            <option value="PAYMENT_AFTER_CANCELLATION">Tiền vào đơn đã hủy</option>
             <option value="NO_ORDER_CODE">Không có mã đơn</option>
             <option value="ORDER_NOT_FOUND">Mã đơn không tồn tại</option>
             <option value="DUPLICATE_PAYMENT">Chuyển trùng lặp (2 lần)</option>

@@ -5,6 +5,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { createTestClient, prisma, TestClient } from './helpers.js';
 import { signToken } from '../src/middleware/auth.js';
 import { env } from '../src/config/env.js';
+import { decryptSensitive, encryptSensitive } from '../src/utils/crypto.js';
 
 describe('Order cancellation and payment concurrency', () => {
   let customer: TestClient;
@@ -35,6 +36,7 @@ describe('Order cancellation and payment concurrency', () => {
         code: `DUKE${randomUUID().replaceAll('-', '').toUpperCase()}`, paymentOrderCode,
         userId: owner.id, userEmail: owner.email, packageName: 'Test', gameName: 'Test',
         amount, paymentStatus: 'PENDING',
+        topupInfo: { uid: '812345678', password: encryptSensitive('CancellationTestSecret') },
       } }));
     }
     return rows.sort((a, b) => a.id.localeCompare(b.id));
@@ -133,6 +135,9 @@ describe('Order cancellation and payment concurrency', () => {
     assert.ok(paid.every((row) => row.bankTransactionId === body.referenceCode));
     assert.ok(paid.every((row) => (row.paymentMetadata as { id: number }).id === body.id));
     assert.equal(await prisma.paymentReceipt.count({ where: { externalId: String(body.id) } }), 1);
+    const job = await prisma.telegramNotification.findUniqueOrThrow({ where: { id: rows[0].id } });
+    assert.match(decryptSensitive(job.message, true), /ĐƠN HÀNG MỚI ĐÃ THANH TOÁN/);
+    assert.match(decryptSensitive(job.message, true), /CancellationTestSecret/);
   });
 
   it('rejects cancellation after an in-flight admin payment confirmation', async () => {
@@ -161,6 +166,24 @@ describe('Order cancellation and payment concurrency', () => {
     assert.ok(saved.every((row) => row.bankTransactionId === body.referenceCode));
     assert.equal(await prisma.paymentReceipt.count({ where: { externalId: String(body.id) } }), 1);
     assert.equal((await prisma.user.findUniqueOrThrow({ where: { id: owner.id } })).totalSpent.toNumber(), 0);
+    assert.equal((await sendPayment(body)).status, 200);
+    const jobs = await prisma.telegramNotification.findMany({ where: { id: { in: rows.map(row => row.id) } } });
+    assert.equal(jobs.length, rows.length);
+    for (const job of jobs) {
+      assert.ok(job.message.startsWith('enc:'));
+      const message = decryptSensitive(job.message, true);
+      assert.match(message, /NHẬN TIỀN CHO ĐƠN ĐÃ HỦY/);
+      assert.match(message, /Không thực hiện nạp/);
+      assert.ok(message.includes(rows.find(row => row.id === job.id)!.code));
+      assert.doesNotMatch(message, /CancellationTestSecret|812345678|THÔNG TIN NẠP|ĐƠN HÀNG MỚI/);
+    }
+    const anomalies = await prisma.paymentAnomaly.findMany({ where: { gatewayId: String(body.id) } });
+    assert.equal(anomalies.length, 1);
+    assert.equal(anomalies[0].anomalyType, 'PAYMENT_AFTER_CANCELLATION');
+    assert.equal(anomalies[0].resolved, false);
+    const listed = await admin.get('/api/admin/payment-anomalies?anomalyType=PAYMENT_AFTER_CANCELLATION');
+    assert.equal(listed.status, 200);
+    assert.ok(listed.body.data.items.some((item: { id: string }) => item.id === anomalies[0].id));
   });
 
   it('only accepts one of two cancellations of the same payment group', async () => {

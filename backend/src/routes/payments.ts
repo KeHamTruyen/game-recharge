@@ -220,7 +220,7 @@ router.post(
         const transactions = await tx.transaction.findMany({
           where: { OR: [{ paymentOrderCode: orderCode }, { paymentOrderCode: null, code: orderCode }] },
           select: {
-            id: true, amount: true, paymentStatus: true, packageName: true,
+            id: true, code: true, status: true, amount: true, paymentStatus: true, packageName: true,
             gameName: true, userEmail: true, topupInfo: true, topupLabels: true, topupFields: true,
           },
         });
@@ -241,6 +241,9 @@ router.post(
           await recordAnomaly('AMOUNT_MISMATCH', expectedAmount);
           return;
         }
+        if (transactions.some((row) => row.status === 'FAILED')) {
+          await recordAnomaly('PAYMENT_AFTER_CANCELLATION', expectedAmount);
+        }
         await tx.paymentReceipt.create({
           data: { provider: 'sepay', externalId: gatewayId, paymentOrderCode: orderCode },
         });
@@ -257,7 +260,8 @@ router.post(
           data: transactions.map((item) => ({
             id: item.id,
             message: encryptSensitive(formatTelegramOrderMessage({
-              orderCode: orderCode!, amount: Number(item.amount),
+              orderCode: item.status === 'FAILED' ? item.code : orderCode!, amount: Number(item.amount),
+              cancelled: item.status === 'FAILED',
               packageName: item.packageName, gameName: item.gameName, userEmail: item.userEmail,
               topupInfo: item.topupInfo as Record<string, unknown>,
               topupLabels: item.topupLabels as Record<string, string>, topupFields: item.topupFields, paidAt,

@@ -15,6 +15,7 @@ interface TelegramOrderPayload {
   topupLabels?: Record<string, string>;
   topupFields?: unknown;
   paidAt?: Date | string;
+  cancelled?: boolean;
 }
 
 function escapeHtml(text: string): string {
@@ -33,6 +34,14 @@ function formatVnd(amount: number | string): string {
 }
 
 export function formatTelegramOrderMessage(payload: TelegramOrderPayload): string {
+  if (payload.cancelled) {
+    return [
+      '⚠️ <b>NHẬN TIỀN CHO ĐƠN ĐÃ HỦY</b>',
+      `📦 <b>Mã đơn:</b> <code>#${escapeHtml(payload.orderCode)}</code>`,
+      `💰 <b>Số tiền:</b> ${escapeHtml(formatVnd(payload.amount))}`,
+      'Cần đối soát/hoàn tiền trong trang quản trị. <b>Không thực hiện nạp.</b>',
+    ].join('\n');
+  }
   const timeStr = payload.paidAt
     ? new Date(payload.paidAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
     : new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });

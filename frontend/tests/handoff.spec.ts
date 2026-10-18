@@ -38,6 +38,121 @@ async function mockApi(page: Page) {
 
 test.beforeEach(async ({ page }) => { await mockApi(page) })
 
+test("hidden audit screen filters by actual backend actions", async ({ page }) => {
+  const actions = ["TRANSACTION_STATUS_UPDATE", "TRANSACTION_REFUND", "admin.post", "admin.put", "admin.patch", "admin.delete"];
+  await page.route("**/api/auth/session", route => route.fulfill({ json: { success: true, data: {
+    user: { id: "admin", email: "admin@test.invalid", name: "Admin", role: "ADMIN", status: "ACTIVE" },
+  } } }));
+  await page.route("**/api/admin/audit-logs?*", route => {
+    const action = new URL(route.request().url()).searchParams.get("action");
+    return route.fulfill({ json: { success: true, data: {
+      items: actions.filter(value => !action || value === action).map((value, index) => ({
+        id: value, action: value, method: "PATCH", path: `/audit-test/${value}`, statusCode: 200,
+        createdAt: new Date().toISOString(), requestId: `request-${index}`, metadata: {},
+      })), total: action ? 1 : actions.length, page: 1, totalPages: 1,
+    } } });
+  });
+  await page.goto("/admin");
+  await expect(page.getByRole("button", { name: "Giao dịch", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Nhật ký hoạt động" })).toHaveCount(0);
+  // Mount only in this browser test; the production navigation stays hidden.
+  await page.evaluate(async () => {
+    const reactUrl = "/node_modules/.vite/deps/react.js";
+    const rendererUrl = "/node_modules/.vite/deps/react-dom_client.js";
+    const componentUrl = "/src/features/admin/index.tsx";
+    const [React, renderer, components] = await Promise.all([import(reactUrl), import(rendererUrl), import(componentUrl)]);
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const createRoot = renderer.createRoot || renderer.default?.createRoot || renderer.default;
+    const createElement = React.createElement || React.default?.createElement;
+    createRoot(host).render(createElement(components.AuditLogManager));
+  });
+  const filter = page.getByRole("combobox", { name: "Lọc hành động nhật ký" });
+  await expect(filter.locator("option")).toHaveCount(actions.length + 1);
+  for (const action of actions) {
+    const response = page.waitForResponse(res => res.url().includes("/api/admin/audit-logs?") && new URL(res.url()).searchParams.get("action") === action);
+    await filter.selectOption(action);
+    await response;
+    await expect(page.getByText(`/audit-test/${action}`, { exact: true })).toBeVisible();
+    for (const other of actions.filter(value => value !== action)) {
+      await expect(page.getByText(`/audit-test/${other}`, { exact: true })).toHaveCount(0);
+    }
+  }
+});
+
+test.describe("refund revenue regression", () => {
+  for (const scenario of [
+    { name: "completed partial refund", completed: true, refund: "40000", revenue: "60.000" },
+    { name: "unfinished partial refund", completed: false, refund: "40000", revenue: "0" },
+    { name: "completed full refund", completed: true, refund: "100000", revenue: "0" },
+  ]) {
+    test(scenario.name, async ({ page }) => {
+      await page.route("**/api/auth/session", route => route.fulfill({ json: { success: true, data: {
+        user: { id: "admin", email: "admin@test.invalid", name: "Admin", role: "ADMIN", status: "ACTIVE" },
+      } } }));
+      await page.route("**/api/admin/transactions?*", route => route.fulfill({ json: { success: true, data: {
+        items: [{ id: "refund", code: "DUKEREFUND", userEmail: "customer@test.invalid", gameName: "Game Alpha",
+          packageName: "100 Gems", amount: "100000", quantity: 1, status: "REFUNDED", paymentStatus: "REFUNDED",
+          refundAmount: scenario.refund, refundFromCompleted: scenario.completed,
+          createdAt: new Date().toISOString(), topupInfo: {} }], hasNext: false,
+      } } }));
+      await page.goto("/admin");
+      const expected = `${scenario.revenue}đ`;
+      await expect(page.locator(".admin-summary > div").filter({ hasText: "Doanh thu hoàn tất" }).locator("strong")).toHaveText(expected);
+      await page.getByRole("button", { name: "Thống kê & Doanh thu" }).click();
+      await expect(page.locator(".analytics-kpi-card").filter({ hasText: "Tổng doanh thu thực tế" }).locator("strong")).toHaveText(expected);
+      await page.reload();
+      await expect(page.locator(".admin-summary > div").filter({ hasText: "Doanh thu hoàn tất" }).locator("strong")).toHaveText(expected);
+    });
+  }
+});
+
+test.describe("terminal payment polling regression", () => {
+  for (const screen of ["checkout", "resume"] as const) {
+    for (const terminal of ["EXPIRED", "FAILED", "REFUNDED"]) {
+      test(`${screen} removes QR after ${terminal}`, async ({ page }) => {
+        let ended = false;
+        const payment = { orderCode: "DUKETERMINAL", paymentOrderCode: "DUKETERMINAL", amount: 10000,
+          bankCode: "TEST", accountNumber: "0000", accountName: "TEST", transferContent: "DUKETERMINAL",
+          qrCode: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", checkoutUrl: "",
+          status: "PENDING", paymentStatus: "PENDING" };
+        await page.route("**/api/payments/status/*", route => route.fulfill({ json: { success: true, data: {
+          paymentStatus: ended ? terminal : "PENDING", status: ended ? (terminal === "REFUNDED" ? "REFUNDED" : "FAILED") : "PENDING",
+        } } }));
+        if (screen === "checkout") {
+          await page.route("**/api/orders/checkout", route => route.fulfill({ json: { success: true, data: { transactions: [], payment } } }));
+          await page.goto("/nap-game/a");
+          await page.locator(".account-nav-button.signed-in").waitFor({ state: "attached" });
+          await page.locator(".package-card").click();
+          await page.locator(".cart-button").click();
+          await page.getByLabel("UID").fill("800123456");
+          await page.getByLabel("Server").selectOption("asia");
+          await page.locator(".dynamic-topup-form button[type=submit]").click();
+          await page.locator(".confirmation-modal .primary-button").click();
+          await page.locator(".confirm-payment").click();
+        } else {
+          await page.route("**/api/orders/mine?*", route => route.fulfill({ json: { success: true, data: {
+            items: [{ ...payment, id: "order", code: "DUKETERMINAL", packageName: "100 Gems", gameName: "Game Alpha",
+              quantity: 1, createdAt: new Date().toISOString(), topupInfo: {} }], hasNext: false,
+          } } }));
+          await page.route("**/api/orders/DUKETERMINAL/payment", route => route.fulfill({ json: { success: true, data: payment } }));
+          await page.goto("/tai-khoan");
+          await page.locator(".history-desktop-status").getByRole("button", { name: "Thanh toán ngay" }).click();
+        }
+        const qr = page.getByRole("img", { name: screen === "checkout" ? "QR thanh toán SePay" : "QR SePay", exact: true });
+        await expect(qr).toBeVisible();
+        ended = true;
+        await expect(page.getByText(/Vui lòng không chuyển khoản vào mã này/)).toBeVisible();
+        await expect(qr).toHaveCount(0);
+        if (screen === "checkout") {
+          expect(await page.evaluate(() => [sessionStorage.getItem("duke1305_checkout_payment"), sessionStorage.getItem("duke1305_checkout_attempt")])).toEqual([null, null]);
+          await expect(page.locator(".confirm-payment")).toHaveCount(0);
+        }
+      });
+    }
+  }
+});
+
 test.describe("admin mutation errors", () => {
   test.beforeEach(async ({ page }) => {
     await page.route("**/api/auth/session", route => route.fulfill({ json: { success: true, data: {
